@@ -121,45 +121,45 @@ RUN mkdir /classpath && mkdir /classpath/atl-libafl-jazzer && \
 #################################################################################
 ## Staged Images - Concolic Engine Build (/graal-jdk)
 #################################################################################
-FROM ubuntu:20.04 AS espresso_builder
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y \
-    curl \
-    python3.9 \
-    python3-pip \
-    git \
-    zip \
-    wget \
-    build-essential \
-    libstdc++-9-dev
-
-# COPY crs/mx
-COPY crs/concolic/graal-concolic/mx /mx
-
-ENV PATH="/mx:$PATH"
-RUN echo Y | mx fetch-jdk labsjdk-ce-21
-RUN python3 -mpip install ninja_syntax
-
-WORKDIR /graal-jdk
-RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz && \
-    tar -xzvf cmake-3.31.6-linux-x86_64.tar.gz && \
-    cp -r cmake-3.31.6-linux-x86_64/* /usr/ && \
-    rm -rf cmake-3.31.6-linux-x86_64
-
-# graal espresso
-COPY crs/concolic/graal-concolic/graal-jdk-25-14 /graal-jdk
-COPY crs/concolic/graal-concolic/docker-scripts /docker-scripts
-WORKDIR /graal-jdk
-RUN chmod +x /docker-scripts/*
-
-# put mx deps
-COPY --from=graal_deps /root/.mx /root/.mx
-
-ENV MODE="jvm-ce"
-ENV PREPARE_CMD="pushd /graal-jdk/espresso && mx --env=$MODE build --targets LLVM_TOOLCHAIN && mx --env $MODE create-generated-sources"
-RUN /docker-scripts/init_dev.sh /bin/bash -c "$PREPARE_CMD"
-ENV BUILD_CMD="pushd /graal-jdk/espresso && export MX_BUILD_EXPLODED=$MX_BUILD_EXPLODED && mx --env $MODE create-generated-sources && mx --env $MODE build"
-RUN /docker-scripts/init_dev.sh /bin/bash -c "$BUILD_CMD"
+#FROM ubuntu:20.04 AS espresso_builder
+#ARG DEBIAN_FRONTEND=noninteractive
+#RUN apt-get update && apt-get install -y \
+#    curl \
+#    python3.9 \
+#    python3-pip \
+#    git \
+#    zip \
+#    wget \
+#    build-essential \
+#    libstdc++-9-dev
+#
+## COPY crs/mx
+#COPY crs/concolic/graal-concolic/mx /mx
+#
+#ENV PATH="/mx:$PATH"
+#RUN echo Y | mx fetch-jdk labsjdk-ce-21
+#RUN python3 -mpip install ninja_syntax
+#
+#WORKDIR /graal-jdk
+#RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz && \
+#    tar -xzvf cmake-3.31.6-linux-x86_64.tar.gz && \
+#    cp -r cmake-3.31.6-linux-x86_64/* /usr/ && \
+#    rm -rf cmake-3.31.6-linux-x86_64
+#
+## graal espresso
+#COPY crs/concolic/graal-concolic/graal-jdk-25-14 /graal-jdk
+#COPY crs/concolic/graal-concolic/docker-scripts /docker-scripts
+#WORKDIR /graal-jdk
+#RUN chmod +x /docker-scripts/*
+#
+## put mx deps
+#COPY --from=graal_deps /root/.mx /root/.mx
+#
+#ENV MODE="jvm-ce"
+#ENV PREPARE_CMD="pushd /graal-jdk/espresso && mx --env=$MODE build --targets LLVM_TOOLCHAIN && mx --env $MODE create-generated-sources"
+#RUN /docker-scripts/init_dev.sh /bin/bash -c "$PREPARE_CMD"
+#ENV BUILD_CMD="pushd /graal-jdk/espresso && export MX_BUILD_EXPLODED=$MX_BUILD_EXPLODED && mx --env $MODE create-generated-sources && mx --env $MODE build"
+#RUN /docker-scripts/init_dev.sh /bin/bash -c "$BUILD_CMD"
 
 #################################################################################
 ## Staged Images - Prebuilt Joern (Public)
@@ -209,6 +209,7 @@ ENV ATL_MOCK_JAZZER_DIR=/classpath/mock-jazzer
 
 ## crs python package deps
 COPY ./crs/libs ${JAVA_CRS_SRC}/libs
+RUN cd ${JAVA_CRS_SRC}/libs/libFDP/libfdp && cargo update simd_cesu8 --precise 1.0.1
 RUN /venv/bin/pip install --no-cache-dir \
         ${JAVA_CRS_SRC}/libs/libCRS \
         ${JAVA_CRS_SRC}/libs/libLLM \
@@ -274,18 +275,18 @@ RUN cd ${JAVA_CRS_SRC}/expkit && \
 ## Build espresso-JDK-dependent components
 ## concolic executor engine (espresso-jdk & runtime)
 # COPY crs/binary only
-COPY --from=espresso_builder /graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/ /graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/
-# COPY crs/only the executor and provider
-COPY ./crs/concolic/graal-concolic/executor /graal-jdk/concolic/graal-concolic/executor
-COPY ./crs/concolic/graal-concolic/provider /graal-jdk/concolic/graal-concolic/provider
-COPY ./crs/concolic/graal-concolic/scheduler /graal-jdk/concolic/graal-concolic/scheduler
-RUN cd /graal-jdk/concolic/graal-concolic/executor && \
-        JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build && \
-        /venv/bin/pip install --no-cache-dir -r /graal-jdk/concolic/graal-concolic/executor/scripts/requirements.txt && \
-    cd /graal-jdk/concolic/graal-concolic/provider && \
-        JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build && \
-    rm -rf /root/.cache/coursier && \
-    rm -rf /root/.cache/pip
+#COPY --from=espresso_builder /graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/ /graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/
+## COPY crs/only the executor and provider
+#COPY ./crs/concolic/graal-concolic/executor /graal-jdk/concolic/graal-concolic/executor
+#COPY ./crs/concolic/graal-concolic/provider /graal-jdk/concolic/graal-concolic/provider
+#COPY ./crs/concolic/graal-concolic/scheduler /graal-jdk/concolic/graal-concolic/scheduler
+#RUN cd /graal-jdk/concolic/graal-concolic/executor && \
+#        JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build && \
+#        /venv/bin/pip install --no-cache-dir -r /graal-jdk/concolic/graal-concolic/executor/scripts/requirements.txt && \
+#    cd /graal-jdk/concolic/graal-concolic/provider && \
+#        JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build && \
+#    rm -rf /root/.cache/coursier && \
+#    rm -rf /root/.cache/pip
 
 ## dictgen
 COPY ./crs/dictgen ${JAVA_CRS_SRC}/dictgen
