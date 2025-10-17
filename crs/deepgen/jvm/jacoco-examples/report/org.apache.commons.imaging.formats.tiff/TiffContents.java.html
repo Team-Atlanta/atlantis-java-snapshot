@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffContents.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffContents.java</span></div><h1>TiffContents.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.internal.Debug;
+
+public class TiffContents {
+
+    public final TiffHeader header;
+    public final List&lt;TiffDirectory&gt; directories;
+    public final List&lt;TiffField&gt; tiffFields;
+
+<span class="fc" id="L33">    public TiffContents(final TiffHeader tiffHeader, final List&lt;TiffDirectory&gt; directories, final List&lt;TiffField&gt; tiffFields) {</span>
+<span class="fc" id="L34">        this.header = tiffHeader;</span>
+<span class="fc" id="L35">        this.directories = Collections.unmodifiableList(directories);</span>
+<span class="fc" id="L36">        this.tiffFields = Collections.unmodifiableList(tiffFields);</span>
+<span class="fc" id="L37">    }</span>
+
+    public void dissect() throws ImagingException {
+<span class="nc" id="L40">        final List&lt;AbstractTiffElement&gt; elements = getElements();</span>
+
+<span class="nc" id="L42">        elements.sort(AbstractTiffElement.COMPARATOR);</span>
+
+<span class="nc" id="L44">        long lastEnd = 0;</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (final AbstractTiffElement element : elements) {</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            if (element.offset &gt; lastEnd) {</span>
+<span class="nc" id="L47">                Debug.debug(&quot;\t&quot; + &quot;gap: &quot; + (element.offset - lastEnd));</span>
+            }
+<span class="nc bnc" id="L49" title="All 2 branches missed.">            if (element.offset &lt; lastEnd) {</span>
+<span class="nc" id="L50">                Debug.debug(&quot;\t&quot; + &quot;overlap&quot;);</span>
+            }
+
+<span class="nc" id="L53">            Debug.debug(&quot;element, start: &quot; + element.offset + &quot;, length: &quot; + element.length + &quot;, end: &quot; + (element.offset + element.length) + &quot;: &quot;</span>
+<span class="nc" id="L54">                    + element.getElementDescription());</span>
+<span class="nc" id="L55">            final String verbosity = element.getElementDescription();</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (null != verbosity) {</span>
+<span class="nc" id="L57">                Debug.debug(verbosity);</span>
+            }
+
+<span class="nc" id="L60">            lastEnd = element.offset + element.length;</span>
+<span class="nc" id="L61">        }</span>
+<span class="nc" id="L62">        Debug.debug(&quot;end: &quot; + lastEnd);</span>
+<span class="nc" id="L63">        Debug.debug();</span>
+<span class="nc" id="L64">    }</span>
+
+    public TiffField findField(final TagInfo tag) throws ImagingException {
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        for (final TiffDirectory directory : directories) {</span>
+<span class="nc" id="L68">            final TiffField field = directory.findField(tag);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            if (null != field) {</span>
+<span class="nc" id="L70">                return field;</span>
+            }
+<span class="nc" id="L72">        }</span>
+
+<span class="nc" id="L74">        return null;</span>
+    }
+
+    public List&lt;AbstractTiffElement&gt; getElements() throws ImagingException {
+<span class="nc" id="L78">        final List&lt;AbstractTiffElement&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L80">        result.add(header);</span>
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (final TiffDirectory directory : directories) {</span>
+<span class="nc" id="L83">            result.add(directory);</span>
+
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            for (final TiffField field : directory) {</span>
+<span class="nc" id="L86">                final AbstractTiffElement oversizeValue = field.getOversizeValueElement();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                if (null != oversizeValue) {</span>
+<span class="nc" id="L88">                    result.add(oversizeValue);</span>
+                }
+<span class="nc" id="L90">            }</span>
+
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            if (directory.hasTiffImageData()) {</span>
+<span class="nc" id="L93">                result.addAll(directory.getTiffRawImageDataElements());</span>
+            }
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (directory.hasJpegImageData()) {</span>
+<span class="nc" id="L96">                result.add(directory.getJpegRawImageDataElement());</span>
+            }
+<span class="nc" id="L98">        }</span>
+
+<span class="nc" id="L100">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

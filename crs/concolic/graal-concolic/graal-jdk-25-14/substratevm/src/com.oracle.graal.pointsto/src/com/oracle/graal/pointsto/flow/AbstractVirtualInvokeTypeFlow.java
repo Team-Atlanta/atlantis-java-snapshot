@@ -1,0 +1,136 @@
+/*
+ * Copyright (c) 2016, 2017, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+package com.oracle.graal.pointsto.flow;
+
+import static com.oracle.graal.pointsto.util.ConcurrentLightHashSet.addElement;
+import static com.oracle.graal.pointsto.util.ConcurrentLightHashSet.getElements;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
+import com.oracle.graal.pointsto.PointsToAnalysis;
+import com.oracle.graal.pointsto.meta.AnalysisMethod;
+import com.oracle.graal.pointsto.meta.AnalysisType;
+import com.oracle.graal.pointsto.meta.PointsToAnalysisMethod;
+import com.oracle.graal.pointsto.typestate.TypeState;
+import com.oracle.graal.pointsto.util.AnalysisError;
+import com.oracle.graal.pointsto.util.ConcurrentLightHashSet;
+import com.oracle.svm.common.meta.MultiMethod.MultiMethodKey;
+
+import jdk.vm.ci.code.BytecodePosition;
+
+public abstract class AbstractVirtualInvokeTypeFlow extends InvokeTypeFlow {
+    private static final AtomicReferenceFieldUpdater<AbstractVirtualInvokeTypeFlow, Object> CALLEES_UPDATER = AtomicReferenceFieldUpdater
+                    .newUpdater(AbstractVirtualInvokeTypeFlow.class, Object.class, "callees");
+
+    private static final AtomicReferenceFieldUpdater<AbstractVirtualInvokeTypeFlow, Object> INVOKE_LOCATIONS_UPDATER = AtomicReferenceFieldUpdater
+                    .newUpdater(AbstractVirtualInvokeTypeFlow.class, Object.class, "invokeLocations");
+
+    @SuppressWarnings("unused") protected volatile Object callees;
+
+    /**
+     * The context insensitive invoke needs to keep track of all the locations it is swapped in. For
+     * all the other invokes this is null, their location is the source node location.
+     */
+    @SuppressWarnings("unused") protected volatile Object invokeLocations;
+
+    protected AbstractVirtualInvokeTypeFlow(BytecodePosition invokeLocation, AnalysisType receiverType, PointsToAnalysisMethod targetMethod,
+                    TypeFlow<?>[] actualParameters, ActualReturnTypeFlow actualReturn, MultiMethodKey callerMultiMethodKey) {
+        super(invokeLocation, receiverType, targetMethod, actualParameters, actualReturn, callerMultiMethodKey);
+    }
+
+    protected AbstractVirtualInvokeTypeFlow(PointsToAnalysis bb, MethodFlowsGraph methodFlows, AbstractVirtualInvokeTypeFlow original) {
+        super(bb, methodFlows, original);
+    }
+
+    public boolean addInvokeLocation(BytecodePosition invokeLocation) {
+        if (invokeLocation != null) {
+            return addElement(this, INVOKE_LOCATIONS_UPDATER, invokeLocation);
+        }
+        return false;
+    }
+
+    /** The context insensitive virtual invoke returns all the locations where it is swapped in. */
+    public Collection<BytecodePosition> getInvokeLocations() {
+        if (isContextInsensitive) {
+            return getElements(this, INVOKE_LOCATIONS_UPDATER);
+        } else {
+            return Collections.singleton(getSource());
+        }
+    }
+
+    @Override
+    public final boolean isDirectInvoke() {
+        return false;
+    }
+
+    @Override
+    protected void onFlowEnabled(PointsToAnalysis bb) {
+        if (getReceiver().isFlowEnabled()) {
+            bb.postTask(() -> onObservedUpdate(bb));
+        }
+    }
+
+    @Override
+    public boolean addState(PointsToAnalysis bb, TypeState add, boolean postFlow) {
+        throw AnalysisError.shouldNotReachHere("The VirtualInvokeTypeFlow should not be updated directly.");
+    }
+
+    @Override
+    public void update(PointsToAnalysis bb) {
+        throw AnalysisError.shouldNotReachHere("The VirtualInvokeTypeFlow should not be updated directly.");
+    }
+
+    @Override
+    public abstract void onObservedUpdate(PointsToAnalysis bb);
+
+    @Override
+    public abstract void onObservedSaturated(PointsToAnalysis bb, TypeFlow<?> observed);
+
+    protected boolean addCallee(AnalysisMethod callee) {
+        boolean add = addElement(this, CALLEES_UPDATER, callee);
+        if (this.isClone()) {
+            // if this is a clone, register the callee with the original invoke
+            ((AbstractVirtualInvokeTypeFlow) originalInvoke).addCallee(callee);
+        }
+        return add;
+    }
+
+    @Override
+    public Collection<AnalysisMethod> getAllCallees() {
+        return ConcurrentLightHashSet.getElements(this, CALLEES_UPDATER);
+    }
+
+    @Override
+    public Collection<AnalysisMethod> getCalleesForReturnLinking() {
+        return getAllCallees();
+    }
+
+    @Override
+    public String toString() {
+        return "VirtualInvoke<" + targetMethod.format("%h.%n") + ">" + ":" + getStateDescription();
+    }
+}

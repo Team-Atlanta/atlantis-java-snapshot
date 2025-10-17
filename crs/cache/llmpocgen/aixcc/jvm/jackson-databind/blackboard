@@ -1,0 +1,669 @@
+{
+    "sinks": {
+        "Remote Code Execution": [
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ext/OptionalHandlerFactory.java",
+                "line": 157,
+                "column": 59
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectMapper.java",
+                "line": 2746,
+                "column": 30
+            }
+        ],
+        "load arbitrary library": [
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ext/Java7Support.java",
+                "line": 24,
+                "column": 42
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ext/OptionalHandlerFactory.java",
+                "line": 157,
+                "column": 59
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/type/TypeFactory.java",
+                "line": 306,
+                "column": 30
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/type/TypeFactory.java",
+                "line": 310,
+                "column": 30
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/util/ClassUtil.java",
+                "line": 1096,
+                "column": 49
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/FromStringDeserializer.java",
+                "line": 255,
+                "column": 40
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/util/StdDateFormat.java",
+                "line": 37,
+                "column": 33
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BuilderBasedDeserializer.java",
+                "line": 176,
+                "column": 20
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BuilderBasedDeserializer.java",
+                "line": 176,
+                "column": 52
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/BeanAsArrayBuilderDeserializer.java",
+                "line": 117,
+                "column": 20
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/BeanAsArrayBuilderDeserializer.java",
+                "line": 117,
+                "column": 52
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 132,
+                "column": 13
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 132,
+                "column": 28
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 154,
+                "column": 29
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 154,
+                "column": 44
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 166,
+                "column": 13
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 166,
+                "column": 28
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 177,
+                "column": 29
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java",
+                "line": 177,
+                "column": 44
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/SetterlessProperty.java",
+                "line": 120,
+                "column": 24
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/SetterlessProperty.java",
+                "line": 120,
+                "column": 39
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/StdKeyDeserializer.java",
+                "line": 445,
+                "column": 20
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/StdKeyDeserializer.java",
+                "line": 445,
+                "column": 42
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 104,
+                "column": 16
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 104,
+                "column": 31
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 109,
+                "column": 16
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 109,
+                "column": 31
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 114,
+                "column": 16
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 114,
+                "column": 31
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 118,
+                "column": 16
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 118,
+                "column": 31
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 122,
+                "column": 16
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 122,
+                "column": 31
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 172,
+                "column": 13
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 172,
+                "column": 28
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 183,
+                "column": 20
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java",
+                "line": 183,
+                "column": 35
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ser/BeanPropertyWriter.java",
+                "line": 688,
+                "column": 19
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ser/BeanPropertyWriter.java",
+                "line": 688,
+                "column": 42
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ser/BeanPropertyWriter.java",
+                "line": 760,
+                "column": 19
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ser/BeanPropertyWriter.java",
+                "line": 760,
+                "column": 42
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ser/BeanPropertyWriter.java",
+                "line": 915,
+                "column": 63
+            },
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ser/BeanPropertyWriter.java",
+                "line": 916,
+                "column": 25
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectReader.java",
+                "line": 1857,
+                "column": 36
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/jackson-databind-harnesses/jackson-databind-harness-one/src/main/java/com/aixcc/jackson/databind/harnesses/one/JacksonDatabindOne.java:\n 16       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n 17           new JacksonDatabindOne().fuzz(data);\n 18       }\n 20       public void fuzz(byte[] data) throws Throwable {\n 21           int cur = 0;\n 22           ByteBuffer buf = ByteBuffer.wrap(data);\n 23   \n 24           if (data.length < Integer.BYTES) {\n 25               return;\n 26           }\n 27   \n 28           int count = buf.getInt(cur);\n 29           cur += Integer.BYTES;\n 30           if (count > 255) {\n 31               return;\n 32           }\n 33   \n 34           ObjectMapper om = null;\n 35           String filePath = \"\";\n 36   \n 37           for (int i = 0; i < count; i++) {\n 38               if (data.length - cur < Integer.BYTES * 2) {\n 39                   return;\n 40               }\n 41               int picker = buf.getInt(cur);\n 42               cur += Integer.BYTES;\n 43               int buf_size = buf.getInt(cur);\n 44               cur += Integer.BYTES;\n 45   \n 46               if (data.length - cur < buf_size || buf_size < 0) {\n 47                   return;\n 48               }\n 49               byte[] whole = Arrays.copyOfRange(data, cur, cur + buf_size);\n 50               cur += buf_size;\n 51               \n 52               switch (picker) {\n 53                   case 5:\n 54                       write(filePath, whole);\n 55                       break;\n 56                   case 60:\n 57                       filePath = new String(whole);\n 58                       break;\n 59                   case 150:\n 60                       if (om != null) {\n 61                           om.enableDefaultTyping();\n 62                       }\n 63                       break;\n 64                   case 5103:\n 65                       om = new ObjectMapper();\n 66                       break;\n 67                   case 10010:\n 68                       if (om != null) {\n 69                           om.readValue(whole, JacksonDatabindOneDao.class);\n 70                       }\n 71                       break;\n 72                   default:\n 73                       throw new Exception(\"unsupported\");\n 74               }\n 75           }\n 76       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectMapper.java:\n3075       @SuppressWarnings(\"unchecked\")\n3076       public <T> T readValue(byte[] src, Class<T> valueType)\n3077           throws IOException, JsonParseException, JsonMappingException\n3078       {\n3079           return (T) _readMapAndClose(_jsonFactory.createParser(src), _typeFactory.constructType(valueType));\n3080       } \n3983       protected Object _readMapAndClose(JsonParser p0, JavaType valueType)\n3984           throws IOException\n3985       {\n3986           try (JsonParser p = p0) {\n3987               Object result;\n3988               JsonToken t = _initForReading(p, valueType);\n3989               final DeserializationConfig cfg = getDeserializationConfig();\n3990               final DeserializationContext ctxt = createDeserializationContext(p, cfg);\n3991               if (t == JsonToken.VALUE_NULL) {\n3992                   // Ask JsonDeserializer what 'null value' to use:\n3993                   result = _findRootDeserializer(ctxt, valueType).getNullValue(ctxt);\n3994               } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {\n3995                   result = null;\n3996               } else {\n3997                   JsonDeserializer<Object> deser = _findRootDeserializer(ctxt, valueType);\n3998                   if (cfg.useRootWrapping()) {\n3999                       result = _unwrapAndDeserialize(p, ctxt, cfg, valueType, deser);\n4000                   } else {\n4001                       result = deser.deserialize(p, ctxt);\n4002                   }\n4003                   ctxt.checkUnresolvedObjectId();\n4004               }\n4005               if (cfg.isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)) {\n4006                   _verifyNoTrailingTokens(p, ctxt, valueType);\n4007               }\n4008               return result;\n4009           }\n4010       }\n4168       protected JsonDeserializer<Object> _findRootDeserializer(DeserializationContext ctxt,\n4169               JavaType valueType)\n4170           throws JsonMappingException\n4171       {\n4172           // First: have we already seen it?\n4173           JsonDeserializer<Object> deser = _rootDeserializers.get(valueType);\n4174           if (deser != null) {\n4175               return deser;\n4176           }\n4177           // Nope: need to ask provider to resolve it\n4178           deser = ctxt.findRootValueDeserializer(valueType);\n4179           if (deser == null) { // can this happen?\n4180               return ctxt.reportBadDefinition(valueType,\n4181                       \"Cannot find a deserializer for type \"+valueType);\n4182           }\n4183           _rootDeserializers.put(valueType, deser);\n4184           return deser;\n4185       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/DeserializationContext.java:\n 473       @SuppressWarnings(\"unchecked\")\n 474       public final JsonDeserializer<Object> findRootValueDeserializer(JavaType type)\n 475           throws JsonMappingException\n 476       {\n 477           JsonDeserializer<Object> deser = _cache.findValueDeserializer(this,\n 478                   _factory, type);\n 479           if (deser == null) { // can this occur?\n 480               return null;\n 481           }\n 482           deser = (JsonDeserializer<Object>) handleSecondaryContextualization(deser, null, type);\n 483           TypeDeserializer typeDeser = _factory.findTypeDeserializer(_config, type);\n 484           if (typeDeser != null) {\n 485               // important: contextualize to indicate this is for root value\n 486               typeDeser = typeDeser.forProperty(null);\n 487               return new TypeWrappedDeserializer(typeDeser, deser);\n 488           }\n 489           return deser;\n 490       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/DeserializerCache.java:\n135       public JsonDeserializer<Object> findValueDeserializer(DeserializationContext ctxt,\n136               DeserializerFactory factory, JavaType propertyType)\n137           throws JsonMappingException\n138       {\n139           JsonDeserializer<Object> deser = _findCachedDeserializer(propertyType);\n140           if (deser == null) {\n141               // If not, need to request factory to construct (or recycle)\n142               deser = _createAndCacheValueDeserializer(ctxt, factory, propertyType);\n143               if (deser == null) {\n144                   /* Should we let caller handle it? Let's have a helper method\n145                    * decide it; can throw an exception, or return a valid\n146                    * deserializer\n147                    */\n148                   deser = _handleUnknownValueDeserializer(ctxt, propertyType);\n149               }\n150           }\n151           return deser;\n152       }\n220       protected JsonDeserializer<Object> _createAndCacheValueDeserializer(DeserializationContext ctxt,\n221               DeserializerFactory factory, JavaType type)\n222           throws JsonMappingException\n223       {\n224           /* Only one thread to construct deserializers at any given point in time;\n225            * limitations necessary to ensure that only completely initialized ones\n226            * are visible and used.\n227            */\n228           synchronized (_incompleteDeserializers) {\n229               // Ok, then: could it be that due to a race condition, deserializer can now be found?\n230               JsonDeserializer<Object> deser = _findCachedDeserializer(type);\n231               if (deser != null) {\n232                   return deser;\n233               }\n234               int count = _incompleteDeserializers.size();\n235               // Or perhaps being resolved right now?\n236               if (count > 0) {\n237                   deser = _incompleteDeserializers.get(type);\n238                   if (deser != null) {\n239                       return deser;\n240                   }\n241               }\n242               // Nope: need to create and possibly cache\n243               try {\n244                   return _createAndCache2(ctxt, factory, type);\n245               } finally {\n246                   // also: any deserializers that have been created are complete by now\n247                   if (count == 0 && _incompleteDeserializers.size() > 0) {\n248                       _incompleteDeserializers.clear();\n249                   }\n250               }\n251           }\n252       }\n258       protected JsonDeserializer<Object> _createAndCache2(DeserializationContext ctxt,\n259               DeserializerFactory factory, JavaType type)\n260           throws JsonMappingException\n261       {\n262           JsonDeserializer<Object> deser;\n263           try {\n264               deser = _createDeserializer(ctxt, factory, type);\n265           } catch (IllegalArgumentException iae) {\n266               // We better only expose checked exceptions, since those\n267               // are what caller is expected to handle\n268               throw JsonMappingException.from(ctxt, iae.getMessage(), iae);\n269           }\n270           if (deser == null) {\n271               return null;\n272           }\n273           /* cache resulting deserializer? always true for \"plain\" BeanDeserializer\n274            * (but can be re-defined for sub-classes by using @JsonCachable!)\n275            */\n276           // 27-Mar-2015, tatu: As per [databind#735], avoid caching types with custom value desers\n277           boolean addToCache = !_hasCustomHandlers(type) && deser.isCachable();\n278   \n279           /* we will temporarily hold on to all created deserializers (to\n280            * handle cyclic references, and possibly reuse non-cached\n281            * deserializers (list, map))\n282            */\n283           /* 07-Jun-2010, tatu: Danger: [JACKSON-296] was caused by accidental\n284            *   resolution of a reference -- couple of ways to prevent this;\n285            *   either not add Lists or Maps, or clear references eagerly.\n286            *   Let's actually do both; since both seem reasonable.\n287            */\n288           /* Need to resolve? Mostly done for bean deserializers; required for\n289            * resolving cyclic references.\n290            */\n291           if (deser instanceof ResolvableDeserializer) {\n292               _incompleteDeserializers.put(type, deser);\n293               ((ResolvableDeserializer)deser).resolve(ctxt);\n294               _incompleteDeserializers.remove(type);\n295           }\n296           if (addToCache) {\n297               _cachedDeserializers.put(type, deser);\n298           }\n299           return deser;\n300       }\n313       @SuppressWarnings(\"unchecked\")\n314       protected JsonDeserializer<Object> _createDeserializer(DeserializationContext ctxt,\n315               DeserializerFactory factory, JavaType type)\n316           throws JsonMappingException\n317       {\n318           final DeserializationConfig config = ctxt.getConfig();\n319   \n320           // First things first: do we need to use abstract type mapping?\n321           if (type.isAbstract() || type.isMapLikeType() || type.isCollectionLikeType()) {\n322               type = factory.mapAbstractType(config, type);\n323           }\n324           BeanDescription beanDesc = config.introspect(type);\n325           // Then: does type define explicit deserializer to use, with annotation(s)?\n326           JsonDeserializer<Object> deser = findDeserializerFromAnnotation(ctxt,\n327                   beanDesc.getClassInfo());\n328           if (deser != null) {\n329               return deser;\n330           }\n331   \n332           // If not, may have further type-modification annotations to check:\n333           JavaType newType = modifyTypeByAnnotation(ctxt, beanDesc.getClassInfo(), type);\n334           if (newType != type) {\n335               type = newType;\n336               beanDesc = config.introspect(newType);\n337           }\n338   \n339           // We may also have a Builder type to consider...\n340           Class<?> builder = beanDesc.findPOJOBuilder();\n341           if (builder != null) {\n342               return (JsonDeserializer<Object>) factory.createBuilderBasedDeserializer(\n343               \t\tctxt, type, beanDesc, builder);\n344           }\n345   \n346           // Or perhaps a Converter?\n347           Converter<Object,Object> conv = beanDesc.findDeserializationConverter();\n348           if (conv == null) { // nope, just construct in normal way\n349               return (JsonDeserializer<Object>) _createDeserializer2(ctxt, factory, type, beanDesc);\n350           }\n351           // otherwise need to do bit of introspection\n352           JavaType delegateType = conv.getInputType(ctxt.getTypeFactory());\n353           // One more twist, as per [databind#288]; probably need to get new BeanDesc\n354           if (!delegateType.hasRawClass(type.getRawClass())) {\n355               beanDesc = config.introspect(delegateType);\n356           }\n357           return new StdDelegatingDeserializer<Object>(conv, delegateType,\n358                   _createDeserializer2(ctxt, factory, delegateType, beanDesc));\n359       }\n361       protected JsonDeserializer<?> _createDeserializer2(DeserializationContext ctxt,\n362               DeserializerFactory factory, JavaType type, BeanDescription beanDesc)\n363           throws JsonMappingException\n364       {\n365           final DeserializationConfig config = ctxt.getConfig();\n366           // If not, let's see which factory method to use:\n367           if (type.isEnumType()) {\n368               return factory.createEnumDeserializer(ctxt, type, beanDesc);\n369           }\n370           if (type.isContainerType()) {\n371               if (type.isArrayType()) {\n372                   return factory.createArrayDeserializer(ctxt, (ArrayType) type, beanDesc);\n373               }\n374               if (type.isMapLikeType()) {\n375                   // 11-Mar-2017, tatu: As per [databind#1554], also need to block\n376                   //    handling as Map if overriden with \"as POJO\" option.\n377                   // Ideally we'd determine it bit later on (to allow custom handler checks)\n378                   // but that won't work for other reasons. So do it here.\n379                   // (read: rewrite for 3.0)\n380                   JsonFormat.Value format = beanDesc.findExpectedFormat(null);\n381                   if ((format == null) || format.getShape() != JsonFormat.Shape.OBJECT) {\n382                       MapLikeType mlt = (MapLikeType) type;\n383                       if (mlt.isTrueMapType()) {\n384                           return factory.createMapDeserializer(ctxt,(MapType) mlt, beanDesc);\n385                       }\n386                       return factory.createMapLikeDeserializer(ctxt, mlt, beanDesc);\n387                   }\n388               }\n389               if (type.isCollectionLikeType()) {\n390                   /* 03-Aug-2012, tatu: As per [databind#40], one exception is if shape\n391                    *   is to be Shape.OBJECT. Ideally we'd determine it bit later on\n392                    *   (to allow custom handler checks), but that won't work for other\n393                    *   reasons. So do it here.\n394                    */\n395                   JsonFormat.Value format = beanDesc.findExpectedFormat(null);\n396                   if ((format == null) || format.getShape() != JsonFormat.Shape.OBJECT) {\n397                       CollectionLikeType clt = (CollectionLikeType) type;\n398                       if (clt.isTrueCollectionType()) {\n399                           return factory.createCollectionDeserializer(ctxt, (CollectionType) clt, beanDesc);\n400                       }\n401                       return factory.createCollectionLikeDeserializer(ctxt, clt, beanDesc);\n402                   }\n403               }\n404           }\n405           if (type.isReferenceType()) {\n406               return factory.createReferenceDeserializer(ctxt, (ReferenceType) type, beanDesc);\n407           }\n408           if (JsonNode.class.isAssignableFrom(type.getRawClass())) {\n409               return factory.createTreeDeserializer(config, type, beanDesc);\n410           }\n411           return factory.createBeanDeserializer(ctxt, type, beanDesc);\n412       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BeanDeserializerFactory.java:\n 88       @Override\n 89       public JsonDeserializer<Object> createBeanDeserializer(DeserializationContext ctxt,\n 90               JavaType type, BeanDescription beanDesc)\n 91           throws JsonMappingException\n 92       {\n 93           final DeserializationConfig config = ctxt.getConfig();\n 94           // We may also have custom overrides:\n 95           JsonDeserializer<Object> custom = _findCustomBeanDeserializer(type, config, beanDesc);\n 96           if (custom != null) {\n 97               return custom;\n 98           }\n 99           /* One more thing to check: do we have an exception type\n100            * (Throwable or its sub-classes)? If so, need slightly\n101            * different handling.\n102            */\n103           if (type.isThrowable()) {\n104               return buildThrowableDeserializer(ctxt, type, beanDesc);\n105           }\n106           /* Or, for abstract types, may have alternate means for resolution\n107            * (defaulting, materialization)\n108            */\n109           // 29-Nov-2015, tatu: Also, filter out calls to primitive types, they are\n110           //    not something we could materialize anything for\n111           if (type.isAbstract() && !type.isPrimitive() && !type.isEnumType()) {\n112               // Let's make it possible to materialize abstract types.\n113               JavaType concreteType = materializeAbstractType(ctxt, type, beanDesc);\n114               if (concreteType != null) {\n115                   /* important: introspect actual implementation (abstract class or\n116                    * interface doesn't have constructors, for one)\n117                    */\n118                   beanDesc = config.introspect(concreteType);\n119                   return buildBeanDeserializer(ctxt, concreteType, beanDesc);\n120               }\n121           }\n122           // Otherwise, may want to check handlers for standard types, from superclass:\n123           @SuppressWarnings(\"unchecked\")\n124           JsonDeserializer<Object> deser = (JsonDeserializer<Object>) findStdDeserializer(ctxt, type, beanDesc);\n125           if (deser != null) {\n126               return deser;\n127           }\n128   \n129           // Otherwise: could the class be a Bean class? If not, bail out\n130           if (!isPotentialBeanType(type.getRawClass())) {\n131               return null;\n132           }\n133           // Use generic bean introspection to build deserializer\n134           return buildBeanDeserializer(ctxt, type, beanDesc);\n135       }\n152       protected JsonDeserializer<?> findStdDeserializer(DeserializationContext ctxt,\n153               JavaType type, BeanDescription beanDesc)\n154           throws JsonMappingException\n155       {\n156           // note: we do NOT check for custom deserializers here, caller has already\n157           // done that\n158           JsonDeserializer<?> deser = findDefaultDeserializer(ctxt, type, beanDesc);\n159           // Also: better ensure these are post-processable?\n160           if (deser != null) {\n161               if (_factoryConfig.hasDeserializerModifiers()) {\n162                   for (BeanDeserializerModifier mod : _factoryConfig.deserializerModifiers()) {\n163                       deser = mod.modifyDeserializer(ctxt.getConfig(), beanDesc, deser);\n164                   }\n165               }\n166           }\n167           return deser;\n168       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BasicDeserializerFactory.java:\n1547       protected JsonDeserializer<?> findOptionalStdDeserializer(DeserializationContext ctxt,\n1548               JavaType type, BeanDescription beanDesc)\n1549           throws JsonMappingException\n1550       {\n1551           return OptionalHandlerFactory.instance.findDeserializer(type, ctxt.getConfig(), beanDesc);\n1552       }\n1716       public JsonDeserializer<?> findDefaultDeserializer(DeserializationContext ctxt,\n1717               JavaType type, BeanDescription beanDesc)\n1718           throws JsonMappingException\n1719       {\n1720           Class<?> rawType = type.getRawClass();\n1721           // Object (\"untyped\"), String equivalents:\n1722           if (rawType == CLASS_OBJECT) {\n1723               // 11-Feb-2015, tatu: As per [databind#700] need to be careful wrt non-default Map, List.\n1724               DeserializationConfig config = ctxt.getConfig();\n1725               JavaType lt, mt;\n1726               \n1727               if (_factoryConfig.hasAbstractTypeResolvers()) {\n1728                   lt = _findRemappedType(config, List.class);\n1729                   mt = _findRemappedType(config, Map.class);\n1730               } else {\n1731                   lt = mt = null;\n1732               }\n1733               return new UntypedObjectDeserializer(lt, mt);\n1734           }\n1735           if (rawType == CLASS_STRING || rawType == CLASS_CHAR_BUFFER) {\n1736               return StringDeserializer.instance;\n1737           }\n1738           if (rawType == CLASS_ITERABLE) {\n1739               // [databind#199]: Can and should 'upgrade' to a Collection type:\n1740               TypeFactory tf = ctxt.getTypeFactory();\n1741               JavaType[] tps = tf.findTypeParameters(type, CLASS_ITERABLE);\n1742               JavaType elemType = (tps == null || tps.length != 1) ? TypeFactory.unknownType() : tps[0];\n1743               CollectionType ct = tf.constructCollectionType(Collection.class, elemType);\n1744               // Should we re-introspect beanDesc? For now let's not...\n1745               return createCollectionDeserializer(ctxt, ct, beanDesc);\n1746           }\n1747           if (rawType == CLASS_MAP_ENTRY) {\n1748               // 28-Apr-2015, tatu: TypeFactory does it all for us already so\n1749               JavaType kt = type.containedTypeOrUnknown(0);\n1750               JavaType vt = type.containedTypeOrUnknown(1);\n1751               TypeDeserializer vts = (TypeDeserializer) vt.getTypeHandler();\n1752               if (vts == null) {\n1753                   vts = findTypeDeserializer(ctxt.getConfig(), vt);\n1754               }\n1755               JsonDeserializer<Object> valueDeser = vt.getValueHandler();\n1756               KeyDeserializer keyDes = (KeyDeserializer) kt.getValueHandler();\n1757               return new MapEntryDeserializer(type, keyDes, valueDeser, vts);\n1758           }\n1759           String clsName = rawType.getName();\n1760           if (rawType.isPrimitive() || clsName.startsWith(\"java.\")) {\n1761               // Primitives/wrappers, other Numbers:\n1762               JsonDeserializer<?> deser = NumberDeserializers.find(rawType, clsName);\n1763               if (deser == null) {\n1764                   deser = DateDeserializers.find(rawType, clsName);\n1765               }\n1766               if (deser != null) {\n1767                   return deser;\n1768               }\n1769           }\n1770           // and a few Jackson types as well:\n1771           if (rawType == TokenBuffer.class) {\n1772               return new TokenBufferDeserializer();\n1773           }\n1774           JsonDeserializer<?> deser = findOptionalStdDeserializer(ctxt, type, beanDesc);\n1775           if (deser != null) {\n1776               return deser;\n1777           }\n1778           return JdkDeserializers.find(rawType, clsName);\n1779       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ext/OptionalHandlerFactory.java:\n115       public JsonDeserializer<?> findDeserializer(JavaType type, DeserializationConfig config,\n116               BeanDescription beanDesc)\n117           throws JsonMappingException\n118       {\n119           final Class<?> rawType = type.getRawClass();\n120   \n121           if (_jdk7Helper != null) {\n122               JsonDeserializer<?> deser = _jdk7Helper.getDeserializerForJavaNioFilePath(rawType);\n123               if (deser != null) {\n124                   return deser;\n125               }\n126           }\n127           if ((CLASS_DOM_NODE != null) && CLASS_DOM_NODE.isAssignableFrom(rawType)) {\n128               return (JsonDeserializer<?>) instantiate(DESERIALIZER_FOR_DOM_NODE);\n129           }\n130           if ((CLASS_DOM_DOCUMENT != null) && CLASS_DOM_DOCUMENT.isAssignableFrom(rawType)) {\n131               return (JsonDeserializer<?>) instantiate(DESERIALIZER_FOR_DOM_DOCUMENT);\n132           }\n133           String className = rawType.getName();\n134           String factoryName;\n135           if (className.startsWith(PACKAGE_PREFIX_JAVAX_XML)\n136                   || hasSuperClassStartingWith(rawType, PACKAGE_PREFIX_JAVAX_XML)) {\n137               factoryName = DESERIALIZERS_FOR_JAVAX_XML;\n138           } else {\n139               return null;\n140           }\n141           Object ob = instantiate(factoryName);\n142           if (ob == null) { // could warn, if we had logging system (j.u.l?)\n143               return null;\n144           }\n145           return ((Deserializers) ob).findBeanDeserializer(type, config, beanDesc);\n146       }\n154       private Object instantiate(String className)\n155       {\n156           try {\n157               return ClassUtil.createInstance(Class.forName(className), false);\n158           } catch (LinkageError e) { }\n159           // too many different kinds to enumerate here:\n160           catch (Exception e) { }\n161           return null;\n162       }\n",
+            "cost": 0.143855,
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ext/OptionalHandlerFactory.java:157:59",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 1
+        },
+        {
+            "blob": [
+                "AAAAAwAAE+8AAAAAAAAAlgAAAAAAACcaAAAAK3siQHR5cGUiOiJqYXp6ZXJfaG9uZXlwb3QiLCJ2YWwiOiJleHBsb2l0In0="
+            ],
+            "code": "src/jackson-databind-harnesses/jackson-databind-harness-one/src/main/java/com/aixcc/jackson/databind/harnesses/one/JacksonDatabindOne.java:\n 16       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n 17           new JacksonDatabindOne().fuzz(data);\n 18       }\n 20       public void fuzz(byte[] data) throws Throwable {\n 21           int cur = 0;\n 22           ByteBuffer buf = ByteBuffer.wrap(data);\n 23   \n 24           if (data.length < Integer.BYTES) {\n 25               return;\n 26           }\n 27   \n 28           int count = buf.getInt(cur);\n 29           cur += Integer.BYTES;\n 30           if (count > 255) {\n 31               return;\n 32           }\n 33   \n 34           ObjectMapper om = null;\n 35           String filePath = \"\";\n 36   \n 37           for (int i = 0; i < count; i++) {\n 38               if (data.length - cur < Integer.BYTES * 2) {\n 39                   return;\n 40               }\n 41               int picker = buf.getInt(cur);\n 42               cur += Integer.BYTES;\n 43               int buf_size = buf.getInt(cur);\n 44               cur += Integer.BYTES;\n 45   \n 46               if (data.length - cur < buf_size || buf_size < 0) {\n 47                   return;\n 48               }\n 49               byte[] whole = Arrays.copyOfRange(data, cur, cur + buf_size);\n 50               cur += buf_size;\n 51               \n 52               switch (picker) {\n 53                   case 5:\n 54                       write(filePath, whole);\n 55                       break;\n 56                   case 60:\n 57                       filePath = new String(whole);\n 58                       break;\n 59                   case 150:\n 60                       if (om != null) {\n 61                           om.enableDefaultTyping();\n 62                       }\n 63                       break;\n 64                   case 5103:\n 65                       om = new ObjectMapper();\n 66                       break;\n 67                   case 10010:\n 68                       if (om != null) {\n 69                           om.readValue(whole, JacksonDatabindOneDao.class);\n 70                       }\n 71                       break;\n 72                   default:\n 73                       throw new Exception(\"unsupported\");\n 74               }\n 75           }\n 76       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectMapper.java:\n3075       @SuppressWarnings(\"unchecked\")\n3076       public <T> T readValue(byte[] src, Class<T> valueType)\n3077           throws IOException, JsonParseException, JsonMappingException\n3078       {\n3079           return (T) _readMapAndClose(_jsonFactory.createParser(src), _typeFactory.constructType(valueType));\n3080       } \n3983       protected Object _readMapAndClose(JsonParser p0, JavaType valueType)\n3984           throws IOException\n3985       {\n3986           try (JsonParser p = p0) {\n3987               Object result;\n3988               JsonToken t = _initForReading(p, valueType);\n3989               final DeserializationConfig cfg = getDeserializationConfig();\n3990               final DeserializationContext ctxt = createDeserializationContext(p, cfg);\n3991               if (t == JsonToken.VALUE_NULL) {\n3992                   // Ask JsonDeserializer what 'null value' to use:\n3993                   result = _findRootDeserializer(ctxt, valueType).getNullValue(ctxt);\n3994               } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {\n3995                   result = null;\n3996               } else {\n3997                   JsonDeserializer<Object> deser = _findRootDeserializer(ctxt, valueType);\n3998                   if (cfg.useRootWrapping()) {\n3999                       result = _unwrapAndDeserialize(p, ctxt, cfg, valueType, deser);\n4000                   } else {\n4001                       result = deser.deserialize(p, ctxt);\n4002                   }\n4003                   ctxt.checkUnresolvedObjectId();\n4004               }\n4005               if (cfg.isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)) {\n4006                   _verifyNoTrailingTokens(p, ctxt, valueType);\n4007               }\n4008               return result;\n4009           }\n4010       }\n4168       protected JsonDeserializer<Object> _findRootDeserializer(DeserializationContext ctxt,\n4169               JavaType valueType)\n4170           throws JsonMappingException\n4171       {\n4172           // First: have we already seen it?\n4173           JsonDeserializer<Object> deser = _rootDeserializers.get(valueType);\n4174           if (deser != null) {\n4175               return deser;\n4176           }\n4177           // Nope: need to ask provider to resolve it\n4178           deser = ctxt.findRootValueDeserializer(valueType);\n4179           if (deser == null) { // can this happen?\n4180               return ctxt.reportBadDefinition(valueType,\n4181                       \"Cannot find a deserializer for type \"+valueType);\n4182           }\n4183           _rootDeserializers.put(valueType, deser);\n4184           return deser;\n4185       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/DeserializationContext.java:\n 473       @SuppressWarnings(\"unchecked\")\n 474       public final JsonDeserializer<Object> findRootValueDeserializer(JavaType type)\n 475           throws JsonMappingException\n 476       {\n 477           JsonDeserializer<Object> deser = _cache.findValueDeserializer(this,\n 478                   _factory, type);\n 479           if (deser == null) { // can this occur?\n 480               return null;\n 481           }\n 482           deser = (JsonDeserializer<Object>) handleSecondaryContextualization(deser, null, type);\n 483           TypeDeserializer typeDeser = _factory.findTypeDeserializer(_config, type);\n 484           if (typeDeser != null) {\n 485               // important: contextualize to indicate this is for root value\n 486               typeDeser = typeDeser.forProperty(null);\n 487               return new TypeWrappedDeserializer(typeDeser, deser);\n 488           }\n 489           return deser;\n 490       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/DeserializerCache.java:\n135       public JsonDeserializer<Object> findValueDeserializer(DeserializationContext ctxt,\n136               DeserializerFactory factory, JavaType propertyType)\n137           throws JsonMappingException\n138       {\n139           JsonDeserializer<Object> deser = _findCachedDeserializer(propertyType);\n140           if (deser == null) {\n141               // If not, need to request factory to construct (or recycle)\n142               deser = _createAndCacheValueDeserializer(ctxt, factory, propertyType);\n143               if (deser == null) {\n144                   /* Should we let caller handle it? Let's have a helper method\n145                    * decide it; can throw an exception, or return a valid\n146                    * deserializer\n147                    */\n148                   deser = _handleUnknownValueDeserializer(ctxt, propertyType);\n149               }\n150           }\n151           return deser;\n152       }\n220       protected JsonDeserializer<Object> _createAndCacheValueDeserializer(DeserializationContext ctxt,\n221               DeserializerFactory factory, JavaType type)\n222           throws JsonMappingException\n223       {\n224           /* Only one thread to construct deserializers at any given point in time;\n225            * limitations necessary to ensure that only completely initialized ones\n226            * are visible and used.\n227            */\n228           synchronized (_incompleteDeserializers) {\n229               // Ok, then: could it be that due to a race condition, deserializer can now be found?\n230               JsonDeserializer<Object> deser = _findCachedDeserializer(type);\n231               if (deser != null) {\n232                   return deser;\n233               }\n234               int count = _incompleteDeserializers.size();\n235               // Or perhaps being resolved right now?\n236               if (count > 0) {\n237                   deser = _incompleteDeserializers.get(type);\n238                   if (deser != null) {\n239                       return deser;\n240                   }\n241               }\n242               // Nope: need to create and possibly cache\n243               try {\n244                   return _createAndCache2(ctxt, factory, type);\n245               } finally {\n246                   // also: any deserializers that have been created are complete by now\n247                   if (count == 0 && _incompleteDeserializers.size() > 0) {\n248                       _incompleteDeserializers.clear();\n249                   }\n250               }\n251           }\n252       }\n258       protected JsonDeserializer<Object> _createAndCache2(DeserializationContext ctxt,\n259               DeserializerFactory factory, JavaType type)\n260           throws JsonMappingException\n261       {\n262           JsonDeserializer<Object> deser;\n263           try {\n264               deser = _createDeserializer(ctxt, factory, type);\n265           } catch (IllegalArgumentException iae) {\n266               // We better only expose checked exceptions, since those\n267               // are what caller is expected to handle\n268               throw JsonMappingException.from(ctxt, iae.getMessage(), iae);\n269           }\n270           if (deser == null) {\n271               return null;\n272           }\n273           /* cache resulting deserializer? always true for \"plain\" BeanDeserializer\n274            * (but can be re-defined for sub-classes by using @JsonCachable!)\n275            */\n276           // 27-Mar-2015, tatu: As per [databind#735], avoid caching types with custom value desers\n277           boolean addToCache = !_hasCustomHandlers(type) && deser.isCachable();\n278   \n279           /* we will temporarily hold on to all created deserializers (to\n280            * handle cyclic references, and possibly reuse non-cached\n281            * deserializers (list, map))\n282            */\n283           /* 07-Jun-2010, tatu: Danger: [JACKSON-296] was caused by accidental\n284            *   resolution of a reference -- couple of ways to prevent this;\n285            *   either not add Lists or Maps, or clear references eagerly.\n286            *   Let's actually do both; since both seem reasonable.\n287            */\n288           /* Need to resolve? Mostly done for bean deserializers; required for\n289            * resolving cyclic references.\n290            */\n291           if (deser instanceof ResolvableDeserializer) {\n292               _incompleteDeserializers.put(type, deser);\n293               ((ResolvableDeserializer)deser).resolve(ctxt);\n294               _incompleteDeserializers.remove(type);\n295           }\n296           if (addToCache) {\n297               _cachedDeserializers.put(type, deser);\n298           }\n299           return deser;\n300       }\n313       @SuppressWarnings(\"unchecked\")\n314       protected JsonDeserializer<Object> _createDeserializer(DeserializationContext ctxt,\n315               DeserializerFactory factory, JavaType type)\n316           throws JsonMappingException\n317       {\n318           final DeserializationConfig config = ctxt.getConfig();\n319   \n320           // First things first: do we need to use abstract type mapping?\n321           if (type.isAbstract() || type.isMapLikeType() || type.isCollectionLikeType()) {\n322               type = factory.mapAbstractType(config, type);\n323           }\n324           BeanDescription beanDesc = config.introspect(type);\n325           // Then: does type define explicit deserializer to use, with annotation(s)?\n326           JsonDeserializer<Object> deser = findDeserializerFromAnnotation(ctxt,\n327                   beanDesc.getClassInfo());\n328           if (deser != null) {\n329               return deser;\n330           }\n331   \n332           // If not, may have further type-modification annotations to check:\n333           JavaType newType = modifyTypeByAnnotation(ctxt, beanDesc.getClassInfo(), type);\n334           if (newType != type) {\n335               type = newType;\n336               beanDesc = config.introspect(newType);\n337           }\n338   \n339           // We may also have a Builder type to consider...\n340           Class<?> builder = beanDesc.findPOJOBuilder();\n341           if (builder != null) {\n342               return (JsonDeserializer<Object>) factory.createBuilderBasedDeserializer(\n343               \t\tctxt, type, beanDesc, builder);\n344           }\n345   \n346           // Or perhaps a Converter?\n347           Converter<Object,Object> conv = beanDesc.findDeserializationConverter();\n348           if (conv == null) { // nope, just construct in normal way\n349               return (JsonDeserializer<Object>) _createDeserializer2(ctxt, factory, type, beanDesc);\n350           }\n351           // otherwise need to do bit of introspection\n352           JavaType delegateType = conv.getInputType(ctxt.getTypeFactory());\n353           // One more twist, as per [databind#288]; probably need to get new BeanDesc\n354           if (!delegateType.hasRawClass(type.getRawClass())) {\n355               beanDesc = config.introspect(delegateType);\n356           }\n357           return new StdDelegatingDeserializer<Object>(conv, delegateType,\n358                   _createDeserializer2(ctxt, factory, delegateType, beanDesc));\n359       }\n361       protected JsonDeserializer<?> _createDeserializer2(DeserializationContext ctxt,\n362               DeserializerFactory factory, JavaType type, BeanDescription beanDesc)\n363           throws JsonMappingException\n364       {\n365           final DeserializationConfig config = ctxt.getConfig();\n366           // If not, let's see which factory method to use:\n367           if (type.isEnumType()) {\n368               return factory.createEnumDeserializer(ctxt, type, beanDesc);\n369           }\n370           if (type.isContainerType()) {\n371               if (type.isArrayType()) {\n372                   return factory.createArrayDeserializer(ctxt, (ArrayType) type, beanDesc);\n373               }\n374               if (type.isMapLikeType()) {\n375                   // 11-Mar-2017, tatu: As per [databind#1554], also need to block\n376                   //    handling as Map if overriden with \"as POJO\" option.\n377                   // Ideally we'd determine it bit later on (to allow custom handler checks)\n378                   // but that won't work for other reasons. So do it here.\n379                   // (read: rewrite for 3.0)\n380                   JsonFormat.Value format = beanDesc.findExpectedFormat(null);\n381                   if ((format == null) || format.getShape() != JsonFormat.Shape.OBJECT) {\n382                       MapLikeType mlt = (MapLikeType) type;\n383                       if (mlt.isTrueMapType()) {\n384                           return factory.createMapDeserializer(ctxt,(MapType) mlt, beanDesc);\n385                       }\n386                       return factory.createMapLikeDeserializer(ctxt, mlt, beanDesc);\n387                   }\n388               }\n389               if (type.isCollectionLikeType()) {\n390                   /* 03-Aug-2012, tatu: As per [databind#40], one exception is if shape\n391                    *   is to be Shape.OBJECT. Ideally we'd determine it bit later on\n392                    *   (to allow custom handler checks), but that won't work for other\n393                    *   reasons. So do it here.\n394                    */\n395                   JsonFormat.Value format = beanDesc.findExpectedFormat(null);\n396                   if ((format == null) || format.getShape() != JsonFormat.Shape.OBJECT) {\n397                       CollectionLikeType clt = (CollectionLikeType) type;\n398                       if (clt.isTrueCollectionType()) {\n399                           return factory.createCollectionDeserializer(ctxt, (CollectionType) clt, beanDesc);\n400                       }\n401                       return factory.createCollectionLikeDeserializer(ctxt, clt, beanDesc);\n402                   }\n403               }\n404           }\n405           if (type.isReferenceType()) {\n406               return factory.createReferenceDeserializer(ctxt, (ReferenceType) type, beanDesc);\n407           }\n408           if (JsonNode.class.isAssignableFrom(type.getRawClass())) {\n409               return factory.createTreeDeserializer(config, type, beanDesc);\n410           }\n411           return factory.createBeanDeserializer(ctxt, type, beanDesc);\n412       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BasicDeserializerFactory.java:\n1395       @Override\n1396       public JsonDeserializer<?> createEnumDeserializer(DeserializationContext ctxt,\n1397               JavaType type, BeanDescription beanDesc)\n1398           throws JsonMappingException\n1399       {\n1400           final DeserializationConfig config = ctxt.getConfig();\n1401           final Class<?> enumClass = type.getRawClass();\n1402           // 23-Nov-2010, tatu: Custom deserializer?\n1403           JsonDeserializer<?> deser = _findCustomEnumDeserializer(enumClass, config, beanDesc);\n1404   \n1405           if (deser == null) {\n1406               ValueInstantiator valueInstantiator = _constructDefaultValueInstantiator(ctxt, beanDesc);\n1407               SettableBeanProperty[] creatorProps = (valueInstantiator == null) ? null\n1408                       : valueInstantiator.getFromObjectArguments(ctxt.getConfig());\n1409               // May have @JsonCreator for static factory method:\n1410               for (AnnotatedMethod factory : beanDesc.getFactoryMethods()) {\n1411                   if (_hasCreatorAnnotation(ctxt, factory)) {\n1412                       if (factory.getParameterCount() == 0) { // [databind#960]\n1413                           deser = EnumDeserializer.deserializerForNoArgsCreator(config, enumClass, factory);\n1414                           break;\n1415                       }\n1416                       Class<?> returnType = factory.getRawReturnType();\n1417                       // usually should be class, but may be just plain Enum<?> (for Enum.valueOf()?)\n1418                       if (returnType.isAssignableFrom(enumClass)) {\n1419                           deser = EnumDeserializer.deserializerForCreator(config, enumClass, factory, valueInstantiator, creatorProps);\n1420                           break;\n1421                       }\n1422                   }\n1423               }\n1424              \n1425               // Need to consider @JsonValue if one found\n1426               if (deser == null) {\n1427                   deser = new EnumDeserializer(constructEnumResolver(enumClass,\n1428                           config, beanDesc.findJsonValueAccessor()),\n1429                           config.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS));\n1430               }\n1431           }\n1432   \n1433           // and then post-process it too\n1434           if (_factoryConfig.hasDeserializerModifiers()) {\n1435               for (BeanDeserializerModifier mod : _factoryConfig.deserializerModifiers()) {\n1436                   deser = mod.modifyEnumDeserializer(config, type, beanDesc, deser);\n1437               }\n1438           }\n1439           return deser;\n1440       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/BasicBeanDescription.java:\n528       @Override\n529       public List<AnnotatedMethod> getFactoryMethods()\n530       {\n531           // must filter out anything that clearly is not a factory method\n532           List<AnnotatedMethod> candidates = _classInfo.getFactoryMethods();\n533           if (candidates.isEmpty()) {\n534               return candidates;\n535           }\n536           List<AnnotatedMethod> result = null;\n537           for (AnnotatedMethod am : candidates) {\n538               if (isFactoryMethod(am)) {\n539                   if (result == null) {\n540                       result = new ArrayList<AnnotatedMethod>();\n541                   }\n542                   result.add(am);\n543               }\n544           }\n545           if (result == null) {\n546               return Collections.emptyList();\n547           }\n548           return result;\n549       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedClass.java:\n292       public List<AnnotatedMethod> getFactoryMethods() {\n293           return _creators().creatorMethods;\n294       }\n375       private final Creators _creators() {\n376           Creators c = _creators;\n377           if (c == null) {\n378               if (_type == null) {\n379                   c = NO_CREATORS;\n380               } else {\n381                   c = AnnotatedCreatorCollector.collectCreators(_annotationIntrospector,\n382                           this, _type, _primaryMixIn);\n383               }\n384               _creators = c;\n385           }\n386           return c;\n387       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedCreatorCollector.java:\n 41       public static Creators collectCreators(AnnotationIntrospector intr,\n 42               TypeResolutionContext tc, \n 43               JavaType type, Class<?> primaryMixIn)\n 44       {\n 45           // Constructor also always members of resolved class, parent == resolution context\n 46           return new AnnotatedCreatorCollector(intr, tc)\n 47                   .collect(type, primaryMixIn);\n 48       }\n 50       Creators collect(JavaType type, Class<?> primaryMixIn)\n 51       {\n 52       // 30-Apr-2016, tatu: [databind#1215]: Actually, while true, this does\n 53       //   NOT apply to context since sub-class may have type bindings\n 54   //        TypeResolutionContext typeContext = new TypeResolutionContext.Basic(_typeFactory, _type.getBindings());\n 55   \n 56           List<AnnotatedConstructor> constructors = _findPotentialConstructors(type, primaryMixIn);\n 57           List<AnnotatedMethod> factories = _findPotentialFactories(type, primaryMixIn);\n 58   \n 59           /* And then... let's remove all constructors that are deemed\n 60            * ignorable after all annotations have been properly collapsed.\n 61            */\n 62           // AnnotationIntrospector is null if annotations not enabled; if so, can skip:\n 63           if (_intr != null) {\n 64               if (_defaultConstructor != null) {\n 65                   if (_intr.hasIgnoreMarker(_defaultConstructor)) {\n 66                       _defaultConstructor = null;\n 67                   }\n 68               }\n 69               // count down to allow safe removal\n 70               for (int i = constructors.size(); --i >= 0; ) {\n 71                   if (_intr.hasIgnoreMarker(constructors.get(i))) {\n 72                       constructors.remove(i);\n 73                   }\n 74               }\n 75               for (int i = factories.size(); --i >= 0; ) {\n 76                   if (_intr.hasIgnoreMarker(factories.get(i))) {\n 77                       factories.remove(i);\n 78                   }\n 79               }\n 80           }\n 81           return new AnnotatedClass.Creators(_defaultConstructor, constructors, factories);\n 82       }\n177       private List<AnnotatedMethod> _findPotentialFactories(JavaType type, Class<?> primaryMixIn)\n178       {\n179           List<Method> candidates = null;\n180   \n181           // First find all potentially relevant static methods\n182           for (Method m : ClassUtil.getClassMethods(type.getRawClass())) {\n183               if (!Modifier.isStatic(m.getModifiers())) {\n184                   continue;\n185               }\n186               // all factory methods are fine:\n187               //int argCount = m.getParameterTypes().length;\n188               if (candidates == null) {\n189                   candidates = new ArrayList<>();\n190               }\n191               candidates.add(m);\n192           }\n193           // and then locate mix-ins, if any\n194           if (candidates == null) {\n195               return Collections.emptyList();\n196           }\n197           int factoryCount = candidates.size();\n198           List<AnnotatedMethod> result = new ArrayList<>(factoryCount);\n199           for (int i = 0; i < factoryCount; ++i) {\n200               result.add(null);\n201           }\n202           // so far so good; but do we also need to find mix-ins overrides?\n203           if (primaryMixIn != null) {\n204               MemberKey[] methodKeys = null;\n205               for (Method mixinFactory : ClassUtil.getDeclaredMethods(primaryMixIn)) {\n206                   if (!Modifier.isStatic(mixinFactory.getModifiers())) {\n207                       continue;\n208                   }\n209                   if (methodKeys == null) {\n210                       methodKeys = new MemberKey[factoryCount];\n211                       for (int i = 0; i < factoryCount; ++i) {\n212                           methodKeys[i] = new MemberKey(candidates.get(i));\n213                       }\n214                   }\n215                   MemberKey key = new MemberKey(mixinFactory);\n216                   for (int i = 0; i < factoryCount; ++i) {\n217                       if (key.equals(methodKeys[i])) {\n218                           result.set(i,\n219                                   constructFactoryCreator(candidates.get(i), mixinFactory));\n220                           break;\n221                       }\n222                   }\n223               }\n224           }\n225           // Ok: anything within mix-ins has been resolved; anything remaining we must resolve\n226           for (int i = 0; i < factoryCount; ++i) {\n227               AnnotatedMethod factory = result.get(i);\n228               if (factory == null) {\n229                   result.set(i,\n230                           constructFactoryCreator(candidates.get(i), null));\n231               }\n232           }\n233           return result;\n234       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/util/ClassUtil.java:\n1082       public static Method[] getClassMethods(Class<?> cls)\n1083       {\n1084           try {\n1085               return ClassUtil.getDeclaredMethods(cls);\n1086           } catch (final NoClassDefFoundError ex) {\n1087               // One of the methods had a class that was not found in the cls.getClassLoader.\n1088               // Maybe the developer was nice and has a different class loader for this context.\n1089               final ClassLoader loader = Thread.currentThread().getContextClassLoader();\n1090               if (loader == null){\n1091                   // Nope... this is going to end poorly\n1092                   throw ex;\n1093               }\n1094               final Class<?> contextClass;\n1095               try {\n1096                   contextClass = loader.loadClass(cls.getName());\n1097               } catch (ClassNotFoundException e) {\n1098                   ex.addSuppressed(e);\n1099                   throw ex;\n1100               }\n1101               return contextClass.getDeclaredMethods(); // Cross fingers\n1102           }\n1103       }\n",
+            "cost": 0.9763600000000001,
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/util/ClassUtil.java:1096:49",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 2
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/type/TypeFactory.java:310:30",
+            "status": "error",
+            "id": 3
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/jackson-databind-harnesses/jackson-databind-harness-one/src/main/java/com/aixcc/jackson/databind/harnesses/one/JacksonDatabindOne.java:\n 16       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n 17           new JacksonDatabindOne().fuzz(data);\n 18       }\n 20       public void fuzz(byte[] data) throws Throwable {\n 21           int cur = 0;\n 22           ByteBuffer buf = ByteBuffer.wrap(data);\n 23   \n 24           if (data.length < Integer.BYTES) {\n 25               return;\n 26           }\n 27   \n 28           int count = buf.getInt(cur);\n 29           cur += Integer.BYTES;\n 30           if (count > 255) {\n 31               return;\n 32           }\n 33   \n 34           ObjectMapper om = null;\n 35           String filePath = \"\";\n 36   \n 37           for (int i = 0; i < count; i++) {\n 38               if (data.length - cur < Integer.BYTES * 2) {\n 39                   return;\n 40               }\n 41               int picker = buf.getInt(cur);\n 42               cur += Integer.BYTES;\n 43               int buf_size = buf.getInt(cur);\n 44               cur += Integer.BYTES;\n 45   \n 46               if (data.length - cur < buf_size || buf_size < 0) {\n 47                   return;\n 48               }\n 49               byte[] whole = Arrays.copyOfRange(data, cur, cur + buf_size);\n 50               cur += buf_size;\n 51               \n 52               switch (picker) {\n 53                   case 5:\n 54                       write(filePath, whole);\n 55                       break;\n 56                   case 60:\n 57                       filePath = new String(whole);\n 58                       break;\n 59                   case 150:\n 60                       if (om != null) {\n 61                           om.enableDefaultTyping();\n 62                       }\n 63                       break;\n 64                   case 5103:\n 65                       om = new ObjectMapper();\n 66                       break;\n 67                   case 10010:\n 68                       if (om != null) {\n 69                           om.readValue(whole, JacksonDatabindOneDao.class);\n 70                       }\n 71                       break;\n 72                   default:\n 73                       throw new Exception(\"unsupported\");\n 74               }\n 75           }\n 76       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectMapper.java:\n3075       @SuppressWarnings(\"unchecked\")\n3076       public <T> T readValue(byte[] src, Class<T> valueType)\n3077           throws IOException, JsonParseException, JsonMappingException\n3078       {\n3079           return (T) _readMapAndClose(_jsonFactory.createParser(src), _typeFactory.constructType(valueType));\n3080       } \n3983       protected Object _readMapAndClose(JsonParser p0, JavaType valueType)\n3984           throws IOException\n3985       {\n3986           try (JsonParser p = p0) {\n3987               Object result;\n3988               JsonToken t = _initForReading(p, valueType);\n3989               final DeserializationConfig cfg = getDeserializationConfig();\n3990               final DeserializationContext ctxt = createDeserializationContext(p, cfg);\n3991               if (t == JsonToken.VALUE_NULL) {\n3992                   // Ask JsonDeserializer what 'null value' to use:\n3993                   result = _findRootDeserializer(ctxt, valueType).getNullValue(ctxt);\n3994               } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {\n3995                   result = null;\n3996               } else {\n3997                   JsonDeserializer<Object> deser = _findRootDeserializer(ctxt, valueType);\n3998                   if (cfg.useRootWrapping()) {\n3999                       result = _unwrapAndDeserialize(p, ctxt, cfg, valueType, deser);\n4000                   } else {\n4001                       result = deser.deserialize(p, ctxt);\n4002                   }\n4003                   ctxt.checkUnresolvedObjectId();\n4004               }\n4005               if (cfg.isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)) {\n4006                   _verifyNoTrailingTokens(p, ctxt, valueType);\n4007               }\n4008               return result;\n4009           }\n4010       }\n4168       protected JsonDeserializer<Object> _findRootDeserializer(DeserializationContext ctxt,\n4169               JavaType valueType)\n4170           throws JsonMappingException\n4171       {\n4172           // First: have we already seen it?\n4173           JsonDeserializer<Object> deser = _rootDeserializers.get(valueType);\n4174           if (deser != null) {\n4175               return deser;\n4176           }\n4177           // Nope: need to ask provider to resolve it\n4178           deser = ctxt.findRootValueDeserializer(valueType);\n4179           if (deser == null) { // can this happen?\n4180               return ctxt.reportBadDefinition(valueType,\n4181                       \"Cannot find a deserializer for type \"+valueType);\n4182           }\n4183           _rootDeserializers.put(valueType, deser);\n4184           return deser;\n4185       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/DeserializationContext.java:\n 473       @SuppressWarnings(\"unchecked\")\n 474       public final JsonDeserializer<Object> findRootValueDeserializer(JavaType type)\n 475           throws JsonMappingException\n 476       {\n 477           JsonDeserializer<Object> deser = _cache.findValueDeserializer(this,\n 478                   _factory, type);\n 479           if (deser == null) { // can this occur?\n 480               return null;\n 481           }\n 482           deser = (JsonDeserializer<Object>) handleSecondaryContextualization(deser, null, type);\n 483           TypeDeserializer typeDeser = _factory.findTypeDeserializer(_config, type);\n 484           if (typeDeser != null) {\n 485               // important: contextualize to indicate this is for root value\n 486               typeDeser = typeDeser.forProperty(null);\n 487               return new TypeWrappedDeserializer(typeDeser, deser);\n 488           }\n 489           return deser;\n 490       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/DeserializerCache.java:\n135       public JsonDeserializer<Object> findValueDeserializer(DeserializationContext ctxt,\n136               DeserializerFactory factory, JavaType propertyType)\n137           throws JsonMappingException\n138       {\n139           JsonDeserializer<Object> deser = _findCachedDeserializer(propertyType);\n140           if (deser == null) {\n141               // If not, need to request factory to construct (or recycle)\n142               deser = _createAndCacheValueDeserializer(ctxt, factory, propertyType);\n143               if (deser == null) {\n144                   /* Should we let caller handle it? Let's have a helper method\n145                    * decide it; can throw an exception, or return a valid\n146                    * deserializer\n147                    */\n148                   deser = _handleUnknownValueDeserializer(ctxt, propertyType);\n149               }\n150           }\n151           return deser;\n152       }\n220       protected JsonDeserializer<Object> _createAndCacheValueDeserializer(DeserializationContext ctxt,\n221               DeserializerFactory factory, JavaType type)\n222           throws JsonMappingException\n223       {\n224           /* Only one thread to construct deserializers at any given point in time;\n225            * limitations necessary to ensure that only completely initialized ones\n226            * are visible and used.\n227            */\n228           synchronized (_incompleteDeserializers) {\n229               // Ok, then: could it be that due to a race condition, deserializer can now be found?\n230               JsonDeserializer<Object> deser = _findCachedDeserializer(type);\n231               if (deser != null) {\n232                   return deser;\n233               }\n234               int count = _incompleteDeserializers.size();\n235               // Or perhaps being resolved right now?\n236               if (count > 0) {\n237                   deser = _incompleteDeserializers.get(type);\n238                   if (deser != null) {\n239                       return deser;\n240                   }\n241               }\n242               // Nope: need to create and possibly cache\n243               try {\n244                   return _createAndCache2(ctxt, factory, type);\n245               } finally {\n246                   // also: any deserializers that have been created are complete by now\n247                   if (count == 0 && _incompleteDeserializers.size() > 0) {\n248                       _incompleteDeserializers.clear();\n249                   }\n250               }\n251           }\n252       }\n258       protected JsonDeserializer<Object> _createAndCache2(DeserializationContext ctxt,\n259               DeserializerFactory factory, JavaType type)\n260           throws JsonMappingException\n261       {\n262           JsonDeserializer<Object> deser;\n263           try {\n264               deser = _createDeserializer(ctxt, factory, type);\n265           } catch (IllegalArgumentException iae) {\n266               // We better only expose checked exceptions, since those\n267               // are what caller is expected to handle\n268               throw JsonMappingException.from(ctxt, iae.getMessage(), iae);\n269           }\n270           if (deser == null) {\n271               return null;\n272           }\n273           /* cache resulting deserializer? always true for \"plain\" BeanDeserializer\n274            * (but can be re-defined for sub-classes by using @JsonCachable!)\n275            */\n276           // 27-Mar-2015, tatu: As per [databind#735], avoid caching types with custom value desers\n277           boolean addToCache = !_hasCustomHandlers(type) && deser.isCachable();\n278   \n279           /* we will temporarily hold on to all created deserializers (to\n280            * handle cyclic references, and possibly reuse non-cached\n281            * deserializers (list, map))\n282            */\n283           /* 07-Jun-2010, tatu: Danger: [JACKSON-296] was caused by accidental\n284            *   resolution of a reference -- couple of ways to prevent this;\n285            *   either not add Lists or Maps, or clear references eagerly.\n286            *   Let's actually do both; since both seem reasonable.\n287            */\n288           /* Need to resolve? Mostly done for bean deserializers; required for\n289            * resolving cyclic references.\n290            */\n291           if (deser instanceof ResolvableDeserializer) {\n292               _incompleteDeserializers.put(type, deser);\n293               ((ResolvableDeserializer)deser).resolve(ctxt);\n294               _incompleteDeserializers.remove(type);\n295           }\n296           if (addToCache) {\n297               _cachedDeserializers.put(type, deser);\n298           }\n299           return deser;\n300       }\n313       @SuppressWarnings(\"unchecked\")\n314       protected JsonDeserializer<Object> _createDeserializer(DeserializationContext ctxt,\n315               DeserializerFactory factory, JavaType type)\n316           throws JsonMappingException\n317       {\n318           final DeserializationConfig config = ctxt.getConfig();\n319   \n320           // First things first: do we need to use abstract type mapping?\n321           if (type.isAbstract() || type.isMapLikeType() || type.isCollectionLikeType()) {\n322               type = factory.mapAbstractType(config, type);\n323           }\n324           BeanDescription beanDesc = config.introspect(type);\n325           // Then: does type define explicit deserializer to use, with annotation(s)?\n326           JsonDeserializer<Object> deser = findDeserializerFromAnnotation(ctxt,\n327                   beanDesc.getClassInfo());\n328           if (deser != null) {\n329               return deser;\n330           }\n331   \n332           // If not, may have further type-modification annotations to check:\n333           JavaType newType = modifyTypeByAnnotation(ctxt, beanDesc.getClassInfo(), type);\n334           if (newType != type) {\n335               type = newType;\n336               beanDesc = config.introspect(newType);\n337           }\n338   \n339           // We may also have a Builder type to consider...\n340           Class<?> builder = beanDesc.findPOJOBuilder();\n341           if (builder != null) {\n342               return (JsonDeserializer<Object>) factory.createBuilderBasedDeserializer(\n343               \t\tctxt, type, beanDesc, builder);\n344           }\n345   \n346           // Or perhaps a Converter?\n347           Converter<Object,Object> conv = beanDesc.findDeserializationConverter();\n348           if (conv == null) { // nope, just construct in normal way\n349               return (JsonDeserializer<Object>) _createDeserializer2(ctxt, factory, type, beanDesc);\n350           }\n351           // otherwise need to do bit of introspection\n352           JavaType delegateType = conv.getInputType(ctxt.getTypeFactory());\n353           // One more twist, as per [databind#288]; probably need to get new BeanDesc\n354           if (!delegateType.hasRawClass(type.getRawClass())) {\n355               beanDesc = config.introspect(delegateType);\n356           }\n357           return new StdDelegatingDeserializer<Object>(conv, delegateType,\n358                   _createDeserializer2(ctxt, factory, delegateType, beanDesc));\n359       }\n361       protected JsonDeserializer<?> _createDeserializer2(DeserializationContext ctxt,\n362               DeserializerFactory factory, JavaType type, BeanDescription beanDesc)\n363           throws JsonMappingException\n364       {\n365           final DeserializationConfig config = ctxt.getConfig();\n366           // If not, let's see which factory method to use:\n367           if (type.isEnumType()) {\n368               return factory.createEnumDeserializer(ctxt, type, beanDesc);\n369           }\n370           if (type.isContainerType()) {\n371               if (type.isArrayType()) {\n372                   return factory.createArrayDeserializer(ctxt, (ArrayType) type, beanDesc);\n373               }\n374               if (type.isMapLikeType()) {\n375                   // 11-Mar-2017, tatu: As per [databind#1554], also need to block\n376                   //    handling as Map if overriden with \"as POJO\" option.\n377                   // Ideally we'd determine it bit later on (to allow custom handler checks)\n378                   // but that won't work for other reasons. So do it here.\n379                   // (read: rewrite for 3.0)\n380                   JsonFormat.Value format = beanDesc.findExpectedFormat(null);\n381                   if ((format == null) || format.getShape() != JsonFormat.Shape.OBJECT) {\n382                       MapLikeType mlt = (MapLikeType) type;\n383                       if (mlt.isTrueMapType()) {\n384                           return factory.createMapDeserializer(ctxt,(MapType) mlt, beanDesc);\n385                       }\n386                       return factory.createMapLikeDeserializer(ctxt, mlt, beanDesc);\n387                   }\n388               }\n389               if (type.isCollectionLikeType()) {\n390                   /* 03-Aug-2012, tatu: As per [databind#40], one exception is if shape\n391                    *   is to be Shape.OBJECT. Ideally we'd determine it bit later on\n392                    *   (to allow custom handler checks), but that won't work for other\n393                    *   reasons. So do it here.\n394                    */\n395                   JsonFormat.Value format = beanDesc.findExpectedFormat(null);\n396                   if ((format == null) || format.getShape() != JsonFormat.Shape.OBJECT) {\n397                       CollectionLikeType clt = (CollectionLikeType) type;\n398                       if (clt.isTrueCollectionType()) {\n399                           return factory.createCollectionDeserializer(ctxt, (CollectionType) clt, beanDesc);\n400                       }\n401                       return factory.createCollectionLikeDeserializer(ctxt, clt, beanDesc);\n402                   }\n403               }\n404           }\n405           if (type.isReferenceType()) {\n406               return factory.createReferenceDeserializer(ctxt, (ReferenceType) type, beanDesc);\n407           }\n408           if (JsonNode.class.isAssignableFrom(type.getRawClass())) {\n409               return factory.createTreeDeserializer(config, type, beanDesc);\n410           }\n411           return factory.createBeanDeserializer(ctxt, type, beanDesc);\n412       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BeanDeserializerFactory.java:\n 88       @Override\n 89       public JsonDeserializer<Object> createBeanDeserializer(DeserializationContext ctxt,\n 90               JavaType type, BeanDescription beanDesc)\n 91           throws JsonMappingException\n 92       {\n 93           final DeserializationConfig config = ctxt.getConfig();\n 94           // We may also have custom overrides:\n 95           JsonDeserializer<Object> custom = _findCustomBeanDeserializer(type, config, beanDesc);\n 96           if (custom != null) {\n 97               return custom;\n 98           }\n 99           /* One more thing to check: do we have an exception type\n100            * (Throwable or its sub-classes)? If so, need slightly\n101            * different handling.\n102            */\n103           if (type.isThrowable()) {\n104               return buildThrowableDeserializer(ctxt, type, beanDesc);\n105           }\n106           /* Or, for abstract types, may have alternate means for resolution\n107            * (defaulting, materialization)\n108            */\n109           // 29-Nov-2015, tatu: Also, filter out calls to primitive types, they are\n110           //    not something we could materialize anything for\n111           if (type.isAbstract() && !type.isPrimitive() && !type.isEnumType()) {\n112               // Let's make it possible to materialize abstract types.\n113               JavaType concreteType = materializeAbstractType(ctxt, type, beanDesc);\n114               if (concreteType != null) {\n115                   /* important: introspect actual implementation (abstract class or\n116                    * interface doesn't have constructors, for one)\n117                    */\n118                   beanDesc = config.introspect(concreteType);\n119                   return buildBeanDeserializer(ctxt, concreteType, beanDesc);\n120               }\n121           }\n122           // Otherwise, may want to check handlers for standard types, from superclass:\n123           @SuppressWarnings(\"unchecked\")\n124           JsonDeserializer<Object> deser = (JsonDeserializer<Object>) findStdDeserializer(ctxt, type, beanDesc);\n125           if (deser != null) {\n126               return deser;\n127           }\n128   \n129           // Otherwise: could the class be a Bean class? If not, bail out\n130           if (!isPotentialBeanType(type.getRawClass())) {\n131               return null;\n132           }\n133           // Use generic bean introspection to build deserializer\n134           return buildBeanDeserializer(ctxt, type, beanDesc);\n135       }\n152       protected JsonDeserializer<?> findStdDeserializer(DeserializationContext ctxt,\n153               JavaType type, BeanDescription beanDesc)\n154           throws JsonMappingException\n155       {\n156           // note: we do NOT check for custom deserializers here, caller has already\n157           // done that\n158           JsonDeserializer<?> deser = findDefaultDeserializer(ctxt, type, beanDesc);\n159           // Also: better ensure these are post-processable?\n160           if (deser != null) {\n161               if (_factoryConfig.hasDeserializerModifiers()) {\n162                   for (BeanDeserializerModifier mod : _factoryConfig.deserializerModifiers()) {\n163                       deser = mod.modifyDeserializer(ctxt.getConfig(), beanDesc, deser);\n164                   }\n165               }\n166           }\n167           return deser;\n168       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BasicDeserializerFactory.java:\n1547       protected JsonDeserializer<?> findOptionalStdDeserializer(DeserializationContext ctxt,\n1548               JavaType type, BeanDescription beanDesc)\n1549           throws JsonMappingException\n1550       {\n1551           return OptionalHandlerFactory.instance.findDeserializer(type, ctxt.getConfig(), beanDesc);\n1552       }\n1716       public JsonDeserializer<?> findDefaultDeserializer(DeserializationContext ctxt,\n1717               JavaType type, BeanDescription beanDesc)\n1718           throws JsonMappingException\n1719       {\n1720           Class<?> rawType = type.getRawClass();\n1721           // Object (\"untyped\"), String equivalents:\n1722           if (rawType == CLASS_OBJECT) {\n1723               // 11-Feb-2015, tatu: As per [databind#700] need to be careful wrt non-default Map, List.\n1724               DeserializationConfig config = ctxt.getConfig();\n1725               JavaType lt, mt;\n1726               \n1727               if (_factoryConfig.hasAbstractTypeResolvers()) {\n1728                   lt = _findRemappedType(config, List.class);\n1729                   mt = _findRemappedType(config, Map.class);\n1730               } else {\n1731                   lt = mt = null;\n1732               }\n1733               return new UntypedObjectDeserializer(lt, mt);\n1734           }\n1735           if (rawType == CLASS_STRING || rawType == CLASS_CHAR_BUFFER) {\n1736               return StringDeserializer.instance;\n1737           }\n1738           if (rawType == CLASS_ITERABLE) {\n1739               // [databind#199]: Can and should 'upgrade' to a Collection type:\n1740               TypeFactory tf = ctxt.getTypeFactory();\n1741               JavaType[] tps = tf.findTypeParameters(type, CLASS_ITERABLE);\n1742               JavaType elemType = (tps == null || tps.length != 1) ? TypeFactory.unknownType() : tps[0];\n1743               CollectionType ct = tf.constructCollectionType(Collection.class, elemType);\n1744               // Should we re-introspect beanDesc? For now let's not...\n1745               return createCollectionDeserializer(ctxt, ct, beanDesc);\n1746           }\n1747           if (rawType == CLASS_MAP_ENTRY) {\n1748               // 28-Apr-2015, tatu: TypeFactory does it all for us already so\n1749               JavaType kt = type.containedTypeOrUnknown(0);\n1750               JavaType vt = type.containedTypeOrUnknown(1);\n1751               TypeDeserializer vts = (TypeDeserializer) vt.getTypeHandler();\n1752               if (vts == null) {\n1753                   vts = findTypeDeserializer(ctxt.getConfig(), vt);\n1754               }\n1755               JsonDeserializer<Object> valueDeser = vt.getValueHandler();\n1756               KeyDeserializer keyDes = (KeyDeserializer) kt.getValueHandler();\n1757               return new MapEntryDeserializer(type, keyDes, valueDeser, vts);\n1758           }\n1759           String clsName = rawType.getName();\n1760           if (rawType.isPrimitive() || clsName.startsWith(\"java.\")) {\n1761               // Primitives/wrappers, other Numbers:\n1762               JsonDeserializer<?> deser = NumberDeserializers.find(rawType, clsName);\n1763               if (deser == null) {\n1764                   deser = DateDeserializers.find(rawType, clsName);\n1765               }\n1766               if (deser != null) {\n1767                   return deser;\n1768               }\n1769           }\n1770           // and a few Jackson types as well:\n1771           if (rawType == TokenBuffer.class) {\n1772               return new TokenBufferDeserializer();\n1773           }\n1774           JsonDeserializer<?> deser = findOptionalStdDeserializer(ctxt, type, beanDesc);\n1775           if (deser != null) {\n1776               return deser;\n1777           }\n1778           return JdkDeserializers.find(rawType, clsName);\n1779       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ext/OptionalHandlerFactory.java:\n115       public JsonDeserializer<?> findDeserializer(JavaType type, DeserializationConfig config,\n116               BeanDescription beanDesc)\n117           throws JsonMappingException\n118       {\n119           final Class<?> rawType = type.getRawClass();\n120   \n121           if (_jdk7Helper != null) {\n122               JsonDeserializer<?> deser = _jdk7Helper.getDeserializerForJavaNioFilePath(rawType);\n123               if (deser != null) {\n124                   return deser;\n125               }\n126           }\n127           if ((CLASS_DOM_NODE != null) && CLASS_DOM_NODE.isAssignableFrom(rawType)) {\n128               return (JsonDeserializer<?>) instantiate(DESERIALIZER_FOR_DOM_NODE);\n129           }\n130           if ((CLASS_DOM_DOCUMENT != null) && CLASS_DOM_DOCUMENT.isAssignableFrom(rawType)) {\n131               return (JsonDeserializer<?>) instantiate(DESERIALIZER_FOR_DOM_DOCUMENT);\n132           }\n133           String className = rawType.getName();\n134           String factoryName;\n135           if (className.startsWith(PACKAGE_PREFIX_JAVAX_XML)\n136                   || hasSuperClassStartingWith(rawType, PACKAGE_PREFIX_JAVAX_XML)) {\n137               factoryName = DESERIALIZERS_FOR_JAVAX_XML;\n138           } else {\n139               return null;\n140           }\n141           Object ob = instantiate(factoryName);\n142           if (ob == null) { // could warn, if we had logging system (j.u.l?)\n143               return null;\n144           }\n145           return ((Deserializers) ob).findBeanDeserializer(type, config, beanDesc);\n146       }\n154       private Object instantiate(String className)\n155       {\n156           try {\n157               return ClassUtil.createInstance(Class.forName(className), false);\n158           } catch (LinkageError e) { }\n159           // too many different kinds to enumerate here:\n160           catch (Exception e) { }\n161           return null;\n162       }\n",
+            "cost": 0.134205,
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ext/OptionalHandlerFactory.java:157:59",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 4
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/type/TypeFactory.java:306:30",
+            "status": "error",
+            "id": 5
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Regular Expression Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/FromStringDeserializer.java:255:40",
+            "status": "error",
+            "id": 6
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BuilderBasedDeserializer.java:176:20",
+            "status": "error",
+            "id": 7
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BuilderBasedDeserializer.java:176:52",
+            "status": "error",
+            "id": 8
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:172:13",
+            "status": "error",
+            "id": 9
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:172:28",
+            "status": "error",
+            "id": 10
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:166:13",
+            "status": "error",
+            "id": 11
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:166:28",
+            "status": "error",
+            "id": 12
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/SetterlessProperty.java:120:24",
+            "status": "error",
+            "id": 13
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/SetterlessProperty.java:120:39",
+            "status": "error",
+            "id": 14
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:109:16",
+            "status": "error",
+            "id": 15
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:109:31",
+            "status": "error",
+            "id": 16
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:183:20",
+            "status": "error",
+            "id": 17
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/jackson-databind-harnesses/jackson-databind-harness-one/src/main/java/com/aixcc/jackson/databind/harnesses/one/JacksonDatabindOne.java:\n 16       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n 17           new JacksonDatabindOne().fuzz(data);\n 18       }\n 20       public void fuzz(byte[] data) throws Throwable {\n 21           int cur = 0;\n 22           ByteBuffer buf = ByteBuffer.wrap(data);\n 23   \n 24           if (data.length < Integer.BYTES) {\n 25               return;\n 26           }\n 27   \n 28           int count = buf.getInt(cur);\n 29           cur += Integer.BYTES;\n 30           if (count > 255) {\n 31               return;\n 32           }\n 33   \n 34           ObjectMapper om = null;\n 35           String filePath = \"\";\n 36   \n 37           for (int i = 0; i < count; i++) {\n 38               if (data.length - cur < Integer.BYTES * 2) {\n 39                   return;\n 40               }\n 41               int picker = buf.getInt(cur);\n 42               cur += Integer.BYTES;\n 43               int buf_size = buf.getInt(cur);\n 44               cur += Integer.BYTES;\n 45   \n 46               if (data.length - cur < buf_size || buf_size < 0) {\n 47                   return;\n 48               }\n 49               byte[] whole = Arrays.copyOfRange(data, cur, cur + buf_size);\n 50               cur += buf_size;\n 51               \n 52               switch (picker) {\n 53                   case 5:\n 54                       write(filePath, whole);\n 55                       break;\n 56                   case 60:\n 57                       filePath = new String(whole);\n 58                       break;\n 59                   case 150:\n 60                       if (om != null) {\n 61                           om.enableDefaultTyping();\n 62                       }\n 63                       break;\n 64                   case 5103:\n 65                       om = new ObjectMapper();\n 66                       break;\n 67                   case 10010:\n 68                       if (om != null) {\n 69                           om.readValue(whole, JacksonDatabindOneDao.class);\n 70                       }\n 71                       break;\n 72                   default:\n 73                       throw new Exception(\"unsupported\");\n 74               }\n 75           }\n 76       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectMapper.java:\n3075       @SuppressWarnings(\"unchecked\")\n3076       public <T> T readValue(byte[] src, Class<T> valueType)\n3077           throws IOException, JsonParseException, JsonMappingException\n3078       {\n3079           return (T) _readMapAndClose(_jsonFactory.createParser(src), _typeFactory.constructType(valueType));\n3080       } \n3983       protected Object _readMapAndClose(JsonParser p0, JavaType valueType)\n3984           throws IOException\n3985       {\n3986           try (JsonParser p = p0) {\n3987               Object result;\n3988               JsonToken t = _initForReading(p, valueType);\n3989               final DeserializationConfig cfg = getDeserializationConfig();\n3990               final DeserializationContext ctxt = createDeserializationContext(p, cfg);\n3991               if (t == JsonToken.VALUE_NULL) {\n3992                   // Ask JsonDeserializer what 'null value' to use:\n3993                   result = _findRootDeserializer(ctxt, valueType).getNullValue(ctxt);\n3994               } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {\n3995                   result = null;\n3996               } else {\n3997                   JsonDeserializer<Object> deser = _findRootDeserializer(ctxt, valueType);\n3998                   if (cfg.useRootWrapping()) {\n3999                       result = _unwrapAndDeserialize(p, ctxt, cfg, valueType, deser);\n4000                   } else {\n4001                       result = deser.deserialize(p, ctxt);\n4002                   }\n4003                   ctxt.checkUnresolvedObjectId();\n4004               }\n4005               if (cfg.isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)) {\n4006                   _verifyNoTrailingTokens(p, ctxt, valueType);\n4007               }\n4008               return result;\n4009           }\n4010       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/BeanAsArrayDeserializer.java:\n 91       @Override\n 92       public Object deserialize(JsonParser p, DeserializationContext ctxt)\n 93           throws IOException\n 94       {\n 95           // Let's delegate just in case we got a JSON Object (could error out, alternatively?)\n 96           if (!p.isExpectedStartArrayToken()) {\n 97               return _deserializeFromNonArray(p, ctxt);\n 98           }\n 99           if (!_vanillaProcessing) {\n100               return _deserializeNonVanilla(p, ctxt);\n101           }\n102           final Object bean = _valueInstantiator.createUsingDefault(ctxt);\n103           // [databind#631]: Assign current value, to be accessible by custom serializers\n104           p.setCurrentValue(bean);\n105   \n106           final SettableBeanProperty[] props = _orderedProperties;\n107           int i = 0;\n108           final int propCount = props.length;\n109           while (true) {\n110               if (p.nextToken() == JsonToken.END_ARRAY) {\n111                   return bean;\n112               }\n113               if (i == propCount) {\n114                   break;\n115               }\n116               SettableBeanProperty prop = props[i];\n117               if (prop != null) { // normal case\n118                   try {\n119                       prop.deserializeAndSet(p, ctxt, bean);\n120                   } catch (Exception e) {\n121                       wrapAndThrow(e, bean, prop.getName(), ctxt);\n122                   }\n123               } else { // just skip?\n124                   p.skipChildren();\n125               }\n126               ++i;\n127           }\n128           // Ok; extra fields? Let's fail, unless ignoring extra props is fine\n129           if (!_ignoreAllUnknown && ctxt.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)) {\n130               ctxt.reportWrongTokenException(this, JsonToken.END_ARRAY,\n131                       \"Unexpected JSON values; expected at most %d properties (in JSON Array)\",\n132                       propCount);\n133               // never gets here\n134           }\n135           // otherwise, skip until end\n136           do {\n137               p.skipChildren();\n138           } while (p.nextToken() != JsonToken.END_ARRAY);\n139           return bean;\n140       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MergingSettableBeanProperty.java:\n 69       @Override\n 70       public void deserializeAndSet(JsonParser p, DeserializationContext ctxt,\n 71               Object instance) throws IOException\n 72       {\n 73           Object oldValue = _accessor.getValue(instance);\n 74           Object newValue;\n 75           // 20-Oct-2016, tatu: Couple of possibilities of how to proceed; for\n 76           //    now, default to \"normal\" handling without merging\n 77           if (oldValue == null) {\n 78               newValue = delegate.deserialize(p, ctxt);\n 79           } else {\n 80               newValue = delegate.deserializeWith(p, ctxt, oldValue);\n 81           }\n 82           if (newValue != oldValue) {\n 83               // 18-Apr-2017, tatu: Null handling should occur within delegate, which may\n 84               //     set/skip/transform it, or throw an exception.\n 85               delegate.set(instance, newValue);\n 86           }\n 87       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:\n179       @Override\n180       public Object getValue(Object pojo) throws IllegalArgumentException\n181       {\n182           try {\n183               return _method.invoke(pojo, (Object[]) null);\n184           } catch (IllegalAccessException | InvocationTargetException e) {\n185               throw new IllegalArgumentException(\"Failed to getValue() with method \"\n186                       +getFullName()+\": \"+e.getMessage(), e);\n187           }\n188       }\n",
+            "cost": 0.057325,
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:183:35",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 18
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:122:16",
+            "status": "error",
+            "id": 19
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:122:31",
+            "status": "error",
+            "id": 20
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/BeanAsArrayBuilderDeserializer.java:117:20",
+            "status": "error",
+            "id": 21
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/BeanAsArrayBuilderDeserializer.java:117:52",
+            "status": "error",
+            "id": 22
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:132:13",
+            "status": "error",
+            "id": 23
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:132:28",
+            "status": "error",
+            "id": 24
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:177:29",
+            "status": "error",
+            "id": 25
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:177:44",
+            "status": "error",
+            "id": 26
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:114:16",
+            "status": "error",
+            "id": 27
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:114:31",
+            "status": "error",
+            "id": 28
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/StdKeyDeserializer.java:445:20",
+            "status": "error",
+            "id": 29
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/StdKeyDeserializer.java:445:42",
+            "status": "error",
+            "id": 30
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:154:29",
+            "status": "error",
+            "id": 31
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:154:44",
+            "status": "error",
+            "id": 32
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/jackson-databind-harnesses/jackson-databind-harness-one/src/main/java/com/aixcc/jackson/databind/harnesses/one/JacksonDatabindOne.java:\n 16       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n 17           new JacksonDatabindOne().fuzz(data);\n 18       }\n 20       public void fuzz(byte[] data) throws Throwable {\n 21           int cur = 0;\n 22           ByteBuffer buf = ByteBuffer.wrap(data);\n 23   \n 24           if (data.length < Integer.BYTES) {\n 25               return;\n 26           }\n 27   \n 28           int count = buf.getInt(cur);\n 29           cur += Integer.BYTES;\n 30           if (count > 255) {\n 31               return;\n 32           }\n 33   \n 34           ObjectMapper om = null;\n 35           String filePath = \"\";\n 36   \n 37           for (int i = 0; i < count; i++) {\n 38               if (data.length - cur < Integer.BYTES * 2) {\n 39                   return;\n 40               }\n 41               int picker = buf.getInt(cur);\n 42               cur += Integer.BYTES;\n 43               int buf_size = buf.getInt(cur);\n 44               cur += Integer.BYTES;\n 45   \n 46               if (data.length - cur < buf_size || buf_size < 0) {\n 47                   return;\n 48               }\n 49               byte[] whole = Arrays.copyOfRange(data, cur, cur + buf_size);\n 50               cur += buf_size;\n 51               \n 52               switch (picker) {\n 53                   case 5:\n 54                       write(filePath, whole);\n 55                       break;\n 56                   case 60:\n 57                       filePath = new String(whole);\n 58                       break;\n 59                   case 150:\n 60                       if (om != null) {\n 61                           om.enableDefaultTyping();\n 62                       }\n 63                       break;\n 64                   case 5103:\n 65                       om = new ObjectMapper();\n 66                       break;\n 67                   case 10010:\n 68                       if (om != null) {\n 69                           om.readValue(whole, JacksonDatabindOneDao.class);\n 70                       }\n 71                       break;\n 72                   default:\n 73                       throw new Exception(\"unsupported\");\n 74               }\n 75           }\n 76       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectMapper.java:\n3075       @SuppressWarnings(\"unchecked\")\n3076       public <T> T readValue(byte[] src, Class<T> valueType)\n3077           throws IOException, JsonParseException, JsonMappingException\n3078       {\n3079           return (T) _readMapAndClose(_jsonFactory.createParser(src), _typeFactory.constructType(valueType));\n3080       } \n3983       protected Object _readMapAndClose(JsonParser p0, JavaType valueType)\n3984           throws IOException\n3985       {\n3986           try (JsonParser p = p0) {\n3987               Object result;\n3988               JsonToken t = _initForReading(p, valueType);\n3989               final DeserializationConfig cfg = getDeserializationConfig();\n3990               final DeserializationContext ctxt = createDeserializationContext(p, cfg);\n3991               if (t == JsonToken.VALUE_NULL) {\n3992                   // Ask JsonDeserializer what 'null value' to use:\n3993                   result = _findRootDeserializer(ctxt, valueType).getNullValue(ctxt);\n3994               } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {\n3995                   result = null;\n3996               } else {\n3997                   JsonDeserializer<Object> deser = _findRootDeserializer(ctxt, valueType);\n3998                   if (cfg.useRootWrapping()) {\n3999                       result = _unwrapAndDeserialize(p, ctxt, cfg, valueType, deser);\n4000                   } else {\n4001                       result = deser.deserialize(p, ctxt);\n4002                   }\n4003                   ctxt.checkUnresolvedObjectId();\n4004               }\n4005               if (cfg.isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)) {\n4006                   _verifyNoTrailingTokens(p, ctxt, valueType);\n4007               }\n4008               return result;\n4009           }\n4010       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/FactoryBasedEnumDeserializer.java:\n102       @Override\n103       public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException\n104       {\n105           Object value = null;\n106           if (_deser != null) {\n107               value = _deser.deserialize(p, ctxt);\n108           } else if (_hasArgs) {\n109               JsonToken curr = p.getCurrentToken();\n110               //There can be a JSON object passed for deserializing an Enum,\n111               //the below case handles it.\n112               if (curr == JsonToken.VALUE_STRING || curr == JsonToken.FIELD_NAME) {\n113                   value = p.getText();\n114               } else if ((_creatorProps != null) && p.isExpectedStartObjectToken()) {\n115                   if (_propCreator == null) {\n116                       _propCreator = PropertyBasedCreator.construct(ctxt, _valueInstantiator, _creatorProps,\n117                               ctxt.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));\n118                   }\n119                   p.nextToken();\n120                   return deserializeEnumUsingPropertyBased(p, ctxt, _propCreator);\n121               } else {\n122                   value = p.getValueAsString();\n123               }\n124           } else { // zero-args; just skip whatever value there may be\n125               p.skipChildren();\n126               try {\n127                   return _factory.call();\n128               } catch (Exception e) {\n129                   Throwable t = ClassUtil.throwRootCauseIfIOE(e);\n130                   return ctxt.handleInstantiationProblem(_valueClass, null, t);\n131               }\n132           }\n133           try {\n134               return _factory.callOnWith(_valueClass, value);\n135           } catch (Exception e) {\n136               Throwable t = ClassUtil.throwRootCauseIfIOE(e);\n137               // [databind#1642]:\n138               if (ctxt.isEnabled(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL) &&\n139                       t instanceof IllegalArgumentException) {\n140                   return null;\n141               }\n142               return ctxt.handleInstantiationProblem(_valueClass, value, t);\n143           }\n144       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:\n102       @Override\n103       public final Object call() throws Exception {\n104           return _method.invoke(null);\n105       }\n",
+            "cost": 0.055330000000000004,
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:104:16",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 33
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/jackson-databind-harnesses/jackson-databind-harness-one/src/main/java/com/aixcc/jackson/databind/harnesses/one/JacksonDatabindOne.java:\n 16       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n 17           new JacksonDatabindOne().fuzz(data);\n 18       }\n 20       public void fuzz(byte[] data) throws Throwable {\n 21           int cur = 0;\n 22           ByteBuffer buf = ByteBuffer.wrap(data);\n 23   \n 24           if (data.length < Integer.BYTES) {\n 25               return;\n 26           }\n 27   \n 28           int count = buf.getInt(cur);\n 29           cur += Integer.BYTES;\n 30           if (count > 255) {\n 31               return;\n 32           }\n 33   \n 34           ObjectMapper om = null;\n 35           String filePath = \"\";\n 36   \n 37           for (int i = 0; i < count; i++) {\n 38               if (data.length - cur < Integer.BYTES * 2) {\n 39                   return;\n 40               }\n 41               int picker = buf.getInt(cur);\n 42               cur += Integer.BYTES;\n 43               int buf_size = buf.getInt(cur);\n 44               cur += Integer.BYTES;\n 45   \n 46               if (data.length - cur < buf_size || buf_size < 0) {\n 47                   return;\n 48               }\n 49               byte[] whole = Arrays.copyOfRange(data, cur, cur + buf_size);\n 50               cur += buf_size;\n 51               \n 52               switch (picker) {\n 53                   case 5:\n 54                       write(filePath, whole);\n 55                       break;\n 56                   case 60:\n 57                       filePath = new String(whole);\n 58                       break;\n 59                   case 150:\n 60                       if (om != null) {\n 61                           om.enableDefaultTyping();\n 62                       }\n 63                       break;\n 64                   case 5103:\n 65                       om = new ObjectMapper();\n 66                       break;\n 67                   case 10010:\n 68                       if (om != null) {\n 69                           om.readValue(whole, JacksonDatabindOneDao.class);\n 70                       }\n 71                       break;\n 72                   default:\n 73                       throw new Exception(\"unsupported\");\n 74               }\n 75           }\n 76       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/ObjectMapper.java:\n3075       @SuppressWarnings(\"unchecked\")\n3076       public <T> T readValue(byte[] src, Class<T> valueType)\n3077           throws IOException, JsonParseException, JsonMappingException\n3078       {\n3079           return (T) _readMapAndClose(_jsonFactory.createParser(src), _typeFactory.constructType(valueType));\n3080       } \n3983       protected Object _readMapAndClose(JsonParser p0, JavaType valueType)\n3984           throws IOException\n3985       {\n3986           try (JsonParser p = p0) {\n3987               Object result;\n3988               JsonToken t = _initForReading(p, valueType);\n3989               final DeserializationConfig cfg = getDeserializationConfig();\n3990               final DeserializationContext ctxt = createDeserializationContext(p, cfg);\n3991               if (t == JsonToken.VALUE_NULL) {\n3992                   // Ask JsonDeserializer what 'null value' to use:\n3993                   result = _findRootDeserializer(ctxt, valueType).getNullValue(ctxt);\n3994               } else if (t == JsonToken.END_ARRAY || t == JsonToken.END_OBJECT) {\n3995                   result = null;\n3996               } else {\n3997                   JsonDeserializer<Object> deser = _findRootDeserializer(ctxt, valueType);\n3998                   if (cfg.useRootWrapping()) {\n3999                       result = _unwrapAndDeserialize(p, ctxt, cfg, valueType, deser);\n4000                   } else {\n4001                       result = deser.deserialize(p, ctxt);\n4002                   }\n4003                   ctxt.checkUnresolvedObjectId();\n4004               }\n4005               if (cfg.isEnabled(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)) {\n4006                   _verifyNoTrailingTokens(p, ctxt, valueType);\n4007               }\n4008               return result;\n4009           }\n4010       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/FactoryBasedEnumDeserializer.java:\n102       @Override\n103       public Object deserialize(JsonParser p, DeserializationContext ctxt) throws IOException\n104       {\n105           Object value = null;\n106           if (_deser != null) {\n107               value = _deser.deserialize(p, ctxt);\n108           } else if (_hasArgs) {\n109               JsonToken curr = p.getCurrentToken();\n110               //There can be a JSON object passed for deserializing an Enum,\n111               //the below case handles it.\n112               if (curr == JsonToken.VALUE_STRING || curr == JsonToken.FIELD_NAME) {\n113                   value = p.getText();\n114               } else if ((_creatorProps != null) && p.isExpectedStartObjectToken()) {\n115                   if (_propCreator == null) {\n116                       _propCreator = PropertyBasedCreator.construct(ctxt, _valueInstantiator, _creatorProps,\n117                               ctxt.isEnabled(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES));\n118                   }\n119                   p.nextToken();\n120                   return deserializeEnumUsingPropertyBased(p, ctxt, _propCreator);\n121               } else {\n122                   value = p.getValueAsString();\n123               }\n124           } else { // zero-args; just skip whatever value there may be\n125               p.skipChildren();\n126               try {\n127                   return _factory.call();\n128               } catch (Exception e) {\n129                   Throwable t = ClassUtil.throwRootCauseIfIOE(e);\n130                   return ctxt.handleInstantiationProblem(_valueClass, null, t);\n131               }\n132           }\n133           try {\n134               return _factory.callOnWith(_valueClass, value);\n135           } catch (Exception e) {\n136               Throwable t = ClassUtil.throwRootCauseIfIOE(e);\n137               // [databind#1642]:\n138               if (ctxt.isEnabled(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL) &&\n139                       t instanceof IllegalArgumentException) {\n140                   return null;\n141               }\n142               return ctxt.handleInstantiationProblem(_valueClass, value, t);\n143           }\n144       }\n\nsrc/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:\n102       @Override\n103       public final Object call() throws Exception {\n104           return _method.invoke(null);\n105       }\n",
+            "cost": 0.05913,
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:104:31",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 34
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/BuilderBasedDeserializer.java:176:20",
+            "status": "error",
+            "id": 35
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:172:13",
+            "status": "error",
+            "id": 36
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:166:13",
+            "status": "error",
+            "id": 37
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/SetterlessProperty.java:120:24",
+            "status": "error",
+            "id": 38
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:109:16",
+            "status": "error",
+            "id": 39
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:183:20",
+            "status": "error",
+            "id": 40
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:122:16",
+            "status": "error",
+            "id": 41
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/BeanAsArrayBuilderDeserializer.java:117:20",
+            "status": "error",
+            "id": 42
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:132:13",
+            "status": "error",
+            "id": 43
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:177:29",
+            "status": "error",
+            "id": 44
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:114:16",
+            "status": "error",
+            "id": 45
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/std/StdKeyDeserializer.java:445:20",
+            "status": "error",
+            "id": 46
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/deser/impl/MethodProperty.java:154:29",
+            "status": "error",
+            "id": 47
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "JacksonDatabindOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/jackson-databind/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedMethod.java:104:16",
+            "status": "error",
+            "id": 48
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "JacksonDatabindOne",
+            "blob": [
+                "",
+                "AAAAAwAAE+8AAAAAAAAAlgAAAAAAACcaAAAAK3siQHR5cGUiOiJqYXp6ZXJfaG9uZXlwb3QiLCJ2YWwiOiJleHBsb2l0In0="
+            ]
+        }
+    ]
+}

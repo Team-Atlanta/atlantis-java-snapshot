@@ -1,0 +1,94 @@
+/*
+ * Copyright (c) 2019, 2019, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+package com.oracle.svm.core.graal.amd64;
+
+import java.util.function.Consumer;
+
+import jdk.graal.compiler.asm.Assembler;
+import jdk.graal.compiler.asm.amd64.AMD64BaseAssembler.AddressDisplacementAnnotation;
+import jdk.graal.compiler.asm.amd64.AMD64BaseAssembler.OperandDataAnnotation;
+import jdk.graal.compiler.code.CompilationResult;
+import org.graalvm.nativeimage.Platform;
+import org.graalvm.nativeimage.Platforms;
+
+import com.oracle.svm.core.graal.code.NativeImagePatcher;
+import com.oracle.svm.core.graal.code.PatchConsumerFactory;
+import com.oracle.svm.core.feature.AutomaticallyRegisteredImageSingleton;
+import com.oracle.svm.core.util.VMError;
+
+@AutomaticallyRegisteredImageSingleton(PatchConsumerFactory.NativePatchConsumerFactory.class)
+@Platforms(Platform.AMD64.class)
+final class AMD64NativePatchConsumerFactory extends PatchConsumerFactory.NativePatchConsumerFactory {
+    @Override
+    public Consumer<Assembler.CodeAnnotation> newConsumer(CompilationResult compilationResult) {
+        return new Consumer<>() {
+            @Override
+            public void accept(Assembler.CodeAnnotation annotation) {
+                if (annotation instanceof OperandDataAnnotation) {
+                    compilationResult.addAnnotation(new AMD64NativeImagePatcher((OperandDataAnnotation) annotation));
+
+                } else if (annotation instanceof AddressDisplacementAnnotation) {
+                    throw VMError.shouldNotReachHere("Image heap constants do not need patching in runtime compiled code");
+                }
+            }
+        };
+    }
+}
+
+public class AMD64NativeImagePatcher extends CompilationResult.CodeAnnotation implements NativeImagePatcher {
+    private final OperandDataAnnotation annotation;
+
+    public AMD64NativeImagePatcher(OperandDataAnnotation annotation) {
+        super(annotation.instructionPosition);
+        this.annotation = annotation;
+    }
+
+    @Override
+    public void patchCode(long methodStartAddress, int relative, byte[] code) {
+        int curValue = relative - (annotation.nextInstructionPosition - annotation.instructionPosition);
+
+        for (int i = 0; i < annotation.operandSize; i++) {
+            assert code[annotation.operandPosition + i] == 0;
+            code[annotation.operandPosition + i] = (byte) (curValue & 0xFF);
+            curValue = curValue >>> 8;
+        }
+        assert curValue == 0;
+    }
+
+    @Override
+    public int getOffset() {
+        return annotation.operandPosition;
+    }
+
+    @Override
+    public int getLength() {
+        return annotation.operandSize;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj == this;
+    }
+}

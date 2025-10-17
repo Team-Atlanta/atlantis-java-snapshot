@@ -1,0 +1,234 @@
+{
+    "sinks": {
+        "OS Command Injection": [
+            {
+                "path": "src/bcel/src/examples/Mini/MiniC.java",
+                "line": 167,
+                "column": 73
+            }
+        ],
+        "Remote Code Execution": [
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/JavaWrapper.java",
+                "line": 52,
+                "column": 58
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/generic/InstructionFactory.java",
+                "line": 519,
+                "column": 49
+            },
+            {
+                "path": "src/bcel/src/examples/ProxyCreator.java",
+                "line": 61,
+                "column": 47
+            }
+        ],
+        "load arbitrary library": [
+            {
+                "path": "src/bcel/src/examples/ProxyCreator.java",
+                "line": 61,
+                "column": 47
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/generic/InstructionFactory.java",
+                "line": 519,
+                "column": 49
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/ClassLoader.java",
+                "line": 142,
+                "column": 48
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/ClassLoader.java",
+                "line": 163,
+                "column": 40
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/JavaWrapper.java",
+                "line": 52,
+                "column": 58
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/JavaWrapper.java",
+                "line": 93,
+                "column": 46
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/verifier/NativeVerifier.java",
+                "line": 44,
+                "column": 27
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/bcel/src/examples/ClassDumper.java",
+                "line": 117,
+                "column": 67
+            },
+            {
+                "path": "src/bcel/src/examples/TransitiveHull.java",
+                "line": 104,
+                "column": 33
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/classfile/BootstrapMethods.java",
+                "line": 151,
+                "column": 96
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/InstructionFinder.java",
+                "line": 347,
+                "column": 47
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/JavaWrapper.java",
+                "line": 110,
+                "column": 13
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/JavaWrapper.java",
+                "line": 110,
+                "column": 27
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/ClassPath.java",
+                "line": 341,
+                "column": 45
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/ClassPath.java",
+                "line": 298,
+                "column": 53
+            },
+            {
+                "path": "src/bcel/src/examples/JasminVisitor.java",
+                "line": 86,
+                "column": 68
+            },
+            {
+                "path": "src/bcel/src/examples/Mini/MiniC.java",
+                "line": 104,
+                "column": 65
+            },
+            {
+                "path": "src/bcel/src/examples/Mini/MiniC.java",
+                "line": 107,
+                "column": 59
+            },
+            {
+                "path": "src/bcel/src/examples/Package.java",
+                "line": 218,
+                "column": 87
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/classfile/ClassParser.java",
+                "line": 122,
+                "column": 103
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/classfile/JavaClass.java",
+                "line": 372,
+                "column": 79
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/ClassPath.java",
+                "line": 242,
+                "column": 60
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/util/ClassPath.java",
+                "line": 202,
+                "column": 48
+            },
+            {
+                "path": "src/bcel/src/main/java/org/apache/bcel/verifier/statics/Pass2Verifier.java",
+                "line": 973,
+                "column": 75
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/bcel-harnesses/bcel-harness-one/src/main/java/com/aixcc/bcel/harnesses/one/BCELOne.java:\n23       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n24           try {\n25               ByteArrayInputStream bis = new ByteArrayInputStream(input);\n26               ClassParser parser = new ClassParser(bis, \"Test.class\");\n27   \n28               Repository.addClass(parser.parse());\n29   \n30               Verifier verifier = VerifierFactory.getVerifier(\"Test\");\n31               verifier.doPass1();\n32               verifier.doPass2();\n33   \n34           } catch (Exception e) {\n35               // Ignore all exceptions thrown.\n36           }\n37       }\n\nsrc/bcel/src/main/java/org/apache/bcel/classfile/ClassParser.java:\n 63       public ClassParser(final InputStream inputStream, final String fileName) {\n 64           this.fileName = fileName;\n 65           this.fileOwned = false;\n 66           final String clazz = inputStream.getClass().getName(); // Not a very clean solution ...\n 67           this.isZip = clazz.startsWith(\"java.util.zip.\") || clazz.startsWith(\"java.util.jar.\");\n 68           if (inputStream instanceof DataInputStream) {\n 69               this.dataInputStream = (DataInputStream) inputStream;\n 70           } else {\n 71               this.dataInputStream = new DataInputStream(new BufferedInputStream(inputStream, BUFSIZE));\n 72           }\n 73       }\n108       public JavaClass parse() throws IOException, ClassFormatException {\n109           ZipFile zip = null;\n110           try {\n111               if (fileOwned) {\n112                   if (isZip) {\n113                       zip = new ZipFile(zipFile);\n114                       final ZipEntry entry = zip.getEntry(fileName);\n115   \n116                       if (entry == null) {\n117                           throw new IOException(\"File \" + fileName + \" not found\");\n118                       }\n119   \n120                       dataInputStream = new DataInputStream(new BufferedInputStream(zip.getInputStream(entry), BUFSIZE));\n121                   } else {\n122                       dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(fileName), BUFSIZE));\n123                   }\n124               }\n125               /****************** Read headers ********************************/\n126               // Check magic tag of class file\n127               readID();\n128               // Get compiler version\n129               readVersion();\n130               /****************** Read constant pool and related **************/\n131               // Read constant pool entries\n132               readConstantPool();\n133               // Get class information\n134               readClassInfo();\n135               // Get interface information, i.e., implemented interfaces\n136               readInterfaces();\n137               /****************** Read class fields and methods ***************/\n138               // Read class fields, i.e., the variables of the class\n139               readFields();\n140               // Read class methods, i.e., the functions in the class\n141               readMethods();\n142               // Read class attributes\n143               readAttributes();\n144               // Check for unknown variables\n145               // Unknown[] u = Unknown.getUnknownAttributes();\n146               // for (int i=0; i < u.length; i++)\n147               // System.err.println(\"WARNING: \" + u[i]);\n148               // Everything should have been read now\n149               // if (file.available() > 0) {\n150               // int bytes = file.available();\n151               // byte[] buf = new byte[bytes];\n152               // file.read(buf);\n153               // if (!(isZip && (buf.length == 1))) {\n154               // System.err.println(\"WARNING: Trailing garbage at end of \" + fileName);\n155               // System.err.println(bytes + \" extra bytes: \" + Utility.toHexString(buf));\n156               // }\n157               // }\n158           } finally {\n159               // Read everything of interest, so close the file\n160               if (fileOwned) {\n161                   try {\n162                       if (dataInputStream != null) {\n163                           dataInputStream.close();\n164                       }\n165                   } catch (final IOException ignored) {\n166                       // ignore close exceptions\n167                   }\n168               }\n169               try {\n170                   if (zip != null) {\n171                       zip.close();\n172                   }\n173               } catch (final IOException ignored) {\n174                   // ignore close exceptions\n175               }\n176           }\n177           // Return the information we have gathered in a new object\n178           return new JavaClass(classNameIndex, superclassNameIndex, fileName, major, minor, accessFlags, constantPool, interfaces, fields, methods, attributes,\n179               isZip ? JavaClass.ZIP : JavaClass.FILE);\n180       }\n",
+            "cost": 0.054955,
+            "harness_id": "BCELOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/bcel/src/main/java/org/apache/bcel/classfile/ClassParser.java:122:103",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 1
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "BCELOne",
+            "sanitizer": "Regular Expression Injection",
+            "sink": "src/bcel/src/examples/TransitiveHull.java:104:33",
+            "status": "error",
+            "id": 2
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "BCELOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/bcel/src/main/java/org/apache/bcel/verifier/statics/Pass2Verifier.java:973:75",
+            "status": "error",
+            "id": 3
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/bcel-harnesses/bcel-harness-one/src/main/java/com/aixcc/bcel/harnesses/one/BCELOne.java:\n23       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n24           try {\n25               ByteArrayInputStream bis = new ByteArrayInputStream(input);\n26               ClassParser parser = new ClassParser(bis, \"Test.class\");\n27   \n28               Repository.addClass(parser.parse());\n29   \n30               Verifier verifier = VerifierFactory.getVerifier(\"Test\");\n31               verifier.doPass1();\n32               verifier.doPass2();\n33   \n34           } catch (Exception e) {\n35               // Ignore all exceptions thrown.\n36           }\n37       }\n\nsrc/bcel/src/main/java/org/apache/bcel/verifier/Verifier.java:\n134       public VerificationResult doPass1() {\n135           if (p1v == null) {\n136               p1v = new Pass1Verifier(this);\n137           }\n138           return p1v.verify();\n139       }\n\nsrc/bcel/src/main/java/org/apache/bcel/verifier/PassVerifier.java:\n 96       public VerificationResult verify() {\n 97           if (verificationResult == null) {\n 98               verificationResult = do_verify();\n 99           }\n100           return verificationResult;\n101       }\n\nsrc/bcel/src/main/java/org/apache/bcel/verifier/statics/Pass3aVerifier.java:\n1004       @Override\n1005       public VerificationResult do_verify() {\n1006           try {\n1007               if (verifier.doPass2().equals(VerificationResult.VR_OK)) {\n1008                   // Okay, class file was loaded correctly by Pass 1\n1009                   // and satisfies static constraints of Pass 2.\n1010                   final JavaClass jc = Repository.lookupClass(verifier.getClassName());\n1011                   final Method[] methods = jc.getMethods();\n1012                   if (methodNo >= methods.length) {\n1013                       throw new InvalidMethodException(\"METHOD DOES NOT EXIST!\");\n1014                   }\n1015                   final Method method = methods[methodNo];\n1016                   code = method.getCode();\n1017   \n1018                   // No Code? Nothing to verify!\n1019                   if (method.isAbstract() || method.isNative()) { // IF mg HAS NO CODE (static constraint of Pass 2)\n1020                       return VerificationResult.VR_OK;\n1021                   }\n1022   \n1023                   // TODO:\n1024                   // We want a very sophisticated code examination here with good explanations\n1025                   // on where to look for an illegal instruction or such.\n1026                   // Only after that we should try to build an InstructionList and throw an\n1027                   // AssertionViolatedException if after our examination InstructionList building\n1028                   // still fails.\n1029                   // That examination should be implemented in a byte-oriented way, i.e. look for\n1030                   // an instruction, make sure its validity, count its length, find the next\n1031                   // instruction and so on.\n1032                   try {\n1033                       instructionList = new InstructionList(method.getCode().getCode());\n1034                   } catch (final RuntimeException re) {\n1035                       return new VerificationResult(VerificationResult.VERIFIED_REJECTED,\n1036                           \"Bad bytecode in the code array of the Code attribute of method '\" + tostring(method) + \"'.\");\n1037                   }\n1038   \n1039                   instructionList.setPositions(true);\n1040   \n1041                   // Start verification.\n1042                   VerificationResult vr = VerificationResult.VR_OK; // default\n1043                   try {\n1044                       delayedPass2Checks();\n1045                   } catch (final ClassConstraintException | ClassFormatException cce) {\n1046                       return new VerificationResult(VerificationResult.VERIFIED_REJECTED, cce.getMessage());\n1047                   }\n1048                   try {\n1049                       pass3StaticInstructionChecks();\n1050                       pass3StaticInstructionOperandsChecks();\n1051                   } catch (final StaticCodeConstraintException | ClassFormatException scce) {\n1052                       vr = new VerificationResult(VerificationResult.VERIFIED_REJECTED, scce.getMessage());\n1053                   } catch (final ClassCastException cce) {\n1054                       vr = new VerificationResult(VerificationResult.VERIFIED_REJECTED, \"Class Cast Exception: \" + cce.getMessage());\n1055                   }\n1056                   return vr;\n1057               }\n1058               // did not pass Pass 2.\n1059               return VerificationResult.VR_NOTYET;\n1060           } catch (final ClassNotFoundException e) {\n1061               // FIXME: maybe not the best way to handle this\n1062               throw new AssertionViolatedException(\"Missing class: \" + e, e);\n1063           }\n1064       }\n\nsrc/bcel/src/main/java/org/apache/bcel/Repository.java:\n179       public static JavaClass lookupClass(final String className) throws ClassNotFoundException {\n180           return repository.loadClass(className);\n181       }\n\nsrc/bcel/src/main/java/org/apache/bcel/util/AbstractClassPathRepository.java:\n107       @Override\n108       public JavaClass loadClass(String className) throws ClassNotFoundException {\n109           if (className == null || className.isEmpty()) {\n110               throw new IllegalArgumentException(\"Invalid class name \" + className);\n111           }\n112           className = Utility.pathToPackage(className); // Just in case, canonical form\n113           final JavaClass clazz = findClass(className);\n114           if (clazz != null) {\n115               return clazz;\n116           }\n117           try (InputStream inputStream = classPath.getInputStream(className)) {\n118               return loadClass(inputStream, className);\n119           } catch (final IOException e) {\n120               throw new ClassNotFoundException(\"Exception while looking for class \" + className + \": \" + e, e);\n121           }\n122       }\n\nsrc/bcel/src/main/java/org/apache/bcel/util/ClassPath.java:\n200                   @Override\n201                   public InputStream getInputStream() throws IOException {\n202                       return new FileInputStream(file);\n203                   }\n679       public InputStream getInputStream(final String name) throws IOException {\n680           return getInputStream(Utility.packageToPath(name), JavaClass.EXTENSION);\n681       }\n694       public InputStream getInputStream(final String name, final String suffix) throws IOException {\n695           try {\n696               final java.lang.ClassLoader classLoader = getClass().getClassLoader();\n697               @SuppressWarnings(\"resource\") // closed by caller\n698               final\n699               InputStream inputStream = classLoader == null ? null : classLoader.getResourceAsStream(name + suffix);\n700               if (inputStream != null) {\n701                   return inputStream;\n702               }\n703           } catch (final Exception ignored) {\n704               // ignored\n705           }\n706           return getClassFile(name, suffix).getInputStream();\n707       }\n",
+            "cost": 0.062020000000000006,
+            "harness_id": "BCELOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/bcel/src/main/java/org/apache/bcel/util/ClassPath.java:202:48",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 4
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/bcel-harnesses/bcel-harness-one/src/main/java/com/aixcc/bcel/harnesses/one/BCELOne.java:\n23       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n24           try {\n25               ByteArrayInputStream bis = new ByteArrayInputStream(input);\n26               ClassParser parser = new ClassParser(bis, \"Test.class\");\n27   \n28               Repository.addClass(parser.parse());\n29   \n30               Verifier verifier = VerifierFactory.getVerifier(\"Test\");\n31               verifier.doPass1();\n32               verifier.doPass2();\n33   \n34           } catch (Exception e) {\n35               // Ignore all exceptions thrown.\n36           }\n37       }\n\nsrc/bcel/src/main/java/org/apache/bcel/verifier/Verifier.java:\n134       public VerificationResult doPass1() {\n135           if (p1v == null) {\n136               p1v = new Pass1Verifier(this);\n137           }\n138           return p1v.verify();\n139       }\n\nsrc/bcel/src/main/java/org/apache/bcel/verifier/PassVerifier.java:\n 96       public VerificationResult verify() {\n 97           if (verificationResult == null) {\n 98               verificationResult = do_verify();\n 99           }\n100           return verificationResult;\n101       }\n\nsrc/bcel/src/main/java/org/apache/bcel/verifier/statics/Pass3aVerifier.java:\n1004       @Override\n1005       public VerificationResult do_verify() {\n1006           try {\n1007               if (verifier.doPass2().equals(VerificationResult.VR_OK)) {\n1008                   // Okay, class file was loaded correctly by Pass 1\n1009                   // and satisfies static constraints of Pass 2.\n1010                   final JavaClass jc = Repository.lookupClass(verifier.getClassName());\n1011                   final Method[] methods = jc.getMethods();\n1012                   if (methodNo >= methods.length) {\n1013                       throw new InvalidMethodException(\"METHOD DOES NOT EXIST!\");\n1014                   }\n1015                   final Method method = methods[methodNo];\n1016                   code = method.getCode();\n1017   \n1018                   // No Code? Nothing to verify!\n1019                   if (method.isAbstract() || method.isNative()) { // IF mg HAS NO CODE (static constraint of Pass 2)\n1020                       return VerificationResult.VR_OK;\n1021                   }\n1022   \n1023                   // TODO:\n1024                   // We want a very sophisticated code examination here with good explanations\n1025                   // on where to look for an illegal instruction or such.\n1026                   // Only after that we should try to build an InstructionList and throw an\n1027                   // AssertionViolatedException if after our examination InstructionList building\n1028                   // still fails.\n1029                   // That examination should be implemented in a byte-oriented way, i.e. look for\n1030                   // an instruction, make sure its validity, count its length, find the next\n1031                   // instruction and so on.\n1032                   try {\n1033                       instructionList = new InstructionList(method.getCode().getCode());\n1034                   } catch (final RuntimeException re) {\n1035                       return new VerificationResult(VerificationResult.VERIFIED_REJECTED,\n1036                           \"Bad bytecode in the code array of the Code attribute of method '\" + tostring(method) + \"'.\");\n1037                   }\n1038   \n1039                   instructionList.setPositions(true);\n1040   \n1041                   // Start verification.\n1042                   VerificationResult vr = VerificationResult.VR_OK; // default\n1043                   try {\n1044                       delayedPass2Checks();\n1045                   } catch (final ClassConstraintException | ClassFormatException cce) {\n1046                       return new VerificationResult(VerificationResult.VERIFIED_REJECTED, cce.getMessage());\n1047                   }\n1048                   try {\n1049                       pass3StaticInstructionChecks();\n1050                       pass3StaticInstructionOperandsChecks();\n1051                   } catch (final StaticCodeConstraintException | ClassFormatException scce) {\n1052                       vr = new VerificationResult(VerificationResult.VERIFIED_REJECTED, scce.getMessage());\n1053                   } catch (final ClassCastException cce) {\n1054                       vr = new VerificationResult(VerificationResult.VERIFIED_REJECTED, \"Class Cast Exception: \" + cce.getMessage());\n1055                   }\n1056                   return vr;\n1057               }\n1058               // did not pass Pass 2.\n1059               return VerificationResult.VR_NOTYET;\n1060           } catch (final ClassNotFoundException e) {\n1061               // FIXME: maybe not the best way to handle this\n1062               throw new AssertionViolatedException(\"Missing class: \" + e, e);\n1063           }\n1064       }\n\nsrc/bcel/src/main/java/org/apache/bcel/Repository.java:\n179       public static JavaClass lookupClass(final String className) throws ClassNotFoundException {\n180           return repository.loadClass(className);\n181       }\n\nsrc/bcel/src/main/java/org/apache/bcel/util/AbstractClassPathRepository.java:\n107       @Override\n108       public JavaClass loadClass(String className) throws ClassNotFoundException {\n109           if (className == null || className.isEmpty()) {\n110               throw new IllegalArgumentException(\"Invalid class name \" + className);\n111           }\n112           className = Utility.pathToPackage(className); // Just in case, canonical form\n113           final JavaClass clazz = findClass(className);\n114           if (clazz != null) {\n115               return clazz;\n116           }\n117           try (InputStream inputStream = classPath.getInputStream(className)) {\n118               return loadClass(inputStream, className);\n119           } catch (final IOException e) {\n120               throw new ClassNotFoundException(\"Exception while looking for class \" + className + \": \" + e, e);\n121           }\n122       }\n\nsrc/bcel/src/main/java/org/apache/bcel/util/ClassPath.java:\n296                       @Override\n297                       public InputStream getInputStream() throws IOException {\n298                           return Files.newInputStream(resolved);\n299                       }\n679       public InputStream getInputStream(final String name) throws IOException {\n680           return getInputStream(Utility.packageToPath(name), JavaClass.EXTENSION);\n681       }\n694       public InputStream getInputStream(final String name, final String suffix) throws IOException {\n695           try {\n696               final java.lang.ClassLoader classLoader = getClass().getClassLoader();\n697               @SuppressWarnings(\"resource\") // closed by caller\n698               final\n699               InputStream inputStream = classLoader == null ? null : classLoader.getResourceAsStream(name + suffix);\n700               if (inputStream != null) {\n701                   return inputStream;\n702               }\n703           } catch (final Exception ignored) {\n704               // ignored\n705           }\n706           return getClassFile(name, suffix).getInputStream();\n707       }\n",
+            "cost": 0.066845,
+            "harness_id": "BCELOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/bcel/src/main/java/org/apache/bcel/util/ClassPath.java:298:53",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 5
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/bcel-harnesses/bcel-harness-one/src/main/java/com/aixcc/bcel/harnesses/one/BCELOne.java:\n23       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n24           try {\n25               ByteArrayInputStream bis = new ByteArrayInputStream(input);\n26               ClassParser parser = new ClassParser(bis, \"Test.class\");\n27   \n28               Repository.addClass(parser.parse());\n29   \n30               Verifier verifier = VerifierFactory.getVerifier(\"Test\");\n31               verifier.doPass1();\n32               verifier.doPass2();\n33   \n34           } catch (Exception e) {\n35               // Ignore all exceptions thrown.\n36           }\n37       }\n\nsrc/bcel/src/main/java/org/apache/bcel/classfile/ClassParser.java:\n108       public JavaClass parse() throws IOException, ClassFormatException {\n109           ZipFile zip = null;\n110           try {\n111               if (fileOwned) {\n112                   if (isZip) {\n113                       zip = new ZipFile(zipFile);\n114                       final ZipEntry entry = zip.getEntry(fileName);\n115   \n116                       if (entry == null) {\n117                           throw new IOException(\"File \" + fileName + \" not found\");\n118                       }\n119   \n120                       dataInputStream = new DataInputStream(new BufferedInputStream(zip.getInputStream(entry), BUFSIZE));\n121                   } else {\n122                       dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(fileName), BUFSIZE));\n123                   }\n124               }\n125               /****************** Read headers ********************************/\n126               // Check magic tag of class file\n127               readID();\n128               // Get compiler version\n129               readVersion();\n130               /****************** Read constant pool and related **************/\n131               // Read constant pool entries\n132               readConstantPool();\n133               // Get class information\n134               readClassInfo();\n135               // Get interface information, i.e., implemented interfaces\n136               readInterfaces();\n137               /****************** Read class fields and methods ***************/\n138               // Read class fields, i.e., the variables of the class\n139               readFields();\n140               // Read class methods, i.e., the functions in the class\n141               readMethods();\n142               // Read class attributes\n143               readAttributes();\n144               // Check for unknown variables\n145               // Unknown[] u = Unknown.getUnknownAttributes();\n146               // for (int i=0; i < u.length; i++)\n147               // System.err.println(\"WARNING: \" + u[i]);\n148               // Everything should have been read now\n149               // if (file.available() > 0) {\n150               // int bytes = file.available();\n151               // byte[] buf = new byte[bytes];\n152               // file.read(buf);\n153               // if (!(isZip && (buf.length == 1))) {\n154               // System.err.println(\"WARNING: Trailing garbage at end of \" + fileName);\n155               // System.err.println(bytes + \" extra bytes: \" + Utility.toHexString(buf));\n156               // }\n157               // }\n158           } finally {\n159               // Read everything of interest, so close the file\n160               if (fileOwned) {\n161                   try {\n162                       if (dataInputStream != null) {\n163                           dataInputStream.close();\n164                       }\n165                   } catch (final IOException ignored) {\n166                       // ignore close exceptions\n167                   }\n168               }\n169               try {\n170                   if (zip != null) {\n171                       zip.close();\n172                   }\n173               } catch (final IOException ignored) {\n174                   // ignore close exceptions\n175               }\n176           }\n177           // Return the information we have gathered in a new object\n178           return new JavaClass(classNameIndex, superclassNameIndex, fileName, major, minor, accessFlags, constantPool, interfaces, fields, methods, attributes,\n179               isZip ? JavaClass.ZIP : JavaClass.FILE);\n180       }\n",
+            "cost": 0.04059,
+            "harness_id": "BCELOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/bcel/src/main/java/org/apache/bcel/classfile/ClassParser.java:122:103",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 6
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "BCELOne",
+            "blob": [
+                ""
+            ]
+        }
+    ]
+}

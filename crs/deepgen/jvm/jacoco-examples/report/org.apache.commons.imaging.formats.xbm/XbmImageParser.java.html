@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XbmImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.xbm</a> &gt; <span class="el_source">XbmImageParser.java</span></div><h1>XbmImageParser.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+package org.apache.commons.imaging.formats.xbm;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.UUID;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BasicCParser;
+import org.apache.commons.imaging.common.ImageMetadata;
+
+<span class="fc" id="L49">public class XbmImageParser extends AbstractImageParser&lt;XbmImagingParameters&gt; {</span>
+
+    private static final class XbmHeader {
+        final int height;
+        final int width;
+<span class="nc" id="L54">        int xHot = -1;</span>
+<span class="nc" id="L55">        int yHot = -1;</span>
+
+<span class="nc" id="L57">        XbmHeader(final int width, final int height, final int xHot, final int yHot) {</span>
+<span class="nc" id="L58">            this.width = width;</span>
+<span class="nc" id="L59">            this.height = height;</span>
+<span class="nc" id="L60">            this.xHot = xHot;</span>
+<span class="nc" id="L61">            this.yHot = yHot;</span>
+<span class="nc" id="L62">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L65">            pw.println(&quot;XbmHeader&quot;);</span>
+<span class="nc" id="L66">            pw.println(&quot;Width: &quot; + width);</span>
+<span class="nc" id="L67">            pw.println(&quot;Height: &quot; + height);</span>
+<span class="nc bnc" id="L68" title="All 4 branches missed.">            if (xHot != -1 &amp;&amp; yHot != -1) {</span>
+<span class="nc" id="L69">                pw.println(&quot;X hot: &quot; + xHot);</span>
+<span class="nc" id="L70">                pw.println(&quot;Y hot: &quot; + yHot);</span>
+            }
+<span class="nc" id="L72">        }</span>
+    }
+
+    private static final class XbmParseResult {
+        BasicCParser cParser;
+        XbmHeader xbmHeader;
+    }
+
+<span class="fc" id="L80">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.XBM.getExtensions();</span>
+
+<span class="fc" id="L82">    private static final String DEFAULT_EXTENSION = ImageFormats.XBM.getDefaultExtension();</span>
+
+    private static int parseCIntegerLiteral(final String value) {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (value.startsWith(&quot;0&quot;)) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            if (value.length() &gt;= 2) {</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">                if (value.charAt(1) == 'x' || value.charAt(1) == 'X') {</span>
+<span class="nc" id="L88">                    return Integer.parseInt(value.substring(2), 16);</span>
+                }
+<span class="nc" id="L90">                return Integer.parseInt(value.substring(1), 8);</span>
+            }
+<span class="nc" id="L92">            return 0;</span>
+        }
+<span class="nc" id="L94">        return Integer.parseInt(value);</span>
+    }
+
+    private static String randomName() {
+<span class="nc" id="L98">        final UUID uuid = UUID.randomUUID();</span>
+<span class="nc" id="L99">        final StringBuilder stringBuilder = new StringBuilder(&quot;a&quot;);</span>
+<span class="nc" id="L100">        long bits = uuid.getMostSignificantBits();</span>
+        // Long.toHexString() breaks for very big numbers
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        for (int i = 64 - 8; i &gt;= 0; i -= 8) {</span>
+<span class="nc" id="L103">            stringBuilder.append(Integer.toHexString((int) (bits &gt;&gt; i &amp; 0xff)));</span>
+        }
+<span class="nc" id="L105">        bits = uuid.getLeastSignificantBits();</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        for (int i = 64 - 8; i &gt;= 0; i -= 8) {</span>
+<span class="nc" id="L107">            stringBuilder.append(Integer.toHexString((int) (bits &gt;&gt; i &amp; 0xff)));</span>
+        }
+<span class="nc" id="L109">        return stringBuilder.toString();</span>
+    }
+
+    private static String toPrettyHex(final int value) {
+<span class="nc" id="L113">        final String s = Integer.toHexString(0xff &amp; value);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (s.length() == 2) {</span>
+<span class="nc" id="L115">            return &quot;0x&quot; + s;</span>
+        }
+<span class="nc" id="L117">        return &quot;0x0&quot; + s;</span>
+    }
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L122">        readXbmHeader(byteSource).dump(pw);</span>
+<span class="nc" id="L123">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L128">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="nc" id="L133">        return new ImageFormat[] { ImageFormats.XBM, //</span>
+        };
+    }
+
+    @Override
+    public final BufferedImage getBufferedImage(final ByteSource byteSource, final XbmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L139">        final XbmParseResult result = parseXbmHeader(byteSource);</span>
+<span class="nc" id="L140">        return readXbmImage(result.xbmHeader, result.cParser);</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L145">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public XbmImagingParameters getDefaultParameters() {
+<span class="nc" id="L150">        return new XbmImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final XbmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L155">        return null;</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final XbmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L160">        final XbmHeader xbmHeader = readXbmHeader(byteSource);</span>
+<span class="nc" id="L161">        return new ImageInfo(&quot;XBM&quot;, 1, new ArrayList&lt;&gt;(), ImageFormats.XBM, &quot;X BitMap&quot;, xbmHeader.height, &quot;image/x-xbitmap&quot;, 1, 0, 0, 0, 0, xbmHeader.width,</span>
+                false, false, false, ImageInfo.ColorType.BW, ImageInfo.CompressionAlgorithm.NONE);
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final XbmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L167">        final XbmHeader xbmHeader = readXbmHeader(byteSource);</span>
+<span class="nc" id="L168">        return new Dimension(xbmHeader.width, xbmHeader.height);</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final XbmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L173">        return null;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L178">        return &quot;X BitMap&quot;;</span>
+    }
+
+    private XbmParseResult parseXbmHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L182">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L183">            final Map&lt;String, String&gt; defines = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L184">            final ByteArrayOutputStream preprocessedFile = BasicCParser.preprocess(is, null, defines);</span>
+<span class="nc" id="L185">            int width = -1;</span>
+<span class="nc" id="L186">            int height = -1;</span>
+<span class="nc" id="L187">            int xHot = -1;</span>
+<span class="nc" id="L188">            int yHot = -1;</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">            for (final Entry&lt;String, String&gt; entry : defines.entrySet()) {</span>
+<span class="nc" id="L190">                final String name = entry.getKey();</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">                if (name.endsWith(&quot;_width&quot;)) {</span>
+<span class="nc" id="L192">                    width = parseCIntegerLiteral(entry.getValue());</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                } else if (name.endsWith(&quot;_height&quot;)) {</span>
+<span class="nc" id="L194">                    height = parseCIntegerLiteral(entry.getValue());</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                } else if (name.endsWith(&quot;_x_hot&quot;)) {</span>
+<span class="nc" id="L196">                    xHot = parseCIntegerLiteral(entry.getValue());</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">                } else if (name.endsWith(&quot;_y_hot&quot;)) {</span>
+<span class="nc" id="L198">                    yHot = parseCIntegerLiteral(entry.getValue());</span>
+                }
+<span class="nc" id="L200">            }</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">            if (width == -1) {</span>
+<span class="nc" id="L202">                throw new ImagingException(&quot;width not found&quot;);</span>
+            }
+<span class="nc bnc" id="L204" title="All 2 branches missed.">            if (height == -1) {</span>
+<span class="nc" id="L205">                throw new ImagingException(&quot;height not found&quot;);</span>
+            }
+
+<span class="nc" id="L208">            final XbmParseResult xbmParseResult = new XbmParseResult();</span>
+<span class="nc" id="L209">            xbmParseResult.cParser = new BasicCParser(new ByteArrayInputStream(preprocessedFile.toByteArray()));</span>
+<span class="nc" id="L210">            xbmParseResult.xbmHeader = new XbmHeader(width, height, xHot, yHot);</span>
+<span class="nc" id="L211">            return xbmParseResult;</span>
+        }
+    }
+
+    private XbmHeader readXbmHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L216">        return parseXbmHeader(byteSource).xbmHeader;</span>
+    }
+
+    private BufferedImage readXbmImage(final XbmHeader xbmHeader, final BasicCParser cParser) throws ImagingException, IOException {
+        String token;
+<span class="nc" id="L221">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (!&quot;static&quot;.equals(token)) {</span>
+<span class="nc" id="L223">            throw new ImagingException(&quot;Parsing XBM file failed, no 'static' token&quot;);</span>
+        }
+<span class="nc" id="L225">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (token == null) {</span>
+<span class="nc" id="L227">            throw new ImagingException(&quot;Parsing XBM file failed, no 'unsigned' &quot; + &quot;or 'char' or 'short' token&quot;);</span>
+        }
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (&quot;unsigned&quot;.equals(token)) {</span>
+<span class="nc" id="L230">            token = cParser.nextToken();</span>
+        }
+        final int inputWidth;
+        final int hexWidth;
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (&quot;char&quot;.equals(token)) {</span>
+<span class="nc" id="L235">            inputWidth = 8;</span>
+<span class="nc" id="L236">            hexWidth = 4; // 0xab</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        } else if (&quot;short&quot;.equals(token)) {</span>
+<span class="nc" id="L238">            inputWidth = 16;</span>
+<span class="nc" id="L239">            hexWidth = 6; // 0xabcd</span>
+        } else {
+<span class="nc" id="L241">            throw new ImagingException(&quot;Parsing XBM file failed, no 'char' or 'short' token&quot;);</span>
+        }
+<span class="nc" id="L243">        final String name = cParser.nextToken();</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L245">            throw new ImagingException(&quot;Parsing XBM file failed, no variable name&quot;);</span>
+        }
+<span class="nc bnc" id="L247" title="All 4 branches missed.">        if (name.charAt(0) != '_' &amp;&amp; !Character.isLetter(name.charAt(0))) {</span>
+<span class="nc" id="L248">            throw new ImagingException(&quot;Parsing XBM file failed, variable name &quot; + &quot;doesn't start with letter or underscore&quot;);</span>
+        }
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        for (int i = 0; i &lt; name.length(); i++) {</span>
+<span class="nc" id="L251">            final char c = name.charAt(i);</span>
+<span class="nc bnc" id="L252" title="All 4 branches missed.">            if (!Character.isLetterOrDigit(c) &amp;&amp; c != '_') {</span>
+<span class="nc" id="L253">                throw new ImagingException(&quot;Parsing XBM file failed, variable name &quot; + &quot;contains non-letter non-digit non-underscore&quot;);</span>
+            }
+        }
+<span class="nc" id="L256">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (!&quot;[&quot;.equals(token)) {</span>
+<span class="nc" id="L258">            throw new ImagingException(&quot;Parsing XBM file failed, no '[' token&quot;);</span>
+        }
+<span class="nc" id="L260">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (!&quot;]&quot;.equals(token)) {</span>
+<span class="nc" id="L262">            throw new ImagingException(&quot;Parsing XBM file failed, no ']' token&quot;);</span>
+        }
+<span class="nc" id="L264">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        if (!&quot;=&quot;.equals(token)) {</span>
+<span class="nc" id="L266">            throw new ImagingException(&quot;Parsing XBM file failed, no '=' token&quot;);</span>
+        }
+<span class="nc" id="L268">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        if (!&quot;{&quot;.equals(token)) {</span>
+<span class="nc" id="L270">            throw new ImagingException(&quot;Parsing XBM file failed, no '{' token&quot;);</span>
+        }
+
+<span class="nc" id="L273">        final int rowLength = (xbmHeader.width + 7) / 8;</span>
+<span class="nc" id="L274">        final byte[] imageData = Allocator.byteArray(rowLength * xbmHeader.height);</span>
+<span class="nc" id="L275">        int i = 0;</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        for (int y = 0; y &lt; xbmHeader.height; y++) {</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">            for (int x = 0; x &lt; xbmHeader.width; x += inputWidth) {</span>
+<span class="nc" id="L278">                token = cParser.nextToken();</span>
+<span class="nc bnc" id="L279" title="All 4 branches missed.">                if (token == null || !token.startsWith(&quot;0x&quot;)) {</span>
+<span class="nc" id="L280">                    throw new ImagingException(&quot;Parsing XBM file failed, &quot; + &quot;hex value missing&quot;);</span>
+                }
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                if (token.length() &gt; hexWidth) {</span>
+<span class="nc" id="L283">                    throw new ImagingException(&quot;Parsing XBM file failed, &quot; + &quot;hex value too long&quot;);</span>
+                }
+<span class="nc" id="L285">                final int value = Integer.parseInt(token.substring(2), 16);</span>
+<span class="nc" id="L286">                final int flipped = Integer.reverse(value) &gt;&gt;&gt; 32 - inputWidth;</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">                if (inputWidth == 16) {</span>
+<span class="nc" id="L288">                    imageData[i++] = (byte) (flipped &gt;&gt;&gt; 8);</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">                    if (x + 8 &lt; xbmHeader.width) {</span>
+<span class="nc" id="L290">                        imageData[i++] = (byte) flipped;</span>
+                    }
+                } else {
+<span class="nc" id="L293">                    imageData[i++] = (byte) flipped;</span>
+                }
+
+<span class="nc" id="L296">                token = cParser.nextToken();</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">                if (token == null) {</span>
+<span class="nc" id="L298">                    throw new ImagingException(&quot;Parsing XBM file failed, &quot; + &quot;premature end of file&quot;);</span>
+                }
+<span class="nc bnc" id="L300" title="All 6 branches missed.">                if (!&quot;,&quot;.equals(token) &amp;&amp; (i &lt; imageData.length || !&quot;}&quot;.equals(token))) {</span>
+<span class="nc" id="L301">                    throw new ImagingException(&quot;Parsing XBM file failed, &quot; + &quot;punctuation error&quot;);</span>
+                }
+            }
+        }
+
+<span class="nc" id="L306">        final int[] palette = { 0xffffff, 0x000000 };</span>
+<span class="nc" id="L307">        final ColorModel colorModel = new IndexColorModel(1, 2, palette, 0, false, -1, DataBuffer.TYPE_BYTE);</span>
+<span class="nc" id="L308">        final DataBufferByte dataBuffer = new DataBufferByte(imageData, imageData.length);</span>
+<span class="nc" id="L309">        final WritableRaster raster = Raster.createPackedRaster(dataBuffer, xbmHeader.width, xbmHeader.height, 1, null);</span>
+
+<span class="nc" id="L311">        return new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+    }
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final XbmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L316">        final String name = randomName();</span>
+
+<span class="nc" id="L318">        os.write((&quot;#define &quot; + name + &quot;_width &quot; + src.getWidth() + &quot;\n&quot;).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L319">        os.write((&quot;#define &quot; + name + &quot;_height &quot; + src.getHeight() + &quot;\n&quot;).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L320">        os.write((&quot;static unsigned char &quot; + name + &quot;_bits[] = {&quot;).getBytes(StandardCharsets.US_ASCII));</span>
+
+<span class="nc" id="L322">        int bitcache = 0;</span>
+<span class="nc" id="L323">        int bitsInCache = 0;</span>
+<span class="nc" id="L324">        String separator = &quot;\n  &quot;;</span>
+<span class="nc" id="L325">        int written = 0;</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        for (int y = 0; y &lt; src.getHeight(); y++) {</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L328">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L329">                final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L330">                final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L331">                final int blue = 0xff &amp; argb &gt;&gt; 0;</span>
+<span class="nc" id="L332">                int sample = (red + green + blue) / 3;</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">                if (sample &gt; 127) {</span>
+<span class="nc" id="L334">                    sample = 0;</span>
+                } else {
+<span class="nc" id="L336">                    sample = 1;</span>
+                }
+<span class="nc" id="L338">                bitcache |= sample &lt;&lt; bitsInCache;</span>
+<span class="nc" id="L339">                ++bitsInCache;</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                if (bitsInCache == 8) {</span>
+<span class="nc" id="L341">                    os.write(separator.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L342">                    separator = &quot;,&quot;;</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">                    if (written == 12) {</span>
+<span class="nc" id="L344">                        os.write(&quot;\n  &quot;.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L345">                        written = 0;</span>
+                    }
+<span class="nc" id="L347">                    os.write(toPrettyHex(bitcache).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L348">                    bitcache = 0;</span>
+<span class="nc" id="L349">                    bitsInCache = 0;</span>
+<span class="nc" id="L350">                    ++written;</span>
+                }
+            }
+<span class="nc bnc" id="L353" title="All 2 branches missed.">            if (bitsInCache != 0) {</span>
+<span class="nc" id="L354">                os.write(separator.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L355">                separator = &quot;,&quot;;</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">                if (written == 12) {</span>
+<span class="nc" id="L357">                    os.write(&quot;\n  &quot;.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L358">                    written = 0;</span>
+                }
+<span class="nc" id="L360">                os.write(toPrettyHex(bitcache).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L361">                bitcache = 0;</span>
+<span class="nc" id="L362">                bitsInCache = 0;</span>
+<span class="nc" id="L363">                ++written;</span>
+            }
+        }
+
+<span class="nc" id="L367">        os.write(&quot;\n};\n&quot;.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L368">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

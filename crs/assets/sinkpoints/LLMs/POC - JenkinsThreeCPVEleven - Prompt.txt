@@ -1,0 +1,567 @@
+
+Target project:
+
+jenkins
+
+Relevant code files:
+
+```java
+// src/jenkins-harnesses/jenkins-harness-three/src/main/java/com/aixcc/jenkins/harnesses/three/JenkinsThree.java
+     1  package com.aixcc.jenkins.harnesses.three;
+     2
+     3  import static org.mockito.Mockito.*;
+     4
+     5  import aixcc.util.StaplerReplacer;
+     6
+     7  import hudson.PluginManager;
+     8  import hudson.ProxyConfiguration;
+     9  import hudson.model.FreeStyleBuild;
+    10  import hudson.model.Job;
+    11  import hudson.security.AccessDeniedException3;
+    12
+    13  import io.jenkins.plugins.toyplugin.Script;
+    14  import io.jenkins.plugins.toyplugin.AccessFilter;
+    15  import io.jenkins.plugins.toyplugin.Api;
+    16  import io.jenkins.plugins.toyplugin.AuthAction;
+    17  import io.jenkins.plugins.coverage.CoverageProcessor;
+    18  import io.jenkins.plugins.toyplugin.SecretMessage;
+    19  import io.jenkins.plugins.toyplugin.Script;
+    20  import io.jenkins.plugins.toyplugin.StateMonitor;
+    21  import io.jenkins.plugins.toyplugin.UserNameAction;
+    22  import io.jenkins.plugins.toyplugin.UserRemoteConfig;
+    23
+    24  import java.io.ByteArrayInputStream;
+    25  import java.io.DataInputStream;
+    26  import java.io.File;
+    27  import java.io.FileInputStream;
+    28  import java.io.FileOutputStream;
+    29  import java.io.InputStream;
+    30  import java.io.IOException;
+    31  import java.io.PrintWriter;
+    32  import java.io.StringWriter;
+    33  import java.lang.reflect.InvocationTargetException;
+    34  import java.lang.reflect.Method;
+    35  import java.nio.ByteBuffer;
+    36  import java.nio.file.Files;
+    37  import java.nio.file.Path;
+    38  import java.util.Collections;
+    39  import javax.naming.NamingException;
+    40  import javax.servlet.ReadListener;
+    41  import javax.servlet.ServletContext;
+    42  import javax.servlet.ServletException;
+    43  import javax.servlet.ServletInputStream;
+    44  import javax.servlet.http.HttpServletRequest;
+    45  import jenkins.model.Jenkins;
+    46
+    47  import org.apache.commons.io.FileUtils;
+    48  import org.kohsuke.stapler.*;
+    49  import org.mockito.Mockito;
+    50  import org.springframework.security.core.Authentication;
+    51
+    52  public class JenkinsThree {
+    53
+    54      static Jenkins jenkins;
+    55      static StaplerReplacer replacer;
+    56      static PluginManager manager;
+    57      static ResponseImpl rsp;
+    58      static SecretMessage secretMessage;
+    59
+    60      public static void fuzzerInitialize() throws Throwable {
+    61          jenkins = Mockito.mock(Jenkins.class);
+    62
+    63          replacer = new StaplerReplacer();
+    64          replacer.setWebApp(new WebApp(Mockito.mock(ServletContext.class)));
+    65
+    66          rsp = Mockito.mock(ResponseImpl.class);
+    67          StringWriter sw = new StringWriter();
+    68          PrintWriter pw = new PrintWriter(sw);
+    69          when(rsp.getWriter()).thenReturn(pw);
+    70
+    71          secretMessage = new SecretMessage();
+    72          manager = PluginManager.createDefault(jenkins);
+    73      }
+    74
+    75      public static void fuzzerTestOneInput(byte[] data) throws Exception {
+    76          new JenkinsThree().fuzz(data);
+    77      }
+    78
+    79      public void fuzz(byte[] data) throws Exception {
+    80          ByteBuffer buf = ByteBuffer.wrap(data);
+    81          if (buf.remaining() < 4) {
+    82              return;
+    83          }
+    84
+    85          int picker = buf.getInt();
+    86          switch (picker) {
+    87              case 11:
+    88                  testProxyConfiguration(buf);
+    89                  break;
+    90              case 33:
+    91                  testPlugin(buf);
+    92                  break;
+    93              case 37:
+    94                  testScript(buf);
+    95                  break;
+    96              case 38:
+    97                  testStateMonitor(buf);
+    98                  break;
+    99              case 73:
+   100                  testApi(buf);
+   101                  break;
+   102              case 77:
+   103                  testAccessFilter(buf);
+   104                  break;
+   105              case 142:
+   106                  testUserNameAction(buf);
+   107                  break;
+   108              case 144:
+   109                  testRecoverCoverage(buf);
+   110                  break;
+   111              case 190:
+   112                  testAuthAction(buf);
+   113                  break;
+   114              case 209:
+   115                  testSecretMessage(buf);
+   116                  break;
+   117              case 249:
+   118                  testUserRemoteConfig(buf);
+   119                  break;
+   120              default:
+   121                  break;
+   122          }
+   123
+   124      }
+   125
+   126      void testProxyConfiguration(ByteBuffer buf) throws Exception {
+   127          Authentication a = Mockito.mock(Authentication.class);
+   128          when(a.getName()).thenReturn("mock");
+   129
+   130          Jenkins j = Mockito.mock(Jenkins.class);
+   131          doThrow(new AccessDeniedException3(a, Jenkins.ADMINISTER))
+   132              .when(j)
+   133              .checkPermission(Jenkins.ADMINISTER);
+   134
+   135          String[] parts = getRemainingAsString(buf).split("\0");
+   136          if (parts.length != 5) {
+   137              return;
+   138          }
+   139
+   140          HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   141          when(innerReq.getParameter(parts[0])).thenReturn(parts[1]);
+   142          when(innerReq.getParameter(parts[2])).thenReturn(parts[3]);
+   143          RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   144          try {
+   145              new ProxyConfiguration.DescriptorImpl2(j).doValidateProxy(parts[4], req, rsp);
+   146          } catch (AccessDeniedException3 | InterruptedException e) {}
+   147      }
+   148
+   149      void testRecoverCoverage(ByteBuffer buf) throws Exception {
+   150          String[] parts = getRemainingAsString(buf).split("\0");
+   151          if (parts.length != 2)
+   152              return;
+   153
+   154          String reportName = parts[0];
+   155          if (reportName.contains("..")) {
+   156              return;
+   157          }
+   158
+   159          String serializedObject = parts[1];
+   160          if (!reportName.startsWith("coverage")) {
+   161              return;
+   162          }
+   163
+   164          byte[] target = null;
+   165          try {
+   166              target = java.util.Base64.getDecoder().decode(serializedObject);
+   167          } catch (IllegalArgumentException e) {
+   168              return;
+   169          }
+   170
+   171          FreeStyleBuild build = Mockito.mock(FreeStyleBuild.class);
+   172          File tmpDir = Files.createTempDirectory("testRecoverCoverage").toFile();
+   173          try {
+   174              File reportFile = new File(tmpDir, reportName);
+   175              try (FileOutputStream fos = new FileOutputStream(reportFile)) {
+   176                  fos.write(target);
+   177              } catch (IOException e) {
+   178                  return;
+   179              }
+   180              when(build.getRootDir()).thenReturn(tmpDir);
+   181              CoverageProcessor.recoverCoverageResult(build);
+   182          } finally {
+   183              try {
+   184                  if (tmpDir.exists()) {
+   185                      FileUtils.deleteDirectory(tmpDir);
+   186                  }
+   187              } catch (IOException e) {}
+   188          }
+   189      }
+   190
+   191      void testUserNameAction(ByteBuffer buf) {
+   192          String[] parts = getRemainingAsString(buf).split("\0");
+   193          if (parts.length != 4) {
+   194              return;
+   195          }
+   196
+   197          HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   198          RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   199          when(innerReq.getParameter(parts[0])).thenReturn(parts[1]);
+   200          when(innerReq.getParameter(parts[2])).thenReturn(parts[3]);
+   201          try {
+   202              new UserNameAction().doGetName(req, rsp);
+   203          } catch (IOException e) {}
+   204      }
+   205
+   206      void testStateMonitor(ByteBuffer buf) {
+   207          String[] parts = getRemainingAsString(buf).split("\0");
+   208          if (parts.length != 4) {
+   209              return;
+   210          }
+   211
+   212          HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   213          when(innerReq.getParameter(parts[0])).thenReturn(parts[1]);
+   214          when(innerReq.getParameter(parts[2])).thenReturn(parts[3]);
+   215          RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   216          try {
+   217              new StateMonitor().doCheck(req, rsp);
+   218          } catch (Exception e) {
+   219          }
+   220      }
+   221
+   222      void testUserRemoteConfig(ByteBuffer buf) {
+   223          String[] parts = getRemainingAsString(buf).split("\0");
+   224          if (parts.length != 2) {
+   225              return;
+   226          }
+   227
+   228          try {
+   229              UserRemoteConfig userRemoteConfig = new UserRemoteConfig();
+   230              Method method = UserRemoteConfig.class.getMethod(parts[0], String.class);
+   231              method.invoke(userRemoteConfig, parts[1]);
+   232          } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {}
+   233      }
+   234
+   235      void testAuthAction(ByteBuffer buf) {
+   236          String[] parts = getRemainingAsString(buf).split("\0");
+   237          if (parts.length != 4) {
+   238              return;
+   239          }
+   240
+   241          HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   242          when(innerReq.getParameter(parts[0])).thenReturn(parts[1]);
+   243          when(innerReq.getParameter(parts[2])).thenReturn(parts[3]);
+   244          RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   245
+   246          AuthAction action = new AuthAction();
+   247          try {
+   248              action.authenticateAsAdmin(req, rsp);
+   249          } catch (IOException | NamingException e) {}
+   250      }
+   251
+   252      void testApi(ByteBuffer buf) {
+   253          String[] parts = getRemainingAsString(buf).split("\0");
+   254          if (parts.length != 3) {
+   255              return;
+   256          }
+   257
+   258          HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   259          when(innerReq.getParameter(parts[0])).thenReturn(parts[1]);
+   260          RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   261          try {
+   262              new Api(jenkins).doXml(req, rsp, parts[2], null, null, 0);
+   263          } catch (IOException | ServletException e) {}
+   264      }
+   265
+   266      void testSecretMessage(ByteBuffer buf) {
+   267          String[] parts = getRemainingAsString(buf).split("\0");
+   268          if (parts.length != 8) {
+   269              return;
+   270          }
+   271
+   272          HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   273          when(innerReq.getParameter(parts[0])).thenReturn(parts[1]);
+   274          when(innerReq.getParameter(parts[2])).thenReturn(parts[3]);
+   275          when(innerReq.getParameter(parts[4])).thenReturn(parts[5]);
+   276          when(innerReq.getParameter(parts[6])).thenReturn(parts[7]);
+   277          RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   278          when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(false);
+   279          secretMessage.setJenkins(jenkins);
+   280          try {
+   281              secretMessage.doPerform(req, rsp);
+   282          } catch (IOException e) {}
+   283      }
+   284
+   285      void testAccessFilter(ByteBuffer buf) {
+   286          String[] parts = getRemainingAsString(buf).split("\0");
+   287          if (parts.length != 4) {
+   288              return;
+   289          }
+   290
+   291          HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   292          when(innerReq.getParameter(parts[0])).thenReturn(parts[1]);
+   293          when(innerReq.getParameter(parts[2])).thenReturn(parts[3]);
+   294          RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   295          when(jenkins.hasPermission(Jenkins.ADMINISTER)).thenReturn(false);
+   296          AccessFilter accessFilter = new AccessFilter();
+   297          accessFilter.setJenkins(jenkins);
+   298          try {
+   299              accessFilter.doGet(req, rsp);
+   300          } catch (IOException e) {}
+   301      }
+   302
+   303      void testScript(ByteBuffer buf) {
+   304          when(jenkins.hasPermission(Job.CONFIGURE)).thenReturn(true);
+   305          try {
+   306              String whole = getRemainingAsString(buf);
+   307              new Script(jenkins).doCheckScriptCompile(whole);
+   308          } catch (Exception e) {}
+   309          when(jenkins.hasPermission(Job.CONFIGURE)).thenReturn(false);
+   310
+   311      }
+   312
+   313      void testPlugin(ByteBuffer buf) {
+   314          System.setProperty("jazzer.fs_allowed_dirs", "/tmp/," + System.getProperty("java.io.tmpdir"));
+   315          byte[] bytes = new byte[buf.remaining()];
+   316          buf.get(bytes);
+   317          DataInputStream data = new DataInputStream(new ByteArrayInputStream(bytes));
+   318          try {
+   319              int numRequests = data.readByte() % 10;
+   320
+   321              for (int i = 0; i < numRequests; i++) {
+   322                  int method = data.readByte() % 2;
+   323                  HttpServletRequest innerReq = Mockito.mock(HttpServletRequest.class);
+   324                  int numParams = data.readByte() % 10;
+   325                  for (int j = 0; j < numParams; j++) {
+   326                      String paramName = data.readUTF();
+   327                      String value = data.readUTF();
+   328                      when(innerReq.getParameter(paramName)).thenReturn(value);
+   329                  }
+   330
+   331                  boolean setContentType = data.readBoolean();
+   332                  if (setContentType) {
+   333                      String contentType = data.readUTF();
+   334                      when(innerReq.getContentType()).thenReturn(contentType);
+   335                  }
+   336
+   337                  if (data.readBoolean()) {
+   338                      int bodyLength = data.readUnsignedShort();
+   339                      byte[] body = new byte[bodyLength];
+   340                      data.readFully(body);
+   341                      ByteArrayInputStream byteStream = new ByteArrayInputStream(body);
+   342                      when(innerReq.getInputStream()).thenAnswer(input -> {
+   343                          return new DelegatingServletInputStream(byteStream);
+   344                      });
+   345                      when(innerReq.getContentLength()).thenReturn(bodyLength);
+   346                  }
+   347
+   348                  RequestImpl req = new RequestImpl(replacer.stapler, innerReq, Collections.emptyList(), null);
+   349                  if (method == 0) {
+   350                      HttpResponse res = manager.doCreateNewUpload(req);
+   351                  } else if (method == 1) {
+   352                      HttpResponse res = manager.doPerformUpload(req);
+   353                  }
+   354              }
+   355          } catch (Exception e) {}
+   356      }
+   357
+   358      String getRemainingAsString(ByteBuffer buf) {
+   359          byte[] remainingBytes = new byte[buf.remaining()];
+   360          buf.get(remainingBytes);
+   361          return new String(remainingBytes);
+   362      }
+   363
+   364      public static class DelegatingServletInputStream extends ServletInputStream {
+   365
+   366          private final InputStream sourceStream;
+   367
+   368          /**
+   369           * Create a DelegatingServletInputStream for the given source stream.
+   370           * @param sourceStream the source stream (never <code>null</code>)
+   371           */
+   372          public DelegatingServletInputStream(InputStream sourceStream) {
+   373              this.sourceStream = sourceStream;
+   374          }
+   375
+   376          /**
+   377           * Return the underlying source stream (never <code>null</code>).
+   378           */
+   379          public final InputStream getSourceStream() {
+   380              return this.sourceStream;
+   381          }
+   382
+   383          public int read() throws IOException {
+   384              return this.sourceStream.read();
+   385          }
+   386
+   387          public void close() throws IOException {
+   388              super.close();
+   389              this.sourceStream.close();
+   390          }
+   391
+   392          public boolean isFinished() {
+   393              try {
+   394                  return this.sourceStream.available() == 0;
+   395              } catch (IOException e) {
+   396                  return true;
+   397              }
+   398          }
+   399
+   400          public boolean isReady() {
+   401              return true;
+   402          }
+   403
+   404          public void setReadListener(ReadListener readListener) {
+   405              throw new UnsupportedOperationException();
+   406          }
+   407      }
+   408  }
+```
+
+```java
+// src/plugins/toy-plugin/src/main/java/io/jenkins/plugins/toyplugin/AccessFilter.java
+     1  package io.jenkins.plugins.toyplugin;
+     2
+     3  import hudson.Extension;
+     4  import hudson.model.RootAction;
+     5  import jenkins.model.Jenkins;
+     6
+     7  import java.io.IOException;
+     8  import java.net.InetAddress;
+     9  import java.net.UnknownHostException;
+    10  import java.time.Instant;
+    11  import java.util.ArrayList;
+    12  import java.util.List;
+    13  import java.util.regex.Pattern;
+    14
+    15  import javax.servlet.http.HttpServletResponse;
+    16
+    17  import org.kohsuke.stapler.StaplerRequest;
+    18  import org.kohsuke.stapler.StaplerResponse;
+    19  import org.kohsuke.stapler.interceptor.RequirePOST;
+    20
+    21  import com.google.gson.Gson;
+    22
+    23  @Extension
+    24  public class AccessFilter implements RootAction {
+    25      List<String> access = new ArrayList<>();
+    26      Jenkins j = null;
+    27
+    28      @Override
+    29      public String getDisplayName() {
+    30          return null;
+    31      }
+    32
+    33      @Override
+    34      public String getIconFileName() {
+    35          return null;
+    36      }
+    37
+    38      @Override
+    39      public String getUrlName() {
+    40          return "logger";
+    41      }
+    42
+    43      @RequirePOST
+    44      public void doAdd(StaplerRequest request, StaplerResponse response) throws IOException {
+    45          if (!request.hasParameter("ip")) {
+    46              response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    47              return;
+    48          }
+    49          String ip = request.getParameter("ip");
+    50          if (!isValidIPFormat(ip)) {
+    51              response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    52              return;
+    53          }
+    54          access.add(String.format("%s %s", Instant.now().toString(), ip));
+    55      }
+    56
+    57      @RequirePOST
+    58      public void doClean(StaplerRequest request, StaplerResponse response) throws IOException {
+    59          if (!getJenkins().hasPermission(Jenkins.ADMINISTER)) {
+    60              response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    61              return;
+    62          }
+    63          access.clear();
+    64      }
+    65
+    66      public void setJenkins(Jenkins j) {
+    67          this.j = j;
+    68      }
+    69
+    70      @RequirePOST
+    71      public void doGet(StaplerRequest request, StaplerResponse response) throws IOException {
+    72          if (!request.hasParameter("ip")) {
+    73              response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    74              return;
+    75          }
+    76          String ip = request.getParameter("ip");
+    77          boolean skip = false;
+    78          boolean admin = getJenkins().hasPermission(Jenkins.ADMINISTER);
+    79          if (admin || request.hasParameter("skip")) {
+    80              skip = Boolean.parseBoolean(request.getParameter("skip"));
+    81          }
+    82          if (!isValidIPFormat(ip) && !skip) {
+    83              response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+    84              return;
+    85          }
+    86
+    87          Pattern pattern = Pattern.compile(".*(" + ip + ").*");
+    88          List<String> result = new ArrayList<>();
+    89          for (String data : access) {
+    90              if (!pattern.matcher(data).matches()) {
+    91                  continue;
+    92              }
+    93              result.add(data);
+    94          }
+    95          Gson gson = new Gson();
+    96          response.getWriter().write(gson.toJson(result));
+    97      }
+    98
+    99      Jenkins getJenkins() {
+   100          return j != null ? j : Jenkins.get();
+   101      }
+   102
+   103      boolean isValidIPFormat(String ip) {
+   104          try {
+   105              InetAddress.getByName(ip);
+   106              return true;
+   107          } catch (UnknownHostException e) {
+   108              return false;
+   109          }
+   110      }
+   111  }
+```
+
+Potential vulnerable target (refer as sinkpoint in following) basics:
+
+```java
+// src/plugins/toy-plugin/src/main/java/io/jenkins/plugins/toyplugin/AccessFilter.java, line 87
+...
+87        Pattern pattern = Pattern.compile(".*(" + ip + ").*"); // Potentially vulnerable to Regex Injection, inputs lead to PatternSyntaxException during execution can be seen as poc and can be detected by Jazzer.
+...
+```
+
+Input whose execution reaches the sinkpoint but not poc:
+
+```bash
+# hexdump
+00000000  3c 4d 4e a2 49 8b 54 2e  7a 69 70 20 3c 3f 78 6d  |<MN.I.T.zip <?xm|
+00000010  6d c9 c9 c9 c9 c9 00 22  00                       |m......".|
+00000019
+
+# stacktrace at reaching point
+        at io.jenkins.plugins.toyplugin.AccessFilter.doGet(AccessFilter.java:87)
+        at com.aixcc.jenkins.harnesses.three.JenkinsThree.testAccessFilter(JenkinsThree.java:299)
+        at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:103)
+        at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:76)
+```
+
+Task:
+
+Generate a poc to trigger the vulnerability, specifically:
+
+- analyze why and how the sinkpoint is potentially vulnerable to that kind of vulnerability
+- infer what kind of input can leads the execution to a exploitation stage
+- considering the conditions/constraints along the execution path, construct the actual poc
+- output the poc in hex
+

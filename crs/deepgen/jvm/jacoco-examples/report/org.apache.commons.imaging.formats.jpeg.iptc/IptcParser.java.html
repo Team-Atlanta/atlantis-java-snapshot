@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IptcParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.iptc</a> &gt; <span class="el_source">IptcParser.java</span></div><h1>IptcParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.imaging.formats.jpeg.iptc;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.slice;
+import static org.apache.commons.imaging.common.BinaryFunctions.startsWith;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingConstants;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.ImagingParameters;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.common.ByteConversions;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+import org.apache.commons.imaging.formats.jpeg.JpegImagingParameters;
+import org.apache.commons.imaging.internal.Debug;
+
+public class IptcParser extends BinaryFileParser {
+
+<span class="nc" id="L56">    private static final Logger LOGGER = Logger.getLogger(IptcParser.class.getName());</span>
+
+<span class="nc" id="L58">    private static final ByteOrder APP13_BYTE_ORDER = ByteOrder.BIG_ENDIAN;</span>
+
+    /**
+     * Block types (or Image Resource IDs) that are not recommended to be interpreted when libraries process Photoshop IPTC metadata.
+     *
+     * @see &lt;a href=&quot;https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/&quot;&gt;Adobe Photoshop File Formats Specification&lt;/a&gt;
+     * @see &lt;a href=&quot;https://issues.apache.org/jira/browse/IMAGING-246&quot;&gt;IMAGING-246&lt;/a&gt;
+     * @since 1.0-alpha2
+     */
+<span class="nc" id="L67">    private static final List&lt;Integer&gt; PHOTOSHOP_IGNORED_BLOCK_TYPE = Arrays.asList(1084, 1085, 1086, 1087);</span>
+
+<span class="nc" id="L69">    private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;</span>
+    private static final int ENV_TAG_CODED_CHARACTER_SET = 90;
+<span class="nc" id="L71">    private static final byte[] CHARACTER_ESCAPE_SEQUENCE = { '\u001B', '%', 'G' };</span>
+
+    public IptcParser() {
+<span class="nc" id="L74">        super(ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L75">    }</span>
+
+    private Charset findCharset(final byte[] codedCharset) {
+<span class="nc" id="L78">        final String codedCharsetString = new String(codedCharset, StandardCharsets.ISO_8859_1);</span>
+        try {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (Charset.isSupported(codedCharsetString)) {</span>
+<span class="nc" id="L81">                return Charset.forName(codedCharsetString);</span>
+            }
+<span class="nc" id="L83">        } catch (final IllegalArgumentException ignored) {</span>
+            // ignored
+<span class="nc" id="L85">        }</span>
+        // check if encoding is a escape sequence
+        // normalize encoding byte sequence
+<span class="nc" id="L88">        final byte[] codedCharsetNormalized = Allocator.byteArray(codedCharset.length);</span>
+<span class="nc" id="L89">        int j = 0;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        for (final byte element : codedCharset) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if (element != ' ') {</span>
+<span class="nc" id="L92">                codedCharsetNormalized[j++] = element;</span>
+            }
+        }
+
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (Objects.deepEquals(codedCharsetNormalized, CHARACTER_ESCAPE_SEQUENCE)) {</span>
+<span class="nc" id="L97">            return StandardCharsets.UTF_8;</span>
+        }
+<span class="nc" id="L99">        return DEFAULT_CHARSET;</span>
+    }
+
+    public boolean isPhotoshopJpegSegment(final byte[] segmentData) {
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (!startsWith(segmentData, JpegConstants.PHOTOSHOP_IDENTIFICATION_STRING)) {</span>
+<span class="nc" id="L104">            return false;</span>
+        }
+
+<span class="nc" id="L107">        final int index = JpegConstants.PHOTOSHOP_IDENTIFICATION_STRING.size();</span>
+<span class="nc bnc" id="L108" title="All 4 branches missed.">        return index + 4 &lt;= segmentData.length &amp;&amp; ByteConversions.toInt(segmentData, index, APP13_BYTE_ORDER) == JpegConstants.CONST_8BIM;</span>
+    }
+
+    protected List&lt;IptcBlock&gt; parseAllBlocks(final byte[] bytes, final boolean strict) throws ImagingException, IOException {
+<span class="nc" id="L112">        final List&lt;IptcBlock&gt; blocks = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L114">        try (InputStream bis = new ByteArrayInputStream(bytes)) {</span>
+
+            // Note that these are unsigned quantities. Name is always an even
+            // number of bytes (including the 1st byte, which is the size.)
+
+<span class="nc" id="L119">            final byte[] idString = readBytes(&quot;&quot;, bis, JpegConstants.PHOTOSHOP_IDENTIFICATION_STRING.size(), &quot;App13 Segment missing identification string&quot;);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            if (!JpegConstants.PHOTOSHOP_IDENTIFICATION_STRING.equals(idString)) {</span>
+<span class="nc" id="L121">                throw new ImagingException(&quot;Not a Photoshop App13 Segment&quot;);</span>
+            }
+
+            // int index = PHOTOSHOP_IDENTIFICATION_STRING.length;
+
+            while (true) {
+                final int imageResourceBlockSignature;
+                try {
+<span class="nc" id="L129">                    imageResourceBlockSignature = read4Bytes(&quot;&quot;, bis, &quot;Image Resource Block missing identification string&quot;, APP13_BYTE_ORDER);</span>
+<span class="nc" id="L130">                } catch (final IOException ioEx) {</span>
+<span class="nc" id="L131">                    break;</span>
+<span class="nc" id="L132">                }</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">                if (imageResourceBlockSignature != JpegConstants.CONST_8BIM) {</span>
+<span class="nc" id="L134">                    throw new ImagingException(&quot;Invalid Image Resource Block Signature&quot;);</span>
+                }
+
+<span class="nc" id="L137">                final int blockType = read2Bytes(&quot;&quot;, bis, &quot;Image Resource Block missing type&quot;, APP13_BYTE_ORDER);</span>
+<span class="nc" id="L138">                Debug.debug(&quot;blockType: &quot; + blockType + &quot; (0x&quot; + Integer.toHexString(blockType) + &quot;)&quot;);</span>
+
+                // skip blocks that the photoshop spec recommends to, see IMAGING-246
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                if (PHOTOSHOP_IGNORED_BLOCK_TYPE.contains(blockType)) {</span>
+<span class="nc" id="L142">                    Debug.debug(&quot;Skipping blockType: &quot; + blockType + &quot; (0x&quot; + Integer.toHexString(blockType) + &quot;)&quot;);</span>
+                    // if there is still data in this block, before the next image resource block
+                    // (8BIM), then we must consume these bytes to leave a pointer ready to read
+                    // the next block
+<span class="nc" id="L146">                    BinaryFunctions.searchQuad(JpegConstants.CONST_8BIM, bis);</span>
+<span class="nc" id="L147">                    continue;</span>
+                }
+
+<span class="nc" id="L150">                final int blockNameLength = readByte(&quot;Name length&quot;, bis, &quot;Image Resource Block missing name length&quot;);</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                if (blockNameLength &gt; 0) {</span>
+<span class="nc" id="L152">                    Debug.debug(&quot;blockNameLength: &quot; + blockNameLength + &quot; (0x&quot; + Integer.toHexString(blockNameLength) + &quot;)&quot;);</span>
+                }
+                byte[] blockNameBytes;
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                if (blockNameLength == 0) {</span>
+<span class="nc" id="L156">                    readByte(&quot;Block name bytes&quot;, bis, &quot;Image Resource Block has invalid name&quot;);</span>
+<span class="nc" id="L157">                    blockNameBytes = ImagingConstants.EMPTY_BYTE_ARRAY;</span>
+                } else {
+                    try {
+<span class="nc" id="L160">                        blockNameBytes = readBytes(&quot;&quot;, bis, blockNameLength, &quot;Invalid Image Resource Block name&quot;);</span>
+<span class="nc" id="L161">                    } catch (final IOException ioEx) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                        if (strict) {</span>
+<span class="nc" id="L163">                            throw ioEx;</span>
+                        }
+<span class="nc" id="L165">                        break;</span>
+<span class="nc" id="L166">                    }</span>
+
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                    if (blockNameLength % 2 == 0) {</span>
+<span class="nc" id="L169">                        readByte(&quot;Padding byte&quot;, bis, &quot;Image Resource Block missing padding byte&quot;);</span>
+                    }
+                }
+
+<span class="nc" id="L173">                final int blockSize = read4Bytes(&quot;&quot;, bis, &quot;Image Resource Block missing size&quot;, APP13_BYTE_ORDER);</span>
+<span class="nc" id="L174">                Debug.debug(&quot;blockSize: &quot; + blockSize + &quot; (0x&quot; + Integer.toHexString(blockSize) + &quot;)&quot;);</span>
+
+                /*
+                 * doesn't catch cases where blocksize is invalid but is still less than bytes.length but will at least prevent OutOfMemory errors
+                 */
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                if (blockSize &gt; bytes.length) {</span>
+<span class="nc" id="L180">                    throw new ImagingException(&quot;Invalid Block Size : &quot; + blockSize + &quot; &gt; &quot; + bytes.length);</span>
+                }
+
+                final byte[] blockData;
+                try {
+<span class="nc" id="L185">                    blockData = readBytes(&quot;&quot;, bis, blockSize, &quot;Invalid Image Resource Block data&quot;);</span>
+<span class="nc" id="L186">                } catch (final IOException ioEx) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">                    if (strict) {</span>
+<span class="nc" id="L188">                        throw ioEx;</span>
+                    }
+<span class="nc" id="L190">                    break;</span>
+<span class="nc" id="L191">                }</span>
+
+<span class="nc" id="L193">                blocks.add(new IptcBlock(blockType, blockNameBytes, blockData));</span>
+
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                if (blockSize % 2 != 0) {</span>
+<span class="nc" id="L196">                    readByte(&quot;Padding byte&quot;, bis, &quot;Image Resource Block missing padding byte&quot;);</span>
+                }
+<span class="nc" id="L198">            }</span>
+
+<span class="nc" id="L200">            return blocks;</span>
+        }
+    }
+
+    protected List&lt;IptcRecord&gt; parseIptcBlock(final byte[] bytes) {
+<span class="nc" id="L205">        Charset charset = DEFAULT_CHARSET;</span>
+<span class="nc" id="L206">        final List&lt;IptcRecord&gt; elements = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L208">        int index = 0;</span>
+        // Integer recordVersion = null;
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        while (index + 1 &lt; bytes.length) {</span>
+<span class="nc" id="L211">            final int tagMarker = 0xff &amp; bytes[index++];</span>
+<span class="nc" id="L212">            Debug.debug(&quot;tagMarker: &quot; + tagMarker + &quot; (0x&quot; + Integer.toHexString(tagMarker) + &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            if (tagMarker != IptcConstants.IPTC_RECORD_TAG_MARKER) {</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L216">                    LOGGER.fine(&quot;Unexpected record tag marker in IPTC data.&quot;);</span>
+                }
+<span class="nc" id="L218">                return elements;</span>
+            }
+
+<span class="nc" id="L221">            final int recordNumber = 0xff &amp; bytes[index++];</span>
+<span class="nc" id="L222">            Debug.debug(&quot;recordNumber: &quot; + recordNumber + &quot; (0x&quot; + Integer.toHexString(recordNumber) + &quot;)&quot;);</span>
+
+            // int recordPrefix = convertByteArrayToShort(&quot;recordPrefix&quot;, index,
+            // bytes);
+            // if (verbose)
+            // Debug.debug(&quot;recordPrefix&quot;, recordPrefix + &quot; (0x&quot;
+            // + Integer.toHexString(recordPrefix) + &quot;)&quot;);
+            // index += 2;
+            //
+            // if (recordPrefix != IPTC_RECORD_PREFIX)
+            // {
+            // if (verbose)
+            // System.out
+            // .println(&quot;Unexpected record prefix in IPTC data!&quot;);
+            // return elements;
+            // }
+
+            // throw new ImageReadException(
+            // &quot;Unexpected record prefix in IPTC data.&quot;);
+
+<span class="nc" id="L242">            final int recordType = 0xff &amp; bytes[index];</span>
+<span class="nc" id="L243">            Debug.debug(&quot;recordType: &quot; + recordType + &quot; (0x&quot; + Integer.toHexString(recordType) + &quot;)&quot;);</span>
+<span class="nc" id="L244">            index++;</span>
+
+<span class="nc" id="L246">            final int recordSize = ByteConversions.toUInt16(bytes, index, getByteOrder());</span>
+<span class="nc" id="L247">            index += 2;</span>
+
+<span class="nc bnc" id="L249" title="All 2 branches missed.">            final boolean extendedDataset = recordSize &gt; IptcConstants.IPTC_NON_EXTENDED_RECORD_MAXIMUM_SIZE;</span>
+<span class="nc" id="L250">            final int dataFieldCountLength = recordSize &amp; 0x7fff;</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">            if (extendedDataset) {</span>
+<span class="nc" id="L252">                Debug.debug(&quot;extendedDataset. dataFieldCountLength: &quot; + dataFieldCountLength);</span>
+            }
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (extendedDataset) {</span>
+                // ignore extended dataset and everything after.
+<span class="nc" id="L256">                return elements;</span>
+            }
+
+<span class="nc" id="L259">            final byte[] recordData = slice(bytes, index, recordSize);</span>
+<span class="nc" id="L260">            index += recordSize;</span>
+
+            // Debug.debug(&quot;recordSize&quot;, recordSize + &quot; (0x&quot;
+            // + Integer.toHexString(recordSize) + &quot;)&quot;);
+
+<span class="nc bnc" id="L265" title="All 4 branches missed.">            if (recordNumber == IptcConstants.IPTC_ENVELOPE_RECORD_NUMBER &amp;&amp; recordType == ENV_TAG_CODED_CHARACTER_SET) {</span>
+<span class="nc" id="L266">                charset = findCharset(recordData);</span>
+<span class="nc" id="L267">                continue;</span>
+            }
+
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            if (recordNumber != IptcConstants.IPTC_APPLICATION_2_RECORD_NUMBER) {</span>
+<span class="nc" id="L271">                continue;</span>
+            }
+
+<span class="nc bnc" id="L274" title="All 2 branches missed.">            if (recordType == 0) {</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">                if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L276">                    LOGGER.fine(&quot;ignore record version record! &quot; + elements.size());</span>
+                }
+                // ignore &quot;record version&quot; record;
+                continue;
+            }
+            // if (recordVersion == null)
+            // {
+            // // The first record in a JPEG/Photoshop IPTC block must be
+            // // the record version.
+            // if (recordType != 0)
+            // throw new ImageReadException(&quot;Missing record version: &quot;
+            // + recordType);
+            // recordVersion = new Integer(convertByteArrayToShort(
+            // &quot;recordNumber&quot;, recordData));
+            //
+            // if (recordSize != 2)
+            // throw new ImageReadException(
+            // &quot;Invalid record version record size: &quot; + recordSize);
+            //
+            // // JPEG/Photoshop IPTC metadata is always in Record version
+            // // 2
+            // if (recordVersion.intValue() != 2)
+            // throw new ImageReadException(
+            // &quot;Invalid IPTC record version: &quot; + recordVersion);
+            //
+            // // Debug.debug(&quot;recordVersion&quot;, recordVersion);
+            // continue;
+            // }
+
+<span class="nc" id="L305">            final String value = new String(recordData, charset);</span>
+
+<span class="nc" id="L307">            final IptcType iptcType = IptcTypeLookup.getIptcType(recordType);</span>
+
+            // Debug.debug(&quot;iptcType&quot;, iptcType);
+            // debugByteArray(&quot;iptcData&quot;, iptcData);
+            // Debug.debug();
+
+            // if (recordType == IPTC_TYPE_CREDIT.type
+            // || recordType == IPTC_TYPE_OBJECT_NAME.type)
+            // {
+            // this.debugByteArray(&quot;recordData&quot;, recordData);
+            // Debug.debug(&quot;index&quot;, IPTC_TYPE_CREDIT.name);
+            // }
+
+<span class="nc" id="L320">            final IptcRecord element = new IptcRecord(iptcType, value);</span>
+<span class="nc" id="L321">            elements.add(element);</span>
+<span class="nc" id="L322">        }</span>
+
+<span class="nc" id="L324">        return elements;</span>
+    }
+
+    public PhotoshopApp13Data parsePhotoshopSegment(final byte[] bytes, final boolean strict) throws ImagingException, IOException {
+<span class="nc" id="L328">        final List&lt;IptcRecord&gt; records = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L330">        final List&lt;IptcBlock&gt; blocks = parseAllBlocks(bytes, strict);</span>
+
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        for (final IptcBlock block : blocks) {</span>
+            // Ignore everything but IPTC data.
+<span class="nc bnc" id="L334" title="All 2 branches missed.">            if (!block.isIptcBlock()) {</span>
+<span class="nc" id="L335">                continue;</span>
+            }
+
+<span class="nc" id="L338">            records.addAll(parseIptcBlock(block.getBlockData()));</span>
+<span class="nc" id="L339">        }</span>
+
+<span class="nc" id="L341">        return new PhotoshopApp13Data(records, blocks);</span>
+    }
+
+    // private void writeIPTCRecord(BinaryOutputStream bos, )
+
+    /*
+     * In practice, App13 segments are only used for Photoshop/IPTC metadata. However, we should not treat App13 signatures without Photoshop's signature as
+     * Photoshop/IPTC segments.
+     *
+     * A Photoshop/IPTC App13 segment begins with the Photoshop Identification string.
+     *
+     * There follows 0-N blocks (Photoshop calls them &quot;Image Resource Blocks&quot;).
+     *
+     * Each block has the following structure:
+     *
+     * 1. 4-byte type. This is always &quot;8BIM&quot; for blocks in a Photoshop App13 segment. 2. 2-byte id. IPTC data is stored in blocks with id 0x0404, aka.
+     * IPTC_NAA_RECORD_IMAGE_RESOURCE_ID 3. Block name as a Pascal String. This is padded to have an even length. 4. 4-byte size (in bytes). 5. Block data. This
+     * is also padded to have an even length.
+     *
+     * The block data consists of a 0-N records. A record has the following structure:
+     *
+     * 1. 2-byte prefix. The value is always 0x1C02 2. 1-byte record type. The record types are documented by the IPTC. See IptcConstants. 3. 2-byte record size
+     * (in bytes). 4. Record data, &quot;record size&quot; bytes long.
+     *
+     * Record data (unlike block data) is NOT padded to have an even length.
+     *
+     * Record data, for IPTC record, should always be ISO-8859-1. But according to SANSELAN-33, this isn't always the case.
+     *
+     * The exception is the first record in the block, which must always be a record version record, whose value is a two-byte number; the value is 0x02.
+     *
+     * Some IPTC blocks are missing this first &quot;record version&quot; record, so we don't require it.
+     */
+    public PhotoshopApp13Data parsePhotoshopSegment(final byte[] bytes, final ImagingParameters&lt;JpegImagingParameters&gt; params)
+            throws ImagingException, IOException {
+<span class="nc bnc" id="L375" title="All 4 branches missed.">        final boolean strict = params != null &amp;&amp; params.isStrict();</span>
+
+<span class="nc" id="L377">        return parsePhotoshopSegment(bytes, strict);</span>
+    }
+
+    public byte[] writeIptcBlock(List&lt;IptcRecord&gt; elements) throws ImagingException, IOException {
+<span class="nc" id="L381">        Charset charset = DEFAULT_CHARSET;</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">        for (final IptcRecord element : elements) {</span>
+<span class="nc" id="L383">            final byte[] recordData = element.getValue().getBytes(charset);</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">            if (!new String(recordData, charset).equals(element.getValue())) {</span>
+<span class="nc" id="L385">                charset = StandardCharsets.UTF_8;</span>
+<span class="nc" id="L386">                break;</span>
+            }
+<span class="nc" id="L388">        }</span>
+        final byte[] blockData;
+<span class="nc" id="L390">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+<span class="nc" id="L391">        try (BinaryOutputStream bos = BinaryOutputStream.create(baos, getByteOrder())) {</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">            if (!charset.equals(DEFAULT_CHARSET)) {</span>
+<span class="nc" id="L393">                bos.write(IptcConstants.IPTC_RECORD_TAG_MARKER);</span>
+<span class="nc" id="L394">                bos.write(IptcConstants.IPTC_ENVELOPE_RECORD_NUMBER);</span>
+<span class="nc" id="L395">                bos.write(ENV_TAG_CODED_CHARACTER_SET);</span>
+<span class="nc" id="L396">                final byte[] codedCharset = CHARACTER_ESCAPE_SEQUENCE;</span>
+<span class="nc" id="L397">                bos.write2Bytes(codedCharset.length);</span>
+<span class="nc" id="L398">                bos.write(codedCharset);</span>
+            }
+
+            // first, right record version record
+<span class="nc" id="L402">            bos.write(IptcConstants.IPTC_RECORD_TAG_MARKER);</span>
+<span class="nc" id="L403">            bos.write(IptcConstants.IPTC_APPLICATION_2_RECORD_NUMBER);</span>
+<span class="nc" id="L404">            bos.write(IptcTypes.RECORD_VERSION.type); // record version record</span>
+                                                      // type.
+<span class="nc" id="L406">            bos.write2Bytes(2); // record version record size</span>
+<span class="nc" id="L407">            bos.write2Bytes(2); // record version value</span>
+
+            // make a copy of the list.
+<span class="nc" id="L410">            elements = new ArrayList&lt;&gt;(elements);</span>
+
+            // sort the list. Records must be in numerical order.
+<span class="nc" id="L413">            final Comparator&lt;IptcRecord&gt; comparator = (e1, e2) -&gt; e2.iptcType.getType() - e1.iptcType.getType();</span>
+<span class="nc" id="L414">            elements.sort(comparator);</span>
+            // TODO: make sure order right
+
+            // write the list.
+<span class="nc bnc" id="L418" title="All 2 branches missed.">            for (final IptcRecord element : elements) {</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">                if (element.iptcType == IptcTypes.RECORD_VERSION) {</span>
+<span class="nc" id="L420">                    continue; // ignore</span>
+                }
+
+<span class="nc" id="L423">                bos.write(IptcConstants.IPTC_RECORD_TAG_MARKER);</span>
+<span class="nc" id="L424">                bos.write(IptcConstants.IPTC_APPLICATION_2_RECORD_NUMBER);</span>
+<span class="nc bnc" id="L425" title="All 4 branches missed.">                if (element.iptcType.getType() &lt; 0 || element.iptcType.getType() &gt; 0xff) {</span>
+<span class="nc" id="L426">                    throw new ImagingException(&quot;Invalid record type: &quot; + element.iptcType.getType());</span>
+                }
+<span class="nc" id="L428">                bos.write(element.iptcType.getType());</span>
+
+<span class="nc" id="L430">                final byte[] recordData = element.getValue().getBytes(charset);</span>
+                /*
+                 * if (!new String(recordData, charset).equals(element.getValue())) { throw new ImageWriteException( &quot;Invalid record value, not &quot; +
+                 * charset.name()); }
+                 */
+
+<span class="nc" id="L436">                bos.write2Bytes(recordData.length);</span>
+<span class="nc" id="L437">                bos.write(recordData);</span>
+<span class="nc" id="L438">            }</span>
+        }
+
+<span class="nc" id="L441">        return baos.toByteArray();</span>
+    }
+
+    public byte[] writePhotoshopApp13Segment(final PhotoshopApp13Data data) throws IOException, ImagingException {
+<span class="nc" id="L445">        try (ByteArrayOutputStream os = new ByteArrayOutputStream();</span>
+<span class="nc" id="L446">                BinaryOutputStream bos = BinaryOutputStream.bigEndian(os)) {</span>
+
+<span class="nc" id="L448">            JpegConstants.PHOTOSHOP_IDENTIFICATION_STRING.writeTo(bos);</span>
+
+<span class="nc" id="L450">            final List&lt;IptcBlock&gt; blocks = data.getRawBlocks();</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">            for (final IptcBlock block : blocks) {</span>
+<span class="nc" id="L452">                bos.write4Bytes(JpegConstants.CONST_8BIM);</span>
+
+<span class="nc bnc" id="L454" title="All 4 branches missed.">                if (block.getBlockType() &lt; 0 || block.getBlockType() &gt; 0xffff) {</span>
+<span class="nc" id="L455">                    throw new ImagingException(&quot;Invalid IPTC block type.&quot;);</span>
+                }
+<span class="nc" id="L457">                bos.write2Bytes(block.getBlockType());</span>
+
+<span class="nc" id="L459">                final byte[] blockNameBytes = block.getBlockNameBytes();</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">                if (blockNameBytes.length &gt; 255) {</span>
+<span class="nc" id="L461">                    throw new ImagingException(&quot;IPTC block name is too long: &quot; + blockNameBytes.length);</span>
+                }
+<span class="nc" id="L463">                bos.write(blockNameBytes.length);</span>
+<span class="nc" id="L464">                bos.write(blockNameBytes);</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">                if (blockNameBytes.length % 2 == 0) {</span>
+<span class="nc" id="L466">                    bos.write(0); // pad to even size, including length byte.</span>
+                }
+
+<span class="nc" id="L469">                final byte[] blockData = block.getBlockData();</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">                if (blockData.length &gt; IptcConstants.IPTC_NON_EXTENDED_RECORD_MAXIMUM_SIZE) {</span>
+<span class="nc" id="L471">                    throw new ImagingException(&quot;IPTC block data is too long: &quot; + blockData.length);</span>
+                }
+<span class="nc" id="L473">                bos.write4Bytes(blockData.length);</span>
+<span class="nc" id="L474">                bos.write(blockData);</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">                if (blockData.length % 2 == 1) {</span>
+<span class="nc" id="L476">                    bos.write(0); // pad to even size</span>
+                }
+<span class="nc" id="L478">            }</span>
+
+<span class="nc" id="L480">            bos.flush();</span>
+<span class="nc" id="L481">            return os.toByteArray();</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

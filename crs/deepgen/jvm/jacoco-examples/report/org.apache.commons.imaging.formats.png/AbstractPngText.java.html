@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractPngText.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">AbstractPngText.java</span></div><h1>AbstractPngText.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+public abstract class AbstractPngText {
+    public static class Itxt extends AbstractPngText {
+
+        /*
+         * The language tag defined in [RFC-3066] indicates the human language used by the translated keyword and the text. Unlike the keyword, the language tag
+         * is case-insensitive. It is an ISO 646.IRV:1991 [ISO 646] string consisting of hyphen-separated words of 1-8 alphanumeric characters each (for example
+         * cn, en-uk, no-bok, x-klingon, x-KlInGoN). If the first word is two or three letters long, it is an ISO language code [ISO-639]. If the language tag
+         * is empty, the language is unspecified.
+         */
+        public final String languageTag;
+
+        public final String translatedKeyword;
+
+        public Itxt(final String keyword, final String text, final String languageTag, final String translatedKeyword) {
+<span class="nc" id="L33">            super(keyword, text);</span>
+<span class="nc" id="L34">            this.languageTag = languageTag;</span>
+<span class="nc" id="L35">            this.translatedKeyword = translatedKeyword;</span>
+<span class="nc" id="L36">        }</span>
+    }
+
+    public static class Text extends AbstractPngText {
+        public Text(final String keyword, final String text) {
+<span class="nc" id="L41">            super(keyword, text);</span>
+<span class="nc" id="L42">        }</span>
+    }
+
+    public static class Ztxt extends AbstractPngText {
+        public Ztxt(final String keyword, final String text) {
+<span class="nc" id="L47">            super(keyword, text);</span>
+<span class="nc" id="L48">        }</span>
+    }
+
+    public final String keyword;
+
+    public final String text;
+
+<span class="nc" id="L55">    public AbstractPngText(final String keyword, final String text) {</span>
+<span class="nc" id="L56">        this.keyword = keyword;</span>
+<span class="nc" id="L57">        this.text = text;</span>
+<span class="nc" id="L58">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

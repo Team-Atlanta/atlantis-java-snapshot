@@ -1,0 +1,940 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JpegImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg</a> &gt; <span class="el_source">JpegImageParser.java</span></div><h1>JpegImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.jpeg;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.remainingBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.startsWith;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.common.XmpEmbeddable;
+import org.apache.commons.imaging.common.XmpImagingParameters;
+import org.apache.commons.imaging.formats.jpeg.decoder.JpegDecoder;
+import org.apache.commons.imaging.formats.jpeg.iptc.IptcParser;
+import org.apache.commons.imaging.formats.jpeg.iptc.PhotoshopApp13Data;
+import org.apache.commons.imaging.formats.jpeg.segments.AbstractSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.App13Segment;
+import org.apache.commons.imaging.formats.jpeg.segments.App14Segment;
+import org.apache.commons.imaging.formats.jpeg.segments.App2Segment;
+import org.apache.commons.imaging.formats.jpeg.segments.ComSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.DqtSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.GenericSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.JfifSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.PatSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.SofnSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.UnknownSegment;
+import org.apache.commons.imaging.formats.jpeg.xmp.JpegXmpParser;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
+import org.apache.commons.imaging.formats.tiff.TiffImageParser;
+import org.apache.commons.imaging.formats.tiff.TiffImagingParameters;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.internal.Debug;
+
+<span class="fc" id="L67">public class JpegImageParser extends AbstractImageParser&lt;JpegImagingParameters&gt; implements XmpEmbeddable&lt;JpegImagingParameters&gt; {</span>
+
+<span class="fc" id="L69">    private static final Logger LOGGER = Logger.getLogger(JpegImageParser.class.getName());</span>
+
+<span class="fc" id="L71">    private static final String DEFAULT_EXTENSION = ImageFormats.JPEG.getDefaultExtension();</span>
+<span class="fc" id="L72">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.JPEG.getExtensions();</span>
+
+    public static boolean isExifApp1Segment(final GenericSegment segment) {
+<span class="nc" id="L75">        return startsWith(segment.getSegmentData(), JpegConstants.EXIF_IDENTIFIER_CODE);</span>
+    }
+
+    private byte[] assembleSegments(final List&lt;App2Segment&gt; segments) throws ImagingException {
+        try {
+<span class="nc" id="L80">            return assembleSegments(segments, false);</span>
+<span class="nc" id="L81">        } catch (final ImagingException e) {</span>
+<span class="nc" id="L82">            return assembleSegments(segments, true);</span>
+        }
+    }
+
+    private byte[] assembleSegments(final List&lt;App2Segment&gt; segments, final boolean startWithZero) throws ImagingException {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (segments.isEmpty()) {</span>
+<span class="nc" id="L88">            throw new ImagingException(&quot;No App2 Segments Found.&quot;);</span>
+        }
+
+<span class="nc" id="L91">        final int markerCount = segments.get(0).numMarkers;</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (segments.size() != markerCount) {</span>
+<span class="nc" id="L94">            throw new ImagingException(&quot;App2 Segments Missing.  Found: &quot; + segments.size() + &quot;, Expected: &quot; + markerCount + &quot;.&quot;);</span>
+        }
+
+<span class="nc" id="L97">        Collections.sort(segments);</span>
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        final int offset = startWithZero ? 0 : 1;</span>
+
+<span class="nc" id="L101">        int total = 0;</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        for (int i = 0; i &lt; segments.size(); i++) {</span>
+<span class="nc" id="L103">            final App2Segment segment = segments.get(i);</span>
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (i + offset != segment.curMarker) {</span>
+<span class="nc" id="L106">                dumpSegments(segments);</span>
+<span class="nc" id="L107">                throw new ImagingException(&quot;Incoherent App2 Segment Ordering.  i: &quot; + i + &quot;, segment[&quot; + i + &quot;].curMarker: &quot; + segment.curMarker + &quot;.&quot;);</span>
+            }
+
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if (markerCount != segment.numMarkers) {</span>
+<span class="nc" id="L111">                dumpSegments(segments);</span>
+<span class="nc" id="L112">                throw new ImagingException(</span>
+                        &quot;Inconsistent App2 Segment Count info.  markerCount: &quot; + markerCount + &quot;, segment[&quot; + i + &quot;].numMarkers: &quot; + segment.numMarkers + &quot;.&quot;);
+            }
+
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            if (segment.getIccBytes() != null) {</span>
+<span class="nc" id="L117">                total += segment.getIccBytes().length;</span>
+            }
+        }
+
+<span class="nc" id="L121">        final byte[] result = Allocator.byteArray(total);</span>
+<span class="nc" id="L122">        int progress = 0;</span>
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        for (final App2Segment segment : segments) {</span>
+<span class="nc" id="L125">            System.arraycopy(segment.getIccBytes(), 0, result, progress, segment.getIccBytes().length);</span>
+<span class="nc" id="L126">            progress += segment.getIccBytes().length;</span>
+<span class="nc" id="L127">        }</span>
+
+<span class="nc" id="L129">        return result;</span>
+    }
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L134">        pw.println(&quot;jpeg.dumpImageFile&quot;);</span>
+
+        {
+<span class="nc" id="L137">            final ImageInfo imageInfo = getImageInfo(byteSource);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">            if (imageInfo == null) {</span>
+<span class="nc" id="L139">                return false;</span>
+            }
+
+<span class="nc" id="L142">            imageInfo.toString(pw, &quot;&quot;);</span>
+        }
+
+<span class="nc" id="L145">        pw.println(&quot;&quot;);</span>
+
+        {
+<span class="nc" id="L148">            final List&lt;AbstractSegment&gt; abstractSegments = readSegments(byteSource, null, false);</span>
+
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (abstractSegments == null) {</span>
+<span class="nc" id="L151">                throw new ImagingException(&quot;No Segments Found.&quot;);</span>
+            }
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            for (int d = 0; d &lt; abstractSegments.size(); d++) {</span>
+
+<span class="nc" id="L156">                final AbstractSegment abstractSegment = abstractSegments.get(d);</span>
+
+<span class="nc" id="L158">                final NumberFormat nf = NumberFormat.getIntegerInstance();</span>
+                // this.debugNumber(&quot;found, marker: &quot;, marker, 4);
+<span class="nc" id="L160">                pw.println(d + &quot;: marker: &quot; + Integer.toHexString(abstractSegment.marker) + &quot;, &quot; + abstractSegment.getDescription() + &quot; (length: &quot;</span>
+<span class="nc" id="L161">                        + nf.format(abstractSegment.length) + &quot;)&quot;);</span>
+<span class="nc" id="L162">                abstractSegment.dump(pw);</span>
+            }
+
+<span class="nc" id="L165">            pw.println(&quot;&quot;);</span>
+        }
+
+<span class="nc" id="L168">        return true;</span>
+    }
+
+    private void dumpSegments(final List&lt;? extends AbstractSegment&gt; v) {
+<span class="nc" id="L172">        Debug.debug();</span>
+<span class="nc" id="L173">        Debug.debug(&quot;dumpSegments: &quot; + v.size());</span>
+
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        for (int i = 0; i &lt; v.size(); i++) {</span>
+<span class="nc" id="L176">            final App2Segment segment = (App2Segment) v.get(i);</span>
+
+<span class="nc" id="L178">            Debug.debug(i + &quot;: &quot; + segment.curMarker + &quot; / &quot; + segment.numMarkers);</span>
+        }
+<span class="nc" id="L180">        Debug.debug();</span>
+<span class="nc" id="L181">    }</span>
+
+    private List&lt;AbstractSegment&gt; filterApp1Segments(final List&lt;AbstractSegment&gt; abstractSegments) {
+<span class="nc" id="L184">        final List&lt;AbstractSegment&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        for (final AbstractSegment s : abstractSegments) {</span>
+<span class="nc" id="L187">            final GenericSegment segment = (GenericSegment) s;</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            if (isExifApp1Segment(segment)) {</span>
+<span class="nc" id="L189">                result.add(segment);</span>
+            }
+<span class="nc" id="L191">        }</span>
+
+<span class="nc" id="L193">        return result;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L198">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L203">        return new ImageFormat[] { ImageFormats.JPEG, //</span>
+        };
+    }
+
+    @Override
+    public final BufferedImage getBufferedImage(final ByteSource byteSource, final JpegImagingParameters params) throws ImagingException, IOException {
+<span class="fc" id="L209">        final JpegDecoder jpegDecoder = new JpegDecoder();</span>
+<span class="nc" id="L210">        return jpegDecoder.decode(byteSource);</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L215">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public JpegImagingParameters getDefaultParameters() {
+<span class="nc" id="L220">        return new JpegImagingParameters();</span>
+    }
+
+    public TiffImageMetadata getExifMetadata(final ByteSource byteSource, TiffImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L224">        final byte[] bytes = getExifRawData(byteSource);</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (null == bytes) {</span>
+<span class="nc" id="L226">            return null;</span>
+        }
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (params == null) {</span>
+<span class="nc" id="L230">            params = new TiffImagingParameters();</span>
+        }
+<span class="nc" id="L232">        params.setReadThumbnails(Boolean.TRUE);</span>
+
+<span class="nc" id="L234">        return (TiffImageMetadata) new TiffImageParser().getMetadata(bytes, params);</span>
+    }
+
+    public byte[] getExifRawData(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L238">        final List&lt;AbstractSegment&gt; abstractSegments = readSegments(byteSource, new int[] { JpegConstants.JPEG_APP1_MARKER, }, false);</span>
+
+<span class="nc bnc" id="L240" title="All 4 branches missed.">        if (abstractSegments == null || abstractSegments.isEmpty()) {</span>
+<span class="nc" id="L241">            return null;</span>
+        }
+
+<span class="nc" id="L244">        final List&lt;AbstractSegment&gt; exifSegments = filterApp1Segments(abstractSegments);</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L246">            LOGGER.finest(&quot;exifSegments.size()&quot; + &quot;: &quot; + exifSegments.size());</span>
+        }
+
+        // Debug.debug(&quot;segments&quot;, segments);
+        // Debug.debug(&quot;exifSegments&quot;, exifSegments);
+
+        // TODO: concatenate if multiple segments, need example.
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (exifSegments.isEmpty()) {</span>
+<span class="nc" id="L254">            return null;</span>
+        }
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        if (exifSegments.size() &gt; 1) {</span>
+<span class="nc" id="L257">            throw new ImagingException(</span>
+                    &quot;Imaging currently can't parse EXIF metadata split across multiple APP1 segments.  &quot; + &quot;Please send this image to the Imaging project.&quot;);
+        }
+
+<span class="nc" id="L261">        final GenericSegment segment = (GenericSegment) exifSegments.get(0);</span>
+<span class="nc" id="L262">        final byte[] bytes = segment.getSegmentData();</span>
+
+        // byte[] head = readBytearray(&quot;exif head&quot;, bytes, 0, 6);
+        //
+        // Debug.debug(&quot;head&quot;, head);
+
+<span class="nc" id="L268">        return remainingBytes(&quot;trimmed exif bytes&quot;, bytes, 6);</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final JpegImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L273">        final List&lt;AbstractSegment&gt; abstractSegments = readSegments(byteSource, new int[] { JpegConstants.JPEG_APP2_MARKER, }, false);</span>
+
+<span class="nc" id="L275">        final List&lt;App2Segment&gt; filtered = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        if (abstractSegments != null) {</span>
+            // throw away non-icc profile app2 segments.
+<span class="nc bnc" id="L278" title="All 2 branches missed.">            for (final AbstractSegment s : abstractSegments) {</span>
+<span class="nc" id="L279">                final App2Segment segment = (App2Segment) s;</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                if (segment.getIccBytes() != null) {</span>
+<span class="nc" id="L281">                    filtered.add(segment);</span>
+                }
+<span class="nc" id="L283">            }</span>
+        }
+
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (filtered.isEmpty()) {</span>
+<span class="nc" id="L287">            return null;</span>
+        }
+
+<span class="nc" id="L290">        final byte[] bytes = assembleSegments(filtered);</span>
+
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L293">            LOGGER.finest(&quot;bytes&quot; + &quot;: &quot; + bytes.length);</span>
+        }
+
+<span class="nc" id="L296">        return bytes;</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final JpegImagingParameters params) throws ImagingException, IOException {
+        // List allSegments = readSegments(byteSource, null, false);
+
+<span class="nc" id="L303">        final List&lt;AbstractSegment&gt; SOF_segments = readSegments(byteSource, new int[] {</span>
+                // kJFIFMarker,
+
+                JpegConstants.SOF0_MARKER, JpegConstants.SOF1_MARKER, JpegConstants.SOF2_MARKER, JpegConstants.SOF3_MARKER, JpegConstants.SOF5_MARKER,
+                JpegConstants.SOF6_MARKER, JpegConstants.SOF7_MARKER, JpegConstants.SOF9_MARKER, JpegConstants.SOF10_MARKER, JpegConstants.SOF11_MARKER,
+                JpegConstants.SOF13_MARKER, JpegConstants.SOF14_MARKER, JpegConstants.SOF15_MARKER, JpegConstants.PAT_MARKER,
+
+        }, false);
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        if (SOF_segments == null) {</span>
+<span class="nc" id="L313">            throw new ImagingException(&quot;No SOFN Data Found.&quot;);</span>
+        }
+
+        // if (SOF_segments.size() != 1)
+        // System.out.println(&quot;Incoherent SOFN Data Found: &quot;
+        // + SOF_segments.size());
+
+<span class="nc" id="L320">        final List&lt;AbstractSegment&gt; jfifSegments = readSegments(byteSource, new int[] { JpegConstants.JFIF_MARKER, }, true);</span>
+
+<span class="nc" id="L322">        final SofnSegment fSOFNSegment = (SofnSegment) SOF_segments.get(0);</span>
+        // SofnSegment fSOFNSegment = (SofnSegment) findSegment(segments,
+        // SOFNmarkers);
+
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if (fSOFNSegment == null) {</span>
+<span class="nc" id="L327">            throw new ImagingException(&quot;No SOFN Data Found.&quot;);</span>
+        }
+
+<span class="nc" id="L330">        final int width = fSOFNSegment.width;</span>
+<span class="nc" id="L331">        final int height = fSOFNSegment.height;</span>
+
+<span class="nc" id="L333">        JfifSegment jfifSegment = null;</span>
+
+<span class="nc bnc" id="L335" title="All 4 branches missed.">        if (jfifSegments != null &amp;&amp; !jfifSegments.isEmpty()) {</span>
+<span class="nc" id="L336">            jfifSegment = (JfifSegment) jfifSegments.get(0);</span>
+        }
+
+<span class="nc" id="L339">        final List&lt;AbstractSegment&gt; app14Segments = readSegments(byteSource, new int[] { JpegConstants.JPEG_APP14_MARKER }, true);</span>
+<span class="nc" id="L340">        App14Segment app14Segment = null;</span>
+<span class="nc bnc" id="L341" title="All 4 branches missed.">        if (app14Segments != null &amp;&amp; !app14Segments.isEmpty()) {</span>
+<span class="nc" id="L342">            app14Segment = (App14Segment) app14Segments.get(0);</span>
+        }
+
+        // JfifSegment fTheJFIFSegment = (JfifSegment) findSegment(segments,
+        // kJFIFMarker);
+
+<span class="nc" id="L348">        double xDensity = -1.0;</span>
+<span class="nc" id="L349">        double yDensity = -1.0;</span>
+<span class="nc" id="L350">        double unitsPerInch = -1.0;</span>
+        // int JFIF_major_version;
+        // int JFIF_minor_version;
+        String formatDetails;
+
+<span class="nc bnc" id="L355" title="All 2 branches missed.">        if (jfifSegment != null) {</span>
+<span class="nc" id="L356">            xDensity = jfifSegment.xDensity;</span>
+<span class="nc" id="L357">            yDensity = jfifSegment.yDensity;</span>
+<span class="nc" id="L358">            final int densityUnits = jfifSegment.densityUnits;</span>
+            // JFIF_major_version = fTheJFIFSegment.JFIF_major_version;
+            // JFIF_minor_version = fTheJFIFSegment.JFIF_minor_version;
+
+<span class="nc" id="L362">            formatDetails = &quot;Jpeg/JFIF v.&quot; + jfifSegment.jfifMajorVersion + &quot;.&quot; + jfifSegment.jfifMinorVersion;</span>
+
+<span class="nc bnc" id="L364" title="All 4 branches missed.">            switch (densityUnits) {</span>
+            case 0:
+<span class="nc" id="L366">                break;</span>
+            case 1: // inches
+<span class="nc" id="L368">                unitsPerInch = 1.0;</span>
+<span class="nc" id="L369">                break;</span>
+            case 2: // cms
+<span class="nc" id="L371">                unitsPerInch = 2.54;</span>
+<span class="nc" id="L372">                break;</span>
+            default:
+                break;
+            }
+<span class="nc" id="L376">        } else {</span>
+<span class="nc" id="L377">            final JpegImageMetadata metadata = (JpegImageMetadata) getMetadata(byteSource, params);</span>
+
+<span class="nc bnc" id="L379" title="All 2 branches missed.">            if (metadata != null) {</span>
+                {
+<span class="nc" id="L381">                    final TiffField field = metadata.findExifValue(TiffTagConstants.TIFF_TAG_XRESOLUTION);</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">                    if (field != null) {</span>
+<span class="nc" id="L383">                        xDensity = ((Number) field.getValue()).doubleValue();</span>
+                    }
+                }
+                {
+<span class="nc" id="L387">                    final TiffField field = metadata.findExifValue(TiffTagConstants.TIFF_TAG_YRESOLUTION);</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">                    if (field != null) {</span>
+<span class="nc" id="L389">                        yDensity = ((Number) field.getValue()).doubleValue();</span>
+                    }
+                }
+                {
+<span class="nc" id="L393">                    final TiffField field = metadata.findExifValue(TiffTagConstants.TIFF_TAG_RESOLUTION_UNIT);</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                    if (field != null) {</span>
+<span class="nc" id="L395">                        final int densityUnits = ((Number) field.getValue()).intValue();</span>
+
+<span class="nc bnc" id="L397" title="All 4 branches missed.">                        switch (densityUnits) {</span>
+                        case 1:
+<span class="nc" id="L399">                            break;</span>
+                        case 2: // inches
+<span class="nc" id="L401">                            unitsPerInch = 1.0;</span>
+<span class="nc" id="L402">                            break;</span>
+                        case 3: // cms
+<span class="nc" id="L404">                            unitsPerInch = 2.54;</span>
+<span class="nc" id="L405">                            break;</span>
+                        default:
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+<span class="nc" id="L414">            formatDetails = &quot;Jpeg/DCM&quot;;</span>
+
+        }
+
+<span class="nc" id="L418">        int physicalHeightDpi = -1;</span>
+<span class="nc" id="L419">        float physicalHeightInch = -1;</span>
+<span class="nc" id="L420">        int physicalWidthDpi = -1;</span>
+<span class="nc" id="L421">        float physicalWidthInch = -1;</span>
+
+<span class="nc bnc" id="L423" title="All 2 branches missed.">        if (unitsPerInch &gt; 0) {</span>
+<span class="nc" id="L424">            physicalWidthDpi = (int) Math.round(xDensity * unitsPerInch);</span>
+<span class="nc" id="L425">            physicalWidthInch = (float) (width / (xDensity * unitsPerInch));</span>
+<span class="nc" id="L426">            physicalHeightDpi = (int) Math.round(yDensity * unitsPerInch);</span>
+<span class="nc" id="L427">            physicalHeightInch = (float) (height / (yDensity * unitsPerInch));</span>
+        }
+
+<span class="nc" id="L430">        final List&lt;AbstractSegment&gt; commentSegments = readSegments(byteSource, new int[] { JpegConstants.COM_MARKER }, false);</span>
+<span class="nc" id="L431">        final List&lt;String&gt; comments = Allocator.arrayList(commentSegments.size());</span>
+<span class="nc bnc" id="L432" title="All 2 branches missed.">        for (final AbstractSegment commentSegment : commentSegments) {</span>
+<span class="nc" id="L433">            final ComSegment comSegment = (ComSegment) commentSegment;</span>
+<span class="nc" id="L434">            comments.add(new String(comSegment.getComment(), StandardCharsets.UTF_8));</span>
+<span class="nc" id="L435">        }</span>
+
+<span class="nc" id="L437">        final int numberOfComponents = fSOFNSegment.numberOfComponents;</span>
+<span class="nc" id="L438">        final int precision = fSOFNSegment.precision;</span>
+
+<span class="nc" id="L440">        final int bitsPerPixel = numberOfComponents * precision;</span>
+<span class="nc" id="L441">        final ImageFormat format = ImageFormats.JPEG;</span>
+<span class="nc" id="L442">        final String formatName = &quot;JPEG (Joint Photographic Experts Group) Format&quot;;</span>
+<span class="nc" id="L443">        final String mimeType = &quot;image/jpeg&quot;;</span>
+        // TODO: we ought to count images, but don't yet.
+<span class="nc" id="L445">        final int numberOfImages = 1;</span>
+        // not accurate ... only reflects first
+<span class="nc bnc" id="L447" title="All 2 branches missed.">        final boolean progressive = fSOFNSegment.marker == JpegConstants.SOF2_MARKER;</span>
+
+<span class="nc" id="L449">        boolean transparent = false;</span>
+<span class="nc" id="L450">        final boolean usesPalette = false; // TODO: inaccurate.</span>
+
+        // See https://docs.oracle.com/javase/8/docs/api/javax/imageio/metadata/doc-files/jpeg_metadata.html#color
+<span class="nc" id="L453">        ImageInfo.ColorType colorType = ImageInfo.ColorType.UNKNOWN;</span>
+        // Some images have both JFIF/APP0 and APP14.
+        // JFIF is meant to win but in them APP14 is clearly right, so make it win.
+<span class="nc bnc" id="L456" title="All 4 branches missed.">        if (app14Segment != null &amp;&amp; app14Segment.isAdobeJpegSegment()) {</span>
+<span class="nc" id="L457">            final int colorTransform = app14Segment.getAdobeColorTransform();</span>
+<span class="nc bnc" id="L458" title="All 4 branches missed.">            switch (colorTransform) {</span>
+            case App14Segment.ADOBE_COLOR_TRANSFORM_UNKNOWN:
+<span class="nc bnc" id="L460" title="All 2 branches missed.">                if (numberOfComponents == 3) {</span>
+<span class="nc" id="L461">                    colorType = ImageInfo.ColorType.RGB;</span>
+<span class="nc bnc" id="L462" title="All 2 branches missed.">                } else if (numberOfComponents == 4) {</span>
+<span class="nc" id="L463">                    colorType = ImageInfo.ColorType.CMYK;</span>
+                }
+                break;
+            case App14Segment.ADOBE_COLOR_TRANSFORM_YCbCr:
+<span class="nc" id="L467">                colorType = ImageInfo.ColorType.YCbCr;</span>
+<span class="nc" id="L468">                break;</span>
+            case App14Segment.ADOBE_COLOR_TRANSFORM_YCCK:
+<span class="nc" id="L470">                colorType = ImageInfo.ColorType.YCCK;</span>
+<span class="nc" id="L471">                break;</span>
+            default:
+                break;
+            }
+<span class="nc bnc" id="L475" title="All 2 branches missed.">        } else if (jfifSegment != null) {</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">            if (numberOfComponents == 1) {</span>
+<span class="nc" id="L477">                colorType = ImageInfo.ColorType.GRAYSCALE;</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">            } else if (numberOfComponents == 3) {</span>
+<span class="nc" id="L479">                colorType = ImageInfo.ColorType.YCbCr;</span>
+            }
+        } else {
+<span class="nc bnc" id="L482" title="All 4 branches missed.">            switch (numberOfComponents) {</span>
+            case 1:
+<span class="nc" id="L484">                colorType = ImageInfo.ColorType.GRAYSCALE;</span>
+<span class="nc" id="L485">                break;</span>
+            case 2:
+<span class="nc" id="L487">                colorType = ImageInfo.ColorType.GRAYSCALE;</span>
+<span class="nc" id="L488">                transparent = true;</span>
+<span class="nc" id="L489">                break;</span>
+            case 3:
+            case 4:
+<span class="nc" id="L492">                boolean have1 = false;</span>
+<span class="nc" id="L493">                boolean have2 = false;</span>
+<span class="nc" id="L494">                boolean have3 = false;</span>
+<span class="nc" id="L495">                boolean have4 = false;</span>
+<span class="nc" id="L496">                boolean haveOther = false;</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                for (final SofnSegment.Component component : fSOFNSegment.getComponents()) {</span>
+<span class="nc" id="L498">                    final int id = component.componentIdentifier;</span>
+<span class="nc bnc" id="L499" title="All 5 branches missed.">                    switch (id) {</span>
+                    case 1:
+<span class="nc" id="L501">                        have1 = true;</span>
+<span class="nc" id="L502">                        break;</span>
+                    case 2:
+<span class="nc" id="L504">                        have2 = true;</span>
+<span class="nc" id="L505">                        break;</span>
+                    case 3:
+<span class="nc" id="L507">                        have3 = true;</span>
+<span class="nc" id="L508">                        break;</span>
+                    case 4:
+<span class="nc" id="L510">                        have4 = true;</span>
+<span class="nc" id="L511">                        break;</span>
+                    default:
+<span class="nc" id="L513">                        haveOther = true;</span>
+                        break;
+                    }
+                }
+<span class="nc bnc" id="L517" title="All 12 branches missed.">                if (numberOfComponents == 3 &amp;&amp; have1 &amp;&amp; have2 &amp;&amp; have3 &amp;&amp; !have4 &amp;&amp; !haveOther) {</span>
+<span class="nc" id="L518">                    colorType = ImageInfo.ColorType.YCbCr;</span>
+<span class="nc bnc" id="L519" title="All 12 branches missed.">                } else if (numberOfComponents == 4 &amp;&amp; have1 &amp;&amp; have2 &amp;&amp; have3 &amp;&amp; have4 &amp;&amp; !haveOther) {</span>
+<span class="nc" id="L520">                    colorType = ImageInfo.ColorType.YCbCr;</span>
+<span class="nc" id="L521">                    transparent = true;</span>
+                } else {
+<span class="nc" id="L523">                    boolean haveR = false;</span>
+<span class="nc" id="L524">                    boolean haveG = false;</span>
+<span class="nc" id="L525">                    boolean haveB = false;</span>
+<span class="nc" id="L526">                    boolean haveA = false;</span>
+<span class="nc" id="L527">                    boolean haveC = false;</span>
+<span class="nc" id="L528">                    boolean havec = false;</span>
+<span class="nc" id="L529">                    boolean haveY = false;</span>
+<span class="nc bnc" id="L530" title="All 2 branches missed.">                    for (final SofnSegment.Component component : fSOFNSegment.getComponents()) {</span>
+<span class="nc" id="L531">                        final int id = component.componentIdentifier;</span>
+<span class="nc bnc" id="L532" title="All 8 branches missed.">                        switch (id) {</span>
+                        case 'R':
+<span class="nc" id="L534">                            haveR = true;</span>
+<span class="nc" id="L535">                            break;</span>
+                        case 'G':
+<span class="nc" id="L537">                            haveG = true;</span>
+<span class="nc" id="L538">                            break;</span>
+                        case 'B':
+<span class="nc" id="L540">                            haveB = true;</span>
+<span class="nc" id="L541">                            break;</span>
+                        case 'A':
+<span class="nc" id="L543">                            haveA = true;</span>
+<span class="nc" id="L544">                            break;</span>
+                        case 'C':
+<span class="nc" id="L546">                            haveC = true;</span>
+<span class="nc" id="L547">                            break;</span>
+                        case 'c':
+<span class="nc" id="L549">                            havec = true;</span>
+<span class="nc" id="L550">                            break;</span>
+                        case 'Y':
+<span class="nc" id="L552">                            haveY = true;</span>
+<span class="nc" id="L553">                            break;</span>
+                        default:
+                            break;
+                        }
+                    }
+<span class="nc bnc" id="L558" title="All 14 branches missed.">                    if (haveR &amp;&amp; haveG &amp;&amp; haveB &amp;&amp; !haveA &amp;&amp; !haveC &amp;&amp; !havec &amp;&amp; !haveY) {</span>
+<span class="nc" id="L559">                        colorType = ImageInfo.ColorType.RGB;</span>
+<span class="nc bnc" id="L560" title="All 14 branches missed.">                    } else if (haveR &amp;&amp; haveG &amp;&amp; haveB &amp;&amp; haveA &amp;&amp; !haveC &amp;&amp; !havec &amp;&amp; !haveY) {</span>
+<span class="nc" id="L561">                        colorType = ImageInfo.ColorType.RGB;</span>
+<span class="nc" id="L562">                        transparent = true;</span>
+<span class="nc bnc" id="L563" title="All 14 branches missed.">                    } else if (haveY &amp;&amp; haveC &amp;&amp; havec &amp;&amp; !haveR &amp;&amp; !haveG &amp;&amp; !haveB &amp;&amp; !haveA) {</span>
+<span class="nc" id="L564">                        colorType = ImageInfo.ColorType.YCC;</span>
+<span class="nc bnc" id="L565" title="All 14 branches missed.">                    } else if (haveY &amp;&amp; haveC &amp;&amp; havec &amp;&amp; haveA &amp;&amp; !haveR &amp;&amp; !haveG &amp;&amp; !haveB) {</span>
+<span class="nc" id="L566">                        colorType = ImageInfo.ColorType.YCC;</span>
+<span class="nc" id="L567">                        transparent = true;</span>
+                    } else {
+<span class="nc" id="L569">                        int minHorizontalSamplingFactor = Integer.MAX_VALUE;</span>
+<span class="nc" id="L570">                        int maxHorizontalSmaplingFactor = Integer.MIN_VALUE;</span>
+<span class="nc" id="L571">                        int minVerticalSamplingFactor = Integer.MAX_VALUE;</span>
+<span class="nc" id="L572">                        int maxVerticalSamplingFactor = Integer.MIN_VALUE;</span>
+<span class="nc bnc" id="L573" title="All 2 branches missed.">                        for (final SofnSegment.Component component : fSOFNSegment.getComponents()) {</span>
+<span class="nc bnc" id="L574" title="All 2 branches missed.">                            if (minHorizontalSamplingFactor &gt; component.horizontalSamplingFactor) {</span>
+<span class="nc" id="L575">                                minHorizontalSamplingFactor = component.horizontalSamplingFactor;</span>
+                            }
+<span class="nc bnc" id="L577" title="All 2 branches missed.">                            if (maxHorizontalSmaplingFactor &lt; component.horizontalSamplingFactor) {</span>
+<span class="nc" id="L578">                                maxHorizontalSmaplingFactor = component.horizontalSamplingFactor;</span>
+                            }
+<span class="nc bnc" id="L580" title="All 2 branches missed.">                            if (minVerticalSamplingFactor &gt; component.verticalSamplingFactor) {</span>
+<span class="nc" id="L581">                                minVerticalSamplingFactor = component.verticalSamplingFactor;</span>
+                            }
+<span class="nc bnc" id="L583" title="All 2 branches missed.">                            if (maxVerticalSamplingFactor &lt; component.verticalSamplingFactor) {</span>
+<span class="nc" id="L584">                                maxVerticalSamplingFactor = component.verticalSamplingFactor;</span>
+                            }
+                        }
+<span class="nc bnc" id="L587" title="All 4 branches missed.">                        final boolean isSubsampled = minHorizontalSamplingFactor != maxHorizontalSmaplingFactor</span>
+                                || minVerticalSamplingFactor != maxVerticalSamplingFactor;
+<span class="nc bnc" id="L589" title="All 2 branches missed.">                        if (numberOfComponents == 3) {</span>
+<span class="nc bnc" id="L590" title="All 2 branches missed.">                            if (isSubsampled) {</span>
+<span class="nc" id="L591">                                colorType = ImageInfo.ColorType.YCbCr;</span>
+                            } else {
+<span class="nc" id="L593">                                colorType = ImageInfo.ColorType.RGB;</span>
+                            }
+<span class="nc bnc" id="L595" title="All 2 branches missed.">                        } else if (numberOfComponents == 4) {</span>
+<span class="nc bnc" id="L596" title="All 2 branches missed.">                            if (isSubsampled) {</span>
+<span class="nc" id="L597">                                colorType = ImageInfo.ColorType.YCCK;</span>
+                            } else {
+<span class="nc" id="L599">                                colorType = ImageInfo.ColorType.CMYK;</span>
+                            }
+                        }
+                    }
+                }
+<span class="nc" id="L604">                break;</span>
+            default:
+                break;
+            }
+        }
+
+<span class="nc" id="L610">        final ImageInfo.CompressionAlgorithm compressionAlgorithm = ImageInfo.CompressionAlgorithm.JPEG;</span>
+
+<span class="nc" id="L612">        return new ImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType, numberOfImages, physicalHeightDpi, physicalHeightInch,</span>
+                physicalWidthDpi, physicalWidthInch, width, progressive, transparent, usesPalette, colorType, compressionAlgorithm);
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final JpegImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L618">        final List&lt;AbstractSegment&gt; abstractSegments = readSegments(byteSource, new int[] {</span>
+                // kJFIFMarker,
+                JpegConstants.SOF0_MARKER, JpegConstants.SOF1_MARKER, JpegConstants.SOF2_MARKER, JpegConstants.SOF3_MARKER, JpegConstants.SOF5_MARKER,
+                JpegConstants.SOF6_MARKER, JpegConstants.SOF7_MARKER, JpegConstants.SOF9_MARKER, JpegConstants.SOF10_MARKER, JpegConstants.SOF11_MARKER,
+                JpegConstants.SOF13_MARKER, JpegConstants.SOF14_MARKER, JpegConstants.SOF15_MARKER,
+
+        }, true);
+
+<span class="nc bnc" id="L626" title="All 4 branches missed.">        if (abstractSegments == null || abstractSegments.isEmpty()) {</span>
+<span class="nc" id="L627">            throw new ImagingException(&quot;No JFIF Data Found.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L630" title="All 2 branches missed.">        if (abstractSegments.size() &gt; 1) {</span>
+<span class="nc" id="L631">            throw new ImagingException(&quot;Redundant JFIF Data Found.&quot;);</span>
+        }
+
+<span class="nc" id="L634">        final SofnSegment fSOFNSegment = (SofnSegment) abstractSegments.get(0);</span>
+
+<span class="nc" id="L636">        return new Dimension(fSOFNSegment.width, fSOFNSegment.height);</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, JpegImagingParameters params) throws ImagingException, IOException {
+<span class="nc bnc" id="L641" title="All 2 branches missed.">        if (params == null) {</span>
+<span class="nc" id="L642">            params = new JpegImagingParameters();</span>
+        }
+<span class="nc" id="L644">        final TiffImageMetadata exif = getExifMetadata(byteSource, new TiffImagingParameters());</span>
+
+<span class="nc" id="L646">        final JpegPhotoshopMetadata photoshop = getPhotoshopMetadata(byteSource, params);</span>
+
+<span class="nc bnc" id="L648" title="All 4 branches missed.">        if (null == exif &amp;&amp; null == photoshop) {</span>
+<span class="nc" id="L649">            return null;</span>
+        }
+
+<span class="nc" id="L652">        return new JpegImageMetadata(photoshop, exif);</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L657">        return &quot;Jpeg-Custom&quot;;</span>
+    }
+
+    public JpegPhotoshopMetadata getPhotoshopMetadata(final ByteSource byteSource, final JpegImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L661">        final List&lt;AbstractSegment&gt; abstractSegments = readSegments(byteSource, new int[] { JpegConstants.JPEG_APP13_MARKER, }, false);</span>
+
+<span class="nc bnc" id="L663" title="All 4 branches missed.">        if (abstractSegments == null || abstractSegments.isEmpty()) {</span>
+<span class="nc" id="L664">            return null;</span>
+        }
+
+<span class="nc" id="L667">        PhotoshopApp13Data photoshopApp13Data = null;</span>
+
+<span class="nc bnc" id="L669" title="All 2 branches missed.">        for (final AbstractSegment s : abstractSegments) {</span>
+<span class="nc" id="L670">            final App13Segment segment = (App13Segment) s;</span>
+
+<span class="nc" id="L672">            final PhotoshopApp13Data data = segment.parsePhotoshopSegment(params);</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">            if (data != null) {</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">                if (photoshopApp13Data != null) {</span>
+<span class="nc" id="L675">                    throw new ImagingException(&quot;JPEG contains more than one Photoshop App13 segment.&quot;);</span>
+                }
+<span class="nc" id="L677">                photoshopApp13Data = data;</span>
+            }
+<span class="nc" id="L679">        }</span>
+
+<span class="nc bnc" id="L681" title="All 2 branches missed.">        if (null == photoshopApp13Data) {</span>
+<span class="nc" id="L682">            return null;</span>
+        }
+<span class="nc" id="L684">        return new JpegPhotoshopMetadata(photoshopApp13Data);</span>
+    }
+
+    /**
+     * Extracts embedded XML metadata as XML string.
+     * &lt;p&gt;
+     *
+     * @param byteSource File containing image data.
+     * @param params     Map of optional parameters, defined in ImagingConstants.
+     * @return Xmp Xml as String, if present. Otherwise, returns null.
+     */
+    @Override
+    public String getXmpXml(final ByteSource byteSource, final XmpImagingParameters&lt;JpegImagingParameters&gt; params) throws ImagingException, IOException {
+
+<span class="nc" id="L698">        final List&lt;String&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L700">        final JpegUtils.Visitor visitor = new JpegUtils.Visitor() {</span>
+            // return false to exit before reading image data.
+            @Override
+            public boolean beginSos() {
+<span class="nc" id="L704">                return false;</span>
+            }
+
+            // return false to exit traversal.
+            @Override
+            public boolean visitSegment(final int marker, final byte[] markerBytes, final int markerLength, final byte[] markerLengthBytes,
+                    final byte[] segmentData) throws ImagingException {
+<span class="nc bnc" id="L711" title="All 2 branches missed.">                if (marker == 0xffd9) {</span>
+<span class="nc" id="L712">                    return false;</span>
+                }
+
+<span class="nc bnc" id="L715" title="All 4 branches missed.">                if (marker == JpegConstants.JPEG_APP1_MARKER &amp;&amp; new JpegXmpParser().isXmpJpegSegment(segmentData)) {</span>
+<span class="nc" id="L716">                    result.add(new JpegXmpParser().parseXmpJpegSegment(segmentData));</span>
+<span class="nc" id="L717">                    return false;</span>
+                }
+
+<span class="nc" id="L720">                return true;</span>
+            }
+
+            @Override
+            public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+                // don't need image data
+<span class="nc" id="L726">            }</span>
+        };
+<span class="nc" id="L728">        new JpegUtils().traverseJfif(byteSource, visitor);</span>
+
+<span class="nc bnc" id="L730" title="All 2 branches missed.">        if (result.isEmpty()) {</span>
+<span class="nc" id="L731">            return null;</span>
+        }
+<span class="nc bnc" id="L733" title="All 2 branches missed.">        if (result.size() &gt; 1) {</span>
+<span class="nc" id="L734">            throw new ImagingException(&quot;JPEG file contains more than one XMP segment.&quot;);</span>
+        }
+<span class="nc" id="L736">        return result.get(0);</span>
+    }
+
+    public boolean hasExifSegment(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L740">        final boolean[] result = { false, };</span>
+
+<span class="nc" id="L742">        final JpegUtils.Visitor visitor = new JpegUtils.Visitor() {</span>
+            // return false to exit before reading image data.
+            @Override
+            public boolean beginSos() {
+<span class="nc" id="L746">                return false;</span>
+            }
+
+            // return false to exit traversal.
+            @Override
+            public boolean visitSegment(final int marker, final byte[] markerBytes, final int markerLength, final byte[] markerLengthBytes,
+                    final byte[] segmentData) {
+<span class="nc bnc" id="L753" title="All 2 branches missed.">                if (marker == 0xffd9) {</span>
+<span class="nc" id="L754">                    return false;</span>
+                }
+
+<span class="nc bnc" id="L757" title="All 4 branches missed.">                if (marker == JpegConstants.JPEG_APP1_MARKER &amp;&amp; startsWith(segmentData, JpegConstants.EXIF_IDENTIFIER_CODE)) {</span>
+<span class="nc" id="L758">                    result[0] = true;</span>
+<span class="nc" id="L759">                    return false;</span>
+                }
+
+<span class="nc" id="L762">                return true;</span>
+            }
+
+            @Override
+            public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+                // don't need image data
+<span class="nc" id="L768">            }</span>
+        };
+
+<span class="nc" id="L771">        new JpegUtils().traverseJfif(byteSource, visitor);</span>
+
+<span class="nc" id="L773">        return result[0];</span>
+    }
+
+    public boolean hasIptcSegment(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L777">        final boolean[] result = { false, };</span>
+
+<span class="nc" id="L779">        final JpegUtils.Visitor visitor = new JpegUtils.Visitor() {</span>
+            // return false to exit before reading image data.
+            @Override
+            public boolean beginSos() {
+<span class="nc" id="L783">                return false;</span>
+            }
+
+            // return false to exit traversal.
+            @Override
+            public boolean visitSegment(final int marker, final byte[] markerBytes, final int markerLength, final byte[] markerLengthBytes,
+                    final byte[] segmentData) {
+<span class="nc bnc" id="L790" title="All 2 branches missed.">                if (marker == 0xffd9) {</span>
+<span class="nc" id="L791">                    return false;</span>
+                }
+
+<span class="nc bnc" id="L794" title="All 4 branches missed.">                if (marker == JpegConstants.JPEG_APP13_MARKER &amp;&amp; new IptcParser().isPhotoshopJpegSegment(segmentData)) {</span>
+<span class="nc" id="L795">                    result[0] = true;</span>
+<span class="nc" id="L796">                    return false;</span>
+                }
+
+<span class="nc" id="L799">                return true;</span>
+            }
+
+            @Override
+            public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+                // don't need image data
+<span class="nc" id="L805">            }</span>
+        };
+
+<span class="nc" id="L808">        new JpegUtils().traverseJfif(byteSource, visitor);</span>
+
+<span class="nc" id="L810">        return result[0];</span>
+    }
+
+    public boolean hasXmpSegment(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L814">        final boolean[] result = { false, };</span>
+
+<span class="nc" id="L816">        final JpegUtils.Visitor visitor = new JpegUtils.Visitor() {</span>
+            // return false to exit before reading image data.
+            @Override
+            public boolean beginSos() {
+<span class="nc" id="L820">                return false;</span>
+            }
+
+            // return false to exit traversal.
+            @Override
+            public boolean visitSegment(final int marker, final byte[] markerBytes, final int markerLength, final byte[] markerLengthBytes,
+                    final byte[] segmentData) {
+<span class="nc bnc" id="L827" title="All 2 branches missed.">                if (marker == 0xffd9) {</span>
+<span class="nc" id="L828">                    return false;</span>
+                }
+
+<span class="nc bnc" id="L831" title="All 4 branches missed.">                if (marker == JpegConstants.JPEG_APP1_MARKER &amp;&amp; new JpegXmpParser().isXmpJpegSegment(segmentData)) {</span>
+<span class="nc" id="L832">                    result[0] = true;</span>
+<span class="nc" id="L833">                    return false;</span>
+                }
+
+<span class="nc" id="L836">                return true;</span>
+            }
+
+            @Override
+            public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+                // don't need image data
+<span class="nc" id="L842">            }</span>
+        };
+<span class="nc" id="L844">        new JpegUtils().traverseJfif(byteSource, visitor);</span>
+
+<span class="nc" id="L846">        return result[0];</span>
+    }
+
+    private boolean keepMarker(final int marker, final int[] markers) {
+<span class="nc bnc" id="L850" title="All 2 branches missed.">        if (markers == null) {</span>
+<span class="nc" id="L851">            return true;</span>
+        }
+
+<span class="nc bnc" id="L854" title="All 2 branches missed.">        for (final int marker2 : markers) {</span>
+<span class="nc bnc" id="L855" title="All 2 branches missed.">            if (marker2 == marker) {</span>
+<span class="nc" id="L856">                return true;</span>
+            }
+        }
+
+<span class="nc" id="L860">        return false;</span>
+    }
+
+    public List&lt;AbstractSegment&gt; readSegments(final ByteSource byteSource, final int[] markers, final boolean returnAfterFirst)
+            throws ImagingException, IOException {
+<span class="nc" id="L865">        final List&lt;AbstractSegment&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L866">        final int[] sofnSegments = {</span>
+                // kJFIFMarker,
+                JpegConstants.SOF0_MARKER, JpegConstants.SOF1_MARKER, JpegConstants.SOF2_MARKER, JpegConstants.SOF3_MARKER, JpegConstants.SOF5_MARKER,
+                JpegConstants.SOF6_MARKER, JpegConstants.SOF7_MARKER, JpegConstants.SOF9_MARKER, JpegConstants.SOF10_MARKER, JpegConstants.SOF11_MARKER,
+                JpegConstants.SOF13_MARKER, JpegConstants.SOF14_MARKER, JpegConstants.SOF15_MARKER, };
+
+<span class="nc" id="L872">        final JpegUtils.Visitor visitor = new JpegUtils.Visitor() {</span>
+            // return false to exit before reading image data.
+            @Override
+            public boolean beginSos() {
+<span class="nc" id="L876">                return false;</span>
+            }
+
+            // return false to exit traversal.
+            @Override
+            public boolean visitSegment(final int marker, final byte[] markerBytes, final int markerLength, final byte[] markerLengthBytes,
+                    final byte[] segmentData) throws ImagingException, IOException {
+<span class="nc bnc" id="L883" title="All 2 branches missed.">                if (marker == JpegConstants.EOI_MARKER) {</span>
+<span class="nc" id="L884">                    return false;</span>
+                }
+
+                // Debug.debug(&quot;visitSegment marker&quot;, marker);
+                // // Debug.debug(&quot;visitSegment keepMarker(marker, markers)&quot;,
+                // keepMarker(marker, markers));
+                // Debug.debug(&quot;visitSegment keepMarker(marker, markers)&quot;,
+                // keepMarker(marker, markers));
+
+<span class="nc bnc" id="L893" title="All 2 branches missed.">                if (!keepMarker(marker, markers)) {</span>
+<span class="nc" id="L894">                    return true;</span>
+                }
+
+<span class="nc bnc" id="L897" title="All 5 branches missed.">                switch (marker) {</span>
+                case JpegConstants.JPEG_APP13_MARKER:
+                    // Debug.debug(&quot;app 13 segment data&quot;, segmentData.length);
+<span class="nc" id="L900">                    result.add(new App13Segment(marker, segmentData));</span>
+<span class="nc" id="L901">                    break;</span>
+                case JpegConstants.JPEG_APP14_MARKER:
+<span class="nc" id="L903">                    result.add(new App14Segment(marker, segmentData));</span>
+<span class="nc" id="L904">                    break;</span>
+                case JpegConstants.JPEG_APP2_MARKER:
+<span class="nc" id="L906">                    result.add(new App2Segment(marker, segmentData));</span>
+<span class="nc" id="L907">                    break;</span>
+                case JpegConstants.JFIF_MARKER:
+<span class="nc" id="L909">                    result.add(new JfifSegment(marker, segmentData));</span>
+<span class="nc" id="L910">                    break;</span>
+                default:
+<span class="nc bnc" id="L912" title="All 2 branches missed.">                    if (Arrays.binarySearch(sofnSegments, marker) &gt;= 0) {</span>
+<span class="nc" id="L913">                        result.add(new SofnSegment(marker, segmentData));</span>
+<span class="nc bnc" id="L914" title="All 2 branches missed.">                    } else if (marker == JpegConstants.DQT_MARKER) {</span>
+<span class="nc" id="L915">                        result.add(new DqtSegment(marker, segmentData));</span>
+<span class="nc bnc" id="L916" title="All 4 branches missed.">                    } else if (marker &gt;= JpegConstants.JPEG_APP1_MARKER &amp;&amp; marker &lt;= JpegConstants.JPEG_APP15_MARKER) {</span>
+<span class="nc" id="L917">                        result.add(new UnknownSegment(marker, segmentData));</span>
+<span class="nc bnc" id="L918" title="All 2 branches missed.">                    }  else if (marker == JpegConstants.PAT_MARKER) {</span>
+<span class="nc" id="L919">                        result.add(new PatSegment(marker, segmentData));</span>
+<span class="nc bnc" id="L920" title="All 2 branches missed.">                    } else if (marker == JpegConstants.COM_MARKER) {</span>
+<span class="nc" id="L921">                        result.add(new ComSegment(marker, segmentData));</span>
+                    }
+                    break;
+                }
+
+<span class="nc bnc" id="L926" title="All 2 branches missed.">                return !returnAfterFirst;</span>
+            }
+
+            @Override
+            public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+                // don't need image data
+<span class="nc" id="L932">            }</span>
+        };
+
+<span class="nc" id="L935">        new JpegUtils().traverseJfif(byteSource, visitor);</span>
+
+<span class="nc" id="L937">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DcxImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.dcx</a> &gt; <span class="el_source">DcxImageParser.java</span></div><h1>DcxImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.dcx;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.formats.pcx.PcxImageParser;
+import org.apache.commons.imaging.formats.pcx.PcxImagingParameters;
+
+public class DcxImageParser extends AbstractImageParser&lt;PcxImagingParameters&gt; {
+    private static final class DcxHeader {
+
+        public static final int DCX_ID = 0x3ADE68B1;
+        public final int id;
+        public final long[] pageTable;
+
+<span class="fc" id="L50">        DcxHeader(final int id, final long[] pageTable) {</span>
+<span class="fc" id="L51">            this.id = id;</span>
+<span class="fc" id="L52">            this.pageTable = pageTable;</span>
+<span class="fc" id="L53">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L56">            pw.println(&quot;DcxHeader&quot;);</span>
+<span class="nc" id="L57">            pw.println(&quot;Id: 0x&quot; + Integer.toHexString(id));</span>
+<span class="nc" id="L58">            pw.println(&quot;Pages: &quot; + pageTable.length);</span>
+<span class="nc" id="L59">            pw.println();</span>
+<span class="nc" id="L60">        }</span>
+    }
+
+    // See [BROEKN URL] http://www.fileformat.fine/format/pcx/egff.htm for documentation
+<span class="fc" id="L64">    private static final String DEFAULT_EXTENSION = ImageFormats.DCX.getDefaultExtension();</span>
+
+<span class="fc" id="L66">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.DCX.getExtensions();</span>
+
+    public DcxImageParser() {
+<span class="fc" id="L69">        super(ByteOrder.LITTLE_ENDIAN);</span>
+<span class="fc" id="L70">    }</span>
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L74">        readDcxHeader(byteSource).dump(pw);</span>
+<span class="nc" id="L75">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L80">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L85">        return new ImageFormat[] { ImageFormats.DCX };</span>
+    }
+
+    @Override
+    public List&lt;BufferedImage&gt; getAllBufferedImages(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="fc" id="L90">        final DcxHeader dcxHeader = readDcxHeader(byteSource);</span>
+<span class="fc" id="L91">        final List&lt;BufferedImage&gt; images = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L92">        final PcxImageParser pcxImageParser = new PcxImageParser();</span>
+<span class="pc bfc" id="L93" title="All 2 branches covered.">        for (final long element : dcxHeader.pageTable) {</span>
+<span class="fc" id="L94">            try (InputStream stream = byteSource.getInputStream(element)) {</span>
+<span class="nc" id="L95">                images.add(pcxImageParser.getBufferedImage(ByteSource.inputStream(stream, null), new PcxImagingParameters()));</span>
+            }
+        }
+<span class="fc" id="L98">        return images;</span>
+    }
+
+    @Override
+    public final BufferedImage getBufferedImage(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="fc" id="L103">        final List&lt;BufferedImage&gt; list = getAllBufferedImages(byteSource);</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        return list.isEmpty() ? null : list.get(0);</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L109">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public PcxImagingParameters getDefaultParameters() {
+<span class="nc" id="L114">        return new PcxImagingParameters();</span>
+    }
+
+    // FIXME should throw UOE
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L120">        return null;</span>
+    }
+
+    // FIXME should throw UOE
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L126">        return null;</span>
+    }
+
+    // FIXME should throw UOE
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L132">        return null;</span>
+    }
+
+    // FIXME should throw UOE
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L138">        return null;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L143">        return &quot;Dcx-Custom&quot;;</span>
+    }
+
+    private DcxHeader readDcxHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="fc" id="L147">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="fc" id="L148">            final int id = read4Bytes(&quot;Id&quot;, is, &quot;Not a Valid DCX File&quot;, getByteOrder());</span>
+<span class="fc" id="L149">            final int size = 1024;</span>
+<span class="fc" id="L150">            final List&lt;Long&gt; pageTable = Allocator.arrayList(size);</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">            for (int i = 0; i &lt; size; i++) {</span>
+<span class="fc" id="L152">                final long pageOffset = 0xFFFFffffL &amp; read4Bytes(&quot;PageTable&quot;, is, &quot;Not a Valid DCX File&quot;, getByteOrder());</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">                if (pageOffset == 0) {</span>
+<span class="fc" id="L154">                    break;</span>
+                }
+<span class="fc" id="L156">                pageTable.add(pageOffset);</span>
+            }
+
+<span class="fc bfc" id="L159" title="All 2 branches covered.">            if (id != DcxHeader.DCX_ID) {</span>
+<span class="fc" id="L160">                throw new ImagingException(&quot;Not a Valid DCX File: file id incorrect&quot;);</span>
+            }
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">            if (pageTable.size() == size) {</span>
+<span class="nc" id="L163">                throw new ImagingException(&quot;DCX page table not terminated by zero entry&quot;);</span>
+            }
+
+<span class="fc" id="L166">            final long[] pages = pageTable.stream().mapToLong(Long::longValue).toArray();</span>
+<span class="fc" id="L167">            return new DcxHeader(id, pages);</span>
+        }
+    }
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L173">        final int headerSize = 4 + 1024 * 4;</span>
+
+<span class="nc" id="L175">        final BinaryOutputStream bos = BinaryOutputStream.littleEndian(os);</span>
+<span class="nc" id="L176">        bos.write4Bytes(DcxHeader.DCX_ID);</span>
+        // Some apps may need a full 1024 entry table
+<span class="nc" id="L178">        bos.write4Bytes(headerSize);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        for (int i = 0; i &lt; 1023; i++) {</span>
+<span class="nc" id="L180">            bos.write4Bytes(0);</span>
+        }
+<span class="nc" id="L182">        new PcxImageParser().writeImage(src, bos, params);</span>
+<span class="nc" id="L183">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

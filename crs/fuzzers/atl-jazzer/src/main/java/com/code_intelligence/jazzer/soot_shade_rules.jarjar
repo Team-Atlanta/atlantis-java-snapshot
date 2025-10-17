@@ -1,0 +1,44 @@
+rule com.github.** soot.third_party.@0
+rule io.** soot.third_party.@0
+rule kotlin.** soot.third_party.@0
+rule net.** soot.third_party.@0
+rule nonapi.** soot.third_party.@0
+rule org.objectweb.** soot.third_party.@0
+
+rule android.** soot.third_party.@0
+rule org.gts3.** soot.third_party.@0
+rule jakarta.** soot.third_party.@0
+rule org.eclipse.** soot.third_party.@0
+rule org.slf4j.** soot.third_party.@0
+rule com.google.** soot.third_party.@0
+rule heros.** soot.third_party.@0
+rule beaver.** soot.third_party.@0
+rule google.** soot.third_party.@0
+
+rule jas.** soot.third_party.@0
+rule jasmin.** soot.third_party.@0
+
+rule java_cup.** soot.third_party.@0
+rule fj.** soot.third_party.@0
+rule javax.annotation.** soot.third_party.@0
+rule org.apache.commons.** soot.third_party.@0
+rule org.checkerframework.** soot.third_party.@0
+rule org.codehaus.** soot.third_party.@0
+rule org.eclipse.angus.** soot.third_party.@0
+rule org.glassfish.** soot.third_party.@0
+rule org.jf.** soot.third_party.@0
+rule org.xmlpull.** soot.third_party.@0
+rule polyglot.** soot.third_party.@0
+rule ppg.** soot.third_party.@0
+rule pxb.** soot.third_party.@0
+rule scm.** soot.third_party.@0
+rule tables.out.** soot.third_party.@0
+
+rule com.android.** soot.third_party.@0
+rule com.sun.** soot.third_party.@0
+rule com.thoughtworks.** soot.third_party.@0
+rule dalvik.** soot.third_party.@0
+rule javassist.** soot.third_party.@0
+rule javax.** soot.third_party.@0
+rule org.** soot.third_party.@0
+

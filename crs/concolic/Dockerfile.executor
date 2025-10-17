@@ -1,0 +1,122 @@
+FROM ghcr.io/blue9057/graal-deps:v1.0.0 AS graal_deps
+
+FROM ubuntu:20.04 AS espresso_builder
+ARG DEBIAN_FRONTEND=noninteractive
+
+ENV USER=root \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8 \
+    TZ=America/New_York
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    zip \
+    wget \
+    software-properties-common \
+    build-essential \
+    libstdc++-9-dev \
+    flex \
+    bison \
+    libpam0g \
+    libpam0g-dev \
+    libtool \
+    cmake \
+    libsystemd-dev
+
+# Python 3.12
+RUN add-apt-repository ppa:deadsnakes/ppa && \
+apt-get update && \
+apt-get -y install \
+    python3.12 \
+    python3.12-dev \
+    python3.12-venv && \
+python3.12 -m ensurepip --upgrade && \
+pip3.12 install virtualenv && \
+update-alternatives --install /usr/local/bin/python3 python3 /usr/bin/python3.12 99 && \
+update-alternatives --install /usr/local/bin/pip3 pip3 /usr/local/bin/pip3.12 99 && \
+update-alternatives --set python3 /usr/bin/python3.12 && \
+update-alternatives --set pip3 /usr/local/bin/pip3.12
+
+# copy mx
+COPY graal-concolic/mx /mx
+
+ENV PATH="/mx:$PATH"
+RUN echo Y | mx fetch-jdk labsjdk-ce-21
+RUN python3 -mpip install ninja_syntax
+
+# graal espresso
+COPY graal-concolic/graal-jdk-25-14 /graal-jdk
+
+WORKDIR /graal-jdk
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz
+RUN tar -xzvf cmake-3.31.6-linux-x86_64.tar.gz
+RUN cp -r cmake-3.31.6-linux-x86_64/* /usr/
+RUN rm -rf cmake-3.31.6-linux-x86_64
+
+WORKDIR /graal-jdk
+
+COPY graal-concolic/docker-scripts /docker-scripts
+RUN chmod +x /docker-scripts/*
+
+# put mx deps
+COPY --from=graal_deps /root/.mx /root/.mx
+
+ENV MODE="jvm-ce"
+ENV PREPARE_CMD="pushd /graal-jdk/espresso && mx --env=$MODE build --targets LLVM_TOOLCHAIN && mx --env $MODE create-generated-sources"
+RUN /docker-scripts/init_dev.sh /bin/bash -c "$PREPARE_CMD"
+ENV BUILD_CMD="pushd /graal-jdk/espresso && export MX_BUILD_EXPLODED=$MX_BUILD_EXPLODED && mx --env $MODE create-generated-sources && mx --env $MODE build"
+RUN /docker-scripts/init_dev.sh /bin/bash -c "$BUILD_CMD"
+
+# z3
+RUN cd /tmp && mkdir z3 && cd z3 \
+    echo "Installing Z3" && \
+    curl -L -O https://github.com/Z3Prover/z3/releases/download/z3-4.12.6/z3-4.12.6-x64-glibc-2.31.zip && \
+    unzip z3-4.12.6-x64-glibc-2.31.zip && \
+    cp z3-4.12.6-x64-glibc-2.31/bin/z3 /usr/bin/z3 && \
+    cp -R z3-4.12.6-x64-glibc-2.31/include /usr && \
+    cp z3-4.12.6-x64-glibc-2.31/bin/libz3.so /usr/lib/x86_64-linux-gnu/libz3.so && \
+    cp z3-4.12.6-x64-glibc-2.31/bin/libz3.so /usr/lib/libz3.so && \
+    cp z3-4.12.6-x64-glibc-2.31/bin/libz3.so /usr/lib/x86_64-linux-gnu/libz3.so.4 && \
+    cp z3-4.12.6-x64-glibc-2.31/bin/libz3.so /usr/lib/libz3.so.4 && \
+    cp z3-4.12.6-x64-glibc-2.31/bin/libz3java.so /usr/lib/libz3java.so && \
+    cp z3-4.12.6-x64-glibc-2.31/bin/com.microsoft.z3.jar /usr/lib
+
+## libcgroup
+RUN cd /tmp && mkdir libcgroup && cd libcgroup \
+    echo "Install libcgroup" && \
+    curl -L -O https://github.com/libcgroup/libcgroup/releases/download/v3.1.0/libcgroup-3.1.0.tar.gz && \
+    tar xzf libcgroup-3.1.0.tar.gz && \
+    cd libcgroup-3.1.0 && \
+    ./configure && \
+    make -j && \
+    make install
+
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib:/usr/local/lib/security
+
+
+# executor & provider
+
+COPY graal-concolic/executor /executor
+RUN cd /executor && \
+    JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build
+RUN pip3 install -r /executor/scripts/requirements.txt
+
+COPY graal-concolic/provider /provider
+RUN cd /provider && \
+    JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build
+
+# resources
+
+ENV JAVA_CRS_SRC=/app/crs-cp-java-test
+RUN mkdir -p $JAVA_CRS_SRC && chmod -R 0755 $JAVA_CRS_SRC
+
+COPY tests/resources ${JAVA_CRS_SRC}/
+COPY tests/*.py ${JAVA_CRS_SRC}/tests/
+
+RUN cd ${JAVA_CRS_SRC}/cp_test && \
+    JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build
+RUN cd ${JAVA_CRS_SRC}/cp_test_fdp && \
+    JAVA_HOME=/graal-jdk/sdk/mxbuild/linux-amd64/GRAALVM_ESPRESSO_JVM_CE_JAVA21/graalvm-espresso-jvm-ce-openjdk-21.0.2+13.1/ ./gradlew build
+
+WORKDIR ${JAVA_CRS_SRC}/

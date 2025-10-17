@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging</a> &gt; <span class="el_source">ImageInfo.java</span></div><h1>ImageInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+
+/**
+ * ImageInfo represents a collection of basic properties of an image, such as width, height, format, bit depth, etc.
+ */
+public class ImageInfo {
+
+<span class="nc" id="L31">    public enum ColorType {</span>
+<span class="nc" id="L32">        BW(&quot;Black and White&quot;), GRAYSCALE(&quot;Grayscale&quot;), RGB(&quot;RGB&quot;), CMYK(&quot;CMYK&quot;), YCbCr(&quot;YCbCr&quot;), YCCK(&quot;YCCK&quot;), YCC(&quot;YCC&quot;), OTHER(&quot;Other&quot;), UNKNOWN(&quot;Unknown&quot;);</span>
+
+        private final String description;
+
+<span class="nc" id="L36">        ColorType(final String description) {</span>
+<span class="nc" id="L37">            this.description = description;</span>
+<span class="nc" id="L38">        }</span>
+
+        @Override
+        public String toString() {
+<span class="nc" id="L42">            return description;</span>
+        }
+    }
+
+<span class="nc" id="L46">    public enum CompressionAlgorithm {</span>
+<span class="nc" id="L47">        UNKNOWN(&quot;Unknown&quot;), NONE(&quot;None&quot;), LZW(&quot;LZW&quot;), PACKBITS(&quot;PackBits&quot;), JPEG_TIFF_OBSOLETE(&quot;JPEG Obsolete (TIFF only)&quot;), JPEG(&quot;JPEG&quot;),</span>
+<span class="nc" id="L48">        RLE(&quot;RLE: Run-Length Encoding&quot;), ADAPTIVE_RLE(&quot;Adaptive RLE&quot;), PSD(&quot;Photoshop&quot;), PNG_FILTER(&quot;PNG Filter&quot;),</span>
+<span class="nc" id="L49">        CCITT_GROUP_3(&quot;CCITT Group 3 1-Dimensional Modified Huffman run-length encoding.&quot;), CCITT_GROUP_4(&quot;CCITT Group 4&quot;), CCITT_1D(&quot;CCITT 1D&quot;),</span>
+<span class="nc" id="L50">        DEFLATE(&quot;DEFLATE (ZIP)&quot;);</span>
+
+        private final String description;
+
+<span class="nc" id="L54">        CompressionAlgorithm(final String description) {</span>
+<span class="nc" id="L55">            this.description = description;</span>
+<span class="nc" id="L56">        }</span>
+
+        @Override
+        public String toString() {
+<span class="nc" id="L60">            return description;</span>
+        }
+    }
+
+<span class="nc" id="L64">    private static final Logger LOGGER = Logger.getLogger(ImageInfo.class.getName());</span>
+
+    private final String formatDetails; // version
+
+    private final int bitsPerPixel;
+    private final List&lt;String&gt; comments;
+
+    private final ImageFormat format;
+    private final String formatName;
+    private final int height;
+    private final String mimeType;
+
+    private final int numberOfImages;
+    private final int physicalHeightDpi;
+    private final float physicalHeightInch;
+    private final int physicalWidthDpi;
+    private final float physicalWidthInch;
+    private final int width;
+    private final boolean progressive;
+    private final boolean transparent;
+
+    private final boolean usesPalette;
+
+    private final ColorType colorType;
+
+    private final CompressionAlgorithm compressionAlgorithm;
+
+    public ImageInfo(final String formatDetails, final int bitsPerPixel, final List&lt;String&gt; comments, final ImageFormat format, final String formatName,
+            final int height, final String mimeType, final int numberOfImages, final int physicalHeightDpi, final float physicalHeightInch,
+            final int physicalWidthDpi, final float physicalWidthInch, final int width, final boolean progressive, final boolean transparent,
+<span class="nc" id="L94">            final boolean usesPalette, final ColorType colorType, final CompressionAlgorithm compressionAlgorithm) {</span>
+<span class="nc" id="L95">        this.formatDetails = formatDetails;</span>
+
+<span class="nc" id="L97">        this.bitsPerPixel = bitsPerPixel;</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        this.comments = comments == null ? Collections.emptyList() : Collections.unmodifiableList(comments);</span>
+
+<span class="nc" id="L100">        this.format = format;</span>
+<span class="nc" id="L101">        this.formatName = formatName;</span>
+<span class="nc" id="L102">        this.height = height;</span>
+<span class="nc" id="L103">        this.mimeType = mimeType;</span>
+
+<span class="nc" id="L105">        this.numberOfImages = numberOfImages;</span>
+<span class="nc" id="L106">        this.physicalHeightDpi = physicalHeightDpi;</span>
+<span class="nc" id="L107">        this.physicalHeightInch = physicalHeightInch;</span>
+<span class="nc" id="L108">        this.physicalWidthDpi = physicalWidthDpi;</span>
+<span class="nc" id="L109">        this.physicalWidthInch = physicalWidthInch;</span>
+<span class="nc" id="L110">        this.width = width;</span>
+<span class="nc" id="L111">        this.progressive = progressive;</span>
+
+<span class="nc" id="L113">        this.transparent = transparent;</span>
+<span class="nc" id="L114">        this.usesPalette = usesPalette;</span>
+
+<span class="nc" id="L116">        this.colorType = colorType;</span>
+<span class="nc" id="L117">        this.compressionAlgorithm = compressionAlgorithm;</span>
+<span class="nc" id="L118">    }</span>
+
+    public void dump() {
+<span class="nc" id="L121">        LOGGER.fine(toString());</span>
+<span class="nc" id="L122">    }</span>
+
+    /**
+     * Returns the bits per pixel of the image data.
+     *
+     * @return bits per pixel of the image data.
+     */
+    public int getBitsPerPixel() {
+<span class="nc" id="L130">        return bitsPerPixel;</span>
+    }
+
+    /**
+     * Returns the {@link org.apache.commons.imaging.ImageInfo.ColorType} of the image.
+     *
+     * @return image color type.
+     */
+    public ColorType getColorType() {
+<span class="nc" id="L139">        return colorType;</span>
+    }
+
+    /**
+     * Returns a list of comments from the image file.
+     *
+     * &lt;p&gt;
+     * This is mostly obsolete.
+     * &lt;/p&gt;
+     *
+     * @return A list of comments.
+     */
+    public List&lt;String&gt; getComments() {
+<span class="nc" id="L152">        return new ArrayList&lt;&gt;(comments);</span>
+    }
+
+    /**
+     * Returns a description of the compression algorithm, if any.
+     *
+     * @return compression algorithm description.
+     */
+    public CompressionAlgorithm getCompressionAlgorithm() {
+<span class="nc" id="L161">        return compressionAlgorithm;</span>
+    }
+
+    /**
+     * Returns the image file format, ie. ImageFormat.IMAGE_FORMAT_PNG.
+     *
+     * &lt;p&gt;
+     * Returns ImageFormat.IMAGE_FORMAT_UNKNOWN if format is unknown.
+     * &lt;/p&gt;
+     *
+     * @return a constant defined in ImageFormat.
+     * @see ImageFormats
+     */
+    public ImageFormat getFormat() {
+<span class="nc" id="L175">        return format;</span>
+    }
+
+    /**
+     * Returns a description of the file format, ie. format version.
+     *
+     * @return file format description.
+     */
+    public String getFormatDetails() {
+<span class="nc" id="L184">        return formatDetails;</span>
+    }
+
+    /**
+     * Returns a string with the name of the image file format.
+     *
+     * @return the name of the image file format.
+     * @see #getFormat()
+     */
+    public String getFormatName() {
+<span class="nc" id="L194">        return formatName;</span>
+    }
+
+    /**
+     * Returns the height of the image in pixels.
+     *
+     * @return image height in pixels.
+     * @see #getWidth()
+     */
+    public int getHeight() {
+<span class="nc" id="L204">        return height;</span>
+    }
+
+    /**
+     * Returns the MIME type of the image.
+     *
+     * @return image MIME type.
+     * @see #getFormat()
+     */
+    public String getMimeType() {
+<span class="nc" id="L214">        return mimeType;</span>
+    }
+
+    /**
+     * Returns the number of images in the file.
+     *
+     * &lt;p&gt;
+     * Applies mostly to GIF and TIFF; reading PSD/Photoshop layers is not supported, and Jpeg/JFIF EXIF thumbnails are not included in this count.
+     * &lt;/p&gt;
+     *
+     * @return number of images in the file.
+     */
+    public int getNumberOfImages() {
+<span class="nc" id="L227">        return numberOfImages;</span>
+    }
+
+    /**
+     * Returns horizontal dpi of the image, if available.
+     *
+     * &lt;p&gt;
+     * Applies to TIFF (optional), BMP (always), GIF (constant: 72), Jpeg (optional), PNG (optional), PNM (constant: 72), PSD/Photoshop (constant: 72).
+     * &lt;/p&gt;
+     *
+     * @return returns -1 if not present.
+     */
+    public int getPhysicalHeightDpi() {
+<span class="nc" id="L240">        return physicalHeightDpi;</span>
+    }
+
+    /**
+     * Returns physical height of the image in inches, if available.
+     *
+     * &lt;p&gt;
+     * Applies to TIFF (optional), BMP (always), GIF (constant: 72), Jpeg (optional), PNG (optional), PNM (constant: 72), PSD/Photoshop (constant: 72).
+     * &lt;/p&gt;
+     *
+     * @return returns -1 if not present.
+     */
+    public float getPhysicalHeightInch() {
+<span class="nc" id="L253">        return physicalHeightInch;</span>
+    }
+
+    /**
+     * Returns vertical dpi of the image, if available.
+     *
+     * &lt;p&gt;
+     * Applies to TIFF (optional), BMP (always), GIF (constant: 72), Jpeg (optional), PNG (optional), PNM (constant: 72), PSD/Photoshop (constant: 72).
+     * &lt;/p&gt;
+     *
+     * @return returns -1 if not present.
+     */
+    public int getPhysicalWidthDpi() {
+<span class="nc" id="L266">        return physicalWidthDpi;</span>
+    }
+
+    /**
+     * Returns physical width of the image in inches, if available.
+     *
+     * &lt;p&gt;
+     * Applies to TIFF (optional), BMP (always), GIF (constant: 72), Jpeg (optional), PNG (optional), PNM (constant: 72), PSD/Photoshop (constant: 72).
+     * &lt;/p&gt;
+     *
+     * @return returns -1 if not present.
+     */
+    public float getPhysicalWidthInch() {
+<span class="nc" id="L279">        return physicalWidthInch;</span>
+    }
+
+    /**
+     * Returns the width of the image in pixels.
+     *
+     * @return image width in pixels.
+     * @see #getHeight()
+     */
+    public int getWidth() {
+<span class="nc" id="L289">        return width;</span>
+    }
+
+    /**
+     * Returns true if the image is progressive or interlaced.
+     *
+     * @return {@code true} if the image is progressive or interlaced, {@code false} otherwise.
+     */
+    public boolean isProgressive() {
+<span class="nc" id="L298">        return progressive;</span>
+    }
+
+    /**
+     * Returns true if the image has transparency.
+     *
+     * @return {@code true} if the image has transparency, {@code false} otherwise.
+     */
+    public boolean isTransparent() {
+<span class="nc" id="L307">        return transparent;</span>
+    }
+
+    @Override
+    public String toString() {
+        try {
+<span class="nc" id="L313">            final StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L314">            final PrintWriter pw = new PrintWriter(sw);</span>
+
+<span class="nc" id="L316">            toString(pw, &quot;&quot;);</span>
+<span class="nc" id="L317">            pw.flush();</span>
+
+<span class="nc" id="L319">            return sw.toString();</span>
+<span class="nc" id="L320">        } catch (final Exception e) {</span>
+<span class="nc" id="L321">            return &quot;Image Data: Error&quot;;</span>
+        }
+    }
+
+    public void toString(final PrintWriter pw, final String prefix) {
+<span class="nc" id="L326">        pw.println(&quot;Format Details: &quot; + formatDetails);</span>
+
+<span class="nc" id="L328">        pw.println(&quot;Bits Per Pixel: &quot; + bitsPerPixel);</span>
+<span class="nc" id="L329">        pw.println(&quot;Comments: &quot; + comments.size());</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">        for (int i = 0; i &lt; comments.size(); i++) {</span>
+<span class="nc" id="L331">            final String s = comments.get(i);</span>
+<span class="nc" id="L332">            pw.println(&quot;\t&quot; + i + &quot;: '&quot; + s + &quot;'&quot;);</span>
+
+        }
+<span class="nc" id="L335">        pw.println(&quot;Format: &quot; + format.getName());</span>
+<span class="nc" id="L336">        pw.println(&quot;Format Name: &quot; + formatName);</span>
+<span class="nc" id="L337">        pw.println(&quot;Compression Algorithm: &quot; + compressionAlgorithm);</span>
+<span class="nc" id="L338">        pw.println(&quot;Height: &quot; + height);</span>
+<span class="nc" id="L339">        pw.println(&quot;MimeType: &quot; + mimeType);</span>
+<span class="nc" id="L340">        pw.println(&quot;Number Of Images: &quot; + numberOfImages);</span>
+<span class="nc" id="L341">        pw.println(&quot;Physical Height Dpi: &quot; + physicalHeightDpi);</span>
+<span class="nc" id="L342">        pw.println(&quot;Physical Height Inch: &quot; + physicalHeightInch);</span>
+<span class="nc" id="L343">        pw.println(&quot;Physical Width Dpi: &quot; + physicalWidthDpi);</span>
+<span class="nc" id="L344">        pw.println(&quot;Physical Width Inch: &quot; + physicalWidthInch);</span>
+<span class="nc" id="L345">        pw.println(&quot;Width: &quot; + width);</span>
+<span class="nc" id="L346">        pw.println(&quot;Is Progressive: &quot; + progressive);</span>
+<span class="nc" id="L347">        pw.println(&quot;Is Transparent: &quot; + transparent);</span>
+
+<span class="nc" id="L349">        pw.println(&quot;Color Type: &quot; + colorType.toString());</span>
+<span class="nc" id="L350">        pw.println(&quot;Uses Palette: &quot; + usesPalette);</span>
+
+<span class="nc" id="L352">        pw.flush();</span>
+
+<span class="nc" id="L354">    }</span>
+
+    /**
+     * Returns true if the image uses a palette.
+     *
+     * @return {@code true} if the image uses a palette, {@code false} otherwise.
+     */
+    public boolean usesPalette() {
+<span class="nc" id="L362">        return usesPalette;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

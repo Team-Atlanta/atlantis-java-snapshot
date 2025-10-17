@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TagInfoGpsText.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.taginfos</a> &gt; <span class="el_source">TagInfoGpsText.java</span></div><h1>TagInfoGpsText.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.taginfos;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryType;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+import org.apache.commons.imaging.internal.Debug;
+
+/**
+ * Used by some GPS tags and the EXIF user comment tag, this badly documented value is meant to contain the text encoding in the first 8 bytes followed by the
+ * non-null-terminated text in an unknown byte order.
+ */
+public final class TagInfoGpsText extends TagInfo {
+
+    private static final class TextEncoding {
+        final byte[] prefix;
+        public final String encodingName;
+
+<span class="fc" id="L41">        TextEncoding(final byte[] prefix, final String encodingName) {</span>
+<span class="fc" id="L42">            this.prefix = prefix;</span>
+<span class="fc" id="L43">            this.encodingName = encodingName;</span>
+<span class="fc" id="L44">        }</span>
+    }
+
+<span class="fc" id="L47">    private static final TagInfoGpsText.TextEncoding TEXT_ENCODING_ASCII = new TextEncoding(new byte[] { 0x41, 0x53, 0x43, 0x49, 0x49, 0x00, 0x00, 0x00, },</span>
+<span class="fc" id="L48">            StandardCharsets.US_ASCII.name()); // ITU-T T.50 IA5</span>
+<span class="fc" id="L49">    private static final TagInfoGpsText.TextEncoding TEXT_ENCODING_JIS = new TextEncoding(new byte[] { 0x4A, 0x49, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, },</span>
+            &quot;JIS&quot;); // JIS X208-1990
+<span class="fc" id="L51">    private static final TagInfoGpsText.TextEncoding TEXT_ENCODING_UNICODE_LE = new TextEncoding(new byte[] { 0x55, 0x4E, 0x49, 0x43, 0x4F, 0x44, 0x45, 0x00 },</span>
+<span class="fc" id="L52">            StandardCharsets.UTF_16LE.name()); // Unicode Standard</span>
+<span class="fc" id="L53">    private static final TagInfoGpsText.TextEncoding TEXT_ENCODING_UNICODE_BE = new TextEncoding(new byte[] { 0x55, 0x4E, 0x49, 0x43, 0x4F, 0x44, 0x45, 0x00 },</span>
+<span class="fc" id="L54">            StandardCharsets.UTF_16BE.name()); // Unicode Standard</span>
+<span class="fc" id="L55">    private static final TagInfoGpsText.TextEncoding TEXT_ENCODING_UNDEFINED = new TextEncoding(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },</span>
+            // Try to interpret an undefined text as ISO-8859-1 (Latin)
+<span class="fc" id="L57">            StandardCharsets.ISO_8859_1.name()); // Undefined</span>
+
+<span class="fc" id="L59">    private static final TagInfoGpsText.TextEncoding[] TEXT_ENCODINGS = { TEXT_ENCODING_ASCII, //</span>
+            TEXT_ENCODING_JIS, //
+            TEXT_ENCODING_UNICODE_LE, //
+            TEXT_ENCODING_UNICODE_BE, //
+            TEXT_ENCODING_UNDEFINED, //
+    };
+
+    public TagInfoGpsText(final String name, final int tag, final TiffDirectoryType exifDirectory) {
+<span class="fc" id="L67">        super(name, tag, AbstractFieldType.UNDEFINED, LENGTH_UNKNOWN, exifDirectory);</span>
+<span class="fc" id="L68">    }</span>
+
+    @Override
+    public byte[] encodeValue(final AbstractFieldType abstractFieldType, final Object value, final ByteOrder byteOrder) throws ImagingException {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (!(value instanceof String)) {</span>
+<span class="nc" id="L73">            throw new ImagingException(&quot;GPS text value not String&quot;, value);</span>
+        }
+<span class="nc" id="L75">        final String s = (String) value;</span>
+
+        try {
+            // try ASCII, with NO prefix.
+<span class="nc" id="L79">            final byte[] asciiBytes = s.getBytes(TEXT_ENCODING_ASCII.encodingName);</span>
+<span class="nc" id="L80">            final String decodedAscii = new String(asciiBytes, TEXT_ENCODING_ASCII.encodingName);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (decodedAscii.equals(s)) {</span>
+                // no unicode/non-ascii values.
+<span class="nc" id="L83">                final byte[] result = Allocator.byteArray(asciiBytes.length + TEXT_ENCODING_ASCII.prefix.length);</span>
+<span class="nc" id="L84">                System.arraycopy(TEXT_ENCODING_ASCII.prefix, 0, result, 0, TEXT_ENCODING_ASCII.prefix.length);</span>
+<span class="nc" id="L85">                System.arraycopy(asciiBytes, 0, result, TEXT_ENCODING_ASCII.prefix.length, asciiBytes.length);</span>
+<span class="nc" id="L86">                return result;</span>
+            }
+            // use Unicode
+            final TextEncoding encoding;
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L91">                encoding = TEXT_ENCODING_UNICODE_BE;</span>
+            } else {
+<span class="nc" id="L93">                encoding = TEXT_ENCODING_UNICODE_LE;</span>
+            }
+<span class="nc" id="L95">            final byte[] unicodeBytes = s.getBytes(encoding.encodingName);</span>
+<span class="nc" id="L96">            final byte[] result = Allocator.byteArray(unicodeBytes.length + encoding.prefix.length);</span>
+<span class="nc" id="L97">            System.arraycopy(encoding.prefix, 0, result, 0, encoding.prefix.length);</span>
+<span class="nc" id="L98">            System.arraycopy(unicodeBytes, 0, result, encoding.prefix.length, unicodeBytes.length);</span>
+<span class="nc" id="L99">            return result;</span>
+<span class="nc" id="L100">        } catch (final UnsupportedEncodingException e) {</span>
+<span class="nc" id="L101">            throw new ImagingException(e.getMessage(), e);</span>
+        }
+    }
+
+    @Override
+    public String getValue(final TiffField entry) throws ImagingException {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if (entry.getFieldType() == AbstractFieldType.ASCII) {</span>
+<span class="nc" id="L108">            final Object object = AbstractFieldType.ASCII.getValue(entry);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">            if (object instanceof String) {</span>
+<span class="nc" id="L110">                return (String) object;</span>
+            }
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            if (object instanceof String[]) {</span>
+                // Use of arrays with the ASCII type
+                // should be extremely rare, and use of
+                // ASCII type in GPS fields should be
+                // forbidden. So assume the 2 never happen
+                // together and return incomplete strings if they do.
+<span class="nc" id="L118">                return ((String[]) object)[0];</span>
+            }
+<span class="nc" id="L120">            throw new ImagingException(&quot;Unexpected ASCII type decoded&quot;);</span>
+        }
+<span class="nc bnc" id="L122" title="All 4 branches missed.">        if (entry.getFieldType() != AbstractFieldType.UNDEFINED &amp;&amp; entry.getFieldType() != AbstractFieldType.BYTE) {</span>
+<span class="nc" id="L123">            Debug.debug(&quot;entry.type: &quot; + entry.getFieldType());</span>
+<span class="nc" id="L124">            Debug.debug(&quot;entry.directoryType: &quot; + entry.getDirectoryType());</span>
+<span class="nc" id="L125">            Debug.debug(&quot;entry.type: &quot; + entry.getDescriptionWithoutValue());</span>
+<span class="nc" id="L126">            Debug.debug(&quot;entry.type: &quot; + entry.getFieldType());</span>
+<span class="nc" id="L127">            throw new ImagingException(&quot;GPS text field not encoded as bytes.&quot;);</span>
+        }
+
+<span class="nc" id="L130">        final byte[] bytes = entry.getByteArrayValue();</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (bytes.length &lt; 8) {</span>
+            // try ASCII, with NO prefix.
+<span class="nc" id="L133">            return new String(bytes, StandardCharsets.US_ASCII);</span>
+        }
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        for (final TextEncoding encoding : TEXT_ENCODINGS) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            if (BinaryFunctions.compareBytes(bytes, 0, encoding.prefix, 0, encoding.prefix.length)) {</span>
+                try {
+<span class="nc" id="L139">                    final String decodedString = new String(bytes, encoding.prefix.length, bytes.length - encoding.prefix.length, encoding.encodingName);</span>
+<span class="nc" id="L140">                    final byte[] reEncodedBytes = decodedString.getBytes(encoding.encodingName);</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                    if (BinaryFunctions.compareBytes(bytes, encoding.prefix.length, reEncodedBytes, 0, reEncodedBytes.length)) {</span>
+<span class="nc" id="L142">                        return decodedString;</span>
+                    }
+<span class="nc" id="L144">                } catch (final UnsupportedEncodingException e) {</span>
+<span class="nc" id="L145">                    throw new ImagingException(e.getMessage(), e);</span>
+<span class="nc" id="L146">                }</span>
+            }
+        }
+
+        // try ASCII, with NO prefix.
+<span class="nc" id="L151">        return new String(bytes, StandardCharsets.US_ASCII);</span>
+    }
+
+    @Override
+    public boolean isText() {
+<span class="nc" id="L156">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "vuli"
+version = "0.1.0"
+description = "LLM based vulnerability detector."
+authors = ["skip"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pyyaml = "^6.0.2"
+psutil = "^6.1.1"
+requests = "^2.32.3"
+langchain-core = "^0.3.28"
+langchain-openai = "^0.2.14"
+langgraph = "^0.2.60"
+toml = "^0.10.2"
+networkx = "^3.4.2"
+langchain-anthropic = "^0.3.3"
+langchain-gemini = "^0.1.1"
+langchain-google-genai = "^2.0.9"
+tenacity = "^9.0.0"
+loguru = "^0.7.3"
+opentelemetry-api = "^1.31.1"
+opentelemetry-exporter-otlp-proto-grpc = "^1.31.1"
+coloredlogs = "^15.0.1"
+pyjson5 = "^1.6.8"
+libfdp = {path = "/app/crs-cp-java/libs/libFDP/libfdp"}
+unidiff = "^0.7.5"
+chardet = "^5.2.0"
+aiofiles = "^24.1.0"
+asyncstdlib = "^3.13.1"
+aiohttp = "^3.12.10"
+redis = "^6.2.0"
+aiosqlite = "^0.21.0"
+
+[tool.poetry.group.crs.dependencies]
+libcrs = {path = "/app/crs-cp-java/libs/libCRS"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+black = "^24.10.0"
+pytest-asyncio = "^0.26.0"
+pytest-timeout = "^2.3.1"
+flask = "^3.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+skip-string-normalization = false
+target-version = ["py312"]
+include = '\.pyi?$'

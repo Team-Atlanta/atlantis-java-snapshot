@@ -1,0 +1,48 @@
+[fuzzy.cpv_0]
+path = "repo/src/main/java/me/xdrop/fuzzywuzzy/Config.java"
+line = 84
+class_name = "me.xdrop.fuzzywuzzy.Config"
+harness = ["FuzzyOne", "FuzzyOneFDP"]
+
+[jenkins.cpv_5]
+path = "repo/src/main/java/io/jenkins/plugins/toyplugin/UserNameAction.java"
+line = 74
+class_name = "io.jenkins.plugins.toyplugin.UserNameAction"
+harness = ["JenkinsThree", "JenkinsThreeFDP"]
+
+[pac4j.cpv_0]
+path = "repo/src/main/java/org/pac4j/core/util/JavaSerializationHelper.java"
+line = 82
+class_name = "org.pac4j.core.util.JavaSerializationHelper"
+harness = ["Pac4jOne", "Pac4jOneFDP"]
+
+[r1-zookeeper.cpv_3]
+path = "repo/src/main/java/org/apache/zookeeper/server/DataTree.java"
+line = 1077
+class_name = "org.apache.zookeeper.server.DataTree"
+harness = "MultiProcessTxnFuzzer"
+
+[r1-zookeeper.cpv_4]
+path = "repo/src/main/java/org/apache/zookeeper/server/DataTree.java"
+line = 2182
+class_name = "org.apache.zookeeper.server.DataTree"
+harness = "MultiProcessTxnFuzzer"
+
+[r2-apache-commons-compress.cpv_3]
+path = "repo/src/main/java/org/apache/commons/compress/archivers/examples/Expander.java"
+line = 86
+class_name = "org.apache.commons.compress.archivers.examples.Expander"
+harness = "ExpanderFuzzer"
+
+[rdf4j.cpv_2]
+path = "repo/src/main/java/org/eclipse/rdf4j/common/io/IOUtil.java"
+line = 387
+class_name = "org.eclipse.rdf4j.common.io.IOUtil"
+harness = ["Rdf4jOne", "Rdf4jOneFDP"]
+
+[tika.cpv_0]
+path = "repo/src/main/java/org/apache/tika/cli/TikaCLI.java"
+line = 1103
+class_name = "org.apache.tika.cli.TikaCLI$FileEmbeddedDocumentExtractor"
+harness = ["TikaOne", "TikaOneFDP"]
+

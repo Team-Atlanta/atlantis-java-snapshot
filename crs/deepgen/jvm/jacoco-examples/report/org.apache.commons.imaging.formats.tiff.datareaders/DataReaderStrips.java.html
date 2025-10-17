@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataReaderStrips.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.datareaders</a> &gt; <span class="el_source">DataReaderStrips.java</span></div><h1>DataReaderStrips.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.datareaders;
+
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_JPEG;
+
+import java.awt.Rectangle;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.ByteOrder;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.ImageBuilder;
+import org.apache.commons.imaging.formats.tiff.AbstractTiffImageData;
+import org.apache.commons.imaging.formats.tiff.TiffDirectory;
+import org.apache.commons.imaging.formats.tiff.TiffRasterData;
+import org.apache.commons.imaging.formats.tiff.TiffRasterDataFloat;
+import org.apache.commons.imaging.formats.tiff.TiffRasterDataInt;
+import org.apache.commons.imaging.formats.tiff.constants.TiffPlanarConfiguration;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.photometricinterpreters.PhotometricInterpreter;
+import org.apache.commons.imaging.formats.tiff.photometricinterpreters.PhotometricInterpreterRgb;
+
+/**
+ * Provides a data reader for TIFF file images organized by tiles.
+ * &lt;p&gt;
+ * See {@link ImageDataReader} for notes discussing design and development with particular emphasis on run-time performance.
+ */
+public final class DataReaderStrips extends ImageDataReader {
+
+    private final int bitsPerPixel;
+    private final int compression;
+    private final int rowsPerStrip;
+    private final TiffPlanarConfiguration planarConfiguration;
+    private final ByteOrder byteOrder;
+    private int x;
+    private int y;
+    private final AbstractTiffImageData.Strips imageData;
+
+    public DataReaderStrips(final TiffDirectory directory, final PhotometricInterpreter photometricInterpreter, final int bitsPerPixel,
+            final int[] bitsPerSample, final int predictor, final int samplesPerPixel, final int sampleFormat, final int width, final int height,
+            final int compression, final TiffPlanarConfiguration planarConfiguration, final ByteOrder byteOrder, final int rowsPerStrip,
+            final AbstractTiffImageData.Strips imageData) {
+<span class="nc" id="L59">        super(directory, photometricInterpreter, bitsPerSample, predictor, samplesPerPixel, sampleFormat, width, height, planarConfiguration);</span>
+
+<span class="nc" id="L61">        this.bitsPerPixel = bitsPerPixel;</span>
+<span class="nc" id="L62">        this.compression = compression;</span>
+<span class="nc" id="L63">        this.rowsPerStrip = rowsPerStrip;</span>
+<span class="nc" id="L64">        this.planarConfiguration = planarConfiguration;</span>
+<span class="nc" id="L65">        this.imageData = imageData;</span>
+<span class="nc" id="L66">        this.byteOrder = byteOrder;</span>
+<span class="nc" id="L67">    }</span>
+
+    private void interpretStrip(final ImageBuilder imageBuilder, final byte[] bytes, final int pixelsPerStrip, final int yLimit)
+            throws ImagingException, IOException {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (y &gt;= yLimit) {</span>
+<span class="nc" id="L72">            return;</span>
+        }
+
+        // changes added March 2020
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (sampleFormat == TiffTagConstants.SAMPLE_FORMAT_VALUE_IEEE_FLOATING_POINT) {</span>
+<span class="nc" id="L77">            int k = 0;</span>
+<span class="nc" id="L78">            int nRows = pixelsPerStrip / width;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (y + nRows &gt; yLimit) {</span>
+<span class="nc" id="L80">                nRows = yLimit - y;</span>
+            }
+<span class="nc" id="L82">            final int i0 = y;</span>
+<span class="nc" id="L83">            final int i1 = y + nRows;</span>
+<span class="nc" id="L84">            x = 0;</span>
+<span class="nc" id="L85">            y += nRows;</span>
+<span class="nc" id="L86">            final int[] samples = new int[1];</span>
+<span class="nc" id="L87">            final int[] b = unpackFloatingPointSamples(width, i1 - i0, width, bytes, bitsPerPixel, byteOrder);</span>
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            for (int i = i0; i &lt; i1; i++) {</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                for (int j = 0; j &lt; width; j++) {</span>
+<span class="nc" id="L91">                    samples[0] = b[k];</span>
+<span class="nc" id="L92">                    k += samplesPerPixel;</span>
+<span class="nc" id="L93">                    photometricInterpreter.interpretPixel(imageBuilder, samples, j, i);</span>
+                }
+            }
+
+<span class="nc" id="L97">            return;</span>
+        }
+
+        // changes added May 2012
+        // In the original implementation, a general-case bit reader called
+        // getSamplesAsBytes is used to retrieve the samples (raw data values)
+        // for each pixel in the strip. These samples are then passed into a
+        // photogrammetric interpreter that converts them to ARGB pixel values
+        // and stores them in the image. Because the bit-reader must handle
+        // a large number of formats, it involves several conditional
+        // branches that must be executed each time a pixel is read.
+        // Depending on the size of an image, the same evaluations must be
+        // executed redundantly thousands and perhaps millions of times
+        // in order to process the complete collection of pixels.
+        // This code attempts to remove that redundancy by
+        // evaluating the format up-front and bypassing the general-format
+        // code for two commonly used data formats: the 8 bits-per-pixel
+        // and 24 bits-per-pixel cases. For these formats, the
+        // special case code achieves substantial reductions in image-loading
+        // time. In other cases, it simply falls through to the original code
+        // and continues to read the data correctly as it did in previous
+        // versions of this class.
+        // In addition to bypassing the getBytesForSample() method,
+        // the 24-bit case also implements a special block for RGB
+        // formatted images. To get a sense of the contributions of each
+        // optimization (removing getSamplesAsBytes and removing the
+        // photometric interpreter), consider the following results from tests
+        // conducted with large TIFF images using the 24-bit RGB format
+        // bypass getSamplesAsBytes: 67.5 % reduction
+        // bypass both optimizations: 77.2 % reduction
+        //
+        //
+        // Future Changes
+        // Both of the 8-bit and 24-bit blocks make the assumption that a strip
+        // always begins on x = 0 and that each strip exactly fills out the rows
+        // it contains (no half rows). The original code did not make this
+        // assumption, but the approach is consistent with the TIFF 6.0 spec
+        // (1992),
+        // and should probably be considered as an enhancement to the
+        // original general-case code block that remains from the original
+        // implementation. Taking this approach saves one conditional
+        // operation per pixel or about 5 percent of the total run time
+        // in the 8 bits/pixel case.
+        // verify that all samples are one byte in size
+<span class="nc" id="L141">        final boolean allSamplesAreOneByte = isHomogenous(8);</span>
+
+<span class="nc bnc" id="L143" title="All 6 branches missed.">        if (predictor != 2 &amp;&amp; bitsPerPixel == 8 &amp;&amp; allSamplesAreOneByte) {</span>
+<span class="nc" id="L144">            int k = 0;</span>
+<span class="nc" id="L145">            int nRows = pixelsPerStrip / width;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            if (y + nRows &gt; yLimit) {</span>
+<span class="nc" id="L147">                nRows = yLimit - y;</span>
+            }
+<span class="nc" id="L149">            final int i0 = y;</span>
+<span class="nc" id="L150">            final int i1 = y + nRows;</span>
+<span class="nc" id="L151">            x = 0;</span>
+<span class="nc" id="L152">            y += nRows;</span>
+<span class="nc" id="L153">            final int[] samples = new int[1];</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            for (int i = i0; i &lt; i1; i++) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                for (int j = 0; j &lt; width; j++) {</span>
+<span class="nc" id="L156">                    samples[0] = bytes[k++] &amp; 0xff;</span>
+<span class="nc" id="L157">                    photometricInterpreter.interpretPixel(imageBuilder, samples, j, i);</span>
+                }
+            }
+<span class="nc" id="L160">            return;</span>
+        }
+<span class="nc bnc" id="L162" title="All 8 branches missed.">        if ((bitsPerPixel == 24 || bitsPerPixel == 32) &amp;&amp; allSamplesAreOneByte &amp;&amp; photometricInterpreter instanceof PhotometricInterpreterRgb) {</span>
+<span class="nc" id="L163">            int k = 0;</span>
+<span class="nc" id="L164">            int nRows = pixelsPerStrip / width;</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">            if (y + nRows &gt; yLimit) {</span>
+<span class="nc" id="L166">                nRows = yLimit - y;</span>
+            }
+<span class="nc" id="L168">            final int i0 = y;</span>
+<span class="nc" id="L169">            final int i1 = y + nRows;</span>
+<span class="nc" id="L170">            x = 0;</span>
+<span class="nc" id="L171">            y += nRows;</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">            if (predictor == TiffTagConstants.PREDICTOR_VALUE_HORIZONTAL_DIFFERENCING) {</span>
+<span class="nc" id="L173">                applyPredictorToBlock(width, nRows, samplesPerPixel, bytes);</span>
+            }
+
+<span class="nc bnc" id="L176" title="All 2 branches missed.">            if (bitsPerPixel == 24) {</span>
+                // 24 bit case, we don't mask the red byte because any
+                // sign-extended bits get covered by opacity mask
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                for (int i = i0; i &lt; i1; i++) {</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">                    for (int j = 0; j &lt; width; j++, k += 3) {</span>
+<span class="nc" id="L181">                        final int rgb = 0xff000000 | bytes[k] &lt;&lt; 16 | (bytes[k + 1] &amp; 0xff) &lt;&lt; 8 | bytes[k + 2] &amp; 0xff;</span>
+<span class="nc" id="L182">                        imageBuilder.setRgb(j, i, rgb);</span>
+                    }
+                }
+            } else {
+                // 32 bit case, we don't mask the high byte because any
+                // sign-extended bits get shifted up and out of result
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                for (int i = i0; i &lt; i1; i++) {</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">                    for (int j = 0; j &lt; width; j++, k += 4) {</span>
+<span class="nc" id="L190">                        final int rgb = (bytes[k] &amp; 0xff) &lt;&lt; 16 | (bytes[k + 1] &amp; 0xff) &lt;&lt; 8 | bytes[k + 2] &amp; 0xff | bytes[k + 3] &lt;&lt; 24;</span>
+<span class="nc" id="L191">                        imageBuilder.setRgb(j, i, rgb);</span>
+                    }
+                }
+            }
+
+<span class="nc" id="L196">            return;</span>
+        }
+
+        // original code before May 2012 modification
+        // this logic will handle all cases not conforming to the
+        // special case handled above
+<span class="nc" id="L202">        try (BitInputStream bis = new BitInputStream(new ByteArrayInputStream(bytes), byteOrder)) {</span>
+
+<span class="nc" id="L204">            int[] samples = Allocator.intArray(bitsPerSampleLength);</span>
+<span class="nc" id="L205">            resetPredictor();</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            for (int i = 0; i &lt; pixelsPerStrip; i++) {</span>
+<span class="nc" id="L207">                getSamplesAsBytes(bis, samples);</span>
+
+<span class="nc bnc" id="L209" title="All 2 branches missed.">                if (x &lt; width) {</span>
+<span class="nc" id="L210">                    samples = applyPredictor(samples);</span>
+
+<span class="nc" id="L212">                    photometricInterpreter.interpretPixel(imageBuilder, samples, x, y);</span>
+                }
+
+<span class="nc" id="L215">                x++;</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">                if (x &gt;= width) {</span>
+<span class="nc" id="L217">                    x = 0;</span>
+<span class="nc" id="L218">                    resetPredictor();</span>
+<span class="nc" id="L219">                    y++;</span>
+<span class="nc" id="L220">                    bis.flushCache();</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">                    if (y &gt;= yLimit) {</span>
+<span class="nc" id="L222">                        break;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L227">    }</span>
+
+    @Override
+    public ImageBuilder readImageData(final Rectangle subImageSpecification, final boolean hasAlpha, final boolean isAlphaPreMultiplied)
+            throws IOException, ImagingException {
+
+        final Rectangle subImage;
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (subImageSpecification == null) {</span>
+            // configure subImage to read entire image
+<span class="nc" id="L236">            subImage = new Rectangle(0, 0, width, height);</span>
+        } else {
+<span class="nc" id="L238">            subImage = subImageSpecification;</span>
+        }
+
+        // the legacy code is optimized to the reading of whole
+        // strips (except for the last strip in the image, which can
+        // be a partial). So create a working image with compatible
+        // dimensions and read that. Later on, the working image
+        // will be sub-imaged to the proper size.
+        // strip0 and strip1 give the indices of the strips containing
+        // the first and last rows of pixels in the subimage
+<span class="nc" id="L248">        final int strip0 = subImage.y / rowsPerStrip;</span>
+<span class="nc" id="L249">        final int strip1 = (subImage.y + subImage.height - 1) / rowsPerStrip;</span>
+<span class="nc" id="L250">        final int workingHeight = (strip1 - strip0 + 1) * rowsPerStrip;</span>
+
+        // the legacy code uses a member element &quot;y&quot; to keep track
+        // of the row index of the output image that is being processed
+        // by interpretStrip. y is set to zero before the first
+        // call to interpretStrip. y0 will be the index of the first row
+        // in the full image (the source image) that will be processed.
+<span class="nc" id="L257">        final int y0 = strip0 * rowsPerStrip;</span>
+<span class="nc" id="L258">        final int yLimit = subImage.y - y0 + subImage.height;</span>
+
+        // When processing a subimage, the workingBuilder height is set
+        // to be an integral multiple of the rowsPerStrip and
+        // the full width of the strips. So the working image may be larger than
+        // the specified size of the subimage. If necessary, the subimage
+        // is extracted from the workingBuilder at the end of this method.
+        // This approach avoids the need for the interpretStrips method
+        // to implement bounds checking for a subimage.
+<span class="nc" id="L267">        final ImageBuilder workingBuilder = new ImageBuilder(width, workingHeight, hasAlpha, isAlphaPreMultiplied);</span>
+
+        // the following statement accounts for cases where planar configuration
+        // is not specified and the default (CHUNKY) is assumed.
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        final boolean interleaved = planarConfiguration != TiffPlanarConfiguration.PLANAR;</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">        if (interleaved) {</span>
+            // Pixel definitions are organized in an interleaved format
+            // For example, red-green-blue values for each pixel
+            // would appear contiguous in input sequence.
+<span class="nc bnc" id="L276" title="All 2 branches missed.">            for (int strip = strip0; strip &lt;= strip1; strip++) {</span>
+<span class="nc" id="L277">                final long rowsPerStripLong = 0xFFFFffffL &amp; rowsPerStrip;</span>
+<span class="nc" id="L278">                final long rowsRemaining = height - strip * rowsPerStripLong;</span>
+<span class="nc" id="L279">                final long rowsInThisStrip = Math.min(rowsRemaining, rowsPerStripLong);</span>
+<span class="nc" id="L280">                final long bytesPerRow = (bitsPerPixel * width + 7) / 8;</span>
+<span class="nc" id="L281">                final long bytesPerStrip = rowsInThisStrip * bytesPerRow;</span>
+<span class="nc" id="L282">                final long pixelsPerStrip = rowsInThisStrip * width;</span>
+
+<span class="nc" id="L284">                final byte[] compressed = imageData.getImageData(strip).getData();</span>
+
+<span class="nc bnc" id="L286" title="All 2 branches missed.">                if (compression == TIFF_COMPRESSION_JPEG) {</span>
+<span class="nc" id="L287">                    final int yBlock = strip * rowsPerStrip;</span>
+<span class="nc" id="L288">                    final int yWork = yBlock - y0;</span>
+<span class="nc" id="L289">                    DataInterpreterJpeg.intepretBlock(directory, workingBuilder, 0, yWork, width, (int) rowsInThisStrip, compressed);</span>
+<span class="nc" id="L290">                    continue;</span>
+                }
+
+<span class="nc" id="L293">                final byte[] decompressed = decompress(compressed, compression, (int) bytesPerStrip, width, (int) rowsInThisStrip);</span>
+
+<span class="nc" id="L295">                interpretStrip(workingBuilder, decompressed, (int) pixelsPerStrip, yLimit);</span>
+            }
+        } else {
+            // pixel definitions are organized in a 3 separate sections of input
+            // sequence. For example, red-green-blue values would be given as
+            // red values for all pixels, followed by green values for all pixels,
+            // etc.
+<span class="nc bnc" id="L302" title="All 2 branches missed.">            if (compression == TIFF_COMPRESSION_JPEG) {</span>
+<span class="nc" id="L303">                throw new ImagingException(&quot;TIFF file in non-supported configuration: JPEG compression used in planar configuration.&quot;);</span>
+            }
+<span class="nc" id="L305">            final int nStripsInPlane = imageData.getImageDataLength() / 3;</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">            for (int strip = strip0; strip &lt;= strip1; strip++) {</span>
+<span class="nc" id="L307">                final long rowsPerStripLong = 0xFFFFffffL &amp; rowsPerStrip;</span>
+<span class="nc" id="L308">                final long rowsRemaining = height - strip * rowsPerStripLong;</span>
+<span class="nc" id="L309">                final long rowsInThisStrip = Math.min(rowsRemaining, rowsPerStripLong);</span>
+<span class="nc" id="L310">                final long bytesPerRow = (bitsPerPixel * width + 7) / 8;</span>
+<span class="nc" id="L311">                final long bytesPerStrip = rowsInThisStrip * bytesPerRow;</span>
+<span class="nc" id="L312">                final long pixelsPerStrip = rowsInThisStrip * width;</span>
+
+<span class="nc" id="L314">                final byte[] b = Allocator.byteArray((int) bytesPerStrip);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">                for (int iPlane = 0; iPlane &lt; 3; iPlane++) {</span>
+<span class="nc" id="L316">                    final int planeStrip = iPlane * nStripsInPlane + strip;</span>
+<span class="nc" id="L317">                    final byte[] compressed = imageData.getImageData(planeStrip).getData();</span>
+<span class="nc" id="L318">                    final byte[] decompressed = decompress(compressed, compression, (int) bytesPerStrip, width, (int) rowsInThisStrip);</span>
+<span class="nc" id="L319">                    int index = iPlane;</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">                    for (final byte element : decompressed) {</span>
+<span class="nc" id="L321">                        b[index] = element;</span>
+<span class="nc" id="L322">                        index += 3;</span>
+                    }
+                }
+<span class="nc" id="L325">                interpretStrip(workingBuilder, b, (int) pixelsPerStrip, height);</span>
+            }
+        }
+
+<span class="nc bnc" id="L329" title="All 8 branches missed.">        if (subImage.x == 0 &amp;&amp; subImage.y == y0 &amp;&amp; subImage.width == width &amp;&amp; subImage.height == workingHeight) {</span>
+            // the subimage exactly matches the ImageBuilder bounds
+            // so we can return that.
+<span class="nc" id="L332">            return workingBuilder;</span>
+        }
+<span class="nc" id="L334">        return workingBuilder.getSubset(subImage.x, subImage.y - y0, subImage.width, subImage.height);</span>
+    }
+
+    @Override
+    public TiffRasterData readRasterData(final Rectangle subImage) throws ImagingException, IOException {
+<span class="nc bnc" id="L339" title="All 3 branches missed.">        switch (sampleFormat) {</span>
+        case TiffTagConstants.SAMPLE_FORMAT_VALUE_IEEE_FLOATING_POINT:
+<span class="nc" id="L341">            return readRasterDataFloat(subImage);</span>
+        case TiffTagConstants.SAMPLE_FORMAT_VALUE_TWOS_COMPLEMENT_SIGNED_INTEGER:
+<span class="nc" id="L343">            return readRasterDataInt(subImage);</span>
+        default:
+<span class="nc" id="L345">            throw new ImagingException(&quot;Unsupported sample format, value=&quot; + sampleFormat);</span>
+        }
+    }
+
+    private TiffRasterData readRasterDataFloat(final Rectangle subImage) throws ImagingException, IOException {
+        int xRaster;
+        int yRaster;
+        int rasterWidth;
+        int rasterHeight;
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        if (subImage != null) {</span>
+<span class="nc" id="L355">            xRaster = subImage.x;</span>
+<span class="nc" id="L356">            yRaster = subImage.y;</span>
+<span class="nc" id="L357">            rasterWidth = subImage.width;</span>
+<span class="nc" id="L358">            rasterHeight = subImage.height;</span>
+        } else {
+<span class="nc" id="L360">            xRaster = 0;</span>
+<span class="nc" id="L361">            yRaster = 0;</span>
+<span class="nc" id="L362">            rasterWidth = width;</span>
+<span class="nc" id="L363">            rasterHeight = height;</span>
+        }
+
+<span class="nc" id="L366">        final float[] rasterDataFloat = Allocator.floatArray(rasterWidth * rasterHeight * samplesPerPixel);</span>
+
+        // the legacy code is optimized to the reading of whole
+        // strips (except for the last strip in the image, which can
+        // be a partial). So create a working image with compatible
+        // dimensions and read that. Later on, the working image
+        // will be sub-imaged to the proper size.
+        // strip0 and strip1 give the indices of the strips containing
+        // the first and last rows of pixels in the subimage
+<span class="nc" id="L375">        final int strip0 = yRaster / rowsPerStrip;</span>
+<span class="nc" id="L376">        final int strip1 = (yRaster + rasterHeight - 1) / rowsPerStrip;</span>
+
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        for (int strip = strip0; strip &lt;= strip1; strip++) {</span>
+<span class="nc" id="L379">            final int yStrip = strip * rowsPerStrip;</span>
+<span class="nc" id="L380">            final int rowsRemaining = height - yStrip;</span>
+<span class="nc" id="L381">            final int rowsInThisStrip = Math.min(rowsRemaining, rowsPerStrip);</span>
+<span class="nc" id="L382">            final int bytesPerRow = (bitsPerPixel * width + 7) / 8;</span>
+<span class="nc" id="L383">            final int bytesPerStrip = rowsInThisStrip * bytesPerRow;</span>
+
+<span class="nc" id="L385">            final byte[] compressed = imageData.getImageData(strip).getData();</span>
+<span class="nc" id="L386">            final byte[] decompressed = decompress(compressed, compression, bytesPerStrip, width, rowsInThisStrip);</span>
+
+<span class="nc" id="L388">            final int[] blockData = unpackFloatingPointSamples(width, rowsInThisStrip, width, decompressed, bitsPerPixel, byteOrder);</span>
+<span class="nc" id="L389">            transferBlockToRaster(0, yStrip, width, rowsInThisStrip, blockData, xRaster, yRaster, rasterWidth, rasterHeight, samplesPerPixel, rasterDataFloat);</span>
+        }
+<span class="nc" id="L391">        return new TiffRasterDataFloat(rasterWidth, rasterHeight, samplesPerPixel, rasterDataFloat);</span>
+    }
+
+    private TiffRasterData readRasterDataInt(final Rectangle subImage) throws ImagingException, IOException {
+        int xRaster;
+        int yRaster;
+        int rasterWidth;
+        int rasterHeight;
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        if (subImage != null) {</span>
+<span class="nc" id="L400">            xRaster = subImage.x;</span>
+<span class="nc" id="L401">            yRaster = subImage.y;</span>
+<span class="nc" id="L402">            rasterWidth = subImage.width;</span>
+<span class="nc" id="L403">            rasterHeight = subImage.height;</span>
+        } else {
+<span class="nc" id="L405">            xRaster = 0;</span>
+<span class="nc" id="L406">            yRaster = 0;</span>
+<span class="nc" id="L407">            rasterWidth = width;</span>
+<span class="nc" id="L408">            rasterHeight = height;</span>
+        }
+
+<span class="nc" id="L411">        final int[] rasterDataInt = Allocator.intArray(rasterWidth * rasterHeight);</span>
+
+        // the legacy code is optimized to the reading of whole
+        // strips (except for the last strip in the image, which can
+        // be a partial). So create a working image with compatible
+        // dimensions and read that. Later on, the working image
+        // will be sub-imaged to the proper size.
+        // strip0 and strip1 give the indices of the strips containing
+        // the first and last rows of pixels in the subimage
+<span class="nc" id="L420">        final int strip0 = yRaster / rowsPerStrip;</span>
+<span class="nc" id="L421">        final int strip1 = (yRaster + rasterHeight - 1) / rowsPerStrip;</span>
+
+<span class="nc bnc" id="L423" title="All 2 branches missed.">        for (int strip = strip0; strip &lt;= strip1; strip++) {</span>
+<span class="nc" id="L424">            final int yStrip = strip * rowsPerStrip;</span>
+<span class="nc" id="L425">            final int rowsRemaining = height - yStrip;</span>
+<span class="nc" id="L426">            final int rowsInThisStrip = Math.min(rowsRemaining, rowsPerStrip);</span>
+<span class="nc" id="L427">            final int bytesPerRow = (bitsPerPixel * width + 7) / 8;</span>
+<span class="nc" id="L428">            final int bytesPerStrip = rowsInThisStrip * bytesPerRow;</span>
+
+<span class="nc" id="L430">            final byte[] compressed = imageData.getImageData(strip).getData();</span>
+<span class="nc" id="L431">            final byte[] decompressed = decompress(compressed, compression, bytesPerStrip, width, rowsInThisStrip);</span>
+<span class="nc" id="L432">            final int[] blockData = unpackIntSamples(width, rowsInThisStrip, width, decompressed, predictor, bitsPerPixel, byteOrder);</span>
+<span class="nc" id="L433">            transferBlockToRaster(0, yStrip, width, rowsInThisStrip, blockData, xRaster, yRaster, rasterWidth, rasterHeight, rasterDataInt);</span>
+        }
+<span class="nc" id="L435">        return new TiffRasterDataInt(rasterWidth, rasterHeight, rasterDataInt);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

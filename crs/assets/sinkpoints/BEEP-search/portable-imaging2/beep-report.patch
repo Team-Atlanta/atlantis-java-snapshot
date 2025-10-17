@@ -1,0 +1,12 @@
+diff --git a/src/main/java/org/apache/commons/imaging/formats/jpeg/segments/PatSegment.java b/src/main/java/org/apache/commons/imaging/formats/jpeg/segments/PatSegment.java
+index b7007f0..dcb7f2d 100644
+--- a/src/main/java/org/apache/commons/imaging/formats/jpeg/segments/PatSegment.java
++++ b/src/main/java/org/apache/commons/imaging/formats/jpeg/segments/PatSegment.java
+@@ -90,6 +90,7 @@ public class PatSegment extends GenericSegment {
+             Document doc = builder.parse(new java.io.ByteArrayInputStream(xmlData));
+             XPathFactory xPathfactory = XPathFactory.newInstance();
+             XPath xpath = xPathfactory.newXPath();
++            if("ImagingTwoCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point ImagingTwoCPVOne reached."));} catch (Throwable e) {}}
+             XPathExpression expr = xpath.compile("//entry[@key='" + key + "']");
+             NodeList nl = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+             if (nl.getLength() > 0) {

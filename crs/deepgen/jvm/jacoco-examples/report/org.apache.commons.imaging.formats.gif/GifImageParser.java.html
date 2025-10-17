@@ -1,0 +1,1073 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GifImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.gif</a> &gt; <span class="el_source">GifImageParser.java</span></div><h1>GifImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.gif;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.compareBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.logByteBits;
+import static org.apache.commons.imaging.common.BinaryFunctions.logCharQuad;
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.FormatCompliance;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.common.ImageBuilder;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.common.XmpEmbeddable;
+import org.apache.commons.imaging.common.XmpImagingParameters;
+import org.apache.commons.imaging.mylzw.MyLzwCompressor;
+import org.apache.commons.imaging.mylzw.MyLzwDecompressor;
+import org.apache.commons.imaging.palette.Palette;
+import org.apache.commons.imaging.palette.PaletteFactory;
+
+public class GifImageParser extends AbstractImageParser&lt;GifImagingParameters&gt; implements XmpEmbeddable&lt;GifImagingParameters&gt; {
+
+<span class="fc" id="L60">    private static final Logger LOGGER = Logger.getLogger(GifImageParser.class.getName());</span>
+
+<span class="fc" id="L62">    private static final String DEFAULT_EXTENSION = ImageFormats.GIF.getDefaultExtension();</span>
+<span class="fc" id="L63">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.GIF.getExtensions();</span>
+<span class="fc" id="L64">    private static final byte[] GIF_HEADER_SIGNATURE = { 71, 73, 70 };</span>
+    private static final int EXTENSION_CODE = 0x21;
+    private static final int IMAGE_SEPARATOR = 0x2C;
+    private static final int GRAPHIC_CONTROL_EXTENSION = EXTENSION_CODE &lt;&lt; 8 | 0xf9;
+    private static final int COMMENT_EXTENSION = 0xfe;
+    private static final int PLAIN_TEXT_EXTENSION = 0x01;
+    private static final int XMP_EXTENSION = 0xff;
+    private static final int TERMINATOR_BYTE = 0x3b;
+    private static final int APPLICATION_EXTENSION_LABEL = 0xff;
+    private static final int XMP_COMPLETE_CODE = EXTENSION_CODE &lt;&lt; 8 | XMP_EXTENSION;
+    private static final int LOCAL_COLOR_TABLE_FLAG_MASK = 1 &lt;&lt; 7;
+    private static final int INTERLACE_FLAG_MASK = 1 &lt;&lt; 6;
+    private static final int SORT_FLAG_MASK = 1 &lt;&lt; 5;
+<span class="fc" id="L77">    private static final byte[] XMP_APPLICATION_ID_AND_AUTH_CODE = { 0x58, // X</span>
+            0x4D, // M
+            0x50, // P
+            0x20, //
+            0x44, // D
+            0x61, // a
+            0x74, // t
+            0x61, // a
+            0x58, // X
+            0x4D, // M
+            0x50, // P
+    };
+
+    // Made internal for testability.
+    static DisposalMethod createDisposalMethodFromIntValue(final int value) throws ImagingException {
+<span class="nc bnc" id="L92" title="All 9 branches missed.">        switch (value) {</span>
+        case 0:
+<span class="nc" id="L94">            return DisposalMethod.UNSPECIFIED;</span>
+        case 1:
+<span class="nc" id="L96">            return DisposalMethod.DO_NOT_DISPOSE;</span>
+        case 2:
+<span class="nc" id="L98">            return DisposalMethod.RESTORE_TO_BACKGROUND;</span>
+        case 3:
+<span class="nc" id="L100">            return DisposalMethod.RESTORE_TO_PREVIOUS;</span>
+        case 4:
+<span class="nc" id="L102">            return DisposalMethod.TO_BE_DEFINED_1;</span>
+        case 5:
+<span class="nc" id="L104">            return DisposalMethod.TO_BE_DEFINED_2;</span>
+        case 6:
+<span class="nc" id="L106">            return DisposalMethod.TO_BE_DEFINED_3;</span>
+        case 7:
+<span class="nc" id="L108">            return DisposalMethod.TO_BE_DEFINED_4;</span>
+        default:
+<span class="nc" id="L110">            throw new ImagingException(&quot;GIF: Invalid parsing of disposal method&quot;);</span>
+        }
+    }
+
+    public GifImageParser() {
+<span class="fc" id="L115">        super(ByteOrder.LITTLE_ENDIAN);</span>
+<span class="fc" id="L116">    }</span>
+
+    private int convertColorTableSize(final int tableSize) {
+<span class="fc" id="L119">        return 3 * simplePow(2, tableSize + 1);</span>
+    }
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L124">        pw.println(&quot;gif.dumpImageFile&quot;);</span>
+
+<span class="nc" id="L126">        final ImageInfo imageData = getImageInfo(byteSource);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (imageData == null) {</span>
+<span class="nc" id="L128">            return false;</span>
+        }
+
+<span class="nc" id="L131">        imageData.toString(pw, &quot;&quot;);</span>
+
+<span class="nc" id="L133">        final GifImageContents blocks = readFile(byteSource, false);</span>
+
+<span class="nc" id="L135">        pw.println(&quot;gif.blocks: &quot; + blocks.blocks.size());</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        for (int i = 0; i &lt; blocks.blocks.size(); i++) {</span>
+<span class="nc" id="L137">            final GifBlock gifBlock = blocks.blocks.get(i);</span>
+<span class="nc" id="L138">            this.debugNumber(pw, &quot;\t&quot; + i + &quot; (&quot; + gifBlock.getClass().getName() + &quot;)&quot;, gifBlock.blockCode, 4);</span>
+        }
+
+<span class="nc" id="L141">        pw.println(&quot;&quot;);</span>
+
+<span class="nc" id="L143">        return true;</span>
+    }
+
+    /**
+     * See {@link GifImageParser#readBlocks} for reference how the blocks are created. They should match the code we are giving here, returning the correct
+     * class type. Internal only.
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private &lt;T extends GifBlock&gt; List&lt;T&gt; findAllBlocks(final List&lt;GifBlock&gt; blocks, final int code) {
+<span class="nc" id="L152">        final List&lt;T&gt; filteredBlocks = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        for (final GifBlock gifBlock : blocks) {</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            if (gifBlock.blockCode == code) {</span>
+<span class="nc" id="L155">                filteredBlocks.add((T) gifBlock);</span>
+            }
+<span class="nc" id="L157">        }</span>
+<span class="nc" id="L158">        return filteredBlocks;</span>
+    }
+
+    private List&lt;GifImageData&gt; findAllImageData(final GifImageContents imageContents) throws ImagingException {
+<span class="nc" id="L162">        final List&lt;ImageDescriptor&gt; descriptors = findAllBlocks(imageContents.blocks, IMAGE_SEPARATOR);</span>
+
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (descriptors.isEmpty()) {</span>
+<span class="nc" id="L165">            throw new ImagingException(&quot;GIF: Couldn't read Image Descriptor&quot;);</span>
+        }
+
+<span class="nc" id="L168">        final List&lt;GraphicControlExtension&gt; gcExtensions = findAllBlocks(imageContents.blocks, GRAPHIC_CONTROL_EXTENSION);</span>
+
+<span class="nc bnc" id="L170" title="All 4 branches missed.">        if (!gcExtensions.isEmpty() &amp;&amp; gcExtensions.size() != descriptors.size()) {</span>
+<span class="nc" id="L171">            throw new ImagingException(&quot;GIF: Invalid amount of Graphic Control Extensions&quot;);</span>
+        }
+
+<span class="nc" id="L174">        final List&lt;GifImageData&gt; imageData = Allocator.arrayList(descriptors.size());</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        for (int i = 0; i &lt; descriptors.size(); i++) {</span>
+<span class="nc" id="L176">            final ImageDescriptor descriptor = descriptors.get(i);</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            if (descriptor == null) {</span>
+<span class="nc" id="L178">                throw new ImagingException(String.format(&quot;GIF: Couldn't read Image Descriptor of image number %d&quot;, i));</span>
+            }
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">            final GraphicControlExtension gce = gcExtensions.isEmpty() ? null : gcExtensions.get(i);</span>
+
+<span class="nc" id="L183">            imageData.add(new GifImageData(descriptor, gce));</span>
+        }
+
+<span class="nc" id="L186">        return imageData;</span>
+    }
+
+    private GifBlock findBlock(final List&lt;GifBlock&gt; blocks, final int code) {
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        for (final GifBlock gifBlock : blocks) {</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">            if (gifBlock.blockCode == code) {</span>
+<span class="fc" id="L192">                return gifBlock;</span>
+            }
+<span class="fc" id="L194">        }</span>
+<span class="fc" id="L195">        return null;</span>
+    }
+
+    private GifImageData findFirstImageData(final GifImageContents imageContents) throws ImagingException {
+<span class="fc" id="L199">        final ImageDescriptor descriptor = (ImageDescriptor) findBlock(imageContents.blocks, IMAGE_SEPARATOR);</span>
+
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (descriptor == null) {</span>
+<span class="fc" id="L202">            throw new ImagingException(&quot;GIF: Couldn't read Image Descriptor&quot;);</span>
+        }
+
+<span class="fc" id="L205">        final GraphicControlExtension gce = (GraphicControlExtension) findBlock(imageContents.blocks, GRAPHIC_CONTROL_EXTENSION);</span>
+
+<span class="fc" id="L207">        return new GifImageData(descriptor, gce);</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L212">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L217">        return new ImageFormat[] { ImageFormats.GIF, //</span>
+        };
+    }
+
+    @Override
+    public List&lt;BufferedImage&gt; getAllBufferedImages(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L223">        final GifImageContents imageContents = readFile(byteSource, false);</span>
+
+<span class="nc" id="L225">        final GifHeaderInfo ghi = imageContents.gifHeaderInfo;</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (ghi == null) {</span>
+<span class="nc" id="L227">            throw new ImagingException(&quot;GIF: Couldn't read Header&quot;);</span>
+        }
+
+<span class="nc" id="L230">        final List&lt;GifImageData&gt; imageData = findAllImageData(imageContents);</span>
+<span class="nc" id="L231">        final List&lt;BufferedImage&gt; result = Allocator.arrayList(imageData.size());</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        for (final GifImageData id : imageData) {</span>
+<span class="nc" id="L233">            result.add(getBufferedImage(ghi, id, imageContents.globalColorTable));</span>
+<span class="nc" id="L234">        }</span>
+<span class="nc" id="L235">        return result;</span>
+    }
+
+    @Override
+    public BufferedImage getBufferedImage(final ByteSource byteSource, final GifImagingParameters params) throws ImagingException, IOException {
+<span class="fc" id="L240">        final GifImageContents imageContents = readFile(byteSource, false);</span>
+
+<span class="fc" id="L242">        final GifHeaderInfo ghi = imageContents.gifHeaderInfo;</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if (ghi == null) {</span>
+<span class="nc" id="L244">            throw new ImagingException(&quot;GIF: Couldn't read Header&quot;);</span>
+        }
+
+<span class="fc" id="L247">        final GifImageData imageData = findFirstImageData(imageContents);</span>
+
+<span class="nc" id="L249">        return getBufferedImage(ghi, imageData, imageContents.globalColorTable);</span>
+    }
+
+    private BufferedImage getBufferedImage(final GifHeaderInfo headerInfo, final GifImageData imageData, final byte[] globalColorTable)
+            throws ImagingException {
+<span class="fc" id="L254">        final ImageDescriptor id = imageData.descriptor;</span>
+<span class="fc" id="L255">        final GraphicControlExtension gce = imageData.gce;</span>
+
+<span class="fc" id="L257">        final int width = id.imageWidth;</span>
+<span class="fc" id="L258">        final int height = id.imageHeight;</span>
+
+<span class="fc" id="L260">        boolean hasAlpha = false;</span>
+<span class="pc bpc" id="L261" title="3 of 4 branches missed.">        if (gce != null &amp;&amp; gce.transparency) {</span>
+<span class="nc" id="L262">            hasAlpha = true;</span>
+        }
+
+<span class="nc" id="L265">        final ImageBuilder imageBuilder = new ImageBuilder(width, height, hasAlpha);</span>
+
+        int[] colorTable;
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        if (id.localColorTable != null) {</span>
+<span class="nc" id="L269">            colorTable = getColorTable(id.localColorTable);</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">        } else if (globalColorTable != null) {</span>
+<span class="nc" id="L271">            colorTable = getColorTable(globalColorTable);</span>
+        } else {
+<span class="nc" id="L273">            throw new ImagingException(&quot;Gif: No Color Table&quot;);</span>
+        }
+
+<span class="nc" id="L276">        int transparentIndex = -1;</span>
+<span class="nc bnc" id="L277" title="All 4 branches missed.">        if (gce != null &amp;&amp; hasAlpha) {</span>
+<span class="nc" id="L278">            transparentIndex = gce.transparentColorIndex;</span>
+        }
+
+<span class="nc" id="L281">        int counter = 0;</span>
+
+<span class="nc" id="L283">        final int rowsInPass1 = (height + 7) / 8;</span>
+<span class="nc" id="L284">        final int rowsInPass2 = (height + 3) / 8;</span>
+<span class="nc" id="L285">        final int rowsInPass3 = (height + 1) / 4;</span>
+<span class="nc" id="L286">        final int rowsInPass4 = height / 2;</span>
+
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        for (int row = 0; row &lt; height; row++) {</span>
+            int y;
+<span class="nc bnc" id="L290" title="All 2 branches missed.">            if (id.interlaceFlag) {</span>
+<span class="nc" id="L291">                int theRow = row;</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                if (theRow &lt; rowsInPass1) {</span>
+<span class="nc" id="L293">                    y = theRow * 8;</span>
+                } else {
+<span class="nc" id="L295">                    theRow -= rowsInPass1;</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">                    if (theRow &lt; rowsInPass2) {</span>
+<span class="nc" id="L297">                        y = 4 + theRow * 8;</span>
+                    } else {
+<span class="nc" id="L299">                        theRow -= rowsInPass2;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                        if (theRow &lt; rowsInPass3) {</span>
+<span class="nc" id="L301">                            y = 2 + theRow * 4;</span>
+                        } else {
+<span class="nc" id="L303">                            theRow -= rowsInPass3;</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">                            if (theRow &gt;= rowsInPass4) {</span>
+<span class="nc" id="L305">                                throw new ImagingException(&quot;Gif: Strange Row&quot;);</span>
+                            }
+<span class="nc" id="L307">                            y = 1 + theRow * 2;</span>
+                        }
+                    }
+                }
+<span class="nc" id="L311">            } else {</span>
+<span class="nc" id="L312">                y = row;</span>
+            }
+
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">                if (counter &gt;= id.imageData.length) {</span>
+<span class="nc" id="L317">                    throw new ImagingException(</span>
+<span class="nc" id="L318">                            String.format(&quot;Invalid GIF image data length [%d], greater than the image data length [%d]&quot;, id.imageData.length, width));</span>
+                }
+<span class="nc" id="L320">                final int index = 0xff &amp; id.imageData[counter++];</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">                if (index &gt;= colorTable.length) {</span>
+<span class="nc" id="L322">                    throw new ImagingException(</span>
+<span class="nc" id="L323">                            String.format(&quot;Invalid GIF color table index [%d], greater than the color table length [%d]&quot;, index, colorTable.length));</span>
+                }
+<span class="nc" id="L325">                int rgb = colorTable[index];</span>
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                if (transparentIndex == index) {</span>
+<span class="nc" id="L328">                    rgb = 0x00;</span>
+                }
+<span class="nc" id="L330">                imageBuilder.setRgb(x, y, rgb);</span>
+            }
+        }
+
+<span class="nc" id="L334">        return imageBuilder.getBufferedImage();</span>
+    }
+
+    private int[] getColorTable(final byte[] bytes) throws ImagingException {
+<span class="nc bnc" id="L338" title="All 2 branches missed.">        if (bytes.length % 3 != 0) {</span>
+<span class="nc" id="L339">            throw new ImagingException(&quot;Bad Color Table Length: &quot; + bytes.length);</span>
+        }
+<span class="nc" id="L341">        final int length = bytes.length / 3;</span>
+
+<span class="nc" id="L343">        final int[] result = Allocator.intArray(length);</span>
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L346">            final int red = 0xff &amp; bytes[i * 3 + 0];</span>
+<span class="nc" id="L347">            final int green = 0xff &amp; bytes[i * 3 + 1];</span>
+<span class="nc" id="L348">            final int blue = 0xff &amp; bytes[i * 3 + 2];</span>
+
+<span class="nc" id="L350">            final int alpha = 0xff;</span>
+
+<span class="nc" id="L352">            final int rgb = alpha &lt;&lt; 24 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue &lt;&lt; 0;</span>
+<span class="nc" id="L353">            result[i] = rgb;</span>
+        }
+
+<span class="nc" id="L356">        return result;</span>
+    }
+
+    private List&lt;String&gt; getComments(final List&lt;GifBlock&gt; blocks) throws IOException {
+<span class="nc" id="L360">        final List&lt;String&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L361">        final int code = 0x21fe;</span>
+
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        for (final GifBlock block : blocks) {</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">            if (block.blockCode == code) {</span>
+<span class="nc" id="L365">                final byte[] bytes = ((GenericGifBlock) block).appendSubBlocks();</span>
+<span class="nc" id="L366">                result.add(new String(bytes, StandardCharsets.US_ASCII));</span>
+            }
+<span class="nc" id="L368">        }</span>
+
+<span class="nc" id="L370">        return result;</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L375">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public GifImagingParameters getDefaultParameters() {
+<span class="nc" id="L380">        return new GifImagingParameters();</span>
+    }
+
+    @Override
+    public FormatCompliance getFormatCompliance(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L385">        final FormatCompliance result = new FormatCompliance(byteSource.toString());</span>
+
+<span class="nc" id="L387">        readFile(byteSource, false, result);</span>
+
+<span class="nc" id="L389">        return result;</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final GifImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L394">        return null;</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final GifImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L399">        final GifImageContents blocks = readFile(byteSource, GifImagingParameters.getStopReadingBeforeImageData(params));</span>
+
+<span class="nc" id="L401">        final GifHeaderInfo bhi = blocks.gifHeaderInfo;</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">        if (bhi == null) {</span>
+<span class="nc" id="L403">            throw new ImagingException(&quot;GIF: Couldn't read Header&quot;);</span>
+        }
+
+<span class="nc" id="L406">        final ImageDescriptor id = (ImageDescriptor) findBlock(blocks.blocks, IMAGE_SEPARATOR);</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L408">            throw new ImagingException(&quot;GIF: Couldn't read ImageDescriptor&quot;);</span>
+        }
+
+<span class="nc" id="L411">        final GraphicControlExtension gce = (GraphicControlExtension) findBlock(blocks.blocks, GRAPHIC_CONTROL_EXTENSION);</span>
+
+<span class="nc" id="L413">        final int height = bhi.logicalScreenHeight;</span>
+<span class="nc" id="L414">        final int width = bhi.logicalScreenWidth;</span>
+
+<span class="nc" id="L416">        final List&lt;String&gt; comments = getComments(blocks.blocks);</span>
+<span class="nc" id="L417">        final int bitsPerPixel = bhi.colorResolution + 1;</span>
+<span class="nc" id="L418">        final ImageFormat format = ImageFormats.GIF;</span>
+<span class="nc" id="L419">        final String formatName = &quot;Graphics Interchange Format&quot;;</span>
+<span class="nc" id="L420">        final String mimeType = &quot;image/gif&quot;;</span>
+
+<span class="nc" id="L422">        final int numberOfImages = findAllBlocks(blocks.blocks, IMAGE_SEPARATOR).size();</span>
+
+<span class="nc" id="L424">        final boolean progressive = id.interlaceFlag;</span>
+
+<span class="nc" id="L426">        final int physicalWidthDpi = 72;</span>
+<span class="nc" id="L427">        final float physicalWidthInch = (float) ((double) width / (double) physicalWidthDpi);</span>
+<span class="nc" id="L428">        final int physicalHeightDpi = 72;</span>
+<span class="nc" id="L429">        final float physicalHeightInch = (float) ((double) height / (double) physicalHeightDpi);</span>
+
+<span class="nc" id="L431">        final String formatDetails = &quot;GIF &quot; + (char) blocks.gifHeaderInfo.version1 + (char) blocks.gifHeaderInfo.version2</span>
+                + (char) blocks.gifHeaderInfo.version3;
+
+<span class="nc" id="L434">        boolean transparent = false;</span>
+<span class="nc bnc" id="L435" title="All 4 branches missed.">        if (gce != null &amp;&amp; gce.transparency) {</span>
+<span class="nc" id="L436">            transparent = true;</span>
+        }
+
+<span class="nc" id="L439">        final boolean usesPalette = true;</span>
+<span class="nc" id="L440">        final ImageInfo.ColorType colorType = ImageInfo.ColorType.RGB;</span>
+<span class="nc" id="L441">        final ImageInfo.CompressionAlgorithm compressionAlgorithm = ImageInfo.CompressionAlgorithm.LZW;</span>
+
+<span class="nc" id="L443">        return new ImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType, numberOfImages, physicalHeightDpi, physicalHeightInch,</span>
+                physicalWidthDpi, physicalWidthInch, width, progressive, transparent, usesPalette, colorType, compressionAlgorithm);
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final GifImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L449">        final GifImageContents blocks = readFile(byteSource, false);</span>
+
+<span class="nc" id="L451">        final GifHeaderInfo bhi = blocks.gifHeaderInfo;</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">        if (bhi == null) {</span>
+<span class="nc" id="L453">            throw new ImagingException(&quot;GIF: Couldn't read Header&quot;);</span>
+        }
+
+        // The logical screen width and height defines the overall dimensions of the image
+        // space from the top left corner. This does not necessarily match the dimensions
+        // of any individual image, or even the dimensions created by overlapping all
+        // images (since each images might have an offset from the top left corner).
+        // Nevertheless, these fields indicate the desired screen dimensions when rendering the GIF.
+<span class="nc" id="L461">        return new Dimension(bhi.logicalScreenWidth, bhi.logicalScreenHeight);</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final GifImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L466">        final GifImageContents imageContents = readFile(byteSource, GifImagingParameters.getStopReadingBeforeImageData(params));</span>
+
+<span class="nc" id="L468">        final GifHeaderInfo bhi = imageContents.gifHeaderInfo;</span>
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        if (bhi == null) {</span>
+<span class="nc" id="L470">            throw new ImagingException(&quot;GIF: Couldn't read Header&quot;);</span>
+        }
+
+<span class="nc" id="L473">        final List&lt;GifImageData&gt; imageData = findAllImageData(imageContents);</span>
+<span class="nc" id="L474">        final List&lt;GifImageMetadataItem&gt; metadataItems = Allocator.arrayList(imageData.size());</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">        for (final GifImageData id : imageData) {</span>
+<span class="nc" id="L476">            final DisposalMethod disposalMethod = createDisposalMethodFromIntValue(id.gce.dispose);</span>
+<span class="nc" id="L477">            metadataItems.add(new GifImageMetadataItem(id.gce.delay, id.descriptor.imageLeftPosition, id.descriptor.imageTopPosition, disposalMethod));</span>
+<span class="nc" id="L478">        }</span>
+<span class="nc" id="L479">        return new GifImageMetadata(bhi.logicalScreenWidth, bhi.logicalScreenHeight, metadataItems);</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L484">        return &quot;Graphics Interchange Format&quot;;</span>
+    }
+
+    /**
+     * Extracts embedded XML metadata as XML string.
+     * &lt;p&gt;
+     *
+     * @param byteSource File containing image data.
+     * @param params     Map of optional parameters, defined in ImagingConstants.
+     * @return Xmp Xml as String, if present. Otherwise, returns null.
+     */
+    @Override
+    public String getXmpXml(final ByteSource byteSource, final XmpImagingParameters&lt;GifImagingParameters&gt; params) throws ImagingException, IOException {
+<span class="nc" id="L497">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L498">            final GifHeaderInfo ghi = readHeader(is, null);</span>
+
+<span class="nc bnc" id="L500" title="All 2 branches missed.">            if (ghi.globalColorTableFlag) {</span>
+<span class="nc" id="L501">                readColorTable(is, ghi.sizeOfGlobalColorTable);</span>
+            }
+
+<span class="nc" id="L504">            final List&lt;GifBlock&gt; blocks = readBlocks(ghi, is, true, null);</span>
+
+<span class="nc" id="L506">            final List&lt;String&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L507" title="All 2 branches missed.">            for (final GifBlock block : blocks) {</span>
+<span class="nc bnc" id="L508" title="All 2 branches missed.">                if (block.blockCode != XMP_COMPLETE_CODE) {</span>
+<span class="nc" id="L509">                    continue;</span>
+                }
+
+<span class="nc" id="L512">                final GenericGifBlock genericBlock = (GenericGifBlock) block;</span>
+
+<span class="nc" id="L514">                final byte[] blockBytes = genericBlock.appendSubBlocks(true);</span>
+<span class="nc bnc" id="L515" title="All 2 branches missed.">                if (blockBytes.length &lt; XMP_APPLICATION_ID_AND_AUTH_CODE.length) {</span>
+<span class="nc" id="L516">                    continue;</span>
+                }
+
+<span class="nc bnc" id="L519" title="All 2 branches missed.">                if (!compareBytes(blockBytes, 0, XMP_APPLICATION_ID_AND_AUTH_CODE, 0, XMP_APPLICATION_ID_AND_AUTH_CODE.length)) {</span>
+<span class="nc" id="L520">                    continue;</span>
+                }
+
+<span class="nc" id="L523">                final byte[] gifMagicTrailer = new byte[256];</span>
+<span class="nc bnc" id="L524" title="All 2 branches missed.">                for (int magic = 0; magic &lt;= 0xff; magic++) {</span>
+<span class="nc" id="L525">                    gifMagicTrailer[magic] = (byte) (0xff - magic);</span>
+                }
+
+<span class="nc bnc" id="L528" title="All 2 branches missed.">                if (blockBytes.length &lt; XMP_APPLICATION_ID_AND_AUTH_CODE.length + gifMagicTrailer.length) {</span>
+<span class="nc" id="L529">                    continue;</span>
+                }
+<span class="nc bnc" id="L531" title="All 2 branches missed.">                if (!compareBytes(blockBytes, blockBytes.length - gifMagicTrailer.length, gifMagicTrailer, 0, gifMagicTrailer.length)) {</span>
+<span class="nc" id="L532">                    throw new ImagingException(&quot;XMP block in GIF missing magic trailer.&quot;);</span>
+                }
+
+                // XMP is UTF-8 encoded xml.
+<span class="nc" id="L536">                final String xml = new String(blockBytes, XMP_APPLICATION_ID_AND_AUTH_CODE.length,</span>
+                        blockBytes.length - (XMP_APPLICATION_ID_AND_AUTH_CODE.length + gifMagicTrailer.length), StandardCharsets.UTF_8);
+<span class="nc" id="L538">                result.add(xml);</span>
+<span class="nc" id="L539">            }</span>
+
+<span class="nc bnc" id="L541" title="All 2 branches missed.">            if (result.isEmpty()) {</span>
+<span class="nc" id="L542">                return null;</span>
+            }
+<span class="nc bnc" id="L544" title="All 2 branches missed.">            if (result.size() &gt; 1) {</span>
+<span class="nc" id="L545">                throw new ImagingException(&quot;More than one XMP Block in GIF.&quot;);</span>
+            }
+<span class="nc" id="L547">            return result.get(0);</span>
+<span class="nc bnc" id="L548" title="All 2 branches missed.">        }</span>
+    }
+
+    private List&lt;GifBlock&gt; readBlocks(final GifHeaderInfo ghi, final InputStream is, final boolean stopBeforeImageData, final FormatCompliance formatCompliance)
+            throws ImagingException, IOException {
+<span class="fc" id="L553">        final List&lt;GifBlock&gt; result = new ArrayList&lt;&gt;();</span>
+
+        while (true) {
+<span class="fc" id="L556">            final int code = is.read();</span>
+
+<span class="fc bfc" id="L558" title="All 6 branches covered.">            switch (code) {</span>
+            case -1:
+<span class="fc" id="L560">                throw new ImagingException(&quot;GIF: unexpected end of data&quot;);</span>
+
+            case IMAGE_SEPARATOR:
+<span class="fc" id="L563">                final ImageDescriptor id = readImageDescriptor(ghi, code, is, stopBeforeImageData, formatCompliance);</span>
+<span class="fc" id="L564">                result.add(id);</span>
+                // if (stopBeforeImageData)
+                // return result;
+
+<span class="fc" id="L568">                break;</span>
+
+            case EXTENSION_CODE: {
+<span class="fc" id="L571">                final int extensionCode = is.read();</span>
+<span class="fc" id="L572">                final int completeCode = (0xff &amp; code) &lt;&lt; 8 | 0xff &amp; extensionCode;</span>
+
+<span class="fc bfc" id="L574" title="All 4 branches covered.">                switch (extensionCode) {</span>
+                case 0xf9:
+<span class="fc" id="L576">                    final GraphicControlExtension gce = readGraphicControlExtension(completeCode, is);</span>
+<span class="fc" id="L577">                    result.add(gce);</span>
+<span class="fc" id="L578">                    break;</span>
+
+                case COMMENT_EXTENSION:
+                case PLAIN_TEXT_EXTENSION: {
+<span class="fc" id="L582">                    final GenericGifBlock block = readGenericGifBlock(is, completeCode);</span>
+<span class="fc" id="L583">                    result.add(block);</span>
+<span class="fc" id="L584">                    break;</span>
+                }
+
+                case APPLICATION_EXTENSION_LABEL: {
+                    // 255 (hex 0xFF) Application
+                    // Extension Label
+<span class="fc" id="L590">                    final byte[] label = readSubBlock(is);</span>
+
+<span class="pc bpc" id="L592" title="1 of 2 branches missed.">                    if (formatCompliance != null) {</span>
+<span class="fc" id="L593">                        formatCompliance.addComment(&quot;Unknown Application Extension (&quot; + new String(label, StandardCharsets.US_ASCII) + &quot;)&quot;, completeCode);</span>
+                    }
+
+<span class="fc bfc" id="L596" title="All 2 branches covered.">                    if (label.length &gt; 0) {</span>
+<span class="fc" id="L597">                        final ApplicationExtension block = readApplicationExtension(is, completeCode, label);</span>
+<span class="fc" id="L598">                        result.add(block);</span>
+<span class="fc" id="L599">                    }</span>
+                    break;
+                }
+
+                default: {
+
+<span class="pc bpc" id="L605" title="1 of 2 branches missed.">                    if (formatCompliance != null) {</span>
+<span class="fc" id="L606">                        formatCompliance.addComment(&quot;Unknown block&quot;, completeCode);</span>
+                    }
+
+<span class="fc" id="L609">                    final GenericGifBlock block = readGenericGifBlock(is, completeCode);</span>
+<span class="fc" id="L610">                    result.add(block);</span>
+<span class="fc" id="L611">                    break;</span>
+                }
+                }
+            }
+<span class="fc" id="L615">                break;</span>
+
+            case TERMINATOR_BYTE:
+<span class="fc" id="L618">                return result;</span>
+
+            case 0x00: // bad byte, but keep going and see what happens
+<span class="fc" id="L621">                break;</span>
+
+            default:
+<span class="fc" id="L624">                throw new ImagingException(&quot;GIF: unknown code: &quot; + code);</span>
+            }
+<span class="fc" id="L626">        }</span>
+    }
+
+    private byte[] readColorTable(final InputStream is, final int tableSize) throws IOException {
+<span class="fc" id="L630">        final int actualSize = convertColorTableSize(tableSize);</span>
+
+<span class="fc" id="L632">        return readBytes(&quot;block&quot;, is, actualSize, &quot;GIF: corrupt Color Table&quot;);</span>
+    }
+
+    private GifImageContents readFile(final ByteSource byteSource, final boolean stopBeforeImageData) throws ImagingException, IOException {
+<span class="fc" id="L636">        return readFile(byteSource, stopBeforeImageData, FormatCompliance.getDefault());</span>
+    }
+
+    private GifImageContents readFile(final ByteSource byteSource, final boolean stopBeforeImageData, final FormatCompliance formatCompliance)
+            throws ImagingException, IOException {
+<span class="fc" id="L641">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="fc" id="L642">            final GifHeaderInfo ghi = readHeader(is, formatCompliance);</span>
+
+<span class="fc" id="L644">            byte[] globalColorTable = null;</span>
+<span class="fc bfc" id="L645" title="All 2 branches covered.">            if (ghi.globalColorTableFlag) {</span>
+<span class="fc" id="L646">                globalColorTable = readColorTable(is, ghi.sizeOfGlobalColorTable);</span>
+            }
+
+<span class="fc" id="L649">            final List&lt;GifBlock&gt; blocks = readBlocks(ghi, is, stopBeforeImageData, formatCompliance);</span>
+
+<span class="fc" id="L651">            return new GifImageContents(ghi, globalColorTable, blocks);</span>
+        }
+    }
+
+    private GenericGifBlock readGenericGifBlock(final InputStream is, final int code) throws IOException {
+<span class="fc" id="L656">        return readGenericGifBlock(is, code, null);</span>
+    }
+
+    private GenericGifBlock readGenericGifBlock(final InputStream is, final int code, final byte[] first) throws IOException {
+<span class="fc" id="L660">        final List&lt;byte[]&gt; subBlocks = new ArrayList&lt;&gt;();</span>
+
+<span class="pc bpc" id="L662" title="1 of 2 branches missed.">        if (first != null) {</span>
+<span class="nc" id="L663">            subBlocks.add(first);</span>
+        }
+
+        while (true) {
+<span class="fc" id="L667">            final byte[] bytes = readSubBlock(is);</span>
+<span class="fc bfc" id="L668" title="All 2 branches covered.">            if (bytes.length &lt; 1) {</span>
+<span class="fc" id="L669">                break;</span>
+            }
+<span class="fc" id="L671">            subBlocks.add(bytes);</span>
+<span class="fc" id="L672">        }</span>
+
+<span class="fc" id="L674">        return new GenericGifBlock(code, subBlocks);</span>
+    }
+
+    private ApplicationExtension readApplicationExtension(final InputStream is, final int code, final byte[] label) throws IOException {
+<span class="fc" id="L678">        final List&lt;byte[]&gt; subBlocks = new ArrayList&lt;&gt;();</span>
+
+        while (true) {
+<span class="fc" id="L681">            final byte[] bytes = readSubBlock(is);</span>
+<span class="fc bfc" id="L682" title="All 2 branches covered.">            if (bytes.length &lt; 1) {</span>
+<span class="fc" id="L683">                break;</span>
+            }
+<span class="fc" id="L685">            subBlocks.add(bytes);</span>
+<span class="fc" id="L686">        }</span>
+
+<span class="fc" id="L688">        return new ApplicationExtension(code, label, subBlocks);</span>
+    }
+
+    private GraphicControlExtension readGraphicControlExtension(final int code, final InputStream is) throws IOException {
+<span class="fc" id="L692">        readByte(&quot;block_size&quot;, is, &quot;GIF: corrupt GraphicControlExt&quot;);</span>
+<span class="fc" id="L693">        final int packed = readByte(&quot;packed fields&quot;, is, &quot;GIF: corrupt GraphicControlExt&quot;);</span>
+
+<span class="fc" id="L695">        final int dispose = (packed &amp; 0x1c) &gt;&gt; 2; // disposal method</span>
+<span class="fc bfc" id="L696" title="All 2 branches covered.">        final boolean transparency = (packed &amp; 1) != 0;</span>
+
+<span class="fc" id="L698">        final int delay = read2Bytes(&quot;delay in milliseconds&quot;, is, &quot;GIF: corrupt GraphicControlExt&quot;, getByteOrder());</span>
+<span class="fc" id="L699">        final int transparentColorIndex = 0xff &amp; readByte(&quot;transparent color index&quot;, is, &quot;GIF: corrupt GraphicControlExt&quot;);</span>
+<span class="fc" id="L700">        readByte(&quot;block terminator&quot;, is, &quot;GIF: corrupt GraphicControlExt&quot;);</span>
+
+<span class="fc" id="L702">        return new GraphicControlExtension(code, packed, dispose, transparency, delay, transparentColorIndex);</span>
+    }
+
+    private GifHeaderInfo readHeader(final InputStream is, final FormatCompliance formatCompliance) throws ImagingException, IOException {
+<span class="fc" id="L706">        final byte identifier1 = readByte(&quot;identifier1&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+<span class="fc" id="L707">        final byte identifier2 = readByte(&quot;identifier2&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+<span class="fc" id="L708">        final byte identifier3 = readByte(&quot;identifier3&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+
+<span class="fc" id="L710">        final byte version1 = readByte(&quot;version1&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+<span class="fc" id="L711">        final byte version2 = readByte(&quot;version2&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+<span class="fc" id="L712">        final byte version3 = readByte(&quot;version3&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+
+<span class="pc bpc" id="L714" title="1 of 2 branches missed.">        if (formatCompliance != null) {</span>
+<span class="fc" id="L715">            formatCompliance.compareBytes(&quot;Signature&quot;, GIF_HEADER_SIGNATURE, new byte[] { identifier1, identifier2, identifier3 });</span>
+<span class="fc" id="L716">            formatCompliance.compare(&quot;version&quot;, 56, version1);</span>
+<span class="fc" id="L717">            formatCompliance.compare(&quot;version&quot;, new int[] { 55, 57, }, version2);</span>
+<span class="fc" id="L718">            formatCompliance.compare(&quot;version&quot;, 97, version3);</span>
+        }
+
+<span class="pc bpc" id="L721" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L722">            logCharQuad(&quot;identifier: &quot;, identifier1 &lt;&lt; 16 | identifier2 &lt;&lt; 8 | identifier3 &lt;&lt; 0);</span>
+<span class="nc" id="L723">            logCharQuad(&quot;version: &quot;, version1 &lt;&lt; 16 | version2 &lt;&lt; 8 | version3 &lt;&lt; 0);</span>
+        }
+
+<span class="fc" id="L726">        final int logicalScreenWidth = read2Bytes(&quot;Logical Screen Width&quot;, is, &quot;Not a Valid GIF File&quot;, getByteOrder());</span>
+<span class="fc" id="L727">        final int logicalScreenHeight = read2Bytes(&quot;Logical Screen Height&quot;, is, &quot;Not a Valid GIF File&quot;, getByteOrder());</span>
+
+<span class="pc bpc" id="L729" title="1 of 2 branches missed.">        if (formatCompliance != null) {</span>
+<span class="fc" id="L730">            formatCompliance.checkBounds(&quot;Width&quot;, 1, Integer.MAX_VALUE, logicalScreenWidth);</span>
+<span class="fc" id="L731">            formatCompliance.checkBounds(&quot;Height&quot;, 1, Integer.MAX_VALUE, logicalScreenHeight);</span>
+        }
+
+<span class="fc" id="L734">        final byte packedFields = readByte(&quot;Packed Fields&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+<span class="fc" id="L735">        final byte backgroundColorIndex = readByte(&quot;Background Color Index&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+<span class="fc" id="L736">        final byte pixelAspectRatio = readByte(&quot;Pixel Aspect Ratio&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+
+<span class="pc bpc" id="L738" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L739">            logByteBits(&quot;PackedFields bits&quot;, packedFields);</span>
+        }
+
+<span class="fc bfc" id="L742" title="All 2 branches covered.">        final boolean globalColorTableFlag = (packedFields &amp; 128) &gt; 0;</span>
+<span class="pc bpc" id="L743" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L744">            LOGGER.finest(&quot;GlobalColorTableFlag: &quot; + globalColorTableFlag);</span>
+        }
+<span class="fc" id="L746">        final byte colorResolution = (byte) (packedFields &gt;&gt; 4 &amp; 7);</span>
+<span class="pc bpc" id="L747" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L748">            LOGGER.finest(&quot;ColorResolution: &quot; + colorResolution);</span>
+        }
+<span class="fc bfc" id="L750" title="All 2 branches covered.">        final boolean sortFlag = (packedFields &amp; 8) &gt; 0;</span>
+<span class="pc bpc" id="L751" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L752">            LOGGER.finest(&quot;SortFlag: &quot; + sortFlag);</span>
+        }
+<span class="fc" id="L754">        final byte sizeofGlobalColorTable = (byte) (packedFields &amp; 7);</span>
+<span class="pc bpc" id="L755" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L756">            LOGGER.finest(&quot;SizeofGlobalColorTable: &quot; + sizeofGlobalColorTable);</span>
+        }
+
+<span class="pc bpc" id="L759" title="1 of 2 branches missed.">        if (formatCompliance != null) {</span>
+<span class="fc bfc" id="L760" title="All 4 branches covered.">            if (globalColorTableFlag &amp;&amp; backgroundColorIndex != -1) {</span>
+<span class="fc" id="L761">                formatCompliance.checkBounds(&quot;Background Color Index&quot;, 0, convertColorTableSize(sizeofGlobalColorTable), backgroundColorIndex);</span>
+            }
+        }
+
+<span class="fc" id="L765">        return new GifHeaderInfo(identifier1, identifier2, identifier3, version1, version2, version3, logicalScreenWidth, logicalScreenHeight, packedFields,</span>
+                backgroundColorIndex, pixelAspectRatio, globalColorTableFlag, colorResolution, sortFlag, sizeofGlobalColorTable);
+    }
+
+    private ImageDescriptor readImageDescriptor(final GifHeaderInfo ghi, final int blockCode, final InputStream is, final boolean stopBeforeImageData,
+            final FormatCompliance formatCompliance) throws ImagingException, IOException {
+<span class="fc" id="L771">        final int imageLeftPosition = read2Bytes(&quot;Image Left Position&quot;, is, &quot;Not a Valid GIF File&quot;, getByteOrder());</span>
+<span class="fc" id="L772">        final int imageTopPosition = read2Bytes(&quot;Image Top Position&quot;, is, &quot;Not a Valid GIF File&quot;, getByteOrder());</span>
+<span class="fc" id="L773">        final int imageWidth = read2Bytes(&quot;Image Width&quot;, is, &quot;Not a Valid GIF File&quot;, getByteOrder());</span>
+<span class="fc" id="L774">        final int imageHeight = read2Bytes(&quot;Image Height&quot;, is, &quot;Not a Valid GIF File&quot;, getByteOrder());</span>
+<span class="fc" id="L775">        final byte packedFields = readByte(&quot;Packed Fields&quot;, is, &quot;Not a Valid GIF File&quot;);</span>
+
+<span class="pc bpc" id="L777" title="1 of 2 branches missed.">        if (formatCompliance != null) {</span>
+<span class="fc" id="L778">            formatCompliance.checkBounds(&quot;Width&quot;, 1, ghi.logicalScreenWidth, imageWidth);</span>
+<span class="fc" id="L779">            formatCompliance.checkBounds(&quot;Height&quot;, 1, ghi.logicalScreenHeight, imageHeight);</span>
+<span class="fc" id="L780">            formatCompliance.checkBounds(&quot;Left Position&quot;, 0, ghi.logicalScreenWidth - imageWidth, imageLeftPosition);</span>
+<span class="fc" id="L781">            formatCompliance.checkBounds(&quot;Top Position&quot;, 0, ghi.logicalScreenHeight - imageHeight, imageTopPosition);</span>
+        }
+
+<span class="pc bpc" id="L784" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L785">            logByteBits(&quot;PackedFields bits&quot;, packedFields);</span>
+        }
+
+<span class="fc bfc" id="L788" title="All 2 branches covered.">        final boolean localColorTableFlag = (packedFields &gt;&gt; 7 &amp; 1) &gt; 0;</span>
+<span class="pc bpc" id="L789" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L790">            LOGGER.finest(&quot;LocalColorTableFlag: &quot; + localColorTableFlag);</span>
+        }
+<span class="fc bfc" id="L792" title="All 2 branches covered.">        final boolean interlaceFlag = (packedFields &gt;&gt; 6 &amp; 1) &gt; 0;</span>
+<span class="pc bpc" id="L793" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L794">            LOGGER.finest(&quot;Interlace Flag: &quot; + interlaceFlag);</span>
+        }
+<span class="fc bfc" id="L796" title="All 2 branches covered.">        final boolean sortFlag = (packedFields &gt;&gt; 5 &amp; 1) &gt; 0;</span>
+<span class="pc bpc" id="L797" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L798">            LOGGER.finest(&quot;Sort Flag: &quot; + sortFlag);</span>
+        }
+
+<span class="fc" id="L801">        final byte sizeOfLocalColorTable = (byte) (packedFields &amp; 7);</span>
+<span class="pc bpc" id="L802" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L803">            LOGGER.finest(&quot;SizeofLocalColorTable: &quot; + sizeOfLocalColorTable);</span>
+        }
+
+<span class="fc" id="L806">        byte[] localColorTable = null;</span>
+<span class="fc bfc" id="L807" title="All 2 branches covered.">        if (localColorTableFlag) {</span>
+<span class="fc" id="L808">            localColorTable = readColorTable(is, sizeOfLocalColorTable);</span>
+        }
+
+<span class="fc" id="L811">        byte[] imageData = null;</span>
+<span class="pc bpc" id="L812" title="1 of 2 branches missed.">        if (!stopBeforeImageData) {</span>
+<span class="fc" id="L813">            final int lzwMinimumCodeSize = is.read();</span>
+
+<span class="fc" id="L815">            final GenericGifBlock block = readGenericGifBlock(is, -1);</span>
+<span class="fc" id="L816">            final byte[] bytes = block.appendSubBlocks();</span>
+<span class="fc" id="L817">            final InputStream bais = new ByteArrayInputStream(bytes);</span>
+
+<span class="fc" id="L819">            final int size = imageWidth * imageHeight;</span>
+<span class="fc" id="L820">            final MyLzwDecompressor myLzwDecompressor = new MyLzwDecompressor(lzwMinimumCodeSize, ByteOrder.LITTLE_ENDIAN, false);</span>
+<span class="fc" id="L821">            imageData = myLzwDecompressor.decompress(bais, size);</span>
+<span class="fc" id="L822">        } else {</span>
+<span class="nc" id="L823">            final int LZWMinimumCodeSize = is.read();</span>
+<span class="nc bnc" id="L824" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L825">                LOGGER.finest(&quot;LZWMinimumCodeSize: &quot; + LZWMinimumCodeSize);</span>
+            }
+
+<span class="nc" id="L828">            readGenericGifBlock(is, -1);</span>
+        }
+
+<span class="fc" id="L831">        return new ImageDescriptor(blockCode, imageLeftPosition, imageTopPosition, imageWidth, imageHeight, packedFields, localColorTableFlag, interlaceFlag,</span>
+                sortFlag, sizeOfLocalColorTable, localColorTable, imageData);
+    }
+
+    private byte[] readSubBlock(final InputStream is) throws IOException {
+<span class="fc" id="L836">        final int blockSize = 0xff &amp; readByte(&quot;blockSize&quot;, is, &quot;GIF: corrupt block&quot;);</span>
+
+<span class="fc" id="L838">        return readBytes(&quot;block&quot;, is, blockSize, &quot;GIF: corrupt block&quot;);</span>
+    }
+
+    private int simplePow(final int base, final int power) {
+<span class="fc" id="L842">        int result = 1;</span>
+
+<span class="fc bfc" id="L844" title="All 2 branches covered.">        for (int i = 0; i &lt; power; i++) {</span>
+<span class="fc" id="L845">            result *= base;</span>
+        }
+
+<span class="fc" id="L848">        return result;</span>
+    }
+
+    private void writeAsSubBlocks(final OutputStream os, final byte[] bytes) throws IOException {
+<span class="nc" id="L852">        int index = 0;</span>
+
+<span class="nc bnc" id="L854" title="All 2 branches missed.">        while (index &lt; bytes.length) {</span>
+<span class="nc" id="L855">            final int blockSize = Math.min(bytes.length - index, 255);</span>
+<span class="nc" id="L856">            os.write(blockSize);</span>
+<span class="nc" id="L857">            os.write(bytes, index, blockSize);</span>
+<span class="nc" id="L858">            index += blockSize;</span>
+<span class="nc" id="L859">        }</span>
+<span class="nc" id="L860">        os.write(0); // last block</span>
+<span class="nc" id="L861">    }</span>
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, GifImagingParameters params) throws ImagingException, IOException {
+<span class="nc bnc" id="L865" title="All 2 branches missed.">        if (params == null) {</span>
+<span class="nc" id="L866">            params = new GifImagingParameters();</span>
+        }
+
+<span class="nc" id="L869">        final String xmpXml = params.getXmpXml();</span>
+
+<span class="nc" id="L871">        final int width = src.getWidth();</span>
+<span class="nc" id="L872">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L874">        final boolean hasAlpha = new PaletteFactory().hasTransparency(src);</span>
+
+<span class="nc bnc" id="L876" title="All 2 branches missed.">        final int maxColors = hasAlpha ? 255 : 256;</span>
+
+<span class="nc" id="L878">        Palette palette2 = new PaletteFactory().makeExactRgbPaletteSimple(src, maxColors);</span>
+        // int[] palette = new PaletteFactory().makePaletteSimple(src, 256);
+        // Map palette_map = paletteToMap(palette);
+
+<span class="nc bnc" id="L882" title="All 2 branches missed.">        if (palette2 == null) {</span>
+<span class="nc" id="L883">            palette2 = new PaletteFactory().makeQuantizedRgbPalette(src, maxColors);</span>
+<span class="nc bnc" id="L884" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L885">                LOGGER.fine(&quot;quantizing&quot;);</span>
+            }
+<span class="nc bnc" id="L887" title="All 2 branches missed.">        } else if (LOGGER.isLoggable(Level.FINE)) {</span>
+<span class="nc" id="L888">            LOGGER.fine(&quot;exact palette&quot;);</span>
+        }
+
+<span class="nc bnc" id="L891" title="All 2 branches missed.">        if (palette2 == null) {</span>
+<span class="nc" id="L892">            throw new ImagingException(&quot;Gif: can't write images with more than 256 colors&quot;);</span>
+        }
+<span class="nc bnc" id="L894" title="All 2 branches missed.">        final int paletteSize = palette2.length() + (hasAlpha ? 1 : 0);</span>
+
+<span class="nc" id="L896">        try (BinaryOutputStream bos = BinaryOutputStream.littleEndian(os)) {</span>
+
+            // write Header
+<span class="nc" id="L899">            os.write(0x47); // G magic numbers</span>
+<span class="nc" id="L900">            os.write(0x49); // I</span>
+<span class="nc" id="L901">            os.write(0x46); // F</span>
+
+<span class="nc" id="L903">            os.write(0x38); // 8 version magic numbers</span>
+<span class="nc" id="L904">            os.write(0x39); // 9</span>
+<span class="nc" id="L905">            os.write(0x61); // a</span>
+
+            // Logical Screen Descriptor.
+
+<span class="nc" id="L909">            bos.write2Bytes(width);</span>
+<span class="nc" id="L910">            bos.write2Bytes(height);</span>
+
+<span class="nc bnc" id="L912" title="All 2 branches missed.">            final int colorTableScaleLessOne = paletteSize &gt; 128 ? 7</span>
+<span class="nc bnc" id="L913" title="All 12 branches missed.">                    : paletteSize &gt; 64 ? 6 : paletteSize &gt; 32 ? 5 : paletteSize &gt; 16 ? 4 : paletteSize &gt; 8 ? 3 : paletteSize &gt; 4 ? 2 : paletteSize &gt; 2 ? 1 : 0;</span>
+
+<span class="nc" id="L915">            final int colorTableSizeInFormat = 1 &lt;&lt; colorTableScaleLessOne + 1;</span>
+            {
+<span class="nc" id="L917">                final byte colorResolution = (byte) colorTableScaleLessOne; // TODO:</span>
+<span class="nc" id="L918">                final int packedFields = (7 &amp; colorResolution) * 16;</span>
+<span class="nc" id="L919">                bos.write(packedFields); // one byte</span>
+            }
+            {
+<span class="nc" id="L922">                final byte backgroundColorIndex = 0;</span>
+<span class="nc" id="L923">                bos.write(backgroundColorIndex);</span>
+            }
+            {
+<span class="nc" id="L926">                final byte pixelAspectRatio = 0;</span>
+<span class="nc" id="L927">                bos.write(pixelAspectRatio);</span>
+            }
+
+            // {
+            // write Global Color Table.
+
+            // }
+
+            { // ALWAYS write GraphicControlExtension
+<span class="nc" id="L936">                bos.write(EXTENSION_CODE);</span>
+<span class="nc" id="L937">                bos.write((byte) 0xf9);</span>
+                // bos.write(0xff &amp; (kGraphicControlExtension &gt;&gt; 8));
+                // bos.write(0xff &amp; (kGraphicControlExtension &gt;&gt; 0));
+
+<span class="nc" id="L941">                bos.write((byte) 4); // block size;</span>
+<span class="nc bnc" id="L942" title="All 2 branches missed.">                final int packedFields = hasAlpha ? 1 : 0; // transparency flag</span>
+<span class="nc" id="L943">                bos.write((byte) packedFields);</span>
+<span class="nc" id="L944">                bos.write((byte) 0); // Delay Time</span>
+<span class="nc" id="L945">                bos.write((byte) 0); // Delay Time</span>
+<span class="nc bnc" id="L946" title="All 2 branches missed.">                bos.write((byte) (hasAlpha ? palette2.length() : 0)); // Transparent</span>
+                // Color
+                // Index
+<span class="nc" id="L949">                bos.write((byte) 0); // terminator</span>
+            }
+
+<span class="nc bnc" id="L952" title="All 2 branches missed.">            if (null != xmpXml) {</span>
+<span class="nc" id="L953">                bos.write(EXTENSION_CODE);</span>
+<span class="nc" id="L954">                bos.write(APPLICATION_EXTENSION_LABEL);</span>
+
+<span class="nc" id="L956">                bos.write(XMP_APPLICATION_ID_AND_AUTH_CODE.length); // 0x0B</span>
+<span class="nc" id="L957">                bos.write(XMP_APPLICATION_ID_AND_AUTH_CODE);</span>
+
+<span class="nc" id="L959">                final byte[] xmpXmlBytes = xmpXml.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L960">                bos.write(xmpXmlBytes);</span>
+
+                // write &quot;magic trailer&quot;
+<span class="nc bnc" id="L963" title="All 2 branches missed.">                for (int magic = 0; magic &lt;= 0xff; magic++) {</span>
+<span class="nc" id="L964">                    bos.write(0xff - magic);</span>
+                }
+
+<span class="nc" id="L967">                bos.write((byte) 0); // terminator</span>
+
+            }
+
+            { // Image Descriptor.
+<span class="nc" id="L972">                bos.write(IMAGE_SEPARATOR);</span>
+<span class="nc" id="L973">                bos.write2Bytes(0); // Image Left Position</span>
+<span class="nc" id="L974">                bos.write2Bytes(0); // Image Top Position</span>
+<span class="nc" id="L975">                bos.write2Bytes(width); // Image Width</span>
+<span class="nc" id="L976">                bos.write2Bytes(height); // Image Height</span>
+
+                {
+<span class="nc" id="L979">                    final boolean localColorTableFlag = true;</span>
+                    // boolean LocalColorTableFlag = false;
+<span class="nc" id="L981">                    final boolean interlaceFlag = false;</span>
+<span class="nc" id="L982">                    final boolean sortFlag = false;</span>
+<span class="nc" id="L983">                    final int sizeOfLocalColorTable = colorTableScaleLessOne;</span>
+
+                    // int SizeOfLocalColorTable = 0;
+
+                    final int packedFields;
+                    if (localColorTableFlag) {
+<span class="nc" id="L989">                        packedFields = LOCAL_COLOR_TABLE_FLAG_MASK | (interlaceFlag ? INTERLACE_FLAG_MASK : 0) | (sortFlag ? SORT_FLAG_MASK : 0)</span>
+                                | 7 &amp; sizeOfLocalColorTable;
+                    } else {
+                        packedFields = 0 | (interlaceFlag ? INTERLACE_FLAG_MASK : 0) | (sortFlag ? SORT_FLAG_MASK : 0) | 7 &amp; sizeOfLocalColorTable;
+                    }
+<span class="nc" id="L994">                    bos.write(packedFields); // one byte</span>
+                }
+            }
+
+            { // write Local Color Table.
+<span class="nc bnc" id="L999" title="All 2 branches missed.">                for (int i = 0; i &lt; colorTableSizeInFormat; i++) {</span>
+<span class="nc bnc" id="L1000" title="All 2 branches missed.">                    if (i &lt; palette2.length()) {</span>
+<span class="nc" id="L1001">                        final int rgb = palette2.getEntry(i);</span>
+
+<span class="nc" id="L1003">                        final int red = 0xff &amp; rgb &gt;&gt; 16;</span>
+<span class="nc" id="L1004">                        final int green = 0xff &amp; rgb &gt;&gt; 8;</span>
+<span class="nc" id="L1005">                        final int blue = 0xff &amp; rgb &gt;&gt; 0;</span>
+
+<span class="nc" id="L1007">                        bos.write(red);</span>
+<span class="nc" id="L1008">                        bos.write(green);</span>
+<span class="nc" id="L1009">                        bos.write(blue);</span>
+<span class="nc" id="L1010">                    } else {</span>
+<span class="nc" id="L1011">                        bos.write(0);</span>
+<span class="nc" id="L1012">                        bos.write(0);</span>
+<span class="nc" id="L1013">                        bos.write(0);</span>
+                    }
+                }
+            }
+
+            { // get Image Data.
+//            int image_data_total = 0;
+
+<span class="nc" id="L1021">                int lzwMinimumCodeSize = colorTableScaleLessOne + 1;</span>
+                // LZWMinimumCodeSize = Math.max(8, LZWMinimumCodeSize);
+<span class="nc bnc" id="L1023" title="All 2 branches missed.">                if (lzwMinimumCodeSize &lt; 2) {</span>
+<span class="nc" id="L1024">                    lzwMinimumCodeSize = 2;</span>
+                }
+
+                // TODO:
+                // make
+                // better
+                // choice
+                // here.
+<span class="nc" id="L1032">                bos.write(lzwMinimumCodeSize);</span>
+
+<span class="nc" id="L1034">                final MyLzwCompressor compressor = new MyLzwCompressor(lzwMinimumCodeSize, ByteOrder.LITTLE_ENDIAN, false); // GIF</span>
+                // Mode);
+
+<span class="nc" id="L1037">                final byte[] imageData = Allocator.byteArray(width * height);</span>
+<span class="nc bnc" id="L1038" title="All 2 branches missed.">                for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L1039" title="All 2 branches missed.">                    for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L1040">                        final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L1041">                        final int rgb = 0xffffff &amp; argb;</span>
+                        int index;
+
+<span class="nc bnc" id="L1044" title="All 2 branches missed.">                        if (hasAlpha) {</span>
+<span class="nc" id="L1045">                            final int alpha = 0xff &amp; argb &gt;&gt; 24;</span>
+<span class="nc" id="L1046">                            final int alphaThreshold = 255;</span>
+<span class="nc bnc" id="L1047" title="All 2 branches missed.">                            if (alpha &lt; alphaThreshold) {</span>
+<span class="nc" id="L1048">                                index = palette2.length(); // is transparent</span>
+                            } else {
+<span class="nc" id="L1050">                                index = palette2.getPaletteIndex(rgb);</span>
+                            }
+<span class="nc" id="L1052">                        } else {</span>
+<span class="nc" id="L1053">                            index = palette2.getPaletteIndex(rgb);</span>
+                        }
+
+<span class="nc" id="L1056">                        imageData[y * width + x] = (byte) index;</span>
+                    }
+                }
+
+<span class="nc" id="L1060">                final byte[] compressed = compressor.compress(imageData);</span>
+<span class="nc" id="L1061">                writeAsSubBlocks(bos, compressed);</span>
+//            image_data_total += compressed.length;
+            }
+
+            // palette2.dump();
+
+<span class="nc" id="L1067">            bos.write(TERMINATOR_BYTE);</span>
+
+        }
+<span class="nc" id="L1070">        os.close();</span>
+<span class="nc" id="L1071">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

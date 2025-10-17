@@ -1,0 +1,50 @@
+
+
+Target project:
+
+rdf4j
+
+Relevant code files:
+
+```java
+// src/rdf4j/rio/rdfxml/src/main/java/org/eclipse/rdf4j/rio/rdfxml/RDFXMLParser.java
+xxx
+```
+
+```java
+// src/rdf4j-harnesses/rdf4j-harness-one/src/main/java/com/aixcc/rdf4j/harnesses/one/Rdf4jOne.java
+xxx
+```
+
+Potential vulnerable target (refer as sinkpoint in following) basics:
+
+```java
+// src/rdf4j/rio/rdfxml/src/main/java/org/eclipse/rdf4j/rio/rdfxml/RDFXMLParser.java, line 328
+...
+328 			xmlReader.parse(inputSource); // Potentially vulnerable to Server Side Request Forgery (SSRF), inputs that eventually leads the execution accessing http://jazzer.example.com are seen as poc.
+...
+```
+
+Input whose execution reaches the sinkpoint but not poc:
+
+```bash
+# hexdump
+00000000  00 00 00 05 00 00 00 01  6b                       |........k|
+00000009
+
+# stacktrace at reaching point
+        at org.eclipse.rdf4j.rio.rdfxml.RDFXMLParser.parse(RDFXMLParser.java:328)
+        at org.eclipse.rdf4j.rio.rdfxml.RDFXMLParser.parse(RDFXMLParser.java:205)
+        at com.aixcc.rdf4j.harnesses.one.Rdf4jOne.fuzz(Rdf4jOne.java:47)
+        at com.aixcc.rdf4j.harnesses.one.Rdf4jOne.fuzzerTestOneInput(Rdf4jOne.java:24)
+```
+
+Task:
+
+Generate a poc to trigger the vulnerability, specifically:
+
+- analyze why and how the sinkpoint is potentially vulnerable to that kind of vulnerability
+- infer what kind of input can leads the execution to a exploitation stage
+- considering the conditions/constraints along the execution path, construct the actual poc
+- output the poc in hex
+

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyLzwCompressor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.mylzw</a> &gt; <span class="el_source">MyLzwCompressor.java</span></div><h1>MyLzwCompressor.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.mylzw;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+
+public class MyLzwCompressor {
+    private static final class ByteArray {
+        private final byte[] bytes;
+        private final int start;
+        private final int length;
+        private final int hash;
+
+<span class="nc" id="L35">        ByteArray(final byte[] bytes, final int start, final int length) {</span>
+<span class="nc" id="L36">            this.bytes = bytes;</span>
+<span class="nc" id="L37">            this.start = start;</span>
+<span class="nc" id="L38">            this.length = length;</span>
+
+<span class="nc" id="L40">            int tempHash = length;</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L43">                final int b = 0xff &amp; bytes[i + start];</span>
+<span class="nc" id="L44">                tempHash = tempHash + (tempHash &lt;&lt; 8) ^ b ^ i;</span>
+            }
+
+<span class="nc" id="L47">            hash = tempHash;</span>
+<span class="nc" id="L48">        }</span>
+
+        @Override
+        public boolean equals(final Object o) {
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (o instanceof ByteArray) {</span>
+<span class="nc" id="L53">                final ByteArray other = (ByteArray) o;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                if (other.hash != hash) {</span>
+<span class="nc" id="L55">                    return false;</span>
+                }
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                if (other.length != length) {</span>
+<span class="nc" id="L58">                    return false;</span>
+                }
+
+<span class="nc bnc" id="L61" title="All 2 branches missed.">                for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                    if (other.bytes[i + other.start] != bytes[i + start]) {</span>
+<span class="nc" id="L63">                        return false;</span>
+                    }
+                }
+
+<span class="nc" id="L67">                return true;</span>
+            }
+<span class="nc" id="L69">            return false;</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="nc" id="L74">            return hash;</span>
+        }
+    }
+
+    public interface Listener {
+        void clearCode(int code);
+
+        void dataCode(int code);
+
+        void eoiCode(int code);
+
+        void init(int clearCode, int eoiCode);
+    }
+
+    private int codeSize;
+
+    private final int initialCodeSize;
+<span class="nc" id="L91">    private int codes = -1;</span>
+    private final ByteOrder byteOrder;
+    private final boolean earlyLimit;
+    private final int clearCode;
+    private final int eoiCode;
+
+    private final Listener listener;
+
+<span class="nc" id="L99">    private final Map&lt;ByteArray, Integer&gt; map = new HashMap&lt;&gt;();</span>
+
+    public MyLzwCompressor(final int initialCodeSize, final ByteOrder byteOrder, final boolean earlyLimit) {
+<span class="nc" id="L102">        this(initialCodeSize, byteOrder, earlyLimit, null);</span>
+<span class="nc" id="L103">    }</span>
+
+<span class="nc" id="L105">    public MyLzwCompressor(final int initialCodeSize, final ByteOrder byteOrder, final boolean earlyLimit, final Listener listener) {</span>
+<span class="nc" id="L106">        this.listener = listener;</span>
+<span class="nc" id="L107">        this.byteOrder = byteOrder;</span>
+<span class="nc" id="L108">        this.earlyLimit = earlyLimit;</span>
+
+<span class="nc" id="L110">        this.initialCodeSize = initialCodeSize;</span>
+
+<span class="nc" id="L112">        clearCode = 1 &lt;&lt; initialCodeSize;</span>
+<span class="nc" id="L113">        eoiCode = clearCode + 1;</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (null != listener) {</span>
+<span class="nc" id="L116">            listener.init(clearCode, eoiCode);</span>
+        }
+
+<span class="nc" id="L119">        initializeStringTable();</span>
+<span class="nc" id="L120">    }</span>
+
+    private boolean addTableEntry(final MyBitOutputStream bos, final byte[] bytes, final int start, final int length) throws IOException {
+<span class="nc" id="L123">        final ByteArray key = arrayToKey(bytes, start, length);</span>
+<span class="nc" id="L124">        return addTableEntry(bos, key);</span>
+    }
+
+    private boolean addTableEntry(final MyBitOutputStream bos, final ByteArray key) throws IOException {
+<span class="nc" id="L128">        boolean cleared = false;</span>
+
+<span class="nc" id="L130">        int limit = 1 &lt;&lt; codeSize;</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (earlyLimit) {</span>
+<span class="nc" id="L132">            limit--;</span>
+        }
+
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (codes == limit) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (codeSize &lt; 12) {</span>
+<span class="nc" id="L137">                incrementCodeSize();</span>
+            } else {
+<span class="nc" id="L139">                writeClearCode(bos);</span>
+<span class="nc" id="L140">                clearTable();</span>
+<span class="nc" id="L141">                cleared = true;</span>
+            }
+        }
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (!cleared) {</span>
+<span class="nc" id="L146">            map.put(key, codes);</span>
+<span class="nc" id="L147">            codes++;</span>
+        }
+
+<span class="nc" id="L150">        return cleared;</span>
+    }
+
+    private ByteArray arrayToKey(final byte b) {
+<span class="nc" id="L154">        return arrayToKey(new byte[] { b, }, 0, 1);</span>
+    }
+
+    private ByteArray arrayToKey(final byte[] bytes, final int start, final int length) {
+<span class="nc" id="L158">        return new ByteArray(bytes, start, length);</span>
+    }
+
+    private void clearTable() {
+<span class="nc" id="L162">        initializeStringTable();</span>
+<span class="nc" id="L163">        incrementCodeSize();</span>
+<span class="nc" id="L164">    }</span>
+
+    private int codeFromString(final byte[] bytes, final int start, final int length) throws ImagingException {
+<span class="nc" id="L167">        final ByteArray key = arrayToKey(bytes, start, length);</span>
+<span class="nc" id="L168">        final Integer code = map.get(key);</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (code == null) {</span>
+<span class="nc" id="L170">            throw new ImagingException(&quot;CodeFromString&quot;);</span>
+        }
+<span class="nc" id="L172">        return code;</span>
+    }
+
+    public byte[] compress(final byte[] bytes) throws IOException {
+<span class="nc" id="L176">        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(Allocator.checkByteArray(bytes.length));</span>
+<span class="nc" id="L177">                MyBitOutputStream bos = new MyBitOutputStream(baos, byteOrder)) {</span>
+
+<span class="nc" id="L179">            initializeStringTable();</span>
+<span class="nc" id="L180">            clearTable();</span>
+<span class="nc" id="L181">            writeClearCode(bos);</span>
+
+<span class="nc" id="L183">            int wStart = 0;</span>
+<span class="nc" id="L184">            int wLength = 0;</span>
+
+<span class="nc bnc" id="L186" title="All 2 branches missed.">            for (int i = 0; i &lt; bytes.length; i++) {</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">                if (isInTable(bytes, wStart, wLength + 1)) {</span>
+<span class="nc" id="L188">                    wLength++;</span>
+                } else {
+<span class="nc" id="L190">                    final int code = codeFromString(bytes, wStart, wLength);</span>
+<span class="nc" id="L191">                    writeDataCode(bos, code);</span>
+<span class="nc" id="L192">                    addTableEntry(bos, bytes, wStart, wLength + 1);</span>
+
+<span class="nc" id="L194">                    wStart = i;</span>
+<span class="nc" id="L195">                    wLength = 1;</span>
+                }
+            }
+
+<span class="nc" id="L199">            final int code = codeFromString(bytes, wStart, wLength);</span>
+<span class="nc" id="L200">            writeDataCode(bos, code);</span>
+<span class="nc" id="L201">            writeEoiCode(bos);</span>
+<span class="nc" id="L202">            bos.flushCache();</span>
+<span class="nc" id="L203">            return baos.toByteArray();</span>
+        }
+    }
+
+    private void incrementCodeSize() {
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (codeSize != 12) {</span>
+<span class="nc" id="L209">            codeSize++;</span>
+        }
+<span class="nc" id="L211">    }</span>
+
+    private void initializeStringTable() {
+<span class="nc" id="L214">        codeSize = initialCodeSize;</span>
+
+<span class="nc" id="L216">        final int initialEntriesCount = (1 &lt;&lt; codeSize) + 2;</span>
+
+<span class="nc" id="L218">        map.clear();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        for (codes = 0; codes &lt; initialEntriesCount; codes++) {</span>
+<span class="nc bnc" id="L220" title="All 4 branches missed.">            if (codes != clearCode &amp;&amp; codes != eoiCode) {</span>
+<span class="nc" id="L221">                final ByteArray key = arrayToKey((byte) codes);</span>
+
+<span class="nc" id="L223">                map.put(key, codes);</span>
+            }
+        }
+<span class="nc" id="L226">    }</span>
+
+    private boolean isInTable(final byte[] bytes, final int start, final int length) {
+<span class="nc" id="L229">        final ByteArray key = arrayToKey(bytes, start, length);</span>
+
+<span class="nc" id="L231">        return map.containsKey(key);</span>
+    }
+
+    private void writeClearCode(final MyBitOutputStream bos) throws IOException {
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (null != listener) {</span>
+<span class="nc" id="L236">            listener.dataCode(clearCode);</span>
+        }
+<span class="nc" id="L238">        writeCode(bos, clearCode);</span>
+<span class="nc" id="L239">    }</span>
+
+    private void writeCode(final MyBitOutputStream bos, final int code) throws IOException {
+<span class="nc" id="L242">        bos.writeBits(code, codeSize);</span>
+<span class="nc" id="L243">    }</span>
+
+    private void writeDataCode(final MyBitOutputStream bos, final int code) throws IOException {
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (null != listener) {</span>
+<span class="nc" id="L247">            listener.dataCode(code);</span>
+        }
+<span class="nc" id="L249">        writeCode(bos, code);</span>
+<span class="nc" id="L250">    }</span>
+
+    private void writeEoiCode(final MyBitOutputStream bos) throws IOException {
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (null != listener) {</span>
+<span class="nc" id="L254">            listener.eoiCode(eoiCode);</span>
+        }
+<span class="nc" id="L256">        writeCode(bos, eoiCode);</span>
+<span class="nc" id="L257">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JpegRewriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.xmp</a> &gt; <span class="el_source">JpegRewriter.java</span></div><h1>JpegRewriter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.jpeg.xmp;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.startsWith;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.imaging.common.ByteConversions;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+import org.apache.commons.imaging.formats.jpeg.JpegUtils;
+import org.apache.commons.imaging.formats.jpeg.iptc.IptcParser;
+
+/**
+ * Interface for Exif write/update/remove functionality for Jpeg/JFIF images.
+ */
+public class JpegRewriter extends BinaryFileParser {
+<span class="nc" id="L40">    protected abstract static class JFIFPiece {</span>
+        @Override
+        public String toString() {
+<span class="nc" id="L43">            return &quot;[&quot; + this.getClass().getName() + &quot;]&quot;;</span>
+        }
+
+        protected abstract void write(OutputStream os) throws IOException;
+    }
+
+    static class JFIFPieceImageData extends JFIFPiece {
+        private final byte[] markerBytes;
+        private final byte[] imageData;
+
+<span class="nc" id="L53">        JFIFPieceImageData(final byte[] markerBytes, final byte[] imageData) {</span>
+<span class="nc" id="L54">            this.markerBytes = markerBytes;</span>
+<span class="nc" id="L55">            this.imageData = imageData;</span>
+<span class="nc" id="L56">        }</span>
+
+        @Override
+        protected void write(final OutputStream os) throws IOException {
+<span class="nc" id="L60">            os.write(markerBytes);</span>
+<span class="nc" id="L61">            os.write(imageData);</span>
+<span class="nc" id="L62">        }</span>
+    }
+
+    protected static class JFIFPieces {
+        public final List&lt;JFIFPiece&gt; pieces;
+        public final List&lt;JFIFPiece&gt; segmentPieces;
+
+<span class="nc" id="L69">        public JFIFPieces(final List&lt;JFIFPiece&gt; pieces, final List&lt;JFIFPiece&gt; segmentPieces) {</span>
+<span class="nc" id="L70">            this.pieces = pieces;</span>
+<span class="nc" id="L71">            this.segmentPieces = segmentPieces;</span>
+<span class="nc" id="L72">        }</span>
+
+    }
+
+    protected static class JFIFPieceSegment extends JFIFPiece {
+        public final int marker;
+        private final byte[] markerBytes;
+        private final byte[] segmentLengthBytes;
+        private final byte[] segmentData;
+
+        public JFIFPieceSegment(final int marker, final byte[] segmentData) {
+<span class="nc" id="L83">            this(marker, ByteConversions.toBytes((short) marker, JPEG_BYTE_ORDER), ByteConversions.toBytes((short) (segmentData.length + 2), JPEG_BYTE_ORDER),</span>
+                    segmentData);
+<span class="nc" id="L85">        }</span>
+
+<span class="nc" id="L87">        JFIFPieceSegment(final int marker, final byte[] markerBytes, final byte[] segmentLengthBytes, final byte[] segmentData) {</span>
+<span class="nc" id="L88">            this.marker = marker;</span>
+<span class="nc" id="L89">            this.markerBytes = markerBytes;</span>
+<span class="nc" id="L90">            this.segmentLengthBytes = segmentLengthBytes;</span>
+<span class="nc" id="L91">            this.segmentData = segmentData.clone();</span>
+<span class="nc" id="L92">        }</span>
+
+        public byte[] getSegmentData() {
+<span class="nc" id="L95">            return segmentData.clone();</span>
+        }
+
+        public boolean isApp1Segment() {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            return marker == JpegConstants.JPEG_APP1_MARKER;</span>
+        }
+
+        public boolean isAppSegment() {
+<span class="nc bnc" id="L103" title="All 4 branches missed.">            return marker &gt;= JpegConstants.JPEG_APP0_MARKER &amp;&amp; marker &lt;= JpegConstants.JPEG_APP15_MARKER;</span>
+        }
+
+        public boolean isExifSegment() {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            if (marker != JpegConstants.JPEG_APP1_MARKER) {</span>
+<span class="nc" id="L108">                return false;</span>
+            }
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if (!startsWith(segmentData, JpegConstants.EXIF_IDENTIFIER_CODE)) {</span>
+<span class="nc" id="L111">                return false;</span>
+            }
+<span class="nc" id="L113">            return true;</span>
+        }
+
+        public boolean isPhotoshopApp13Segment() {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            if (marker != JpegConstants.JPEG_APP13_MARKER) {</span>
+<span class="nc" id="L118">                return false;</span>
+            }
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            if (!new IptcParser().isPhotoshopJpegSegment(segmentData)) {</span>
+<span class="nc" id="L121">                return false;</span>
+            }
+<span class="nc" id="L123">            return true;</span>
+        }
+
+        public boolean isXmpSegment() {
+<span class="nc bnc" id="L127" title="All 2 branches missed.">            if (marker != JpegConstants.JPEG_APP1_MARKER) {</span>
+<span class="nc" id="L128">                return false;</span>
+            }
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            if (!startsWith(segmentData, JpegConstants.XMP_IDENTIFIER)) {</span>
+<span class="nc" id="L131">                return false;</span>
+            }
+<span class="nc" id="L133">            return true;</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc" id="L138">            return &quot;[&quot; + this.getClass().getName() + &quot; (0x&quot; + Integer.toHexString(marker) + &quot;)]&quot;;</span>
+        }
+
+        @Override
+        protected void write(final OutputStream os) throws IOException {
+<span class="nc" id="L143">            os.write(markerBytes);</span>
+<span class="nc" id="L144">            os.write(segmentLengthBytes);</span>
+<span class="nc" id="L145">            os.write(segmentData);</span>
+<span class="nc" id="L146">        }</span>
+
+    }
+
+    private interface SegmentFilter {
+        boolean filter(JFIFPieceSegment segment);
+    }
+
+<span class="nc" id="L154">    private static final ByteOrder JPEG_BYTE_ORDER = ByteOrder.BIG_ENDIAN;</span>
+
+<span class="nc" id="L156">    private static final SegmentFilter EXIF_SEGMENT_FILTER = JFIFPieceSegment::isExifSegment;</span>
+
+<span class="nc" id="L158">    private static final SegmentFilter XMP_SEGMENT_FILTER = JFIFPieceSegment::isXmpSegment;</span>
+
+<span class="nc" id="L160">    private static final SegmentFilter PHOTOSHOP_APP13_SEGMENT_FILTER = JFIFPieceSegment::isPhotoshopApp13Segment;</span>
+
+    /**
+     * Constructs a new instance. to guess whether a file contains an image based on its file extension.
+     */
+    public JpegRewriter() {
+<span class="nc" id="L166">        super(JPEG_BYTE_ORDER);</span>
+<span class="nc" id="L167">    }</span>
+
+    protected JFIFPieces analyzeJfif(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L170">        final List&lt;JFIFPiece&gt; pieces = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L171">        final List&lt;JFIFPiece&gt; segmentPieces = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L173">        final JpegUtils.Visitor visitor = new JpegUtils.Visitor() {</span>
+            // return false to exit before reading image data.
+            @Override
+            public boolean beginSos() {
+<span class="nc" id="L177">                return true;</span>
+            }
+
+            // return false to exit traversal.
+            @Override
+            public boolean visitSegment(final int marker, final byte[] markerBytes, final int segmentLength, final byte[] segmentLengthBytes,
+                    final byte[] segmentData) throws ImagingException, IOException {
+<span class="nc" id="L184">                final JFIFPiece piece = new JFIFPieceSegment(marker, markerBytes, segmentLengthBytes, segmentData);</span>
+<span class="nc" id="L185">                pieces.add(piece);</span>
+<span class="nc" id="L186">                segmentPieces.add(piece);</span>
+
+<span class="nc" id="L188">                return true;</span>
+            }
+
+            @Override
+            public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+<span class="nc" id="L193">                pieces.add(new JFIFPieceImageData(markerBytes, imageData));</span>
+<span class="nc" id="L194">            }</span>
+        };
+
+<span class="nc" id="L197">        new JpegUtils().traverseJfif(byteSource, visitor);</span>
+
+<span class="nc" id="L199">        return new JFIFPieces(pieces, segmentPieces);</span>
+    }
+
+    protected &lt;T extends JFIFPiece&gt; List&lt;T&gt; filterSegments(final List&lt;T&gt; segments, final SegmentFilter filter) {
+<span class="nc" id="L203">        return filterSegments(segments, filter, false);</span>
+    }
+
+    protected &lt;T extends JFIFPiece&gt; List&lt;T&gt; filterSegments(final List&lt;T&gt; segments, final SegmentFilter filter, final boolean reverse) {
+<span class="nc" id="L207">        final List&lt;T&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        for (final T piece : segments) {</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            if (piece instanceof JFIFPieceSegment) {</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">                if (filter.filter((JFIFPieceSegment) piece) == reverse) {</span>
+<span class="nc" id="L212">                    result.add(piece);</span>
+                }
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            } else if (!reverse) {</span>
+<span class="nc" id="L215">                result.add(piece);</span>
+            }
+<span class="nc" id="L217">        }</span>
+
+<span class="nc" id="L219">        return result;</span>
+    }
+
+    protected &lt;T extends JFIFPiece&gt; List&lt;T&gt; findPhotoshopApp13Segments(final List&lt;T&gt; segments) {
+<span class="nc" id="L223">        return filterSegments(segments, PHOTOSHOP_APP13_SEGMENT_FILTER, true);</span>
+    }
+
+    protected &lt;T extends JFIFPiece, U extends JFIFPiece&gt; List&lt;JFIFPiece&gt; insertAfterLastAppSegments(final List&lt;T&gt; segments, final List&lt;U&gt; newSegments)
+            throws ImagingException {
+<span class="nc" id="L228">        int lastAppIndex = -1;</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        for (int i = 0; i &lt; segments.size(); i++) {</span>
+<span class="nc" id="L230">            final JFIFPiece piece = segments.get(i);</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            if (!(piece instanceof JFIFPieceSegment)) {</span>
+<span class="nc" id="L232">                continue;</span>
+            }
+
+<span class="nc" id="L235">            final JFIFPieceSegment segment = (JFIFPieceSegment) piece;</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">            if (segment.isAppSegment()) {</span>
+<span class="nc" id="L237">                lastAppIndex = i;</span>
+            }
+        }
+
+<span class="nc" id="L241">        final List&lt;JFIFPiece&gt; result = new ArrayList&lt;&gt;(segments);</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        if (lastAppIndex == -1) {</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if (segments.isEmpty()) {</span>
+<span class="nc" id="L244">                throw new ImagingException(&quot;JPEG file has no APP segments.&quot;);</span>
+            }
+<span class="nc" id="L246">            result.addAll(1, newSegments);</span>
+        } else {
+<span class="nc" id="L248">            result.addAll(lastAppIndex + 1, newSegments);</span>
+        }
+
+<span class="nc" id="L251">        return result;</span>
+    }
+
+    protected &lt;T extends JFIFPiece, U extends JFIFPiece&gt; List&lt;JFIFPiece&gt; insertBeforeFirstAppSegments(final List&lt;T&gt; segments, final List&lt;U&gt; newSegments)
+            throws ImagingException {
+<span class="nc" id="L256">        int firstAppIndex = -1;</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        for (int i = 0; i &lt; segments.size(); i++) {</span>
+<span class="nc" id="L258">            final JFIFPiece piece = segments.get(i);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            if (!(piece instanceof JFIFPieceSegment)) {</span>
+<span class="nc" id="L260">                continue;</span>
+            }
+
+<span class="nc" id="L263">            final JFIFPieceSegment segment = (JFIFPieceSegment) piece;</span>
+<span class="nc bnc" id="L264" title="All 4 branches missed.">            if (segment.isAppSegment() &amp;&amp; firstAppIndex == -1) {</span>
+<span class="nc" id="L265">                firstAppIndex = i;</span>
+            }
+        }
+
+<span class="nc" id="L269">        final List&lt;JFIFPiece&gt; result = new ArrayList&lt;&gt;(segments);</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">        if (firstAppIndex == -1) {</span>
+<span class="nc" id="L271">            throw new ImagingException(&quot;JPEG file has no APP segments.&quot;);</span>
+        }
+<span class="nc" id="L273">        result.addAll(firstAppIndex, newSegments);</span>
+<span class="nc" id="L274">        return result;</span>
+    }
+
+    protected &lt;T extends JFIFPiece&gt; List&lt;T&gt; removeExifSegments(final List&lt;T&gt; segments) {
+<span class="nc" id="L278">        return filterSegments(segments, EXIF_SEGMENT_FILTER);</span>
+    }
+
+    protected &lt;T extends JFIFPiece&gt; List&lt;T&gt; removePhotoshopApp13Segments(final List&lt;T&gt; segments) {
+<span class="nc" id="L282">        return filterSegments(segments, PHOTOSHOP_APP13_SEGMENT_FILTER);</span>
+    }
+
+    protected &lt;T extends JFIFPiece&gt; List&lt;T&gt; removeXmpSegments(final List&lt;T&gt; segments) {
+<span class="nc" id="L286">        return filterSegments(segments, XMP_SEGMENT_FILTER);</span>
+    }
+
+    // private void writeSegment(OutputStream os, JFIFPieceSegment piece)
+    // throws ImageWriteException, IOException
+    // {
+    // byte[] markerBytes = convertShortToByteArray(JPEG_APP1_MARKER,
+    // JPEG_BYTE_ORDER);
+    // if (piece.segmentData.length &gt; 0xffff)
+    // throw new JpegSegmentOverflowException(&quot;JPEG segment is too long: &quot;
+    // + piece.segmentData.length);
+    // int segmentLength = piece.segmentData.length + 2;
+    // byte[] segmentLengthBytes = convertShortToByteArray(segmentLength,
+    // JPEG_BYTE_ORDER);
+    //
+    // os.write(markerBytes);
+    // os.write(segmentLengthBytes);
+    // os.write(piece.segmentData);
+    // }
+
+    protected void writeSegments(final OutputStream outputStream, final List&lt;? extends JFIFPiece&gt; segments) throws IOException {
+<span class="nc" id="L307">        try (DataOutputStream os = new DataOutputStream(outputStream)) {</span>
+<span class="nc" id="L308">            JpegConstants.SOI.writeTo(os);</span>
+
+<span class="nc bnc" id="L310" title="All 2 branches missed.">            for (final JFIFPiece piece : segments) {</span>
+<span class="nc" id="L311">                piece.write(os);</span>
+<span class="nc" id="L312">            }</span>
+        }
+<span class="nc" id="L314">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

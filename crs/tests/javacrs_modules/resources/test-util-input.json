@@ -1,0 +1,433 @@
+{
+  "cp": "aixcc/jvm/jenkins",
+  "env": {
+    "AFL_FUZZER_ARGS": "-m none",
+    "AIXCC_CP_ROOT": "/cp_root",
+    "AIXCC_JAZZER_DIR": "/classpath/aixcc-jazzer",
+    "AIXCC_LITELLM_HOSTNAME": "xxx",
+    "ASAN_OPTIONS": "alloc_dealloc_mismatch=0:allocator_may_return_null=1:allocator_release_to_os_interval_ms=500:check_malloc_usable_size=0:detect_container_overflow=1:detect_odr_violation=0:detect_leaks=1:detect_stack_use_after_return=1:fast_unwind_on_fatal=0:handle_abort=1:handle_segv=1:handle_sigill=1:max_uar_stack_size_log=16:print_scariness=1:quarantine_size_mb=10:strict_memcmp=1:strip_path_prefix=/workspace/:symbolize=1:use_sigaltstack=1:dedup_token_length=3",
+    "ATL_JAZZER_DIR": "/classpath/atl-jazzer",
+    "CODE_COVERAGE_SRC": "/opt/code_coverage",
+    "CP_BUILD_PATH": "/cp_root/build/out/aixcc/jvm/jenkins",
+    "CP_FULL_SRC": "/crs-workdir/worker-0/cp-full-src/aixcc/jvm/jenkins",
+    "CP_METADATA_FILE": "/crs-workdir/worker-0/metadata/aixcc/jvm/jenkins.json",
+    "CP_PROJ_PATH": "/cp_root/projects/aixcc/jvm/jenkins",
+    "CP_SRC_PATH": "/cp_root/build/repos/aixcc/jvm/jenkins",
+    "CRS_TARGET": "aixcc/jvm/jenkins",
+    "CRS_WORKDIR": "/crs-workdir/worker-0",
+    "DEBIAN_FRONTEND": "noninteractive",
+    "DEV": "1",
+    "FUZZER_ARGS": "-rss_limit_mb=2560 -timeout=25",
+    "FUZZ_BEEPSEED_SEARCH": "on",
+    "FUZZ_BOUND_CPULIST": "2",
+    "FUZZ_CWD": "/tmp/JenkinsThree-atljazzer-r0-73d8580bc5804ffe91877fc01fc414cd",
+    "FUZZ_ID": "atljazzer-r0",
+    "FUZZ_JAZZER_MEM": "4096",
+    "FUZZ_REPEAT_IDX": "0",
+    "FUZZ_TARGET_CP": "aixcc/jvm/jenkins",
+    "FUZZ_TARGET_HARNESS": "com.aixcc.jenkins.harnesses.three.JenkinsThree",
+    "FUZZ_TTL_FUZZ_TIME": "300",
+    "GEM_HOME": "/out/fuzz-gem",
+    "GEM_PATH": "/install/ruzzy",
+    "GOPATH": "/root/go",
+    "HOME": "/root",
+    "HOSTNAME": "8fec42a55e62",
+    "HWASAN_OPTIONS": "random_tags=0",
+    "JAVA2CPG": "/app/crs-cp-java/joern/Joern/joern-cli/frontends/javasrc2cpg/bin",
+    "JAVA_15_HOME": "/usr/lib/jvm/java-15-openjdk-amd64",
+    "JAVA_CRS_CACHE_ROOT": "/app/crs-cp-java/cache",
+    "JAVA_CRS_SRC": "/app/crs-cp-java",
+    "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64",
+    "JOERN_CLI": "/app/crs-cp-java/joern/Joern/joern-cli",
+    "JOERN_DIR": "/app/crs-cp-java/joern/Joern",
+    "JVM_LD_LIBRARY_PATH": "/usr/lib/jvm/java-17-openjdk-amd64/lib/server",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "LS_COLORS": "rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:",
+    "MSAN_OPTIONS": "print_stats=1:strip_path_prefix=/workspace/:symbolize=1:dedup_token_length=3",
+    "NODE_CNT": "1",
+    "NODE_IDX": "0",
+    "OLDPWD": "/app/crs-cp-java",
+    "OUT": "/out",
+    "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/out:/root/go/bin:/usr/lib/jvm/java-17-openjdk-amd64/bin:/usr/local/rvm/rubies/ruby-3.3.1/bin:/usr/lib/jvm/java-17-openjdk-amd64/bin:/apache-maven-3.9.7/bin:/opt/gradle/gradle-8.8/bin:/usr/local/sbt/bin:/usr/lib/jvm/java-17-openjdk-amd64/bin:/app/crs-cp-java/joern/Joern/joern-cli:/app/crs-cp-java/joern/Joern/joern-cli/frontends/javasrc2cpg/bin:/root/.local/bin",
+    "PWD": "/app/crs-cp-java",
+    "SANITIZER": "address",
+    "SBT_HOME": "/usr/local/sbt",
+    "SBT_VERSION": "1.10.2",
+    "SHLVL": "2",
+    "SRC": "/src",
+    "START_TIME": "1742470727",
+    "TARGET_CP": "aixcc/jvm/jenkins",
+    "TERM": "xterm",
+    "TZ": "America/New_York",
+    "UBSAN_OPTIONS": "print_stacktrace=1:print_summary=1:silence_unsigned_overflow=1:strip_path_prefix=/workspace/:symbolize=1:dedup_token_length=3",
+    "USER": "root",
+    "VAPI_HOSTNAME": "xxx",
+    "WORK": "/work",
+    "_": "/usr/bin/python3.12"
+  },
+  "fuzz_data": {
+    "cov_over_time": [
+      [
+        70,
+        302
+      ]
+    ],
+    "ft_over_time": [
+      [
+        70,
+        1152
+      ]
+    ],
+    "rss_over_time": [
+      [
+        70,
+        2009071616
+      ]
+    ],
+    "log_crash_over_time": [
+      [
+        67,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueCritical: Script Engine Injection: Insecure user input was used in script engine invocation."
+      ],
+      [
+        71,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: XPath Injection"
+      ],
+      [
+        92,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueCritical: Remote JNDI Lookup"
+      ],
+      [
+        112,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+      ],
+      [
+        115,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: load arbitrary library"
+      ],
+      [
+        116,
+        "== Java Exception: java.io.FileNotFoundException: /tmp/testRecoverCoverage4550781932239161036/coverage-report (No such file or directory)"
+      ],
+      [
+        128,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: SQL Injection"
+      ],
+      [
+        131,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: XPath Injection"
+      ],
+      [
+        163,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: XPath Injection"
+      ],
+      [
+        198,
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueLow: Regular Expression Injection"
+      ]
+    ],
+    "artifact_over_time": [
+      [
+        67,
+        "crash-b1e1f82111475b7062be5dca0888d136ddd500d9"
+      ],
+      [
+        71,
+        "crash-d51c5dc1783e81b10dbc343cf1a237f385b7fc8e"
+      ],
+      [
+        92,
+        "crash-aa5d09a162d2364fe09272ddd51aaffdbf31c1ae"
+      ],
+      [
+        112,
+        "crash-b96985e184f91ffd0322d240ed06d7bde438e0b7"
+      ],
+      [
+        115,
+        "crash-b6f1f70a7233d18fc032140adc5a68c2ea5d38f0"
+      ],
+      [
+        116,
+        "crash-0e2ace0da50255e448dc8a383ec02a2f9a641513"
+      ],
+      [
+        128,
+        "crash-f2b02d64a0b2258fb00026daa0e91f3de900e99b"
+      ],
+      [
+        131,
+        "crash-7bd4837cdc1cabeecb0565881983d7af19dfa699"
+      ],
+      [
+        163,
+        "crash-6b0b2192386b8c6cb6726195cfb0991048c12820"
+      ],
+      [
+        198,
+        "crash-66a43dc42fb27abbf0cfbaaed1c255c526be153b"
+      ]
+    ],
+    "log_dedup_crash_over_time": [
+      [
+        67,
+        "FuzzerSecurityIssueCritical: Script Engine Injection",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueCritical: Script Engine Injection: Insecure user input was used in script engine invocation.",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.ScriptEngineInjection.checkScriptContent(ScriptEngineInjection.java:99)",
+          "at com.code_intelligence.jazzer.sanitizers.ScriptEngineInjection.checkScriptEngineExecuteString(ScriptEngineInjection.java:64)",
+          "at io.jenkins.plugins.toyplugin.Script.secureEval(Script.java:84)",
+          "at io.jenkins.plugins.toyplugin.Script.doCheckScriptCompile(Script.java:93)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testScript(JenkinsThree.java:310)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:97)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)"
+        ],
+        "dc783964d5f21ada",
+        "crash-b1e1f82111475b7062be5dca0888d136ddd500d9"
+      ],
+      [
+        71,
+        "FuzzerSecurityIssueHigh: XPath Injection",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: XPath Injection",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.XPathInjection.checkXpathExecute(XPathInjection.kt:72)",
+          "at jenkins.util.xml.XMLUtils.getValue(XMLUtils.java:236)",
+          "at io.jenkins.plugins.toyplugin.Api.doXml(Api.java:137)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testApi(JenkinsThree.java:265)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:103)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)",
+          "at java.xml/com.sun.org.apache.xpath.internal.jaxp.XPathImpl.compile(XPathImpl.java:174)",
+          "at java.base/java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:732)",
+          "at com.code_intelligence.jazzer.sanitizers.XPathInjection.checkXpathExecute(XPathInjection.kt:62)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.error(XPathParser.java:627)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.FunctionCall(XPathParser.java:1479)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.PrimaryExpr(XPathParser.java:1418)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.FilterExpr(XPathParser.java:1317)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.PathExpr(XPathParser.java:1250)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.UnionExpr(XPathParser.java:1208)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.UnaryExpr(XPathParser.java:1114)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.MultiplicativeExpr(XPathParser.java:1035)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.AdditiveExpr(XPathParser.java:977)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.RelationalExpr(XPathParser.java:902)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.EqualityExpr(XPathParser.java:842)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.AndExpr(XPathParser.java:806)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.OrExpr(XPathParser.java:779)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.Expr(XPathParser.java:762)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.initXPath(XPathParser.java:138)",
+          "at java.xml/com.sun.org.apache.xpath.internal.XPath.<init>(XPath.java:207)",
+          "at java.xml/com.sun.org.apache.xpath.internal.jaxp.XPathImpl.compile(XPathImpl.java:166)"
+        ],
+        "d250a5c6615f5dc3",
+        "crash-d51c5dc1783e81b10dbc343cf1a237f385b7fc8e"
+      ],
+      [
+        92,
+        "FuzzerSecurityIssueCritical: Remote JNDI Lookup",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueCritical: Remote JNDI Lookup",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.NamingContextLookup.lookupHook(NamingContextLookup.kt:61)",
+          "at org.apache.logging.log4j.core.net.JndiManager.lookup(JndiManager.java:172)",
+          "at org.apache.logging.log4j.core.lookup.JndiLookup.lookup(JndiLookup.java:56)",
+          "at org.apache.logging.log4j.core.lookup.Interpolator.lookup(Interpolator.java:221)",
+          "at org.apache.logging.log4j.core.lookup.StrSubstitutor.resolveVariable(StrSubstitutor.java:1110)",
+          "at org.apache.logging.log4j.core.lookup.StrSubstitutor.substitute(StrSubstitutor.java:1033)",
+          "at org.apache.logging.log4j.core.lookup.StrSubstitutor.substitute(StrSubstitutor.java:912)",
+          "at org.apache.logging.log4j.core.lookup.StrSubstitutor.replace(StrSubstitutor.java:467)",
+          "at org.apache.logging.log4j.core.pattern.MessagePatternConverter.format(MessagePatternConverter.java:132)",
+          "at org.apache.logging.log4j.core.pattern.PatternFormatter.format(PatternFormatter.java:38)",
+          "at org.apache.logging.log4j.core.layout.PatternLayout$PatternSerializer.toSerializable(PatternLayout.java:344)",
+          "at org.apache.logging.log4j.core.layout.PatternLayout.toText(PatternLayout.java:244)",
+          "at org.apache.logging.log4j.core.layout.PatternLayout.encode(PatternLayout.java:229)",
+          "at org.apache.logging.log4j.core.layout.PatternLayout.encode(PatternLayout.java:59)",
+          "at org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender.directEncodeEvent(AbstractOutputStreamAppender.java:197)",
+          "at org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender.tryAppend(AbstractOutputStreamAppender.java:190)",
+          "at org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender.append(AbstractOutputStreamAppender.java:181)",
+          "at org.apache.logging.log4j.core.config.AppenderControl.tryCallAppender(AppenderControl.java:156)",
+          "at org.apache.logging.log4j.core.config.AppenderControl.callAppender0(AppenderControl.java:129)",
+          "at org.apache.logging.log4j.core.config.AppenderControl.callAppenderPreventRecursion(AppenderControl.java:120)",
+          "at org.apache.logging.log4j.core.config.AppenderControl.callAppender(AppenderControl.java:84)",
+          "at org.apache.logging.log4j.core.config.LoggerConfig.callAppenders(LoggerConfig.java:540)",
+          "at org.apache.logging.log4j.core.config.LoggerConfig.processLogEvent(LoggerConfig.java:498)",
+          "at org.apache.logging.log4j.core.config.LoggerConfig.log(LoggerConfig.java:481)",
+          "at org.apache.logging.log4j.core.config.LoggerConfig.log(LoggerConfig.java:456)",
+          "at org.apache.logging.log4j.core.config.DefaultReliabilityStrategy.log(DefaultReliabilityStrategy.java:63)",
+          "at org.apache.logging.log4j.core.Logger.log(Logger.java:161)",
+          "at org.apache.logging.log4j.spi.AbstractLogger.tryLogMessage(AbstractLogger.java:2205)",
+          "at org.apache.logging.log4j.spi.AbstractLogger.logMessageTrackRecursion(AbstractLogger.java:2159)",
+          "at org.apache.logging.log4j.spi.AbstractLogger.logMessageSafely(AbstractLogger.java:2142)",
+          "at org.apache.logging.log4j.spi.AbstractLogger.logMessage(AbstractLogger.java:2017)",
+          "at org.apache.logging.log4j.spi.AbstractLogger.logIfEnabled(AbstractLogger.java:1983)",
+          "at org.apache.logging.log4j.spi.AbstractLogger.error(AbstractLogger.java:740)",
+          "at io.jenkins.plugins.toyplugin.StateMonitor.doCheck(StateMonitor.java:58)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testStateMonitor(JenkinsThree.java:220)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:100)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)"
+        ],
+        "1f34d5e98afea029",
+        "crash-aa5d09a162d2364fe09272ddd51aaffdbf31c1ae"
+      ],
+      [
+        112,
+        "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.ServerSideRequestForgery.checkSsrf(ServerSideRequestForgery.java:133)",
+          "at com.code_intelligence.jazzer.sanitizers.ServerSideRequestForgery.checkSsrfHttpConnection(ServerSideRequestForgery.java:92)",
+          "at java.net.http/jdk.internal.net.http.PlainHttpConnection.lambda$connectAsync$0(PlainHttpConnection.java:183)",
+          "at java.base/java.security.AccessController.doPrivileged(AccessController.java:569)",
+          "at java.net.http/jdk.internal.net.http.PlainHttpConnection.connectAsync(PlainHttpConnection.java:185)",
+          "at java.net.http/jdk.internal.net.http.Http1Exchange.sendHeadersAsync(Http1Exchange.java:239)",
+          "at java.net.http/jdk.internal.net.http.Exchange.lambda$responseAsyncImpl0$9(Exchange.java:472)",
+          "at java.net.http/jdk.internal.net.http.Exchange.checkFor407(Exchange.java:404)",
+          "at java.net.http/jdk.internal.net.http.Exchange.lambda$responseAsyncImpl0$10(Exchange.java:476)",
+          "at java.base/java.util.concurrent.CompletableFuture.uniHandle(CompletableFuture.java:934)",
+          "at java.base/java.util.concurrent.CompletableFuture.uniHandleStage(CompletableFuture.java:950)",
+          "at java.base/java.util.concurrent.CompletableFuture.handle(CompletableFuture.java:2340)",
+          "at java.net.http/jdk.internal.net.http.Exchange.responseAsyncImpl0(Exchange.java:476)",
+          "at java.net.http/jdk.internal.net.http.Exchange.responseAsyncImpl(Exchange.java:380)",
+          "at java.net.http/jdk.internal.net.http.Exchange.responseAsync(Exchange.java:372)",
+          "at java.net.http/jdk.internal.net.http.MultiExchange.responseAsyncImpl(MultiExchange.java:408)",
+          "at java.net.http/jdk.internal.net.http.MultiExchange.lambda$responseAsync0$2(MultiExchange.java:341)",
+          "at java.base/java.util.concurrent.CompletableFuture$UniCompose.tryFire(CompletableFuture.java:1150)",
+          "at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:510)",
+          "at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1773)",
+          "at java.net.http/jdk.internal.net.http.HttpClientImpl$DelegatingExecutor.execute(HttpClientImpl.java:157)",
+          "at java.base/java.util.concurrent.CompletableFuture.completeAsync(CompletableFuture.java:2673)",
+          "at java.net.http/jdk.internal.net.http.MultiExchange.responseAsync(MultiExchange.java:294)",
+          "at java.net.http/jdk.internal.net.http.HttpClientImpl.sendAsync(HttpClientImpl.java:654)",
+          "at java.net.http/jdk.internal.net.http.HttpClientImpl.send(HttpClientImpl.java:552)",
+          "at java.net.http/jdk.internal.net.http.HttpClientFacade.send(HttpClientFacade.java:123)",
+          "at hudson.ProxyConfiguration$DescriptorImpl2.doValidateProxy(ProxyConfiguration.java:593)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testProxyConfiguration(JenkinsThree.java:148)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:91)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)"
+        ],
+        "1f153306c7ec2ad9",
+        "crash-b96985e184f91ffd0322d240ed06d7bde438e0b7"
+      ],
+      [
+        115,
+        "FuzzerSecurityIssueHigh: load arbitrary library",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: load arbitrary library",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.ReflectiveCall.loadLibraryHook(ReflectiveCall.kt:116)",
+          "at io.jenkins.plugins.toyplugin.SecretMessage.doPerform(SecretMessage.java:98)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testSecretMessage(JenkinsThree.java:284)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:118)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)"
+        ],
+        "1e613770a53a0221",
+        "crash-b6f1f70a7233d18fc032140adc5a68c2ea5d38f0"
+      ],
+      [
+        128,
+        "FuzzerSecurityIssueHigh: SQL Injection",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: SQL Injection",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.SqlInjection.checkSqlExecute(SqlInjection.java:120)",
+          "at io.jenkins.plugins.toyplugin.UserNameAction.doGetName(UserNameAction.java:74)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testUserNameAction(JenkinsThree.java:205)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:109)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)"
+        ],
+        "6814ae2464a8b6cd",
+        "crash-f2b02d64a0b2258fb00026daa0e91f3de900e99b"
+      ],
+      [
+        131,
+        "FuzzerSecurityIssueHigh: XPath Injection",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: XPath Injection",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.XPathInjection.checkXpathExecute(XPathInjection.kt:72)",
+          "at jenkins.util.xml.XMLUtils.getValue(XMLUtils.java:236)",
+          "at io.jenkins.plugins.toyplugin.Api.doXml(Api.java:137)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testApi(JenkinsThree.java:265)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:103)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)",
+          "at java.xml/com.sun.org.apache.xpath.internal.jaxp.XPathImpl.compile(XPathImpl.java:174)",
+          "at java.base/java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:732)",
+          "at com.code_intelligence.jazzer.sanitizers.XPathInjection.checkXpathExecute(XPathInjection.kt:62)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.error(XPathParser.java:627)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.LocationPath(XPathParser.java:1574)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.PathExpr(XPathParser.java:1289)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.UnionExpr(XPathParser.java:1208)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.UnaryExpr(XPathParser.java:1114)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.MultiplicativeExpr(XPathParser.java:1035)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.AdditiveExpr(XPathParser.java:977)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.RelationalExpr(XPathParser.java:902)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.EqualityExpr(XPathParser.java:842)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.AndExpr(XPathParser.java:806)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.OrExpr(XPathParser.java:779)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.Expr(XPathParser.java:762)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.initXPath(XPathParser.java:138)",
+          "at java.xml/com.sun.org.apache.xpath.internal.XPath.<init>(XPath.java:207)",
+          "at java.xml/com.sun.org.apache.xpath.internal.jaxp.XPathImpl.compile(XPathImpl.java:166)"
+        ],
+        "4b8e382a37507117",
+        "crash-7bd4837cdc1cabeecb0565881983d7af19dfa699"
+      ],
+      [
+        163,
+        "FuzzerSecurityIssueHigh: XPath Injection",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh: XPath Injection",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.XPathInjection.checkXpathExecute(XPathInjection.kt:72)",
+          "at jenkins.util.xml.XMLUtils.getValue(XMLUtils.java:236)",
+          "at io.jenkins.plugins.toyplugin.Api.doXml(Api.java:137)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testApi(JenkinsThree.java:265)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:103)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)",
+          "at java.xml/com.sun.org.apache.xpath.internal.jaxp.XPathImpl.compile(XPathImpl.java:174)",
+          "at java.base/java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:732)",
+          "at com.code_intelligence.jazzer.sanitizers.XPathInjection.checkXpathExecute(XPathInjection.kt:62)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.error(XPathParser.java:627)",
+          "at java.xml/com.sun.org.apache.xpath.internal.compiler.XPathParser.initXPath(XPathParser.java:154)",
+          "at java.xml/com.sun.org.apache.xpath.internal.XPath.<init>(XPath.java:207)",
+          "at java.xml/com.sun.org.apache.xpath.internal.jaxp.XPathImpl.compile(XPathImpl.java:166)"
+        ],
+        "47351863d764564c",
+        "crash-6b0b2192386b8c6cb6726195cfb0991048c12820"
+      ],
+      [
+        198,
+        "FuzzerSecurityIssueLow: Regular Expression Injection",
+        "== Java Exception: com.code_intelligence.jazzer.api.FuzzerSecurityIssueLow: Regular Expression Injection",
+        [
+          "at com.code_intelligence.jazzer.sanitizers.RegexInjection.hookInternal(RegexInjection.kt:164)",
+          "at com.code_intelligence.jazzer.sanitizers.RegexInjection.patternHook(RegexInjection.kt:85)",
+          "at io.jenkins.plugins.toyplugin.AccessFilter.doGet(AccessFilter.java:87)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.testAccessFilter(JenkinsThree.java:302)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzz(JenkinsThree.java:106)",
+          "at com.aixcc.jenkins.harnesses.three.JenkinsThree.fuzzerTestOneInput(JenkinsThree.java:79)",
+          "at java.base/java.util.regex.Pattern.error(Pattern.java:2028)",
+          "at java.base/java.util.regex.Pattern.clazz(Pattern.java:2690)",
+          "at java.base/java.util.regex.Pattern.sequence(Pattern.java:2139)",
+          "at java.base/java.util.regex.Pattern.expr(Pattern.java:2069)",
+          "at java.base/java.util.regex.Pattern.group0(Pattern.java:3050)",
+          "at java.base/java.util.regex.Pattern.sequence(Pattern.java:2124)",
+          "at java.base/java.util.regex.Pattern.expr(Pattern.java:2069)",
+          "at java.base/java.util.regex.Pattern.compile(Pattern.java:1783)",
+          "at java.base/java.util.regex.Pattern.<init>(Pattern.java:1430)",
+          "at java.base/java.util.regex.Pattern.compile(Pattern.java:1069)",
+          "at java.base/java.lang.invoke.MethodHandle.invokeWithArguments(MethodHandle.java:732)",
+          "at com.code_intelligence.jazzer.sanitizers.RegexInjection.hookInternal(RegexInjection.kt:155)"
+        ],
+        "87849c789a9908ec",
+        "crash-66a43dc42fb27abbf0cfbaaed1c255c526be153b"
+      ]
+    ],
+    "ttl_round": 12788,
+    "last_cov": 27696,
+    "last_ft": 54028,
+    "last_rss": 2010120192,
+    "max_cov": 27696,
+    "max_ft": 54028,
+    "max_rss": 2010120192
+  },
+  "fuzz_id": "atljazzer-r0",
+  "harness": "com.aixcc.jenkins.harnesses.three.JenkinsThree",
+  "harness_id": "JenkinsThree",
+  "module": "atljazzer",
+  "repeat_idx": 0
+}

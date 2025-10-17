@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>POC - JenkinsThreeCPVEleven</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <link rel="shortcut icon" href="https://chatboxai.app/icon.png">
+</head>
+<body class='bg-slate-100'>
+    <div class='mx-auto max-w-5xl shadow-md prose bg-white px-2 py-4'>
+        <h1 class='flex flex-row justify-between items-center my-4 h-8'>
+            <span>POC - JenkinsThreeCPVEleven</span>
+            <a href="https://chatboxai.app" target="_blank" >
+                <img src='https://chatboxai.app/icon.png' class="w-12">
+            </a>
+        </h1>
+        <hr />
+        <div class="prose-sm">
+<h2>1. Empty Chat</h2>
+<div class="mb-4">
+<p class="text-green-500 text-lg"><b>SYSTEM: </b></p>
+<div class="break-words "><p>You are a helpful assistant for answering my questions.</p></div></div>
+<div class="mb-4">
+<p class="text-green-500 text-lg"><b>USER: </b></p>
+<div class="break-words "></div></div>
+<div class="mb-4">
+<p class="text-blue-500 text-lg"><b>ASSISTANT: </b></p>
+<div class="break-words "><p>To generate a proof of concept (PoC) that triggers the vulnerability in the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">AccessFilter.java</code> code, we need to:</p>
+<ol>
+<li>
+<p><strong>Analyze the Vulnerability:</strong><br/>
+The sink point is at line 87 in <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">AccessFilter.java</code>:</p>
+<pre><div><div class="py-0.5 px-1" style="display:flex;justify-content:space-between;width:100%;background-color:rgb(50, 50, 50);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;border-top-left-radius:0.3rem;border-top-right-radius:0.3rem;border-bottom-left-radius:0;border-bottom-right-radius:0"><div class="flex items-center"><span class="text-gray-400/30 mx-1" style="font-size:1rem">JAVA</span></div><div class="flex items-center"></div></div><div style="position:relative" class="group"><div class=""><div style="color:#f8f8f2;background:#2b2b2b;font-family:Consolas, Monaco, &#x27;Andale Mono&#x27;, &#x27;Ubuntu Mono&#x27;, monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none;padding:1em;margin:0;overflow:auto;border-radius:0.3em;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;border-bottom-left-radius:0.3rem;border-bottom-right-radius:0.3rem;border:none"><code class="language-java" style="color:#f8f8f2;background:none;font-family:Consolas, Monaco, &#x27;Andale Mono&#x27;, &#x27;Ubuntu Mono&#x27;, monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none"><span class="token class-name">Pattern</span><span> pattern </span><span class="token" style="color:#00e0e0">=</span><span> </span><span class="token class-name">Pattern</span><span class="token" style="color:#fefefe">.</span><span class="token" style="color:#ffd700">compile</span><span class="token" style="color:#fefefe">(</span><span class="token" style="color:#abe338">&quot;.*(&quot;</span><span> </span><span class="token" style="color:#00e0e0">+</span><span> ip </span><span class="token" style="color:#00e0e0">+</span><span> </span><span class="token" style="color:#abe338">&quot;).*&quot;</span><span class="token" style="color:#fefefe">)</span><span class="token" style="color:#fefefe">;</span><span>
+</span></code></div></div></div></div></pre>
+<p>The vulnerability arises because user-supplied input (<code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">ip</code>) is inserted into a regular expression without proper sanitization or escaping. If <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">ip</code> contains special regex characters (like an unbalanced parenthesis), it can cause a <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">PatternSyntaxException</code>.</p>
+</li>
+<li>
+<p><strong>Determine the Exploit Conditions:</strong></p>
+<ul>
+<li>We need to reach the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">Pattern.compile</code> statement with a malicious <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">ip</code> value.</li>
+<li>The <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">ip</code> parameter must be present in the POST request.</li>
+<li>If the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">ip</code> value is not a valid IP address, we can bypass the IP format check by setting the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">skip</code> parameter to <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">true</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Construct the PoC Input:</strong></p>
+<ul>
+<li>Set <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">ip</code> to a value that causes a <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">PatternSyntaxException</code> when used in the regex. For example, <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">&quot;abc(&quot;</code> (an unbalanced parenthesis).</li>
+<li>Include the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">skip</code> parameter set to <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">true</code> to bypass the IP format validation.</li>
+</ul>
+</li>
+<li>
+<p><strong>Format the Input for the Test Code:</strong></p>
+<ul>
+<li>In the fuzzing test code, parameters are read from a byte array that is converted to a string and split by null characters (<code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">\0</code>).</li>
+<li>We need to create a byte array where the first 4 bytes represent the integer <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">77</code> (to select the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">testAccessFilter</code> method) and the rest of the bytes form the parameters.</li>
+</ul>
+</li>
+<li>
+<p><strong>Finalize and Output the PoC in Hexadecimal:</strong></p>
+<ul>
+<li>The PoC input in bytes (hexadecimal representation) is:
+<pre><div><div class="py-0.5 px-1" style="display:flex;justify-content:space-between;width:100%;background-color:rgb(50, 50, 50);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;border-top-left-radius:0.3rem;border-top-right-radius:0.3rem;border-bottom-left-radius:0;border-bottom-right-radius:0"><div class="flex items-center"><span class="text-gray-400/30 mx-1" style="font-size:1rem">TEXT</span></div><div class="flex items-center"></div></div><div style="position:relative" class="group"><div class=""><div style="color:#f8f8f2;background:#2b2b2b;font-family:Consolas, Monaco, &#x27;Andale Mono&#x27;, &#x27;Ubuntu Mono&#x27;, monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none;padding:1em;margin:0;overflow:auto;border-radius:0.3em;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;border-bottom-left-radius:0.3rem;border-bottom-right-radius:0.3rem;border:none"><code class="language-text" style="color:#f8f8f2;background:none;font-family:Consolas, Monaco, &#x27;Andale Mono&#x27;, &#x27;Ubuntu Mono&#x27;, monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none"><span>00 00 00 4D 69 70 00 61 62 63 28 00 73 6B 69 70 00 74 72 75 65
+</span></code></div></div></div></div></pre>
+</li>
+<li>It corresponds to:
+<ul>
+<li><code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">00 00 00 4D</code> → The integer <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">77</code> in 4 bytes.</li>
+<li><code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">69 70 00</code> → <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">&quot;ip\0&quot;</code></li>
+<li><code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">61 62 63 28 00</code> → <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">&quot;abc(\0&quot;</code></li>
+<li><code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">73 6B 69 70 00</code> → <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">&quot;skip\0&quot;</code></li>
+<li><code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">74 72 75 65</code> → <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">&quot;true&quot;</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>PoC in Hexadecimal:</strong></p>
+<pre><div><div class="py-0.5 px-1" style="display:flex;justify-content:space-between;width:100%;background-color:rgb(50, 50, 50);font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace;border-top-left-radius:0.3rem;border-top-right-radius:0.3rem;border-bottom-left-radius:0;border-bottom-right-radius:0"><div class="flex items-center"><span class="text-gray-400/30 mx-1" style="font-size:1rem">HEX</span></div><div class="flex items-center"></div></div><div style="position:relative" class="group"><div class=""><div style="color:#f8f8f2;background:#2b2b2b;font-family:Consolas, Monaco, &#x27;Andale Mono&#x27;, &#x27;Ubuntu Mono&#x27;, monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none;padding:1em;margin:0;overflow:auto;border-radius:0.3em;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;border-bottom-left-radius:0.3rem;border-bottom-right-radius:0.3rem;border:none"><code class="language-hex" style="color:#f8f8f2;background:none;font-family:Consolas, Monaco, &#x27;Andale Mono&#x27;, &#x27;Ubuntu Mono&#x27;, monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none"><span>00 00 00 4D 69 70 00 61 62 63 28 00 73 6B 69 70 00 74 72 75 65
+</span></code></div></div></div></div></pre>
+<p><strong>Explanation:</strong></p>
+<ul>
+<li>This input will cause the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">Pattern.compile</code> method to attempt to compile the regex <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">&quot;.*(abc().*&quot;</code>, which has an unclosed parenthesis, leading to a <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">PatternSyntaxException</code>.</li>
+<li>By including the <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">skip</code> parameter set to <code style="background-color:#f1f1f1;padding:2px 4px;margin:0 4px;border-radius:4px;border:1px solid;border-color:#ddd">true</code>, we bypass the IP validation and directly reach the vulnerable regex compilation line.</li>
+<li>The PoC effectively demonstrates how an attacker can inject malicious input to trigger an exception due to improper input handling in the regex construction.</li>
+</ul></div></div>
+<hr />
+</div>
+
+        <hr />
+        <a href="https://chatboxai.app" style="display: flex; align-items: center;" class="text-sky-500" target="_blank">
+            <img src='https://chatboxai.app/icon.png' class="w-12 pr-2">
+            <b style='font-size:30px'>Chatbox AI</b>
+        </a>
+        <p><a a href="https://chatboxai.app" target="_blank">https://chatboxai.app</a></p>
+    </div>
+</body>
+</html>

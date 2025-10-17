@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GifImageMetadata.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.gif</a> &gt; <span class="el_source">GifImageMetadata.java</span></div><h1>GifImageMetadata.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.gif;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.common.ImageMetadata;
+
+public class GifImageMetadata implements ImageMetadata {
+
+<span class="nc" id="L27">    private static final String NEWLINE = System.lineSeparator();</span>
+    private final int width;
+    private final int height;
+    private final List&lt;GifImageMetadataItem&gt; items;
+
+<span class="nc" id="L32">    GifImageMetadata(final int width, final int height, final List&lt;GifImageMetadataItem&gt; items) {</span>
+<span class="nc" id="L33">        this.width = width;</span>
+<span class="nc" id="L34">        this.height = height;</span>
+<span class="nc" id="L35">        this.items = Collections.unmodifiableList(new ArrayList&lt;&gt;(items));</span>
+<span class="nc" id="L36">    }</span>
+
+    public int getHeight() {
+<span class="nc" id="L39">        return height;</span>
+    }
+
+    @Override
+    public List&lt;GifImageMetadataItem&gt; getItems() {
+<span class="nc" id="L44">        return Collections.unmodifiableList(items);</span>
+    }
+
+    public int getWidth() {
+<span class="nc" id="L48">        return width;</span>
+    }
+
+    @Override
+    public String toString(String prefix) {
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        prefix = prefix == null ? &quot;&quot; : prefix;</span>
+<span class="nc" id="L54">        final StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L55">        result.append(String.format(&quot;%sGIF metadata:&quot;, prefix));</span>
+<span class="nc" id="L56">        result.append(String.format(&quot;%sWidth: %d%s&quot;, prefix, width, NEWLINE));</span>
+<span class="nc" id="L57">        result.append(String.format(&quot;%sHeight: %d%s&quot;, prefix, height, NEWLINE));</span>
+<span class="nc" id="L58">        result.append(NEWLINE);</span>
+<span class="nc" id="L59">        result.append(String.format(&quot;%sImages:&quot;, prefix));</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (final GifImageMetadataItem item : items) {</span>
+<span class="nc" id="L61">            result.append(NEWLINE);</span>
+<span class="nc" id="L62">            result.append(item.toString(prefix));</span>
+<span class="nc" id="L63">        }</span>
+<span class="nc" id="L64">        return result.toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

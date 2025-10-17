@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyBitInputStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.mylzw</a> &gt; <span class="el_source">MyBitInputStream.java</span></div><h1>MyBitInputStream.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.mylzw;
+
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+
+public class MyBitInputStream extends FilterInputStream {
+    private final ByteOrder byteOrder;
+    private final boolean tiffLZWMode;
+    private long bytesRead;
+    private int bitsInCache;
+    private int bitCache;
+
+    public MyBitInputStream(final InputStream is, final ByteOrder byteOrder, final boolean tiffLZWMode) {
+<span class="fc" id="L32">        super(is);</span>
+<span class="fc" id="L33">        this.byteOrder = byteOrder;</span>
+<span class="fc" id="L34">        this.tiffLZWMode = tiffLZWMode;</span>
+<span class="fc" id="L35">    }</span>
+
+    public void flushCache() {
+<span class="nc" id="L38">        bitsInCache = 0;</span>
+<span class="nc" id="L39">        bitCache = 0;</span>
+<span class="nc" id="L40">    }</span>
+
+    public long getBytesRead() {
+<span class="nc" id="L43">        return bytesRead;</span>
+    }
+
+    @Override
+    public int read() throws IOException {
+<span class="nc" id="L48">        return readBits(8);</span>
+    }
+
+    public int readBits(final int sampleBits) throws IOException {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        while (bitsInCache &lt; sampleBits) {</span>
+<span class="fc" id="L53">            final int next = in.read();</span>
+
+<span class="fc bfc" id="L55" title="All 2 branches covered.">            if (next &lt; 0) {</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">                if (tiffLZWMode) {</span>
+                    // pernicious special case!
+<span class="nc" id="L58">                    return 257;</span>
+                }
+<span class="fc" id="L60">                return -1;</span>
+            }
+
+<span class="fc" id="L63">            final int newByte = 0xff &amp; next;</span>
+
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">            if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L66">                bitCache = bitCache &lt;&lt; 8 | newByte;</span>
+            } else {
+<span class="fc" id="L68">                bitCache = newByte &lt;&lt; bitsInCache | bitCache;</span>
+            }
+
+<span class="fc" id="L71">            bytesRead++;</span>
+<span class="fc" id="L72">            bitsInCache += 8;</span>
+<span class="fc" id="L73">        }</span>
+<span class="fc" id="L74">        final int sampleMask = (1 &lt;&lt; sampleBits) - 1;</span>
+
+        int sample;
+
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L79">            sample = sampleMask &amp; bitCache &gt;&gt; bitsInCache - sampleBits;</span>
+        } else {
+<span class="fc" id="L81">            sample = sampleMask &amp; bitCache;</span>
+<span class="fc" id="L82">            bitCache &gt;&gt;= sampleBits;</span>
+        }
+
+<span class="fc" id="L85">        final int result = sample;</span>
+
+<span class="fc" id="L87">        bitsInCache -= sampleBits;</span>
+<span class="fc" id="L88">        final int remainderMask = (1 &lt;&lt; bitsInCache) - 1;</span>
+<span class="fc" id="L89">        bitCache &amp;= remainderMask;</span>
+
+<span class="fc" id="L91">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

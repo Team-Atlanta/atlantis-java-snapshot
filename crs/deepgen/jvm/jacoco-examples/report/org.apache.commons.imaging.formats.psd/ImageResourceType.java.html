@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageResourceType.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.psd</a> &gt; <span class="el_source">ImageResourceType.java</span></div><h1>ImageResourceType.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.psd;
+
+/**
+ * TODO Turn into an enum
+ *
+ * @see &lt;a href=&quot;https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/#50577409_pgfId-1037727&quot;&gt;Photoshop File Formats Specification - Image Resource
+ *      IDs&lt;/a&gt;
+ */
+final class ImageResourceType {
+
+<span class="nc" id="L27">    private static final ImageResourceType[] TYPES = { new ImageResourceType(1000, &quot;Number of channels, rows, columns, depth, and mode.&quot;),</span>
+            new ImageResourceType(1001, &quot;Optional. Macintosh print manager print info record&quot;), new ImageResourceType(1003, &quot;Indexed color table.&quot;),
+            new ImageResourceType(1005, &quot;ResolutionInfo structure&quot;), new ImageResourceType(1006, &quot;Names of the alpha channels as a series of Pascal strings.&quot;),
+            new ImageResourceType(1007, &quot;DisplayInfo structure&quot;), new ImageResourceType(1008, &quot;Optional. The caption as a Pascal string.&quot;),
+            new ImageResourceType(1009, &quot;Border information&quot;), new ImageResourceType(1010, &quot;Background color&quot;),
+            new ImageResourceType(1011, &quot;Print flags (labels, crop marks, color bars, registration marks, negative, flip, interpolate, caption)&quot;),
+            new ImageResourceType(1012, &quot;Grayscale and multichannel halftoning information.&quot;), new ImageResourceType(1013, &quot;Color halftoning information&quot;),
+            new ImageResourceType(1014, &quot;Duotone halftoning information&quot;), new ImageResourceType(1015, &quot;Grayscale and multichannel transfer function&quot;),
+            new ImageResourceType(1016, &quot;Color transfer functions&quot;), new ImageResourceType(1017, &quot;Duotone transfer functions&quot;),
+            new ImageResourceType(1018, &quot;Duotone image information&quot;), new ImageResourceType(1019, &quot;Effective black and white values for the dot range.&quot;),
+            new ImageResourceType(1020, &quot;Obsolete&quot;), new ImageResourceType(1021, &quot;EPS options&quot;), new ImageResourceType(1022, &quot;Quick Mask information&quot;),
+            new ImageResourceType(1023, &quot;Obsolete&quot;), new ImageResourceType(1024, &quot;Layer state information&quot;),
+            new ImageResourceType(1025, &quot;Working path (not saved)&quot;), new ImageResourceType(1026, &quot;Layers group information&quot;),
+            new ImageResourceType(1027, &quot;Obsolete&quot;), new ImageResourceType(1028, &quot;IPTC-NAA record&quot;),
+            new ImageResourceType(1029, &quot;Image mode for raw format files&quot;), new ImageResourceType(1030, &quot;JPEG quality&quot;),
+            new ImageResourceType(1032, &quot;Grid and guides information&quot;), new ImageResourceType(1033, &quot;Thumbnail resource&quot;),
+            new ImageResourceType(1034, &quot;Copyright flag&quot;), new ImageResourceType(1035, &quot;URL&quot;), new ImageResourceType(1036, &quot;Thumbnail resource&quot;),
+            new ImageResourceType(1037, &quot;Global lighting angle for effects layer&quot;), new ImageResourceType(1038, &quot;Color samplers resource&quot;),
+            new ImageResourceType(1039, &quot;ICC Profile&quot;), new ImageResourceType(1040, &quot;Watermark&quot;),
+            new ImageResourceType(1041, &quot;ICC Untagged. Disables any assumed profile handling when opening the file&quot;),
+            new ImageResourceType(1042, &quot;Effects visible. global flag to show/hide all the effects layer. Only present when they are hidden.&quot;),
+            new ImageResourceType(1043, &quot;Spot Halftone&quot;), new ImageResourceType(1044, &quot;Document specific IDs&quot;),
+            new ImageResourceType(1045, &quot;Unicode Alpha Names&quot;),
+            new ImageResourceType(1046, &quot;Indexed Color Table Count. Number of colors in table that are actually defined&quot;),
+            new ImageResourceType(1047, &quot;Transparency Index. Index of transparent color, if any&quot;), new ImageResourceType(1049, &quot;Global Altitude&quot;),
+            new ImageResourceType(1050, &quot;Slices&quot;), new ImageResourceType(1051, &quot;Workflow URL&quot;), new ImageResourceType(1052, &quot;Jump To XPEP&quot;),
+            new ImageResourceType(1053, &quot;Alpha Identifiers&quot;), new ImageResourceType(1054, &quot;URL List&quot;), new ImageResourceType(1057, &quot;Version Info&quot;),
+            new ImageResourceType(1058, &quot;EXIF data 1&quot;), new ImageResourceType(1059, &quot;EXIF data 3&quot;), new ImageResourceType(1060, &quot;XMP metadata&quot;),
+            new ImageResourceType(1061, &quot;Caption digest&quot;), new ImageResourceType(1062, &quot;Print scale&quot;), new ImageResourceType(1064, &quot;Pixel Aspect Ratio&quot;),
+            new ImageResourceType(1065, &quot;Layer Comps&quot;), new ImageResourceType(1066, &quot;Alternate Duotone Colors&quot;),
+            new ImageResourceType(1067, &quot;Alternate Spot Colors&quot;), new ImageResourceType(1069, &quot;Layer Selection ID(s)&quot;),
+            new ImageResourceType(1070, &quot;HDR Toning information&quot;), new ImageResourceType(1071, &quot;Print info&quot;),
+            new ImageResourceType(1072, &quot;Layer Group(s) Enabled ID&quot;), new ImageResourceType(1073, &quot;Color samplers resource&quot;),
+            new ImageResourceType(1074, &quot;Measurement Scale&quot;), new ImageResourceType(1075, &quot;Timeline Information&quot;),
+            new ImageResourceType(1076, &quot;Sheet Disclosure&quot;), new ImageResourceType(1077, &quot;DisplayInfo structure to support floating point colors&quot;),
+            new ImageResourceType(1078, &quot;Onion Skins&quot;), new ImageResourceType(1080, &quot;Count Information. Information about the count in the document.&quot;),
+            new ImageResourceType(1082, &quot;Print Information. Information about the current print settings in the document. The color management options.&quot;),
+            new ImageResourceType(1083, &quot;Print Style. Information about the current print style in the document. The printing marks, labels, ornaments, etc.&quot;),
+            new ImageResourceType(1084, &quot;Macintosh NSPrintInfo. Variable OS specific info for Macintosh. NSPrintInfo.&quot;),
+            new ImageResourceType(1085, &quot;Windows DEVMODE. Variable OS specific info for Windows. DEVMODE.&quot;), new ImageResourceType(1086, &quot;Auto Save File Path&quot;),
+            new ImageResourceType(1087, &quot;Auto Save Format&quot;),
+            new ImageResourceType(1088, &quot;Path Selection State. Information about the current path selection state&quot;),
+            new ImageResourceType(2000, 2998, &quot;Path Information (saved paths).&quot;), new ImageResourceType(2999, &quot;Name of clipping path&quot;),
+            new ImageResourceType(3000, &quot;Origin Path Info&quot;), new ImageResourceType(4000, 4999, &quot;Plug-In resource(s). Resources added by a plug-in&quot;),
+            new ImageResourceType(7000, &quot;Image Ready variables. XML representation of variables definition&quot;),
+            new ImageResourceType(7001, &quot;Image Ready data sets&quot;),
+            new ImageResourceType(8000, &quot;Lightroom workflow, if present the document is in the middle of a Lightroom workflow&quot;),
+            new ImageResourceType(10000, &quot;Print flags information (center crop marks, bleed width value, bleed width scale)&quot;) };
+
+    public static String getDescription(final int id) {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (final ImageResourceType type : TYPES) {</span>
+<span class="nc bnc" id="L78" title="All 4 branches missed.">            if (type.from &lt;= id &amp;&amp; id &lt;= type.to) {</span>
+<span class="nc" id="L79">                return type.description;</span>
+            }
+        }
+<span class="nc" id="L82">        return &quot;Unknown&quot;;</span>
+    }
+
+    public final int from;
+    public final int to;
+
+    public final String description;
+
+<span class="nc" id="L90">    ImageResourceType(final int id, final int id2, final String description) {</span>
+<span class="nc" id="L91">        this.from = id;</span>
+<span class="nc" id="L92">        this.to = id2;</span>
+<span class="nc" id="L93">        this.description = description;</span>
+<span class="nc" id="L94">    }</span>
+
+<span class="nc" id="L96">    ImageResourceType(final int id, final String description) {</span>
+<span class="nc" id="L97">        this.from = id;</span>
+<span class="nc" id="L98">        this.to = id;</span>
+<span class="nc" id="L99">        this.description = description;</span>
+<span class="nc" id="L100">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

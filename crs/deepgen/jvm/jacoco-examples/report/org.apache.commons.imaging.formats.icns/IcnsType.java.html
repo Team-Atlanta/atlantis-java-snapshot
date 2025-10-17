@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IcnsType.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.icns</a> &gt; <span class="el_source">IcnsType.java</span></div><h1>IcnsType.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.icns;
+
+import java.nio.charset.StandardCharsets;
+
+<span class="fc" id="L21">enum IcnsType {</span>
+
+<span class="fc" id="L23">    ICNS_16x12_1BIT_IMAGE_AND_MASK(&quot;icm#&quot;, 16, 12, 1, true), ICNS_16x12_4BIT_IMAGE(&quot;icm4&quot;, 16, 12, 4, false), ICNS_16x12_8BIT_IMAGE(&quot;icm8&quot;, 16, 12, 8, false),</span>
+
+<span class="fc" id="L25">    ICNS_16x16_8BIT_MASK(&quot;s8mk&quot;, 16, 16, 8, true), ICNS_16x16_1BIT_IMAGE_AND_MASK(&quot;ics#&quot;, 16, 16, 1, true), ICNS_16x16_4BIT_IMAGE(&quot;ics4&quot;, 16, 16, 4, false),</span>
+<span class="fc" id="L26">    ICNS_16x16_8BIT_IMAGE(&quot;ics8&quot;, 16, 16, 8, false), ICNS_16x16_32BIT_IMAGE(&quot;is32&quot;, 16, 16, 32, false),</span>
+
+<span class="fc" id="L28">    ICNS_32x32_8BIT_MASK(&quot;l8mk&quot;, 32, 32, 8, true), ICNS_32x32_1BIT_IMAGE(&quot;ICON&quot;, 32, 32, 1, false), ICNS_32x32_1BIT_IMAGE_AND_MASK(&quot;ICN#&quot;, 32, 32, 1, true),</span>
+<span class="fc" id="L29">    ICNS_32x32_4BIT_IMAGE(&quot;icl4&quot;, 32, 32, 4, false), ICNS_32x32_8BIT_IMAGE(&quot;icl8&quot;, 32, 32, 8, false), ICNS_32x32_32BIT_IMAGE(&quot;il32&quot;, 32, 32, 32, false),</span>
+
+<span class="fc" id="L31">    ICNS_48x48_8BIT_MASK(&quot;h8mk&quot;, 48, 48, 8, true), ICNS_48x48_1BIT_IMAGE_AND_MASK(&quot;ich#&quot;, 48, 48, 1, true), ICNS_48x48_4BIT_IMAGE(&quot;ich4&quot;, 48, 48, 4, false),</span>
+<span class="fc" id="L32">    ICNS_48x48_8BIT_IMAGE(&quot;ich8&quot;, 48, 48, 8, false), ICNS_48x48_32BIT_IMAGE(&quot;ih32&quot;, 48, 48, 32, false),</span>
+
+<span class="fc" id="L34">    ICNS_128x128_8BIT_MASK(&quot;t8mk&quot;, 128, 128, 8, true), ICNS_128x128_32BIT_IMAGE(&quot;it32&quot;, 128, 128, 32, false),</span>
+
+<span class="fc" id="L36">    ICNS_16x16_32BIT_ARGB_IMAGE(&quot;icp4&quot;, 16, 16, 32, false), ICNS_32x32_32BIT_ARGB_IMAGE(&quot;icp5&quot;, 32, 32, 32, false),</span>
+<span class="fc" id="L37">    ICNS_64x64_32BIT_ARGB_IMAGE(&quot;icp6&quot;, 64, 64, 32, false), ICNS_128x128_32BIT_ARGB_IMAGE(&quot;ic07&quot;, 128, 128, 32, false),</span>
+<span class="fc" id="L38">    ICNS_256x256_32BIT_ARGB_IMAGE(&quot;ic08&quot;, 256, 256, 32, false), ICNS_512x512_32BIT_ARGB_IMAGE(&quot;ic09&quot;, 512, 512, 32, false),</span>
+<span class="fc" id="L39">    ICNS_1024x1024_32BIT_ARGB_IMAGE(&quot;ic10&quot;, 1024, 1024, 32, false), ICNS_32x32_2x_32BIT_ARGB_IMAGE(&quot;ic11&quot;, 32, 32, 32, false),</span>
+<span class="fc" id="L40">    ICNS_64x64_2x_32BIT_ARGB_IMAGE(&quot;ic12&quot;, 64, 64, 32, false), ICNS_256x256_2x_32BIT_ARGB_IMAGE(&quot;ic13&quot;, 256, 256, 32, false),</span>
+<span class="fc" id="L41">    ICNS_512x512_2x_32BIT_ARGB_IMAGE(&quot;ic14&quot;, 512, 512, 32, false);</span>
+
+<span class="fc" id="L43">    private static final IcnsType[] ALL_IMAGE_TYPES = { ICNS_16x12_1BIT_IMAGE_AND_MASK, ICNS_16x12_4BIT_IMAGE, ICNS_16x12_8BIT_IMAGE,</span>
+            ICNS_16x16_1BIT_IMAGE_AND_MASK, ICNS_16x16_4BIT_IMAGE, ICNS_16x16_8BIT_IMAGE, ICNS_16x16_32BIT_IMAGE, ICNS_32x32_1BIT_IMAGE,
+            ICNS_32x32_1BIT_IMAGE_AND_MASK, ICNS_32x32_4BIT_IMAGE, ICNS_32x32_8BIT_IMAGE, ICNS_32x32_32BIT_IMAGE, ICNS_48x48_1BIT_IMAGE_AND_MASK,
+            ICNS_48x48_4BIT_IMAGE, ICNS_48x48_8BIT_IMAGE, ICNS_48x48_32BIT_IMAGE, ICNS_128x128_32BIT_IMAGE, ICNS_16x16_32BIT_ARGB_IMAGE,
+            ICNS_32x32_32BIT_ARGB_IMAGE, ICNS_64x64_32BIT_ARGB_IMAGE, ICNS_128x128_32BIT_ARGB_IMAGE, ICNS_256x256_32BIT_ARGB_IMAGE,
+            ICNS_512x512_32BIT_ARGB_IMAGE, ICNS_1024x1024_32BIT_ARGB_IMAGE, ICNS_32x32_2x_32BIT_ARGB_IMAGE, ICNS_64x64_2x_32BIT_ARGB_IMAGE,
+            ICNS_256x256_2x_32BIT_ARGB_IMAGE, ICNS_512x512_2x_32BIT_ARGB_IMAGE };
+
+<span class="fc" id="L51">    private static final IcnsType[] ALL_MASK_TYPES = { ICNS_16x12_1BIT_IMAGE_AND_MASK, ICNS_16x16_1BIT_IMAGE_AND_MASK, ICNS_16x16_8BIT_MASK,</span>
+            ICNS_32x32_1BIT_IMAGE_AND_MASK, ICNS_32x32_8BIT_MASK, ICNS_48x48_1BIT_IMAGE_AND_MASK, ICNS_48x48_8BIT_MASK, ICNS_128x128_8BIT_MASK };
+
+    public static String describeType(final int type) {
+<span class="nc" id="L55">        final byte[] bytes = new byte[4];</span>
+<span class="nc" id="L56">        bytes[0] = (byte) (0xff &amp; type &gt;&gt; 24);</span>
+<span class="nc" id="L57">        bytes[1] = (byte) (0xff &amp; type &gt;&gt; 16);</span>
+<span class="nc" id="L58">        bytes[2] = (byte) (0xff &amp; type &gt;&gt; 8);</span>
+<span class="nc" id="L59">        bytes[3] = (byte) (0xff &amp; type);</span>
+<span class="nc" id="L60">        return new String(bytes, StandardCharsets.US_ASCII);</span>
+    }
+
+    public static IcnsType find1BPPMaskType(final IcnsType imageType) {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        for (final IcnsType allMaskType : ALL_MASK_TYPES) {</span>
+<span class="nc bnc" id="L65" title="All 6 branches missed.">            if (allMaskType.getBitsPerPixel() == 1 &amp;&amp; allMaskType.getWidth() == imageType.getWidth() &amp;&amp; allMaskType.getHeight() == imageType.getHeight()) {</span>
+<span class="nc" id="L66">                return allMaskType;</span>
+            }
+        }
+<span class="nc" id="L69">        return null;</span>
+    }
+
+    public static IcnsType find8BPPMaskType(final IcnsType imageType) {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        for (final IcnsType allMaskType : ALL_MASK_TYPES) {</span>
+<span class="nc bnc" id="L74" title="All 6 branches missed.">            if (allMaskType.getBitsPerPixel() == 8 &amp;&amp; allMaskType.getWidth() == imageType.getWidth() &amp;&amp; allMaskType.getHeight() == imageType.getHeight()) {</span>
+<span class="nc" id="L75">                return allMaskType;</span>
+            }
+        }
+<span class="nc" id="L78">        return null;</span>
+    }
+
+    public static IcnsType findAnyType(final int type) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (final IcnsType allImageType : ALL_IMAGE_TYPES) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (allImageType.getType() == type) {</span>
+<span class="nc" id="L84">                return allImageType;</span>
+            }
+        }
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        for (final IcnsType allMaskType : ALL_MASK_TYPES) {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">            if (allMaskType.getType() == type) {</span>
+<span class="nc" id="L89">                return allMaskType;</span>
+            }
+        }
+<span class="nc" id="L92">        return null;</span>
+    }
+
+    public static IcnsType findImageType(final int type) {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        for (final IcnsType allImageType : ALL_IMAGE_TYPES) {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            if (allImageType.getType() == type) {</span>
+<span class="nc" id="L98">                return allImageType;</span>
+            }
+        }
+<span class="nc" id="L101">        return null;</span>
+    }
+
+    public static int typeAsInt(final String type) {
+<span class="fc" id="L105">        final byte[] bytes = type.getBytes(StandardCharsets.US_ASCII);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (bytes.length != 4) {</span>
+<span class="nc" id="L107">            throw new IllegalArgumentException(&quot;Invalid ICNS type&quot;);</span>
+        }
+<span class="fc" id="L109">        return (0xff &amp; bytes[0]) &lt;&lt; 24 | (0xff &amp; bytes[1]) &lt;&lt; 16 | (0xff &amp; bytes[2]) &lt;&lt; 8 | 0xff &amp; bytes[3];</span>
+    }
+
+    private final int type;
+
+    private final int width;
+
+    private final int height;
+
+    private final int bitsPerPixel;
+
+    private final boolean hasMask;
+
+<span class="fc" id="L122">    IcnsType(final String type, final int width, final int height, final int bitsPerPixel, final boolean hasMask) {</span>
+<span class="fc" id="L123">        this.type = typeAsInt(type);</span>
+<span class="fc" id="L124">        this.width = width;</span>
+<span class="fc" id="L125">        this.height = height;</span>
+<span class="fc" id="L126">        this.bitsPerPixel = bitsPerPixel;</span>
+<span class="fc" id="L127">        this.hasMask = hasMask;</span>
+<span class="fc" id="L128">    }</span>
+
+    public int getBitsPerPixel() {
+<span class="nc" id="L131">        return bitsPerPixel;</span>
+    }
+
+    public int getHeight() {
+<span class="nc" id="L135">        return height;</span>
+    }
+
+    public int getType() {
+<span class="nc" id="L139">        return type;</span>
+    }
+
+    public int getWidth() {
+<span class="nc" id="L143">        return width;</span>
+    }
+
+    public boolean hasMask() {
+<span class="nc" id="L147">        return hasMask;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L152">        return getClass().getName() + &quot;[&quot; + &quot;width=&quot; + width + &quot;,&quot; + &quot;height=&quot; + height + &quot;,&quot; + &quot;bpp=&quot; + bitsPerPixel + &quot;,&quot; + &quot;hasMask=&quot; + hasMask + &quot;]&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

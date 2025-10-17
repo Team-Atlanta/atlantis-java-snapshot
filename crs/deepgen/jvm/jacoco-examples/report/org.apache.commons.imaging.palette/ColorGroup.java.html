@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColorGroup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.palette</a> &gt; <span class="el_source">ColorGroup.java</span></div><h1>ColorGroup.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.palette;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+
+final class ColorGroup {
+
+    // final ColorGroup parent;
+    ColorGroupCut cut;
+    // final List children = new ArrayList();
+<span class="nc" id="L29">    int paletteIndex = -1;</span>
+
+    private final List&lt;ColorCount&gt; colorCounts;
+    final boolean ignoreAlpha;
+<span class="nc" id="L33">    int minRed = Integer.MAX_VALUE;</span>
+<span class="nc" id="L34">    int maxRed = Integer.MIN_VALUE;</span>
+<span class="nc" id="L35">    int minGreen = Integer.MAX_VALUE;</span>
+<span class="nc" id="L36">    int maxGreen = Integer.MIN_VALUE;</span>
+<span class="nc" id="L37">    int minBlue = Integer.MAX_VALUE;</span>
+<span class="nc" id="L38">    int maxBlue = Integer.MIN_VALUE;</span>
+<span class="nc" id="L39">    int minAlpha = Integer.MAX_VALUE;</span>
+<span class="nc" id="L40">    int maxAlpha = Integer.MIN_VALUE;</span>
+
+    final int alphaDiff;
+    final int redDiff;
+    final int greenDiff;
+    final int blueDiff;
+
+    final int maxDiff;
+    final int diffTotal;
+    final int totalPoints;
+
+<span class="nc" id="L51">    ColorGroup(final List&lt;ColorCount&gt; colorCounts, final boolean ignoreAlpha) throws ImagingException {</span>
+<span class="nc" id="L52">        this.colorCounts = colorCounts;</span>
+<span class="nc" id="L53">        this.ignoreAlpha = ignoreAlpha;</span>
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (colorCounts.isEmpty()) {</span>
+<span class="nc" id="L56">            throw new ImagingException(&quot;Empty colorCounts&quot;);</span>
+        }
+
+<span class="nc" id="L59">        int total = 0;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (final ColorCount color : colorCounts) {</span>
+<span class="nc" id="L61">            total += color.count;</span>
+
+<span class="nc" id="L63">            minAlpha = Math.min(minAlpha, color.alpha);</span>
+<span class="nc" id="L64">            maxAlpha = Math.max(maxAlpha, color.alpha);</span>
+<span class="nc" id="L65">            minRed = Math.min(minRed, color.red);</span>
+<span class="nc" id="L66">            maxRed = Math.max(maxRed, color.red);</span>
+<span class="nc" id="L67">            minGreen = Math.min(minGreen, color.green);</span>
+<span class="nc" id="L68">            maxGreen = Math.max(maxGreen, color.green);</span>
+<span class="nc" id="L69">            minBlue = Math.min(minBlue, color.blue);</span>
+<span class="nc" id="L70">            maxBlue = Math.max(maxBlue, color.blue);</span>
+<span class="nc" id="L71">        }</span>
+<span class="nc" id="L72">        this.totalPoints = total;</span>
+
+<span class="nc" id="L74">        alphaDiff = maxAlpha - minAlpha;</span>
+<span class="nc" id="L75">        redDiff = maxRed - minRed;</span>
+<span class="nc" id="L76">        greenDiff = maxGreen - minGreen;</span>
+<span class="nc" id="L77">        blueDiff = maxBlue - minBlue;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        maxDiff = Math.max(ignoreAlpha ? redDiff : Math.max(alphaDiff, redDiff), Math.max(greenDiff, blueDiff));</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        diffTotal = (ignoreAlpha ? 0 : alphaDiff) + redDiff + greenDiff + blueDiff;</span>
+<span class="nc" id="L80">    }</span>
+
+    boolean contains(final int argb) {
+<span class="nc" id="L83">        final int alpha = 0xff &amp; argb &gt;&gt; 24;</span>
+<span class="nc" id="L84">        final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L85">        final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L86">        final int blue = 0xff &amp; argb &gt;&gt; 0;</span>
+
+<span class="nc bnc" id="L88" title="All 6 branches missed.">        if (!ignoreAlpha &amp;&amp; (alpha &lt; minAlpha || alpha &gt; maxAlpha)) {</span>
+<span class="nc" id="L89">            return false;</span>
+        }
+<span class="nc bnc" id="L91" title="All 4 branches missed.">        if (red &lt; minRed || red &gt; maxRed) {</span>
+<span class="nc" id="L92">            return false;</span>
+        }
+<span class="nc bnc" id="L94" title="All 4 branches missed.">        if (green &lt; minGreen || green &gt; maxGreen) {</span>
+<span class="nc" id="L95">            return false;</span>
+        }
+<span class="nc bnc" id="L97" title="All 4 branches missed.">        if (blue &lt; minBlue || blue &gt; maxBlue) {</span>
+<span class="nc" id="L98">            return false;</span>
+        }
+<span class="nc" id="L100">        return true;</span>
+    }
+
+    /**
+     * Gets a copy of the list of color counts.
+     *
+     * @return a copy of the list of color counts
+     */
+    List&lt;ColorCount&gt; getColorCounts() {
+<span class="nc" id="L109">        return new ArrayList&lt;&gt;(colorCounts);</span>
+    }
+
+    int getMedianValue() {
+<span class="nc" id="L113">        long countTotal = 0;</span>
+<span class="nc" id="L114">        long alphaTotal = 0;</span>
+<span class="nc" id="L115">        long redTotal = 0;</span>
+<span class="nc" id="L116">        long greenTotal = 0;</span>
+<span class="nc" id="L117">        long blueTotal = 0;</span>
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        for (final ColorCount color : colorCounts) {</span>
+<span class="nc" id="L120">            countTotal += color.count;</span>
+<span class="nc" id="L121">            alphaTotal += color.count * color.alpha;</span>
+<span class="nc" id="L122">            redTotal += color.count * color.red;</span>
+<span class="nc" id="L123">            greenTotal += color.count * color.green;</span>
+<span class="nc" id="L124">            blueTotal += color.count * color.blue;</span>
+<span class="nc" id="L125">        }</span>
+
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        final int alpha = ignoreAlpha ? 0xff : (int) Math.round((double) alphaTotal / countTotal);</span>
+<span class="nc" id="L128">        final int red = (int) Math.round((double) redTotal / countTotal);</span>
+<span class="nc" id="L129">        final int green = (int) Math.round((double) greenTotal / countTotal);</span>
+<span class="nc" id="L130">        final int blue = (int) Math.round((double) blueTotal / countTotal);</span>
+
+<span class="nc" id="L132">        return alpha &lt;&lt; 24 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L137">        return &quot;{ColorGroup. minRed: &quot; + Integer.toHexString(minRed) + &quot;, maxRed: &quot; + Integer.toHexString(maxRed) + &quot;, minGreen: &quot;</span>
+<span class="nc" id="L138">                + Integer.toHexString(minGreen) + &quot;, maxGreen: &quot; + Integer.toHexString(maxGreen) + &quot;, minBlue: &quot; + Integer.toHexString(minBlue) + &quot;, maxBlue: &quot;</span>
+<span class="nc" id="L139">                + Integer.toHexString(maxBlue) + &quot;, minAlpha: &quot; + Integer.toHexString(minAlpha) + &quot;, maxAlpha: &quot; + Integer.toHexString(maxAlpha) + &quot;, maxDiff: &quot;</span>
+<span class="nc" id="L140">                + Integer.toHexString(maxDiff) + &quot;, diffTotal: &quot; + diffTotal + &quot;}&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

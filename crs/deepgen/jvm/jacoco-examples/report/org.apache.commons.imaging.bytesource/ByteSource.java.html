@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ByteSource.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.bytesource</a> &gt; <span class="el_source">ByteSource.java</span></div><h1>ByteSource.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.bytesource;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Objects;
+
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.build.AbstractOrigin;
+import org.apache.commons.io.build.AbstractOrigin.ByteArrayOrigin;
+import org.apache.commons.io.build.AbstractOrigin.FileOrigin;
+import org.apache.commons.io.build.AbstractOrigin.PathOrigin;
+
+public class ByteSource {
+
+    public static ByteSource array(final byte[] array) {
+<span class="fc" id="L35">        return new ByteSource(new ByteArrayOrigin(array), null);</span>
+    }
+
+    public static ByteSource array(final byte[] array, final String name) {
+<span class="nc" id="L39">        return new ByteSource(new ByteArrayOrigin(array), name);</span>
+    }
+
+    public static ByteSource file(final File file) {
+<span class="nc" id="L43">        return new ByteSource(new FileOrigin(file), file.getName());</span>
+    }
+
+    public static ByteSource inputStream(final InputStream is, final String name) {
+<span class="fc" id="L47">        return new InputStreamByteSource(is, name);</span>
+    }
+
+    public static ByteSource path(final Path file) {
+<span class="nc" id="L51">        return new ByteSource(new PathOrigin(file), Objects.toString(file.getFileName(), null));</span>
+    }
+
+    private final String fileName;
+    private final AbstractOrigin&lt;?, ?&gt; origin;
+
+<span class="fc" id="L57">    public ByteSource(final AbstractOrigin&lt;?, ?&gt; origin, final String fileName) {</span>
+<span class="fc" id="L58">        this.fileName = fileName;</span>
+<span class="fc" id="L59">        this.origin = origin;</span>
+<span class="fc" id="L60">    }</span>
+
+    public byte[] getByteArray(final long position, final int length) throws IOException {
+<span class="fc" id="L63">        return origin.getByteArray(position, length);</span>
+    }
+
+    public final String getFileName() {
+<span class="fc" id="L67">        return fileName;</span>
+    }
+
+    public InputStream getInputStream() throws IOException {
+<span class="fc" id="L71">        return origin.getInputStream();</span>
+    }
+
+    public final InputStream getInputStream(final long start) throws IOException {
+<span class="fc" id="L75">        InputStream is = null;</span>
+<span class="fc" id="L76">        boolean succeeded = false;</span>
+        try {
+<span class="fc" id="L78">            is = getInputStream();</span>
+<span class="fc" id="L79">            BinaryFunctions.skipBytes(is, start);</span>
+<span class="fc" id="L80">            succeeded = true;</span>
+        } finally {
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">            if (!succeeded) {</span>
+<span class="nc" id="L83">                IOUtils.close(is);</span>
+            }
+        }
+<span class="fc" id="L86">        return is;</span>
+    }
+
+    /**
+     * This operation can be VERY expensive; for InputStream byte sources, the entire stream must be drained to determine its length.
+     *
+     * @return the byte source length
+     * @throws IOException if it fails to read the byte source data
+     */
+    public long size() throws IOException {
+<span class="fc" id="L96">        return origin.size();</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L101">        return getClass().getSimpleName() + &quot;[&quot; + getFileName() + &quot;]&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

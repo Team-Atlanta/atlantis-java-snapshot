@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ZlibDeflate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.common</a> &gt; <span class="el_source">ZlibDeflate.java</span></div><h1>ZlibDeflate.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.common;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.zip.DataFormatException;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+
+import org.apache.commons.imaging.ImagingException;
+
+/**
+ * &lt;p&gt;
+ * Utility class to compress/decompress bytes using the ZLIB deflate/inflate compression.
+ * &lt;/p&gt;
+ *
+ * &lt;p&gt;
+ * &lt;a href=&quot;https://www.ietf.org/rfc/rfc1951.txt&quot;&gt;RFC 1951 - DEFLATE Compressed Data Format Specification version 1.3&lt;/a&gt;
+ * &lt;/p&gt;
+ */
+public final class ZlibDeflate {
+
+    /**
+     * Compress the byte[] using ZLIB deflate compression.
+     *
+     * @param bytes The bytes to compress
+     *
+     * @return The compressed bytes.
+     * @throws ImagingException if the bytes could not be compressed.
+     * @see DeflaterOutputStream
+     */
+    public static byte[] compress(final byte[] bytes) throws ImagingException {
+<span class="nc" id="L48">        final ByteArrayOutputStream out = new ByteArrayOutputStream(Allocator.checkByteArray(bytes.length / 2));</span>
+<span class="nc" id="L49">        try (DeflaterOutputStream compressOut = new DeflaterOutputStream(out)) {</span>
+<span class="nc" id="L50">            compressOut.write(bytes);</span>
+<span class="nc" id="L51">        } catch (final IOException e) {</span>
+<span class="nc" id="L52">            throw new ImagingException(&quot;Unable to compress image&quot;, e);</span>
+<span class="nc" id="L53">        }</span>
+<span class="nc" id="L54">        return out.toByteArray();</span>
+    }
+
+    /**
+     * Compress the byte[] using ZLIB deflate decompression.
+     *
+     * @param bytes        The bytes to decompress
+     * @param expectedSize The expected size of the decompressed byte[].
+     *
+     * @return The decompressed bytes.
+     * @throws ImagingException if the bytes could not be decompressed.
+     * @see Inflater
+     */
+    public static byte[] decompress(final byte[] bytes, final int expectedSize) throws ImagingException {
+        try {
+<span class="nc" id="L69">            final Inflater inflater = new Inflater();</span>
+<span class="nc" id="L70">            inflater.setInput(bytes);</span>
+<span class="nc" id="L71">            final byte[] result = Allocator.byteArray(expectedSize);</span>
+<span class="nc" id="L72">            inflater.inflate(result);</span>
+<span class="nc" id="L73">            return result;</span>
+<span class="nc" id="L74">        } catch (final DataFormatException e) {</span>
+<span class="nc" id="L75">            throw new ImagingException(&quot;Unable to decompress image&quot;, e);</span>
+        }
+    }
+
+    private ZlibDeflate() {
+        // empty
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

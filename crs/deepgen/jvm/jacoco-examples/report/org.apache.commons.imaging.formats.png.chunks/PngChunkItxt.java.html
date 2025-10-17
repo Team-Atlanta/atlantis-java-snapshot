@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PngChunkItxt.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png.chunks</a> &gt; <span class="el_source">PngChunkItxt.java</span></div><h1>PngChunkItxt.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png.chunks;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.InflaterInputStream;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.imaging.formats.png.AbstractPngText;
+import org.apache.commons.imaging.formats.png.PngConstants;
+import org.apache.commons.io.IOUtils;
+
+public class PngChunkItxt extends AbstractPngTextChunk {
+
+    private final String keyword;
+    private final String text;
+
+    /**
+     * The language tag defined in [RFC-3066] indicates the human language used by the translated keyword and the text. Unlike the keyword, the language tag is
+     * case-insensitive. It is an ISO 646.IRV:1991 [ISO 646] string consisting of hyphen-separated words of 1-8 alphanumeric characters each (for example cn,
+     * en-uk, no-bok, x-klingon, x-KlInGoN). If the first word is two or three letters long, it is an ISO language code [ISO-639]. If the language tag is empty,
+     * the language is unspecified.
+     */
+    private final String languageTag;
+
+    private final String translatedKeyword;
+
+    public PngChunkItxt(final int length, final int chunkType, final int crc, final byte[] bytes) throws ImagingException, IOException {
+<span class="nc" id="L47">        super(length, chunkType, crc, bytes);</span>
+<span class="nc" id="L48">        int terminator = BinaryFunctions.findNull(bytes, &quot;PNG iTXt chunk keyword is not terminated.&quot;);</span>
+
+<span class="nc" id="L50">        keyword = new String(bytes, 0, terminator, StandardCharsets.ISO_8859_1);</span>
+<span class="nc" id="L51">        int index = terminator + 1;</span>
+
+<span class="nc" id="L53">        final int compressionFlag = bytes[index++];</span>
+<span class="nc bnc" id="L54" title="All 4 branches missed.">        if (compressionFlag != 0 &amp;&amp; compressionFlag != 1) {</span>
+<span class="nc" id="L55">            throw new ImagingException(&quot;PNG iTXt chunk has invalid compression flag: &quot; + compressionFlag);</span>
+        }
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        final boolean compressed = compressionFlag == 1;</span>
+
+<span class="nc" id="L60">        final int compressionMethod = bytes[index++];</span>
+<span class="nc bnc" id="L61" title="All 4 branches missed.">        if (compressed &amp;&amp; compressionMethod != PngConstants.COMPRESSION_DEFLATE_INFLATE) {</span>
+<span class="nc" id="L62">            throw new ImagingException(&quot;PNG iTXt chunk has unexpected compression method: &quot; + compressionMethod);</span>
+        }
+
+<span class="nc" id="L65">        terminator = BinaryFunctions.findNull(bytes, index, &quot;PNG iTXt chunk language tag is not terminated.&quot;);</span>
+<span class="nc" id="L66">        languageTag = new String(bytes, index, terminator - index, StandardCharsets.ISO_8859_1);</span>
+<span class="nc" id="L67">        index = terminator + 1;</span>
+
+<span class="nc" id="L69">        terminator = BinaryFunctions.findNull(bytes, index, &quot;PNG iTXt chunk translated keyword is not terminated.&quot;);</span>
+<span class="nc" id="L70">        translatedKeyword = new String(bytes, index, terminator - index, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L71">        index = terminator + 1;</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (compressed) {</span>
+<span class="nc" id="L74">            final int compressedTextLength = bytes.length - index;</span>
+
+<span class="nc" id="L76">            final byte[] compressedText = Allocator.byteArray(compressedTextLength);</span>
+<span class="nc" id="L77">            System.arraycopy(bytes, index, compressedText, 0, compressedTextLength);</span>
+
+<span class="nc" id="L79">            text = new String(IOUtils.toByteArray(new InflaterInputStream(new ByteArrayInputStream(compressedText))), StandardCharsets.UTF_8);</span>
+
+<span class="nc" id="L81">        } else {</span>
+<span class="nc" id="L82">            text = new String(bytes, index, bytes.length - index, StandardCharsets.UTF_8);</span>
+        }
+<span class="nc" id="L84">    }</span>
+
+    @Override
+    public AbstractPngText getContents() {
+<span class="nc" id="L88">        return new AbstractPngText.Itxt(keyword, text, languageTag, translatedKeyword);</span>
+    }
+
+    /**
+     * @return Gets the keyword.
+     */
+    @Override
+    public String getKeyword() {
+<span class="nc" id="L96">        return keyword;</span>
+    }
+
+    /**
+     * @return Gets the text.
+     */
+    @Override
+    public String getText() {
+<span class="nc" id="L104">        return text;</span>
+    }
+
+    public String getTranslatedKeyword() {
+<span class="nc" id="L108">        return translatedKeyword;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

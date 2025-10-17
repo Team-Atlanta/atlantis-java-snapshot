@@ -1,0 +1,713 @@
+
+CPV Analysis Results for aixcc/jvm/activemq:
+================================================================================
++----------+------------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type               | Exploited               | Reached                 | In-the-wild              |
++==========+========================+=========================+=========================+==========================+
+| cpv_0    | Unsafe Deserialization | ActivemqOne:            | ActivemqOne:            | ActivemqOne:             |
+|          |                        |   atljazzer: 4/17       |   atljazzer: 0/17       |   atljazzer: 13/17       |
+|          |                        |   atllibafljazzer: 7/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 10/17 |
+|          |                        | ActivemqOneFDP:         | ActivemqOneFDP:         | ActivemqOneFDP:          |
+|          |                        |   atljazzer: 2/18       |   atljazzer: 0/18       |   atljazzer: 16/18       |
+|          |                        |   atllibafljazzer: 8/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 10/18 |
++----------+------------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/activemq ActivemqOne ActivemqOneFDP
+
+CPV Analysis Results for aixcc/jvm/batik:
+================================================================================
++----------+------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type   | Exploited               | Reached                 | In-the-wild              |
++==========+============+=========================+=========================+==========================+
+| cpv_0    | SSRF       | BatikOne:               | BatikOne:               | BatikOne:                |
+|          |            |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |            |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 18/18 |
+|          |            | BatikOneFDP:            | BatikOneFDP:            | BatikOneFDP:             |
+|          |            |   atljazzer: 0/18       |   atljazzer: 0/18       |   atljazzer: 18/18       |
+|          |            |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 17/17 |
++----------+------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/batik BatikOne BatikOneFDP
+
+CPV Analysis Results for aixcc/jvm/bcel:
+================================================================================
++----------+----------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type       | Exploited               | Reached                 | In-the-wild              |
++==========+================+=========================+=========================+==========================+
+| cpv_0    | Path Traversal | BCELOne:                | BCELOne:                | BCELOne:                 |
+|          |                |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                |   atllibafljazzer: 0/19 |   atllibafljazzer: 0/19 |   atllibafljazzer: 19/19 |
+|          |                | BCELOneFDP:             | BCELOneFDP:             | BCELOneFDP:              |
+|          |                |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 17/17 |
++----------+----------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/bcel BCELOne BCELOneFDP
+
+CPV Analysis Results for aixcc/jvm/beanutils:
+================================================================================
++----------+----------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type       | Exploited               | Reached                 | In-the-wild              |
++==========+================+=========================+=========================+==========================+
+| cpv_0    | Path Traversal | BeanUtilsOne:           | BeanUtilsOne:           | BeanUtilsOne:            |
+|          |                |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+----------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/beanutils BeanUtilsOne
+
+CPV Analysis Results for aixcc/jvm/cron-utils:
+================================================================================
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type             | Exploited               | Reached                 | In-the-wild              |
++==========+======================+=========================+=========================+==========================+
+| cpv_0    | OS Command Injection | CronUtilsOne:           | CronUtilsOne:           | CronUtilsOne:            |
+|          |                      |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                      |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 18/18 |
+|          |                      | CronUtilsOneFDP:        | CronUtilsOneFDP:        | CronUtilsOneFDP:         |
+|          |                      |   atljazzer: 0/18       |   atljazzer: 0/18       |   atljazzer: 18/18       |
+|          |                      |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 17/17 |
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/cron-utils CronUtilsOne CronUtilsOneFDP
+
+CPV Analysis Results for aixcc/jvm/cxf:
+================================================================================
++----------+------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type   | Exploited               | Reached                 | In-the-wild              |
++==========+============+=========================+=========================+==========================+
+| cpv_0    | SSRF       | CXFOne:                 | CXFOne:                 | CXFOne:                  |
+|          |            |   atljazzer: 0/11       |   atljazzer: 0/11       |   atljazzer: 11/11       |
+|          |            |   atllibafljazzer: 0/12 |   atllibafljazzer: 0/12 |   atllibafljazzer: 12/12 |
++----------+------------+-------------------------+-------------------------+--------------------------+
+| cpv_1    | SSRF       | CXFTwo:                 | CXFTwo:                 | CXFTwo:                  |
+|          |            |   atljazzer: 0/11       |   atljazzer: 0/11       |   atljazzer: 11/11       |
+|          |            |   atllibafljazzer: 0/13 |   atllibafljazzer: 0/13 |   atllibafljazzer: 13/13 |
++----------+------------+-------------------------+-------------------------+--------------------------+
+| cpv_2    | SSRF       | CXFThree:               | CXFThree:               | CXFThree:                |
+|          |            |   atljazzer: 0/12       |   atljazzer: 0/12       |   atljazzer: 12/12       |
+|          |            |   atllibafljazzer: 0/11 |   atllibafljazzer: 0/11 |   atllibafljazzer: 11/11 |
++----------+------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 3
+In-the-wild: 3 aixcc/jvm/cxf CXFOne CXFThree CXFTwo
+
+CPV Analysis Results for aixcc/jvm/feign:
+================================================================================
++----------+------------------------------+--------------------------+-------------------------+-------------------------+
+| CPV ID   | CPV Type                     | Exploited                | Reached                 | In-the-wild             |
++==========+==============================+==========================+=========================+=========================+
+| cpv_2    | Regular Expression Injection | BodyTemplateFuzzer:      | BodyTemplateFuzzer:     | BodyTemplateFuzzer:     |
+|          |                              |   atljazzer: 35/35       |   atljazzer: 0/35       |   atljazzer: 0/35       |
+|          |                              |   atllibafljazzer: 35/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |
++----------+------------------------------+--------------------------+-------------------------+-------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/feign BodyTemplateFuzzer
+
+CPV Analysis Results for aixcc/jvm/fuzzy:
+================================================================================
++----------+----------------------------------------------------------------------------+-------------------------+--------------------------+-------------------------+
+| CPV ID   | CPV Type                                                                   | Exploited               | Reached                  | In-the-wild             |
++==========+============================================================================+=========================+==========================+=========================+
+| cpv_0    | XPath Injection (Improper Neutralization of Data within XPath Expressions) | FuzzyOne:               | FuzzyOne:                | FuzzyOne:               |
+|          |                                                                            |   atljazzer: 0/18       |   atljazzer: 18/18       |   atljazzer: 0/18       |
+|          |                                                                            |   atllibafljazzer: 0/17 |   atllibafljazzer: 9/17  |   atllibafljazzer: 8/17 |
+|          |                                                                            | FuzzyOneFDP:            | FuzzyOneFDP:             | FuzzyOneFDP:            |
+|          |                                                                            |   atljazzer: 0/18       |   atljazzer: 18/18       |   atljazzer: 0/18       |
+|          |                                                                            |   atllibafljazzer: 0/17 |   atllibafljazzer: 13/17 |   atllibafljazzer: 4/17 |
++----------+----------------------------------------------------------------------------+-------------------------+--------------------------+-------------------------+
+
+Summary:
+Total-CPVs: 1
+Reached: 1 aixcc/jvm/fuzzy FuzzyOne FuzzyOneFDP
+
+CPV Analysis Results for aixcc/jvm/geonetwork:
+================================================================================
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type             | Exploited               | Reached                 | In-the-wild              |
++==========+======================+=========================+=========================+==========================+
+| cpv_0    | OS Command Injection | GeonetworkOne:          | GeonetworkOne:          | GeonetworkOne:           |
+|          |                      |   atljazzer: 0/18       |   atljazzer: 0/18       |   atljazzer: 18/18       |
+|          |                      |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 17/17 |
+|          |                      | GeonetworkOneFDP:       | GeonetworkOneFDP:       | GeonetworkOneFDP:        |
+|          |                      |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                      |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 18/18 |
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/geonetwork GeonetworkOne GeonetworkOneFDP
+
+CPV Analysis Results for aixcc/jvm/htmlunit:
+================================================================================
++----------+----------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type       | Exploited               | Reached                 | In-the-wild              |
++==========+================+=========================+=========================+==========================+
+| cpv_0    | XSLT Injection | HtmlunitOne:            | HtmlunitOne:            | HtmlunitOne:             |
+|          |                |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 18/18 |
+|          |                | HtmlunitOneFDP:         | HtmlunitOneFDP:         | HtmlunitOneFDP:          |
+|          |                |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 18/18 |
++----------+----------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/htmlunit HtmlunitOne HtmlunitOneFDP
+
+CPV Analysis Results for aixcc/jvm/imaging:
+================================================================================
++----------+------------------------------------------------------------------------------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type                                                                                 | Exploited               | Reached                 | In-the-wild              |
++==========+==========================================================================================+=========================+=========================+==========================+
+| cpv_0    | Improper Neutralization of Special Elements used in an OS Command (OS Command Injection) | ImagingOne:             | ImagingOne:             | ImagingOne:              |
+|          |                                                                                          |   atljazzer: 0/10       |   atljazzer: 0/10       |   atljazzer: 10/10       |
+|          |                                                                                          |   atllibafljazzer: 0/9  |   atllibafljazzer: 0/9  |   atllibafljazzer: 9/9   |
+|          |                                                                                          | ImagingOneFDP:          | ImagingOneFDP:          | ImagingOneFDP:           |
+|          |                                                                                          |   atljazzer: 0/8        |   atljazzer: 0/8        |   atljazzer: 8/8         |
+|          |                                                                                          |   atllibafljazzer: 0/8  |   atllibafljazzer: 0/8  |   atllibafljazzer: 8/8   |
++----------+------------------------------------------------------------------------------------------+-------------------------+-------------------------+--------------------------+
+| cpv_1    | Improper Input Validation (XPath Injection)                                              | ImagingOne:             | ImagingOne:             | ImagingOne:              |
+|          |                                                                                          |   atljazzer: 5/10       |   atljazzer: 0/10       |   atljazzer: 5/10        |
+|          |                                                                                          |   atllibafljazzer: 9/9  |   atllibafljazzer: 0/9  |   atllibafljazzer: 0/9   |
+|          |                                                                                          | ImagingOneFDP:          | ImagingOneFDP:          | ImagingOneFDP:           |
+|          |                                                                                          |   atljazzer: 2/8        |   atljazzer: 0/8        |   atljazzer: 6/8         |
+|          |                                                                                          |   atllibafljazzer: 8/8  |   atllibafljazzer: 0/8  |   atllibafljazzer: 0/8   |
++----------+------------------------------------------------------------------------------------------+-------------------------+-------------------------+--------------------------+
+| cpv_2    | Improper Neutralization of Data within XPath Expressions (XPath Injection)               | ImagingTwo:             | ImagingTwo:             | ImagingTwo:              |
+|          |                                                                                          |   atljazzer: 0/8        |   atljazzer: 0/8        |   atljazzer: 8/8         |
+|          |                                                                                          |   atllibafljazzer: 0/10 |   atllibafljazzer: 0/10 |   atllibafljazzer: 10/10 |
+|          |                                                                                          | ImagingTwoFDP:          | ImagingTwoFDP:          | ImagingTwoFDP:           |
+|          |                                                                                          |   atljazzer: 0/9        |   atljazzer: 0/9        |   atljazzer: 9/9         |
+|          |                                                                                          |   atllibafljazzer: 0/8  |   atllibafljazzer: 0/8  |   atllibafljazzer: 8/8   |
++----------+------------------------------------------------------------------------------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 3
+Exploited: 1 aixcc/jvm/imaging ImagingOne ImagingOneFDP
+In-the-wild: 2 aixcc/jvm/imaging ImagingOne ImagingOneFDP ImagingTwo ImagingTwoFDP
+
+CPV Analysis Results for aixcc/jvm/jackson-databind:
+================================================================================
++----------+------------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type               | Exploited               | Reached                 | In-the-wild              |
++==========+========================+=========================+=========================+==========================+
+| cpv_0    | Unsafe Deserialization | JacksonDatabindOne:     | JacksonDatabindOne:     | JacksonDatabindOne:      |
+|          |                        |   atljazzer: 1/18       |   atljazzer: 0/18       |   atljazzer: 17/18       |
+|          |                        |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 18/18 |
+|          |                        | JacksonDatabindOneFDP:  | JacksonDatabindOneFDP:  | JacksonDatabindOneFDP:   |
+|          |                        |   atljazzer: 1/17       |   atljazzer: 0/17       |   atljazzer: 16/17       |
+|          |                        |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 17/17 |
++----------+------------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/jackson-databind JacksonDatabindOne JacksonDatabindOneFDP
+
+CPV Analysis Results for aixcc/jvm/jakarta-mail-api:
+================================================================================
++----------+-------------------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type                      | Exploited               | Reached                 | In-the-wild              |
++==========+===============================+=========================+=========================+==========================+
+| cpv_0    | XML External Entity Reference | MailApiHarnessOne:      | MailApiHarnessOne:      | MailApiHarnessOne:       |
+|          |                               |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                               |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 17/17 |
+|          |                               | MailApiHarnessOneFDP:   | MailApiHarnessOneFDP:   | MailApiHarnessOneFDP:    |
+|          |                               |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                               |   atllibafljazzer: 0/19 |   atllibafljazzer: 0/19 |   atllibafljazzer: 19/19 |
++----------+-------------------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/jakarta-mail-api MailApiHarnessOne MailApiHarnessOneFDP
+
+CPV Analysis Results for aixcc/jvm/jenkins:
+================================================================================
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| CPV ID   | CPV Type                                                                      | Exploited              | Reached                | In-the-wild            |
++==========+===============================================================================+========================+========================+========================+
+| cpv_0    | OS Command Injection                                                          | JenkinsTwo:            | JenkinsTwo:            | JenkinsTwo:            |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsTwoFDP:         | JenkinsTwoFDP:         | JenkinsTwoFDP:         |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_1    | Script Engine Injection                                                       | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 5/5       |   atljazzer: 0/5       |   atljazzer: 0/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 4/5       |   atljazzer: 0/5       |   atljazzer: 1/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_10   | Process Control                                                               | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_11   | RegexInjection                                                                | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_12   | Server Side Request Forgery (SSRF)                                            | JenkinsFour:           | JenkinsFour:           | JenkinsFour:           |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_13   | Unsafe Deserialization                                                        | JenkinsFour:           | JenkinsFour:           | JenkinsFour:           |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_14   | Unsafe Deserialization                                                        | JenkinsFive:           | JenkinsFive:           | JenkinsFive:           |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsFiveFDP:        | JenkinsFiveFDP:        | JenkinsFiveFDP:        |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_2    | Path Traversal                                                                | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_3    | Server Side Request Forgery (SSRF)                                            | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_4    | Deserialization                                                               | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_5    | SQL Injection                                                                 | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 3/5       |   atljazzer: 2/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |   atllibafljazzer: 0/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 1/5       |   atljazzer: 4/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 4/5 |   atllibafljazzer: 1/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_6    | LDAP Injection (Deserialization of Untrusted Data, JNDI+LDAP)                 | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_7    | Unsafe Reflection                                                             | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_8    | SQL Injection (Improper Neutralization of Special Elements in an SQL Command) | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 5/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+| cpv_9    | XPath Injection (Improper Neutralization of Data within XPath Expressions)    | JenkinsThree:          | JenkinsThree:          | JenkinsThree:          |
+|          |                                                                               |   atljazzer: 3/5       |   atljazzer: 1/5       |   atljazzer: 1/5       |
+|          |                                                                               |   atllibafljazzer: 5/5 |   atllibafljazzer: 0/5 |   atllibafljazzer: 0/5 |
+|          |                                                                               | JenkinsThreeFDP:       | JenkinsThreeFDP:       | JenkinsThreeFDP:       |
+|          |                                                                               |   atljazzer: 0/5       |   atljazzer: 0/5       |   atljazzer: 5/5       |
+|          |                                                                               |   atllibafljazzer: 4/5 |   atllibafljazzer: 1/5 |   atllibafljazzer: 0/5 |
++----------+-------------------------------------------------------------------------------+------------------------+------------------------+------------------------+
+
+Summary:
+Total-CPVs: 15
+Exploited: 2 aixcc/jvm/jenkins JenkinsThree JenkinsThreeFDP
+Reached: 1 aixcc/jvm/jenkins JenkinsThree JenkinsThreeFDP
+In-the-wild: 12 aixcc/jvm/jenkins JenkinsFive JenkinsFiveFDP JenkinsFour JenkinsThree JenkinsThreeFDP JenkinsTwo JenkinsTwoFDP
+
+CPV Analysis Results for aixcc/jvm/kylin:
+================================================================================
++----------+----------------------+-------------------------+--------------------------+-------------------------+
+| CPV ID   | CPV Type             | Exploited               | Reached                  | In-the-wild             |
++==========+======================+=========================+==========================+=========================+
+| cpv_0    | OS Command Injection | KylinOne:               | KylinOne:                | KylinOne:               |
+|          |                      |   atljazzer: 0/35       |   atljazzer: 1/35        |   atljazzer: 34/35      |
+|          |                      |   atllibafljazzer: 3/35 |   atllibafljazzer: 26/35 |   atllibafljazzer: 6/35 |
++----------+----------------------+-------------------------+--------------------------+-------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/kylin KylinOne
+
+CPV Analysis Results for aixcc/jvm/netty:
+================================================================================
++----------+----------------------+---------------------------+---------------------------+---------------------------+
+| CPV ID   | CPV Type             | Exploited                 | Reached                   | In-the-wild               |
++==========+======================+===========================+===========================+===========================+
+| cpv_1    | OS Command Injection | HttpRequestDecoderFuzzer: | HttpRequestDecoderFuzzer: | HttpRequestDecoderFuzzer: |
+|          |                      |   atljazzer: 10/11        |   atljazzer: 0/11         |   atljazzer: 1/11         |
+|          |                      |   atllibafljazzer: 10/13  |   atllibafljazzer: 0/13   |   atllibafljazzer: 3/13   |
++----------+----------------------+---------------------------+---------------------------+---------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/netty HttpRequestDecoderFuzzer
+
+CPV Analysis Results for aixcc/jvm/olingo:
+================================================================================
++----------+------------+--------------------------+-------------------------+-------------------------+
+| CPV ID   | CPV Type   | Exploited                | Reached                 | In-the-wild             |
++==========+============+==========================+=========================+=========================+
+| cpv_0    | SSRF       | OlingoOne:               | OlingoOne:              | OlingoOne:              |
+|          |            |   atljazzer: 7/18        |   atljazzer: 0/18       |   atljazzer: 11/18      |
+|          |            |   atllibafljazzer: 18/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |
+|          |            | OlingoOneFDP:            | OlingoOneFDP:           | OlingoOneFDP:           |
+|          |            |   atljazzer: 17/17       |   atljazzer: 0/17       |   atljazzer: 0/17       |
+|          |            |   atllibafljazzer: 17/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |
++----------+------------+--------------------------+-------------------------+-------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/olingo OlingoOne OlingoOneFDP
+
+CPV Analysis Results for aixcc/jvm/oripa:
+================================================================================
++----------+-----------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type        | Exploited               | Reached                 | In-the-wild              |
++==========+=================+=========================+=========================+==========================+
+| cpv_0    | Deserialization | OripaOne:               | OripaOne:               | OripaOne:                |
+|          |                 |   atljazzer: 0/17       |   atljazzer: 0/17       |   atljazzer: 17/17       |
+|          |                 |   atllibafljazzer: 0/18 |   atllibafljazzer: 0/18 |   atllibafljazzer: 18/18 |
+|          |                 | OripaOneFDP:            | OripaOneFDP:            | OripaOneFDP:             |
+|          |                 |   atljazzer: 0/18       |   atljazzer: 0/18       |   atljazzer: 18/18       |
+|          |                 |   atllibafljazzer: 0/17 |   atllibafljazzer: 0/17 |   atllibafljazzer: 17/17 |
++----------+-----------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/oripa OripaOne OripaOneFDP
+
+CPV Analysis Results for aixcc/jvm/pac4j:
+================================================================================
++----------+-----------------+-------------------------+--------------------------+--------------------------+
+| CPV ID   | CPV Type        | Exploited               | Reached                  | In-the-wild              |
++==========+=================+=========================+==========================+==========================+
+| cpv_0    | Deserialization | Pac4jOne:               | Pac4jOne:                | Pac4jOne:                |
+|          |                 |   atljazzer: 0/35       |   atljazzer: 35/35       |   atljazzer: 0/35        |
+|          |                 |   atllibafljazzer: 0/35 |   atllibafljazzer: 13/35 |   atllibafljazzer: 22/35 |
++----------+-----------------+-------------------------+--------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+Reached: 1 aixcc/jvm/pac4j Pac4jOne
+
+CPV Analysis Results for aixcc/jvm/r1-zookeeper:
+================================================================================
++----------+----------------------+------------------------+------------------------+------------------------+
+| CPV ID   | CPV Type             | Exploited              | Reached                | In-the-wild            |
++==========+======================+========================+========================+========================+
+| cpv_2    | OS Command Injection | DataTreeFuzzer:        | DataTreeFuzzer:        | DataTreeFuzzer:        |
+|          |                      |   atljazzer: 8/8       |   atljazzer: 0/8       |   atljazzer: 0/8       |
+|          |                      |   atllibafljazzer: 7/8 |   atllibafljazzer: 0/8 |   atllibafljazzer: 1/8 |
++----------+----------------------+------------------------+------------------------+------------------------+
+| cpv_3    | File Path Traversal  | MultiProcessTxnFuzzer: | MultiProcessTxnFuzzer: | MultiProcessTxnFuzzer: |
+|          |                      |   atljazzer: 0/10      |   atljazzer: 10/10     |   atljazzer: 0/10      |
+|          |                      |   atllibafljazzer: 0/9 |   atllibafljazzer: 4/9 |   atllibafljazzer: 5/9 |
++----------+----------------------+------------------------+------------------------+------------------------+
+| cpv_4    | Process Control      | MultiProcessTxnFuzzer: | MultiProcessTxnFuzzer: | MultiProcessTxnFuzzer: |
+|          |                      |   atljazzer: 0/10      |   atljazzer: 10/10     |   atljazzer: 0/10      |
+|          |                      |   atllibafljazzer: 0/9 |   atllibafljazzer: 9/9 |   atllibafljazzer: 0/9 |
++----------+----------------------+------------------------+------------------------+------------------------+
+
+Summary:
+Total-CPVs: 3
+Exploited: 1 aixcc/jvm/r1-zookeeper DataTreeFuzzer
+Reached: 2 aixcc/jvm/r1-zookeeper MultiProcessTxnFuzzer
+
+CPV Analysis Results for aixcc/jvm/r2-apache-commons-compress:
+================================================================================
++----------+------------------------+--------------------------+-------------------------+-------------------------+
+| CPV ID   | CPV Type               | Exploited                | Reached                 | In-the-wild             |
++==========+========================+==========================+=========================+=========================+
+| cpv_0    | SSRF                   | CompressZipFuzzer:       | CompressZipFuzzer:      | CompressZipFuzzer:      |
+|          |                        |   atljazzer: 0/9         |   atljazzer: 0/9        |   atljazzer: 9/9        |
+|          |                        |   atllibafljazzer: 0/8   |   atllibafljazzer: 0/8  |   atllibafljazzer: 8/8  |
++----------+------------------------+--------------------------+-------------------------+-------------------------+
+| cpv_1    | OS Command Injection   | CompressorGzipFuzzer:    | CompressorGzipFuzzer:   | CompressorGzipFuzzer:   |
+|          |                        |   atljazzer: 8/8         |   atljazzer: 0/8        |   atljazzer: 0/8        |
+|          |                        |   atllibafljazzer: 10/10 |   atllibafljazzer: 0/10 |   atllibafljazzer: 0/10 |
++----------+------------------------+--------------------------+-------------------------+-------------------------+
+| cpv_2    | Unsafe Deserialization | CompressTarFuzzer:       | CompressTarFuzzer:      | CompressTarFuzzer:      |
+|          |                        |   atljazzer: 0/10        |   atljazzer: 0/10       |   atljazzer: 10/10      |
+|          |                        |   atllibafljazzer: 0/8   |   atllibafljazzer: 0/8  |   atllibafljazzer: 8/8  |
++----------+------------------------+--------------------------+-------------------------+-------------------------+
+| cpv_3    | SSRF                   | ExpanderFuzzer:          | ExpanderFuzzer:         | ExpanderFuzzer:         |
+|          |                        |   atljazzer: 0/8         |   atljazzer: 8/8        |   atljazzer: 0/8        |
+|          |                        |   atllibafljazzer: 0/9   |   atllibafljazzer: 9/9  |   atllibafljazzer: 0/9  |
++----------+------------------------+--------------------------+-------------------------+-------------------------+
+
+Summary:
+Total-CPVs: 4
+Exploited: 1 aixcc/jvm/r2-apache-commons-compress CompressorGzipFuzzer
+Reached: 1 aixcc/jvm/r2-apache-commons-compress ExpanderFuzzer
+In-the-wild: 2 aixcc/jvm/r2-apache-commons-compress CompressTarFuzzer CompressZipFuzzer
+
+CPV Analysis Results for aixcc/jvm/r2-zookeeper:
+================================================================================
++----------+-----------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type              | Exploited               | Reached                 | In-the-wild              |
++==========+=======================+=========================+=========================+==========================+
+| cpv_0    | Remote Code Execution | MultiProcessTxnFuzzer:  | MultiProcessTxnFuzzer:  | MultiProcessTxnFuzzer:   |
+|          |                       |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                       |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+-----------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/r2-zookeeper MultiProcessTxnFuzzer
+
+CPV Analysis Results for aixcc/jvm/r3_5-jackson-databind:
+================================================================================
++----------+------------+--------------------------+--------------------------+--------------------------+
+| CPV ID   | CPV Type   | Exploited                | Reached                  | In-the-wild              |
++==========+============+==========================+==========================+==========================+
+| cpv_0    | SSRF       | AdaLObjectReader3Fuzzer: | AdaLObjectReader3Fuzzer: | AdaLObjectReader3Fuzzer: |
+|          |            |   atljazzer: 0/18        |   atljazzer: 0/18        |   atljazzer: 18/18       |
+|          |            |   atllibafljazzer: 0/17  |   atllibafljazzer: 0/17  |   atllibafljazzer: 17/17 |
++----------+------------+--------------------------+--------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/r3_5-jackson-databind AdaLObjectReader3Fuzzer
+
+CPV Analysis Results for aixcc/jvm/r3-tika:
+================================================================================
++----------+------------------------+-------------------------+-------------------------+-------------------------+
+| CPV ID   | CPV Type               | Exploited               | Reached                 | In-the-wild             |
++==========+========================+=========================+=========================+=========================+
+| cpv_0    | SSRF                   | XliffParserFuzzer:      | XliffParserFuzzer:      | XliffParserFuzzer:      |
+|          |                        |   atljazzer: 0/7        |   atljazzer: 0/7        |   atljazzer: 7/7        |
+|          |                        |   atllibafljazzer: 0/7  |   atllibafljazzer: 0/7  |   atllibafljazzer: 7/7  |
++----------+------------------------+-------------------------+-------------------------+-------------------------+
+| cpv_1    | Unsafe Deserialization | RTFParserFuzzer:        | RTFParserFuzzer:        | RTFParserFuzzer:        |
+|          |                        |   atljazzer: 0/7        |   atljazzer: 0/7        |   atljazzer: 7/7        |
+|          |                        |   atllibafljazzer: 0/7  |   atllibafljazzer: 0/7  |   atllibafljazzer: 7/7  |
++----------+------------------------+-------------------------+-------------------------+-------------------------+
+| cpv_2    | File Path Traversal    | TikaAppUntarringFuzzer: | TikaAppUntarringFuzzer: | TikaAppUntarringFuzzer: |
+|          |                        |   atljazzer: 0/7        |   atljazzer: 0/7        |   atljazzer: 7/7        |
+|          |                        |   atllibafljazzer: 0/7  |   atllibafljazzer: 0/7  |   atllibafljazzer: 7/7  |
++----------+------------------------+-------------------------+-------------------------+-------------------------+
+| cpv_3    | SSRF                   | TextAndCSVParserFuzzer: | TextAndCSVParserFuzzer: | TextAndCSVParserFuzzer: |
+|          |                        |   atljazzer: 5/7        |   atljazzer: 0/7        |   atljazzer: 2/7        |
+|          |                        |   atllibafljazzer: 0/7  |   atllibafljazzer: 0/7  |   atllibafljazzer: 7/7  |
++----------+------------------------+-------------------------+-------------------------+-------------------------+
+| cpv_4    | OS Command Injection   | TikaAppUnpackerFuzzer:  | TikaAppUnpackerFuzzer:  | TikaAppUnpackerFuzzer:  |
+|          |                        |   atljazzer: 0/7        |   atljazzer: 0/7        |   atljazzer: 7/7        |
+|          |                        |   atllibafljazzer: 0/7  |   atllibafljazzer: 0/7  |   atllibafljazzer: 7/7  |
++----------+------------------------+-------------------------+-------------------------+-------------------------+
+
+Summary:
+Total-CPVs: 5
+Exploited: 1 aixcc/jvm/r3-tika TextAndCSVParserFuzzer
+In-the-wild: 4 aixcc/jvm/r3-tika RTFParserFuzzer TikaAppUnpackerFuzzer TikaAppUntarringFuzzer XliffParserFuzzer
+
+CPV Analysis Results for aixcc/jvm/r3-tika-delta-01:
+================================================================================
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type             | Exploited               | Reached                 | In-the-wild              |
++==========+======================+=========================+=========================+==========================+
+| cpv_0    | OS Command Injection | HtmlParserFuzzer:       | HtmlParserFuzzer:       | HtmlParserFuzzer:        |
+|          |                      |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                      |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/r3-tika-delta-01 HtmlParserFuzzer
+
+CPV Analysis Results for aixcc/jvm/r3-tika-delta-02:
+================================================================================
++----------+------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type   | Exploited               | Reached                 | In-the-wild              |
++==========+============+=========================+=========================+==========================+
+| cpv_0    | SSRF       | M3U8ParserFuzzer:       | M3U8ParserFuzzer:       | M3U8ParserFuzzer:        |
+|          |            |   atljazzer: 35/35      |   atljazzer: 0/35       |   atljazzer: 0/35        |
+|          |            |   atllibafljazzer: 1/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 34/35 |
++----------+------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/r3-tika-delta-02 M3U8ParserFuzzer
+
+CPV Analysis Results for aixcc/jvm/r3-tika-delta-03:
+================================================================================
++----------+------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type   | Exploited               | Reached                 | In-the-wild              |
++==========+============+=========================+=========================+==========================+
+| cpv_0    | SSRF       | ThreeDXMLParserFuzzer:  | ThreeDXMLParserFuzzer:  | ThreeDXMLParserFuzzer:   |
+|          |            |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |            |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/r3-tika-delta-03 ThreeDXMLParserFuzzer
+
+CPV Analysis Results for aixcc/jvm/r3-tika-delta-04:
+================================================================================
++----------+---------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type            | Exploited               | Reached                 | In-the-wild              |
++==========+=====================+=========================+=========================+==========================+
+| cpv_0    | File Path Traversal | TikaAppRUnpackerFuzzer: | TikaAppRUnpackerFuzzer: | TikaAppRUnpackerFuzzer:  |
+|          |                     |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                     |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+---------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/r3-tika-delta-04 TikaAppRUnpackerFuzzer
+
+CPV Analysis Results for aixcc/jvm/r3-tika-delta-05:
+================================================================================
++----------+---------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type            | Exploited               | Reached                 | In-the-wild              |
++==========+=====================+=========================+=========================+==========================+
+| cpv_0    | File Path Traversal | TikaAppUnpackerFuzzer:  | TikaAppUnpackerFuzzer:  | TikaAppUnpackerFuzzer:   |
+|          |                     |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                     |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+---------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/r3-tika-delta-05 TikaAppUnpackerFuzzer
+
+CPV Analysis Results for aixcc/jvm/rdf4j:
+================================================================================
++----------+-------------------------------+-------------------------+--------------------------+--------------------------+
+| CPV ID   | CPV Type                      | Exploited               | Reached                  | In-the-wild              |
++==========+===============================+=========================+==========================+==========================+
+| cpv_0    | XML External Entity Reference | Rdf4jOne:               | Rdf4jOne:                | Rdf4jOne:                |
+|          |                               |   atljazzer: 0/35       |   atljazzer: 0/35        |   atljazzer: 35/35       |
+|          |                               |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35  |   atllibafljazzer: 35/35 |
++----------+-------------------------------+-------------------------+--------------------------+--------------------------+
+| cpv_1    | XML External Entity Reference | Rdf4jOne:               | Rdf4jOne:                | Rdf4jOne:                |
+|          |                               |   atljazzer: 0/35       |   atljazzer: 0/35        |   atljazzer: 35/35       |
+|          |                               |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35  |   atllibafljazzer: 35/35 |
++----------+-------------------------------+-------------------------+--------------------------+--------------------------+
+| cpv_2    | Path Traversal                | Rdf4jOne:               | Rdf4jOne:                | Rdf4jOne:                |
+|          |                               |   atljazzer: 0/35       |   atljazzer: 35/35       |   atljazzer: 0/35        |
+|          |                               |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |   atllibafljazzer: 0/35  |
++----------+-------------------------------+-------------------------+--------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 3
+Reached: 1 aixcc/jvm/rdf4j Rdf4jOne
+In-the-wild: 2 aixcc/jvm/rdf4j Rdf4jOne
+
+CPV Analysis Results for aixcc/jvm/shiro:
+================================================================================
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type             | Exploited               | Reached                 | In-the-wild              |
++==========+======================+=========================+=========================+==========================+
+| cpv_0    | OS Command Injection | ShiroOne:               | ShiroOne:               | ShiroOne:                |
+|          |                      |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                      |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/shiro ShiroOne
+
+CPV Analysis Results for aixcc/jvm/struts:
+================================================================================
++----------+------------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type               | Exploited               | Reached                 | In-the-wild              |
++==========+========================+=========================+=========================+==========================+
+| cpv_0    | Unsafe Deserialization | StrutsOne:              | StrutsOne:              | StrutsOne:               |
+|          |                        |   atljazzer: 1/35       |   atljazzer: 0/35       |   atljazzer: 34/35       |
+|          |                        |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+------------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+Exploited: 1 aixcc/jvm/struts StrutsOne
+
+CPV Analysis Results for aixcc/jvm/tika:
+================================================================================
++----------+----------------+-------------------------+--------------------------+-------------------------+
+| CPV ID   | CPV Type       | Exploited               | Reached                  | In-the-wild             |
++==========+================+=========================+==========================+=========================+
+| cpv_0    | Path Traversal | TikaOne:                | TikaOne:                 | TikaOne:                |
+|          |                |   atljazzer: 0/35       |   atljazzer: 35/35       |   atljazzer: 0/35       |
+|          |                |   atllibafljazzer: 0/35 |   atllibafljazzer: 32/35 |   atllibafljazzer: 3/35 |
++----------+----------------+-------------------------+--------------------------+-------------------------+
+
+Summary:
+Total-CPVs: 1
+Reached: 1 aixcc/jvm/tika TikaOne
+
+CPV Analysis Results for aixcc/jvm/widoco:
+================================================================================
++----------+----------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type       | Exploited               | Reached                 | In-the-wild              |
++==========+================+=========================+=========================+==========================+
+| cpv_0    | Path Traversal | WidocoOne:              | WidocoOne:              | WidocoOne:               |
+|          |                |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+----------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/widoco WidocoOne
+
+CPV Analysis Results for aixcc/jvm/xstream:
+================================================================================
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type             | Exploited               | Reached                 | In-the-wild              |
++==========+======================+=========================+=========================+==========================+
+| cpv_2    | SSRF                 | XmlFuzzer:              | XmlFuzzer:              | XmlFuzzer:               |
+|          |                      |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                      |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+| cpv_4    | OS Command Injection | XmlFuzzer:              | XmlFuzzer:              | XmlFuzzer:               |
+|          |                      |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                      |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+----------------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 2
+In-the-wild: 2 aixcc/jvm/xstream XmlFuzzer
+
+CPV Analysis Results for aixcc/jvm/ztzip:
+================================================================================
++----------+----------------+-------------------------+-------------------------+--------------------------+
+| CPV ID   | CPV Type       | Exploited               | Reached                 | In-the-wild              |
++==========+================+=========================+=========================+==========================+
+| cpv_0    | Path Traversal | ZTZIPOne:               | ZTZIPOne:               | ZTZIPOne:                |
+|          |                |   atljazzer: 0/35       |   atljazzer: 0/35       |   atljazzer: 35/35       |
+|          |                |   atllibafljazzer: 0/35 |   atllibafljazzer: 0/35 |   atllibafljazzer: 35/35 |
++----------+----------------+-------------------------+-------------------------+--------------------------+
+
+Summary:
+Total-CPVs: 1
+In-the-wild: 1 aixcc/jvm/ztzip ZTZIPOne

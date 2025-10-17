@@ -1,0 +1,114 @@
+name: E2E Test
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: write
+
+jobs:
+  e2e_test:
+    if: >
+      github.event.issue.pull_request != null &&
+      startsWith(github.event.comment.body, '/e2e-test')
+
+    runs-on: self-hosted
+
+    steps:
+      - name: Parse comment and extract params
+        id: parse-params
+        run: |
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          PARAMS=$(echo "$COMMENT_BODY" | sed 's/\/e2e-test//g' | xargs)
+          echo "Extracted Params: $PARAMS"
+          echo "params=$PARAMS" >> $GITHUB_OUTPUT
+
+      - name: Checkout merged PR code
+        id: checkout-merge
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SSHKEY_GT_NOSGX_RSA }}
+          submodules: 'recursive'
+          lfs: false
+          fetch-depth: 0
+          ref: refs/pull/${{ github.event.issue.number }}/merge
+        continue-on-error: true
+
+      - name: Run E2E Test
+        id: run-e2e
+        if: steps.checkout-merge.outcome == 'success'
+        run: |
+          PARAMS="${{ steps.parse-params.outputs.params }}"
+          echo "Running real E2E Test with parameters: $PARAMS"
+
+          # NOTE: assume our ci server already prepared cp_root
+          rm -rf $(pwd)/cp_root
+          ln -s /data/cp_root $(pwd)/cp_root
+          ls -l $(pwd)/cp_root
+
+          read -ra PARAM_ARRAY <<< "$PARAMS"
+
+          # Export LITELLM_KEY from GitHub secrets
+          export LITELLM_KEY="${{ secrets.LITELLM_KEY }}"
+
+          # NOTE: assume our ci server already prepared cp_root
+          stdbuf -o0 bash dev.sh test "${PARAM_ARRAY[@]}" 2>&1 | tee crs-log.txt
+          if grep -q "E2E RESULT SUMMARY" crs-log.txt; then
+            sed -n '/E2E RESULT SUMMARY/,$p' crs-log.txt > e2e-summary.txt
+          else
+            echo "E2E RESULT SUMMARY not found" > e2e-summary.txt
+          fi
+
+      - name: Post summary comment to PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ github.event.issue.number }}"
+          PARAMS="${{ steps.parse-params.outputs.params }}"
+          ACTION_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if [ "${{ steps.checkout-merge.outcome }}" != 'success' ]; then
+            ICON="⚠️"
+            STATUS="failure"
+            COMMENT_BODY=$(cat <<EOF
+          ${ICON} **E2E Test Cancelled:** Cannot checkout PR merged state. You might have a merge conflict.
+
+          - **Parameters:** \`${PARAMS}\`
+          - **Logs:** [View Action Logs](${ACTION_URL})
+
+          Please resolve merge conflicts by merging/rebasing latest changes from the target branch into your PR.
+          EOF
+            )
+          else
+            STATUS="${{ job.status }}"
+            if [ "$STATUS" = "success" ]; then
+              ICON="✅"
+            else
+              ICON="❌"
+            fi
+
+            E2E_OUTPUT=$(cat e2e-summary.txt || echo "No output captured.")
+
+            COMMENT_BODY=$(cat <<EOF
+          ${ICON} **E2E Test ($STATUS)** executed!
+
+          - **Parameters:** \`${PARAMS}\`
+          - **Logs:** [View Action Logs](${ACTION_URL})
+
+          <details><summary>Test Output</summary>
+
+          \`\`\`
+          ${E2E_OUTPUT}
+          \`\`\`
+
+          </details>
+          EOF
+            )
+          fi
+
+          gh pr comment "$PR_NUMBER" --body "$COMMENT_BODY"

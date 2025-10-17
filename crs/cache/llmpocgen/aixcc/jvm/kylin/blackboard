@@ -1,0 +1,1808 @@
+{
+    "sinks": {
+        "OS Command Injection": [
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/CliCommandExecutor.java",
+                "line": 133,
+                "column": 24
+            }
+        ],
+        "Server Side Request Forgery (SSRF)": [
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinClient.java",
+                "line": 285,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinClient.java",
+                "line": 303,
+                "column": 52
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinClient.java",
+                "line": 445,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/stream-core/src/main/java/org/apache/kylin/stream/core/util/RestService.java",
+                "line": 109,
+                "column": 56
+            }
+        ],
+        "Remote Code Execution": [
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/gridtable/TrimmedCubeCodeSystem.java",
+                "line": 84,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/TrieDictionary.java",
+                "line": 473,
+                "column": 65
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/lib/impl/MetricsSystem.java",
+                "line": 153,
+                "column": 67
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ClassUtil.java",
+                "line": 75,
+                "column": 51
+            },
+            {
+                "path": "src/kylin/stream-source-kafka/src/main/java/org/apache/kylin/stream/source/kafka/KafkaSource.java",
+                "line": 286,
+                "column": 30
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/AdaptorFactory.java",
+                "line": 25,
+                "column": 52
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/TimedJsonStreamParser.java",
+                "line": 96,
+                "column": 45
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/HBaseStorage.java",
+                "line": 63,
+                "column": 53
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/StreamingParser.java",
+                "line": 79,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/InMemCuboidMapperBase.java",
+                "line": 117,
+                "column": 68
+            },
+            {
+                "path": "src/kylin/stream-core/src/main/java/org/apache/kylin/stream/core/storage/StreamingSegmentManager.java",
+                "line": 398,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/MetricsManager.java",
+                "line": 82,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/util/SQLResponseSignatureUtil.java",
+                "line": 62,
+                "column": 34
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/validation/CubeMetadataValidator.java",
+                "line": 53,
+                "column": 90
+            },
+            {
+                "path": "src/kylin/core-storage/src/main/java/org/apache/kylin/storage/gtrecord/ScannerWorker.java",
+                "line": 58,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/stream-source-kafka/src/main/java/org/apache/kylin/stream/source/kafka/TimedJsonStreamParser.java",
+                "line": 104,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/lookup/LookupProviderFactory.java",
+                "line": 52,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/cache/src/main/java/org/apache/kylin/cache/cachemanager/MemcachedCacheManager.java",
+                "line": 108,
+                "column": 74
+            },
+            {
+                "path": "src/kylin/cache/src/main/java/org/apache/kylin/cache/cachemanager/MemcachedCacheManager.java",
+                "line": 133,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/cache/src/main/java/org/apache/kylin/cache/cachemanager/MemcachedCacheManager.java",
+                "line": 156,
+                "column": 78
+            },
+            {
+                "path": "src/kylin/cache/src/main/java/org/apache/kylin/cache/memcached/MemcachedChunkingCache.java",
+                "line": 277,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/restclient/RestClient.java",
+                "line": 358,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 58,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 63,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 68,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 73,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 78,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 83,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 89,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java",
+                "line": 97,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/impl/curator/CuratorScheduler.java",
+                "line": 267,
+                "column": 72
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinClient.java",
+                "line": 309,
+                "column": 71
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinClient.java",
+                "line": 450,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/StreamingCoordinatorController.java",
+                "line": 101,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/StreamingV2Controller.java",
+                "line": 360,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/response/SQLResponse.java",
+                "line": 243,
+                "column": 103
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/TimedJsonStreamParser.java",
+                "line": 118,
+                "column": 60
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/cube/v2/CubeHBaseEndpointRPC.java",
+                "line": 201,
+                "column": 54
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/cube/v2/SegmentQueryCache.java",
+                "line": 65,
+                "column": 69
+            },
+            {
+                "path": "src/kylin/stream-source-kafka/src/main/java/org/apache/kylin/stream/source/kafka/TimedJsonStreamParser.java",
+                "line": 134,
+                "column": 60
+            }
+        ],
+        "SQL Injection": [
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/adaptor/AbstractJdbcAdaptor.java",
+                "line": 177,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/adaptor/AbstractJdbcAdaptor.java",
+                "line": 195,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/QueryCli.java",
+                "line": 63,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/adhoc/PushDownRunnerJdbcImpl.java",
+                "line": 97,
+                "column": 48
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/adhoc/PushDownRunnerJdbcImpl.java",
+                "line": 277,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/enumerator/HiveEnumerator.java",
+                "line": 70,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/pushdown/PushdownRunnerSDKImpl.java",
+                "line": 54,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/security/QueryACLTestUtil.java",
+                "line": 43,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/service/QueryService.java",
+                "line": 977,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/BeelineHiveClient.java",
+                "line": 138,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/BeelineHiveClient.java",
+                "line": 153,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/BeelineHiveClient.java",
+                "line": 194,
+                "column": 22
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/BeelineHiveClient.java",
+                "line": 196,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcTableReader.java",
+                "line": 80,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/SqlUtil.java",
+                "line": 60,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/extensible/JdbcExplorer.java",
+                "line": 173,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/extensible/JdbcTableReader.java",
+                "line": 61,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/stream-receiver/src/main/java/org/apache/kylin/stream/server/rest/service/QueryService.java",
+                "line": 132,
+                "column": 47
+            }
+        ],
+        "load arbitrary library": [
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/Bytes.java",
+                "line": 1030,
+                "column": 51
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ClassUtil.java",
+                "line": 75,
+                "column": 51
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ClassUtil.java",
+                "line": 144,
+                "column": 52
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/FlinkEntry.java",
+                "line": 36,
+                "column": 40
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/SparkEntry.java",
+                "line": 35,
+                "column": 40
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeDesc.java",
+                "line": 655,
+                "column": 67
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/validation/CubeMetadataValidator.java",
+                "line": 53,
+                "column": 90
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/gridtable/GTInfo.java",
+                "line": 349,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/lookup/LookupProviderFactory.java",
+                "line": 52,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/JoinedFlatTable.java",
+                "line": 118,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/measure/MeasureTypeFactory.java",
+                "line": 124,
+                "column": 76
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/MetricsManager.java",
+                "line": 82,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/MetricsManager.java",
+                "line": 104,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/lib/impl/MetricsSystem.java",
+                "line": 153,
+                "column": 67
+            },
+            {
+                "path": "src/kylin/core-storage/src/main/java/org/apache/kylin/storage/gtrecord/ScannerWorker.java",
+                "line": 58,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/adaptor/AbstractJdbcAdaptor.java",
+                "line": 75,
+                "column": 23
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/AdaptorFactory.java",
+                "line": 25,
+                "column": 52
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/AbstractHadoopJob.java",
+                "line": 252,
+                "column": 84
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/AbstractHadoopJob.java",
+                "line": 258,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/AbstractHadoopJob.java",
+                "line": 263,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/AbstractHadoopJob.java",
+                "line": 280,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/InMemCuboidMapperBase.java",
+                "line": 117,
+                "column": 68
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/KylinKryoRegistrator.java",
+                "line": 313,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkBuildDictionary.java",
+                "line": 135,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkBuildDictionary.java",
+                "line": 136,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkBuildDictionary.java",
+                "line": 137,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkColumnCardinality.java",
+                "line": 83,
+                "column": 60
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkColumnCardinality.java",
+                "line": 84,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkCubingByLayer.java",
+                "line": 121,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkCubingMerge.java",
+                "line": 106,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkFactDistinct.java",
+                "line": 158,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkFactDistinct.java",
+                "line": 159,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkMergingDictionary.java",
+                "line": 121,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkMergingDictionary.java",
+                "line": 122,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkUHCDictionary.java",
+                "line": 120,
+                "column": 60
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkUHCDictionary.java",
+                "line": 121,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/QueryConnection.java",
+                "line": 41,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/adhoc/JdbcPushDownConnectionManager.java",
+                "line": 48,
+                "column": 23
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/relnode/OLAPTableScan.java",
+                "line": 250,
+                "column": 55
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java",
+                "line": 373,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/init/InitialTaskManager.java",
+                "line": 56,
+                "column": 68
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/job/StorageCleanupJob.java",
+                "line": 176,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/service/CubeService.java",
+                "line": 561,
+                "column": 52
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/service/QueryService.java",
+                "line": 1184,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/util/SQLResponseSignatureUtil.java",
+                "line": 62,
+                "column": 34
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/BeelineHiveClient.java",
+                "line": 93,
+                "column": 27
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/HiveMetaStoreClientFactory.java",
+                "line": 51,
+                "column": 48
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/SqlUtil.java",
+                "line": 72,
+                "column": 27
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/StreamingParser.java",
+                "line": 79,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/TimedJsonStreamParser.java",
+                "line": 96,
+                "column": 45
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/HBaseStorage.java",
+                "line": 63,
+                "column": 53
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/steps/SparkCubeHFile.java",
+                "line": 127,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/stream-core/src/main/java/org/apache/kylin/stream/core/storage/StreamingSegmentManager.java",
+                "line": 398,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/stream-receiver/src/main/java/org/apache/kylin/stream/server/rest/service/QueryService.java",
+                "line": 202,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/stream-source-kafka/src/main/java/org/apache/kylin/stream/source/kafka/KafkaSource.java",
+                "line": 286,
+                "column": 30
+            },
+            {
+                "path": "src/kylin/stream-source-kafka/src/main/java/org/apache/kylin/stream/source/kafka/TimedJsonStreamParser.java",
+                "line": 104,
+                "column": 49
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfigBase.java",
+                "line": 198,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfigBase.java",
+                "line": 591,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfigBase.java",
+                "line": 1657,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfigBase.java",
+                "line": 1669,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfigBase.java",
+                "line": 1882,
+                "column": 42
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinVersion.java",
+                "line": 53,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinVersion.java",
+                "line": 56,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/StorageURL.java",
+                "line": 70,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/livy/LivyRestBuilder.java",
+                "line": 84,
+                "column": 70
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/metrics/metrics2/KylinObjectNameFactory.java",
+                "line": 59,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/metrics/metrics2/KylinObjectNameFactory.java",
+                "line": 62,
+                "column": 46
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ResourceStore.java",
+                "line": 552,
+                "column": 88
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ResourceTool.java",
+                "line": 66,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ResourceTool.java",
+                "line": 70,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/restclient/RestClient.java",
+                "line": 102,
+                "column": 73
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/BytesUtil.java",
+                "line": 457,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ClassUtil.java",
+                "line": 107,
+                "column": 55
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ClassUtil.java",
+                "line": 136,
+                "column": 40
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/HiveCmdBuilder.java",
+                "line": 80,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/HiveCmdBuilder.java",
+                "line": 91,
+                "column": 53
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ServerMode.java",
+                "line": 68,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ZKUtil.java",
+                "line": 218,
+                "column": 74
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/CubeManager.java",
+                "line": 1298,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/CubeSegment.java",
+                "line": 172,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeDesc.java",
+                "line": 583,
+                "column": 69
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeDesc.java",
+                "line": 1346,
+                "column": 72
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeJoinedFlatTableDesc.java",
+                "line": 84,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/AppendTrieDictionary.java",
+                "line": 258,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/AppendTrieDictionary.java",
+                "line": 262,
+                "column": 28
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/global/GlobalDictHDFSStore.java",
+                "line": 250,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/global/GlobalDictHDFSStore.java",
+                "line": 269,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/execution/ExecutableManager.java",
+                "line": 126,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/execution/ExecutableManager.java",
+                "line": 145,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/execution/ExecutableManager.java",
+                "line": 155,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/execution/ExecutableManager.java",
+                "line": 173,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/impl/curator/CuratorScheduler.java",
+                "line": 163,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/util/FlatTableSqlQuoteUtils.java",
+                "line": 210,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/util/FlatTableSqlQuoteUtils.java",
+                "line": 224,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/dimension/DimensionEncoding.java",
+                "line": 55,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/TableMetadataManager.java",
+                "line": 487,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/badquery/BadQueryHistoryManager.java",
+                "line": 90,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/badquery/BadQueryHistoryManager.java",
+                "line": 95,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/datatype/DataType.java",
+                "line": 59,
+                "column": 17
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/datatype/DataType.java",
+                "line": 69,
+                "column": 17
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/datatype/DataType.java",
+                "line": 203,
+                "column": 45
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/filter/function/LikeMatchers.java",
+                "line": 42,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/model/FunctionDesc.java",
+                "line": 159,
+                "column": 75
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/model/FunctionDesc.java",
+                "line": 161,
+                "column": 60
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/model/PartitionDesc.java",
+                "line": 381,
+                "column": 89
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/model/TableDesc.java",
+                "line": 396,
+                "column": 39
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/model/TableExtDesc.java",
+                "line": 147,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/model/tool/CalciteParser.java",
+                "line": 142,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/source/adhocquery/HivePushDownConverter.java",
+                "line": 182,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/source/datagen/ColumnGenConfig.java",
+                "line": 68,
+                "column": 77
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/source/datagen/ColumnGenConfig.java",
+                "line": 112,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/source/datagen/ColumnGenConfig.java",
+                "line": 130,
+                "column": 90
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/source/datagen/ColumnGenConfig.java",
+                "line": 136,
+                "column": 90
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/source/datagen/ModelDataGenerator.java",
+                "line": 281,
+                "column": 34
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/source/datagen/Util.java",
+                "line": 34,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/lib/ActiveReservoirReporter.java",
+                "line": 41,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/JdbcConnector.java",
+                "line": 122,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/JdbcConnector.java",
+                "line": 125,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/conv/SqlConverter.java",
+                "line": 45,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/conv/SqlConverter.java",
+                "line": 50,
+                "column": 46
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/conv/SqlConverter.java",
+                "line": 51,
+                "column": 46
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/def/TypeDef.java",
+                "line": 101,
+                "column": 78
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/def/TypeDef.java",
+                "line": 101,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/engine-flink/src/main/java/org/apache/kylin/engine/flink/FlinkExecutable.java",
+                "line": 202,
+                "column": 63
+            },
+            {
+                "path": "src/kylin/engine-flink/src/main/java/org/apache/kylin/engine/flink/FlinkExecutable.java",
+                "line": 434,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/AbstractHadoopJob.java",
+                "line": 305,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/HadoopShellExecutable.java",
+                "line": 58,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/MapReduceExecutable.java",
+                "line": 93,
+                "column": 105
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/MapReduceExecutable.java",
+                "line": 130,
+                "column": 110
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/MapReduceExecutable.java",
+                "line": 279,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/ConvergeCuboidDataPartitioner.java",
+                "line": 56,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/UpdateDictionaryStep.java",
+                "line": 114,
+                "column": 99
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/UpdateDictionaryStep.java",
+                "line": 114,
+                "column": 121
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/filter/UHCDictPathFilter.java",
+                "line": 37,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkExecutable.java",
+                "line": 537,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinConnection.java",
+                "line": 57,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinMeta.java",
+                "line": 289,
+                "column": 32
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/schema/OLAPTable.java",
+                "line": 173,
+                "column": 51
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/schema/OLAPTable.java",
+                "line": 189,
+                "column": 61
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/KeywordDefaultDirtyHack.java",
+                "line": 31,
+                "column": 30
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/QueryUtil.java",
+                "line": 88,
+                "column": 30
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/QueryUtil.java",
+                "line": 89,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/QueryUtil.java",
+                "line": 105,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/QueryUtil.java",
+                "line": 193,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/QueryUtil.java",
+                "line": 196,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/QueryUtil.java",
+                "line": 221,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/TempStatementUtil.java",
+                "line": 81,
+                "column": 26
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/TempStatementUtil.java",
+                "line": 82,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/TempStatementUtil.java",
+                "line": 83,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/TempStatementUtil.java",
+                "line": 84,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/TempStatementUtil.java",
+                "line": 90,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/TempStatementUtil.java",
+                "line": 91,
+                "column": 48
+            },
+            {
+                "path": "src/kylin/query/src/main/java/org/apache/kylin/query/util/TempStatementUtil.java",
+                "line": 153,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/ServiceDiscoveryStateController.java",
+                "line": 71,
+                "column": 51
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/UserController.java",
+                "line": 130,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/UserController.java",
+                "line": 131,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/job/HybridCubeCLI.java",
+                "line": 134,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/job/StorageCleanupJob.java",
+                "line": 372,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/request/SQLRequest.java",
+                "line": 108,
+                "column": 54
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/util/TableauInterceptor.java",
+                "line": 88,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/util/TableauInterceptor.java",
+                "line": 98,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/util/ValidateUtil.java",
+                "line": 80,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/server/src/main/java/org/apache/kylin/rest/DebugTomcat.java",
+                "line": 102,
+                "column": 41
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/CLIHiveClient.java",
+                "line": 140,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/CLIHiveClient.java",
+                "line": 153,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/HiveInputBase.java",
+                "line": 387,
+                "column": 55
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcExplorer.java",
+                "line": 251,
+                "column": 104
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcHiveInputBase.java",
+                "line": 302,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcHiveInputBase.java",
+                "line": 303,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcHiveInputBase.java",
+                "line": 445,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcHiveInputBase.java",
+                "line": 460,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcHiveInputBase.java",
+                "line": 476,
+                "column": 36
+            },
+            {
+                "path": "src/kylin/source-jdbc/src/main/java/org/apache/kylin/source/jdbc/JdbcHiveInputBase.java",
+                "line": 490,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/StreamingParser.java",
+                "line": 92,
+                "column": 55
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/StreamingParser.java",
+                "line": 94,
+                "column": 45
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/TimedJsonStreamParser.java",
+                "line": 154,
+                "column": 64
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/TimedJsonStreamParser.java",
+                "line": 157,
+                "column": 64
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/config/KafkaConsumerProperties.java",
+                "line": 85,
+                "column": 525
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/model/StreamCubeFactTableDesc.java",
+                "line": 130,
+                "column": 52
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/steps/HFileOutputFormat3.java",
+                "line": 510,
+                "column": 48
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/steps/HFileOutputFormat3.java",
+                "line": 511,
+                "column": 53
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/util/CubeMigrationCheckCLI.java",
+                "line": 171,
+                "column": 54
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/util/CubeMigrationCheckCLI.java",
+                "line": 188,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/util/CubeMigrationCheckCLI.java",
+                "line": 199,
+                "column": 53
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/util/CubeMigrationCheckCLI.java",
+                "line": 209,
+                "column": 54
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/util/OrphanHBaseCleanJob.java",
+                "line": 122,
+                "column": 92
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/util/StorageCleanupJob.java",
+                "line": 300,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/stream-core/src/main/java/org/apache/kylin/stream/core/storage/columnar/FragmentId.java",
+                "line": 27,
+                "column": 42
+            },
+            {
+                "path": "src/kylin/stream-receiver/src/main/java/org/apache/kylin/stream/server/rest/util/QueryUtil.java",
+                "line": 110,
+                "column": 46
+            },
+            {
+                "path": "src/kylin/stream-receiver/src/main/java/org/apache/kylin/stream/server/rest/util/QueryUtil.java",
+                "line": 171,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/stream-receiver/src/main/java/org/apache/kylin/stream/server/rest/util/QueryUtil.java",
+                "line": 201,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/stream-receiver/src/main/java/org/apache/kylin/stream/server/rest/util/QueryUtil.java",
+                "line": 204,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/stream-source-kafka/src/main/java/org/apache/kylin/stream/source/kafka/TimedJsonStreamParser.java",
+                "line": 95,
+                "column": 84
+            },
+            {
+                "path": "src/kylin/tool/src/main/java/org/apache/kylin/tool/common/HadoopConfExtractor.java",
+                "line": 42,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/tool/src/main/java/org/apache/kylin/tool/common/HadoopConfExtractor.java",
+                "line": 84,
+                "column": 43
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java",
+                "line": 478,
+                "column": 23
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java",
+                "line": 478,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ClassUtil.java",
+                "line": 53,
+                "column": 17
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ClassUtil.java",
+                "line": 53,
+                "column": 31
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ZKUtil.java",
+                "line": 209,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/ZKUtil.java",
+                "line": 209,
+                "column": 99
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeDesc.java",
+                "line": 657,
+                "column": 17
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeDesc.java",
+                "line": 657,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeDesc.java",
+                "line": 660,
+                "column": 17
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/model/CubeDesc.java",
+                "line": 660,
+                "column": 65
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/BuiltInFunctionTransformer.java",
+                "line": 153,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/core-dictionary/src/main/java/org/apache/kylin/dict/BuiltInFunctionTransformer.java",
+                "line": 153,
+                "column": 100
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/JoinedFlatTable.java",
+                "line": 121,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/core-job/src/main/java/org/apache/kylin/job/JoinedFlatTable.java",
+                "line": 121,
+                "column": 47
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/filter/BuiltInFunctionTupleFilter.java",
+                "line": 105,
+                "column": 16
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/filter/BuiltInFunctionTupleFilter.java",
+                "line": 105,
+                "column": 30
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/filter/BuiltInFunctionTupleFilter.java",
+                "line": 142,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/filter/BuiltInFunctionTupleFilter.java",
+                "line": 142,
+                "column": 91
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/realization/RealizationRegistry.java",
+                "line": 67,
+                "column": 65
+            },
+            {
+                "path": "src/kylin/core-metadata/src/main/java/org/apache/kylin/metadata/realization/RealizationRegistry.java",
+                "line": 67,
+                "column": 120
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/MetricsManager.java",
+                "line": 130,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/core-metrics/src/main/java/org/apache/kylin/metrics/MetricsManager.java",
+                "line": 130,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/core-storage/src/main/java/org/apache/kylin/storage/gtrecord/SortedIteratorMergerWithLimit.java",
+                "line": 101,
+                "column": 35
+            },
+            {
+                "path": "src/kylin/core-storage/src/main/java/org/apache/kylin/storage/gtrecord/SortedIteratorMergerWithLimit.java",
+                "line": 101,
+                "column": 80
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/job/StorageCleanupJob.java",
+                "line": 179,
+                "column": 53
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/job/StorageCleanupJob.java",
+                "line": 179,
+                "column": 83
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/security/PasswordPlaceholderConfigurer.java",
+                "line": 68,
+                "column": 37
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/security/PasswordPlaceholderConfigurer.java",
+                "line": 68,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/service/CubeService.java",
+                "line": 561,
+                "column": 38
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/service/CubeService.java",
+                "line": 563,
+                "column": 33
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/HiveMetaStoreClientFactory.java",
+                "line": 53,
+                "column": 54
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/HiveMetaStoreClientFactory.java",
+                "line": 53,
+                "column": 90
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/HiveMetaStoreClientFactory.java",
+                "line": 53,
+                "column": 96
+            },
+            {
+                "path": "src/kylin/tool/src/main/java/org/apache/kylin/tool/DiagnosisInfoCLI.java",
+                "line": 196,
+                "column": 25
+            },
+            {
+                "path": "src/kylin/tool/src/main/java/org/apache/kylin/tool/DiagnosisInfoCLI.java",
+                "line": 196,
+                "column": 40
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/inmemcubing/ConcurrentDiskStore.java",
+                "line": 326,
+                "column": 45
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/inmemcubing/ConcurrentDiskStore.java",
+                "line": 329,
+                "column": 45
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/inmemcubing/ConcurrentDiskStore.java",
+                "line": 340,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/inmemcubing/MemDiskStore.java",
+                "line": 641,
+                "column": 48
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/inmemcubing/MemDiskStore.java",
+                "line": 666,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/inmemcubing/MemDiskStore.java",
+                "line": 670,
+                "column": 49
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java",
+                "line": 244,
+                "column": 54
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java",
+                "line": 395,
+                "column": 63
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java",
+                "line": 401,
+                "column": 67
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java",
+                "line": 555,
+                "column": 58
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/FileResourceStore.java",
+                "line": 84,
+                "column": 112
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/FileResourceStore.java",
+                "line": 111,
+                "column": 83
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/FileResourceStore.java",
+                "line": 136,
+                "column": 62
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/SSHClient.java",
+                "line": 123,
+                "column": 39
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/SSHClient.java",
+                "line": 216,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/VersionUtil.java",
+                "line": 41,
+                "column": 63
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/cube/cli/DumpDictionaryCLI.java",
+                "line": 52,
+                "column": 95
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/gridtable/GTAggregateScanner.java",
+                "line": 683,
+                "column": 71
+            },
+            {
+                "path": "src/kylin/core-cube/src/main/java/org/apache/kylin/gridtable/GTAggregateScanner.java",
+                "line": 726,
+                "column": 57
+            },
+            {
+                "path": "src/kylin/datasource-sdk/src/main/java/org/apache/kylin/sdk/datasource/framework/def/DataSourceDefProvider.java",
+                "line": 79,
+                "column": 51
+            },
+            {
+                "path": "src/kylin/engine-flink/src/main/java/org/apache/kylin/engine/flink/FlinkMergingDictionary.java",
+                "line": 247,
+                "column": 84
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/CubeStatsReader.java",
+                "line": 148,
+                "column": 40
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/common/JobRelatedMetaUtil.java",
+                "line": 96,
+                "column": 61
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/MergeDictionaryMapper.java",
+                "line": 147,
+                "column": 59
+            },
+            {
+                "path": "src/kylin/engine-mr/src/main/java/org/apache/kylin/engine/mr/steps/MergeStatisticsStep.java",
+                "line": 88,
+                "column": 59
+            },
+            {
+                "path": "src/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkMergingDictionary.java",
+                "line": 250,
+                "column": 88
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinClient.java",
+                "line": 98,
+                "column": 67
+            },
+            {
+                "path": "src/kylin/jdbc/src/main/java/org/apache/kylin/jdbc/KylinClient.java",
+                "line": 105,
+                "column": 67
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/BasicController.java",
+                "line": 122,
+                "column": 64
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/util/ControllerSplitter.java",
+                "line": 51,
+                "column": 50
+            },
+            {
+                "path": "src/kylin/server-base/src/main/java/org/apache/kylin/rest/util/ControllerSplitter.java",
+                "line": 71,
+                "column": 56
+            },
+            {
+                "path": "src/kylin/source-hive/src/main/java/org/apache/kylin/source/hive/BeelineHiveClient.java",
+                "line": 72,
+                "column": 87
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/config/KafkaConsumerProperties.java",
+                "line": 108,
+                "column": 55
+            },
+            {
+                "path": "src/kylin/source-kafka/src/main/java/org/apache/kylin/source/kafka/config/KafkaConsumerProperties.java",
+                "line": 115,
+                "column": 64
+            },
+            {
+                "path": "src/kylin/storage-hbase/src/main/java/org/apache/kylin/storage/hbase/util/DeployCoprocessorCLI.java",
+                "line": 485,
+                "column": 42
+            },
+            {
+                "path": "src/kylin/stream-core/src/main/java/org/apache/kylin/stream/core/storage/columnar/ColumnarSegmentStore.java",
+                "line": 346,
+                "column": 43
+            },
+            {
+                "path": "src/kylin/stream-receiver/src/main/java/org/apache/kylin/stream/server/StreamingReceiver.java",
+                "line": 132,
+                "column": 44
+            },
+            {
+                "path": "src/kylin/tool/src/main/java/org/apache/kylin/tool/metrics/systemcube/SCCreator.java",
+                "line": 294,
+                "column": 61
+            },
+            {
+                "path": "src/kylin/tool/src/main/java/org/apache/kylin/tool/metrics/systemcube/SCCreator.java",
+                "line": 128,
+                "column": 99
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                "AAAAAQAAACEAAAARY3ViZV9uYW1lAGBqYXp6ZWA="
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n115       private static void setKylinConfig(KylinConfig mockKylinConfig) {\n116           when (mockKylinConfig.isAllowAutoMigrateCube()).thenReturn(true);\n117           when (mockKylinConfig.getAutoMigrateCubeSrcConfig()).thenReturn(\"srcConfig\");\n118           when (mockKylinConfig.getAutoMigrateCubeDestConfig()).thenReturn(\"destConfig\");\n119       }\n121       public static boolean isValidExecutableInput(String input) {\n122           if (input.length() < 3 || !input.startsWith(\"`\") || !input.endsWith(\"`\"))\n123               return false;\n124           \n125           String content = input.substring(1, input.length() - 1);\n126           if (!SAFE_PATTERN.matcher(content).matches() || content.contains(\"`\")) {\n127               return false;\n128           }\n129   \n130           int backslashCount = 0;\n131           for (char ch : content.toCharArray()) {\n132               if (ch == '\\\\') {\n133                   backslashCount++;\n134               }\n135           }\n136           return backslashCount % 2 == 0;\n137       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/CubeService.java:\n1110       @PreAuthorize(Constant.ACCESS_HAS_ROLE_ADMIN\n1111               + \" or hasPermission(#cube, 'ADMINISTRATION') or hasPermission(#cube, 'MANAGEMENT')\")\n1112       public void migrateCube(CubeInstance cube, String projectName) {\n1113           KylinConfig config = cube.getConfig();\n1114           if (!config.isAllowAutoMigrateCube()) {\n1115               throw new InternalErrorException(\"One click migration is disabled, please contact your ADMIN\");\n1116           }\n1117   \n1118           for (CubeSegment segment : cube.getSegments()) {\n1119               if (segment.getStatus() != SegmentStatusEnum.READY) {\n1120                   throw new InternalErrorException(\n1121                           \"At least one segment is not in READY state. Please check whether there are Running or Error jobs.\");\n1122               }\n1123           }\n1124   \n1125           String srcCfgUri = config.getAutoMigrateCubeSrcConfig();\n1126           String dstCfgUri = config.getAutoMigrateCubeDestConfig();\n1127   \n1128           Preconditions.checkArgument(StringUtils.isNotEmpty(srcCfgUri), \"Source configuration should not be empty.\");\n1129           Preconditions.checkArgument(StringUtils.isNotEmpty(dstCfgUri),\n1130                   \"Destination configuration should not be empty.\");\n1131   \n1132           String stringBuilder = (\"%s/bin/kylin.sh org.apache.kylin.tool.CubeMigrationCLI %s %s %s %s %s %s true true\");\n1133           String cmd = String.format(Locale.ROOT, stringBuilder, KylinConfig.getKylinHome(), srcCfgUri, dstCfgUri,\n1134                   cube.getName(), projectName, config.isAutoMigrateCubeCopyAcl(), config.isAutoMigrateCubePurge());\n1135   \n1136           logger.info(\"One click migration cmd: \" + cmd);\n1137   \n1138           CliCommandExecutor exec = new CliCommandExecutor();\n1139           PatternedLogger patternedLogger = new PatternedLogger(logger);\n1140   \n1141           try {\n1142               exec.execute(cmd, patternedLogger);\n1143           } catch (IOException e) {\n1144               throw new InternalErrorException(\"Failed to perform one-click migrating\", e);\n1145           }\n1146       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/util/CliCommandExecutor.java:\n 86       public Pair<Integer, String> execute(String command, Logger logAppender) throws IOException {\n 87           Pair<Integer, String> r;\n 88           if (remoteHost == null) {\n 89               r = runNativeCommand(command, logAppender);\n 90           } else {\n 91               r = runRemoteCommand(command, logAppender);\n 92           }\n 93   \n 94           if (r.getFirst() != 0)\n 95               throw new IOException(\"OS command error exit with return code: \" + r.getFirst() //\n 96                       + \", error message: \" + r.getSecond() + \"The command is: \\n\" + command\n 97                       + (remoteHost == null ? \"\" : \" (remoteHost:\" + remoteHost + \")\") //\n 98               );\n 99   \n100           return r;\n101       }\n119       private Pair<Integer, String> runNativeCommand(String command, Logger logAppender) throws IOException {\n120           String[] cmd = new String[3];\n121           String osName = System.getProperty(\"os.name\");\n122           if (osName.startsWith(\"Windows\")) {\n123               cmd[0] = \"cmd.exe\";\n124               cmd[1] = \"/C\";\n125           } else {\n126               cmd[0] = \"/bin/bash\";\n127               cmd[1] = \"-c\";\n128           }\n129           cmd[2] = command;\n130   \n131           ProcessBuilder builder = new ProcessBuilder(cmd);\n132           builder.redirectErrorStream(true);\n133           Process proc = builder.start();\n134   \n135           BufferedReader reader = new BufferedReader(\n136                   new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));\n137           String line;\n138           StringBuilder result = new StringBuilder();\n139           while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {\n140               result.append(line).append('\\n');\n141               if (logAppender != null) {\n142                   logAppender.log(line);\n143               }\n144           }\n145   \n146           if (Thread.interrupted()) {\n147               logger.info(\"CliCommandExecutor is interruppted by other, kill the sub process: \" + command);\n148               proc.destroy();\n149               try {\n150                   Thread.sleep(1000);\n151               } catch (InterruptedException e) {\n152                   // do nothing\n153               }\n154               return Pair.newPair(1, \"Killed\");\n155           }\n156   \n157           try {\n158               int exitCode = proc.waitFor();\n159               return Pair.newPair(exitCode, result.toString());\n160           } catch (InterruptedException e) {\n161               Thread.currentThread().interrupt();\n162               throw new IOException(e);\n163           }\n164       }\n",
+            "cost": 0.5254150000000001,
+            "harness_id": "KylinOne",
+            "sanitizer": "OS Command Injection",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/CliCommandExecutor.java:133:24",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 1
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/CubeService.java:\n1110       @PreAuthorize(Constant.ACCESS_HAS_ROLE_ADMIN\n1111               + \" or hasPermission(#cube, 'ADMINISTRATION') or hasPermission(#cube, 'MANAGEMENT')\")\n1112       public void migrateCube(CubeInstance cube, String projectName) {\n1113           KylinConfig config = cube.getConfig();\n1114           if (!config.isAllowAutoMigrateCube()) {\n1115               throw new InternalErrorException(\"One click migration is disabled, please contact your ADMIN\");\n1116           }\n1117   \n1118           for (CubeSegment segment : cube.getSegments()) {\n1119               if (segment.getStatus() != SegmentStatusEnum.READY) {\n1120                   throw new InternalErrorException(\n1121                           \"At least one segment is not in READY state. Please check whether there are Running or Error jobs.\");\n1122               }\n1123           }\n1124   \n1125           String srcCfgUri = config.getAutoMigrateCubeSrcConfig();\n1126           String dstCfgUri = config.getAutoMigrateCubeDestConfig();\n1127   \n1128           Preconditions.checkArgument(StringUtils.isNotEmpty(srcCfgUri), \"Source configuration should not be empty.\");\n1129           Preconditions.checkArgument(StringUtils.isNotEmpty(dstCfgUri),\n1130                   \"Destination configuration should not be empty.\");\n1131   \n1132           String stringBuilder = (\"%s/bin/kylin.sh org.apache.kylin.tool.CubeMigrationCLI %s %s %s %s %s %s true true\");\n1133           String cmd = String.format(Locale.ROOT, stringBuilder, KylinConfig.getKylinHome(), srcCfgUri, dstCfgUri,\n1134                   cube.getName(), projectName, config.isAutoMigrateCubeCopyAcl(), config.isAutoMigrateCubePurge());\n1135   \n1136           logger.info(\"One click migration cmd: \" + cmd);\n1137   \n1138           CliCommandExecutor exec = new CliCommandExecutor();\n1139           PatternedLogger patternedLogger = new PatternedLogger(logger);\n1140   \n1141           try {\n1142               exec.execute(cmd, patternedLogger);\n1143           } catch (IOException e) {\n1144               throw new InternalErrorException(\"Failed to perform one-click migrating\", e);\n1145           }\n1146       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/util/CliCommandExecutor.java:\n 86       public Pair<Integer, String> execute(String command, Logger logAppender) throws IOException {\n 87           Pair<Integer, String> r;\n 88           if (remoteHost == null) {\n 89               r = runNativeCommand(command, logAppender);\n 90           } else {\n 91               r = runRemoteCommand(command, logAppender);\n 92           }\n 93   \n 94           if (r.getFirst() != 0)\n 95               throw new IOException(\"OS command error exit with return code: \" + r.getFirst() //\n 96                       + \", error message: \" + r.getSecond() + \"The command is: \\n\" + command\n 97                       + (remoteHost == null ? \"\" : \" (remoteHost:\" + remoteHost + \")\") //\n 98               );\n 99   \n100           return r;\n101       }\n119       private Pair<Integer, String> runNativeCommand(String command, Logger logAppender) throws IOException {\n120           String[] cmd = new String[3];\n121           String osName = System.getProperty(\"os.name\");\n122           if (osName.startsWith(\"Windows\")) {\n123               cmd[0] = \"cmd.exe\";\n124               cmd[1] = \"/C\";\n125           } else {\n126               cmd[0] = \"/bin/bash\";\n127               cmd[1] = \"-c\";\n128           }\n129           cmd[2] = command;\n130   \n131           ProcessBuilder builder = new ProcessBuilder(cmd);\n132           builder.redirectErrorStream(true);\n133           Process proc = builder.start();\n134   \n135           BufferedReader reader = new BufferedReader(\n136                   new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));\n137           String line;\n138           StringBuilder result = new StringBuilder();\n139           while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {\n140               result.append(line).append('\\n');\n141               if (logAppender != null) {\n142                   logAppender.log(line);\n143               }\n144           }\n145   \n146           if (Thread.interrupted()) {\n147               logger.info(\"CliCommandExecutor is interruppted by other, kill the sub process: \" + command);\n148               proc.destroy();\n149               try {\n150                   Thread.sleep(1000);\n151               } catch (InterruptedException e) {\n152                   // do nothing\n153               }\n154               return Pair.newPair(1, \"Killed\");\n155           }\n156   \n157           try {\n158               int exitCode = proc.waitFor();\n159               return Pair.newPair(exitCode, result.toString());\n160           } catch (InterruptedException e) {\n161               Thread.currentThread().interrupt();\n162               throw new IOException(e);\n163           }\n164       }\n\nsrc/kylin/core-job/src/main/java/org/apache/kylin/job/common/PatternedLogger.java:\n 90       @Override\n 91       public void log(String message) {\n 92           super.log(message);\n 93           Matcher matcher;\n 94           for (Pattern pattern : patternMap.keySet()) {\n 95               matcher = pattern.matcher(message);\n 96               if (matcher.find()) {\n 97                   String key = patternMap.get(pattern).getFirst();\n 98                   int index = patternMap.get(pattern).getSecond();\n 99                   String value = matcher.group(index);\n100                   info.put(key, value);\n101                   if (listener != null) {\n102                       listener.onLogEvent(key, info);\n103                   }\n104                   break;\n105               }\n106           }\n107   \n108       }\n\nsrc/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkExecutable.java:\n302                   @Override\n303                   public void onLogEvent(String infoKey, Map<String, String> info) {\n304                       // only care three properties here\n305                       if (ExecutableConstants.SPARK_JOB_ID.equals(infoKey)\n306                               || ExecutableConstants.YARN_APP_ID.equals(infoKey)\n307                               || ExecutableConstants.YARN_APP_URL.equals(infoKey)) {\n308                           getManager().addJobInfo(getId(), info);\n309                       }\n310                   }\n\nsrc/kylin/core-job/src/main/java/org/apache/kylin/job/execution/ExecutableManager.java:\n543       public void addJobInfo(String id, Map<String, String> info) {\n544           if (Thread.currentThread().isInterrupted()) {\n545               throw new RuntimeException(\"Current thread is interrupted, aborting\");\n546           }\n547   \n548           if (info == null) {\n549               return;\n550           }\n551   \n552           // post process\n553           if (info.containsKey(MR_JOB_ID) && !info.containsKey(ExecutableConstants.YARN_APP_ID)) {\n554               String jobId = info.get(MR_JOB_ID);\n555               if (jobId.startsWith(\"job_\")) {\n556                   info.put(YARN_APP_ID, jobId.replace(\"job_\", \"application_\"));\n557               }\n558           }\n559   \n560           if ((info.containsKey(YARN_APP_ID) || info.containsKey(FLINK_JOB_ID)) && !StringUtils.isEmpty(config.getJobTrackingURLPattern())) {\n561               String pattern = config.getJobTrackingURLPattern();\n562               String jobId = info.containsKey(YARN_APP_ID) ? info.get(YARN_APP_ID) : info.get(FLINK_JOB_ID);\n563               try {\n564                   String newTrackingURL = String.format(Locale.ROOT, pattern, jobId);\n565                   info.put(YARN_APP_URL, newTrackingURL);\n566               } catch (IllegalFormatException ife) {\n567                   logger.error(\"Illegal tracking url pattern: \" + config.getJobTrackingURLPattern());\n568               }\n569           }\n570   \n571           try {\n572               ExecutableOutputPO output = executableDao.getJobOutput(id);\n573               Preconditions.checkArgument(output != null, \"there is no related output for job id:\" + id);\n574               output.getInfo().putAll(info);\n575               executableDao.updateJobOutput(output);\n576           } catch (PersistentException e) {\n577               logger.error(\"error update job info, id:\" + id + \"  info:\" + info.toString());\n578               throw new RuntimeException(e);\n579           }\n580       }\n\nsrc/kylin/core-job/src/main/java/org/apache/kylin/job/dao/ExecutableDao.java:\n248       private ExecutableOutputPO readJobOutputResource(String path) throws IOException {\n249           return store.getResource(path, JOB_OUTPUT_SERIALIZER);\n250       }\n407       public ExecutableOutputPO getJobOutput(String uuid) throws PersistentException {\n408           ExecutableOutputPO result = null;\n409           try {\n410               result = readJobOutputResource(pathOfJobOutput(uuid));\n411               if (result == null) {\n412                   result = new ExecutableOutputPO();\n413                   result.setUuid(uuid);\n414                   return result;\n415               }\n416               return result;\n417           } catch (IOException e) {\n418               logger.error(\"error get job output id:\" + uuid, e);\n419               if (e.getCause() instanceof FileNotFoundException) {\n420                   result = new ExecutableOutputPO();\n421                   result.setUuid(uuid);\n422                   result.setStatus(ExecutableState.SUCCEED.name());\n423                   return result;\n424               } else {\n425                   throw new PersistentException(e);\n426               }\n427           }\n428       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ResourceStore.java:\n284       final public <T extends RootPersistentEntity> T getResource(String resPath, Serializer<T> serializer)\n285               throws IOException {\n286           return getResource(resPath, new ContentReader<T>(serializer));\n287       }\n292       final public <T extends RootPersistentEntity> T getResource(String resPath, ContentReader<T> reader)\n293               throws IOException {\n294           resPath = norm(resPath);\n295           RawResource res = getResourceWithRetry(resPath);\n296           if (res == null)\n297               return null;\n298   \n299           return reader.readContent(res);\n300       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ContentReader.java:\n34       public T readContent(RawResource res) throws IOException {\n35           if (res == null)\n36               return null;\n37   \n38           DataInputStream din = new DataInputStream(res.content());\n39           try {\n40               T r = serializer.deserialize(din);\n41               if (r != null) {\n42                   r.setLastModified(res.lastModified());\n43               }\n44               return r;\n45           } finally {\n46               IOUtils.closeQuietly(din);\n47               IOUtils.closeQuietly(res.content());\n48           }\n49       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/JsonSerializer.java:\n44       @Override\n45       public T deserialize(DataInputStream in) throws IOException {\n46           return JsonUtil.readValue(in, clz);\n47       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java:\n 71       public static <T> T readValue(InputStream src, Class<T> valueType)\n 72               throws IOException, JsonParseException, JsonMappingException {\n 73           return mapper.readValue(src, valueType);\n 74       }\n",
+            "cost": 0.09606,
+            "harness_id": "KylinOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/JsonUtil.java:73:33",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 2
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/CubeService.java:\n1110       @PreAuthorize(Constant.ACCESS_HAS_ROLE_ADMIN\n1111               + \" or hasPermission(#cube, 'ADMINISTRATION') or hasPermission(#cube, 'MANAGEMENT')\")\n1112       public void migrateCube(CubeInstance cube, String projectName) {\n1113           KylinConfig config = cube.getConfig();\n1114           if (!config.isAllowAutoMigrateCube()) {\n1115               throw new InternalErrorException(\"One click migration is disabled, please contact your ADMIN\");\n1116           }\n1117   \n1118           for (CubeSegment segment : cube.getSegments()) {\n1119               if (segment.getStatus() != SegmentStatusEnum.READY) {\n1120                   throw new InternalErrorException(\n1121                           \"At least one segment is not in READY state. Please check whether there are Running or Error jobs.\");\n1122               }\n1123           }\n1124   \n1125           String srcCfgUri = config.getAutoMigrateCubeSrcConfig();\n1126           String dstCfgUri = config.getAutoMigrateCubeDestConfig();\n1127   \n1128           Preconditions.checkArgument(StringUtils.isNotEmpty(srcCfgUri), \"Source configuration should not be empty.\");\n1129           Preconditions.checkArgument(StringUtils.isNotEmpty(dstCfgUri),\n1130                   \"Destination configuration should not be empty.\");\n1131   \n1132           String stringBuilder = (\"%s/bin/kylin.sh org.apache.kylin.tool.CubeMigrationCLI %s %s %s %s %s %s true true\");\n1133           String cmd = String.format(Locale.ROOT, stringBuilder, KylinConfig.getKylinHome(), srcCfgUri, dstCfgUri,\n1134                   cube.getName(), projectName, config.isAutoMigrateCubeCopyAcl(), config.isAutoMigrateCubePurge());\n1135   \n1136           logger.info(\"One click migration cmd: \" + cmd);\n1137   \n1138           CliCommandExecutor exec = new CliCommandExecutor();\n1139           PatternedLogger patternedLogger = new PatternedLogger(logger);\n1140   \n1141           try {\n1142               exec.execute(cmd, patternedLogger);\n1143           } catch (IOException e) {\n1144               throw new InternalErrorException(\"Failed to perform one-click migrating\", e);\n1145           }\n1146       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/util/CliCommandExecutor.java:\n 86       public Pair<Integer, String> execute(String command, Logger logAppender) throws IOException {\n 87           Pair<Integer, String> r;\n 88           if (remoteHost == null) {\n 89               r = runNativeCommand(command, logAppender);\n 90           } else {\n 91               r = runRemoteCommand(command, logAppender);\n 92           }\n 93   \n 94           if (r.getFirst() != 0)\n 95               throw new IOException(\"OS command error exit with return code: \" + r.getFirst() //\n 96                       + \", error message: \" + r.getSecond() + \"The command is: \\n\" + command\n 97                       + (remoteHost == null ? \"\" : \" (remoteHost:\" + remoteHost + \")\") //\n 98               );\n 99   \n100           return r;\n101       }\n119       private Pair<Integer, String> runNativeCommand(String command, Logger logAppender) throws IOException {\n120           String[] cmd = new String[3];\n121           String osName = System.getProperty(\"os.name\");\n122           if (osName.startsWith(\"Windows\")) {\n123               cmd[0] = \"cmd.exe\";\n124               cmd[1] = \"/C\";\n125           } else {\n126               cmd[0] = \"/bin/bash\";\n127               cmd[1] = \"-c\";\n128           }\n129           cmd[2] = command;\n130   \n131           ProcessBuilder builder = new ProcessBuilder(cmd);\n132           builder.redirectErrorStream(true);\n133           Process proc = builder.start();\n134   \n135           BufferedReader reader = new BufferedReader(\n136                   new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));\n137           String line;\n138           StringBuilder result = new StringBuilder();\n139           while ((line = reader.readLine()) != null && !Thread.currentThread().isInterrupted()) {\n140               result.append(line).append('\\n');\n141               if (logAppender != null) {\n142                   logAppender.log(line);\n143               }\n144           }\n145   \n146           if (Thread.interrupted()) {\n147               logger.info(\"CliCommandExecutor is interruppted by other, kill the sub process: \" + command);\n148               proc.destroy();\n149               try {\n150                   Thread.sleep(1000);\n151               } catch (InterruptedException e) {\n152                   // do nothing\n153               }\n154               return Pair.newPair(1, \"Killed\");\n155           }\n156   \n157           try {\n158               int exitCode = proc.waitFor();\n159               return Pair.newPair(exitCode, result.toString());\n160           } catch (InterruptedException e) {\n161               Thread.currentThread().interrupt();\n162               throw new IOException(e);\n163           }\n164       }\n\nsrc/kylin/core-job/src/main/java/org/apache/kylin/job/common/PatternedLogger.java:\n 90       @Override\n 91       public void log(String message) {\n 92           super.log(message);\n 93           Matcher matcher;\n 94           for (Pattern pattern : patternMap.keySet()) {\n 95               matcher = pattern.matcher(message);\n 96               if (matcher.find()) {\n 97                   String key = patternMap.get(pattern).getFirst();\n 98                   int index = patternMap.get(pattern).getSecond();\n 99                   String value = matcher.group(index);\n100                   info.put(key, value);\n101                   if (listener != null) {\n102                       listener.onLogEvent(key, info);\n103                   }\n104                   break;\n105               }\n106           }\n107   \n108       }\n\nsrc/kylin/engine-spark/src/main/java/org/apache/kylin/engine/spark/SparkExecutable.java:\n302                   @Override\n303                   public void onLogEvent(String infoKey, Map<String, String> info) {\n304                       // only care three properties here\n305                       if (ExecutableConstants.SPARK_JOB_ID.equals(infoKey)\n306                               || ExecutableConstants.YARN_APP_ID.equals(infoKey)\n307                               || ExecutableConstants.YARN_APP_URL.equals(infoKey)) {\n308                           getManager().addJobInfo(getId(), info);\n309                       }\n310                   }\n\nsrc/kylin/core-job/src/main/java/org/apache/kylin/job/execution/ExecutableManager.java:\n543       public void addJobInfo(String id, Map<String, String> info) {\n544           if (Thread.currentThread().isInterrupted()) {\n545               throw new RuntimeException(\"Current thread is interrupted, aborting\");\n546           }\n547   \n548           if (info == null) {\n549               return;\n550           }\n551   \n552           // post process\n553           if (info.containsKey(MR_JOB_ID) && !info.containsKey(ExecutableConstants.YARN_APP_ID)) {\n554               String jobId = info.get(MR_JOB_ID);\n555               if (jobId.startsWith(\"job_\")) {\n556                   info.put(YARN_APP_ID, jobId.replace(\"job_\", \"application_\"));\n557               }\n558           }\n559   \n560           if ((info.containsKey(YARN_APP_ID) || info.containsKey(FLINK_JOB_ID)) && !StringUtils.isEmpty(config.getJobTrackingURLPattern())) {\n561               String pattern = config.getJobTrackingURLPattern();\n562               String jobId = info.containsKey(YARN_APP_ID) ? info.get(YARN_APP_ID) : info.get(FLINK_JOB_ID);\n563               try {\n564                   String newTrackingURL = String.format(Locale.ROOT, pattern, jobId);\n565                   info.put(YARN_APP_URL, newTrackingURL);\n566               } catch (IllegalFormatException ife) {\n567                   logger.error(\"Illegal tracking url pattern: \" + config.getJobTrackingURLPattern());\n568               }\n569           }\n570   \n571           try {\n572               ExecutableOutputPO output = executableDao.getJobOutput(id);\n573               Preconditions.checkArgument(output != null, \"there is no related output for job id:\" + id);\n574               output.getInfo().putAll(info);\n575               executableDao.updateJobOutput(output);\n576           } catch (PersistentException e) {\n577               logger.error(\"error update job info, id:\" + id + \"  info:\" + info.toString());\n578               throw new RuntimeException(e);\n579           }\n580       }\n\nsrc/kylin/core-job/src/main/java/org/apache/kylin/job/dao/ExecutableDao.java:\n248       private ExecutableOutputPO readJobOutputResource(String path) throws IOException {\n249           return store.getResource(path, JOB_OUTPUT_SERIALIZER);\n250       }\n407       public ExecutableOutputPO getJobOutput(String uuid) throws PersistentException {\n408           ExecutableOutputPO result = null;\n409           try {\n410               result = readJobOutputResource(pathOfJobOutput(uuid));\n411               if (result == null) {\n412                   result = new ExecutableOutputPO();\n413                   result.setUuid(uuid);\n414                   return result;\n415               }\n416               return result;\n417           } catch (IOException e) {\n418               logger.error(\"error get job output id:\" + uuid, e);\n419               if (e.getCause() instanceof FileNotFoundException) {\n420                   result = new ExecutableOutputPO();\n421                   result.setUuid(uuid);\n422                   result.setStatus(ExecutableState.SUCCEED.name());\n423                   return result;\n424               } else {\n425                   throw new PersistentException(e);\n426               }\n427           }\n428       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ResourceStore.java:\n284       final public <T extends RootPersistentEntity> T getResource(String resPath, Serializer<T> serializer)\n285               throws IOException {\n286           return getResource(resPath, new ContentReader<T>(serializer));\n287       }\n292       final public <T extends RootPersistentEntity> T getResource(String resPath, ContentReader<T> reader)\n293               throws IOException {\n294           resPath = norm(resPath);\n295           RawResource res = getResourceWithRetry(resPath);\n296           if (res == null)\n297               return null;\n298   \n299           return reader.readContent(res);\n300       }\n316       private RawResource getResourceWithRetry(final String resPath) throws IOException {\n317           ExponentialBackoffRetry retry = new ExponentialBackoffRetry(this);\n318           return retry.doWithRetry(() -> getResourceImpl(resPath));\n319       }\n550       protected boolean isUnreachableException(Throwable ex) {\n551           List<String> connectionExceptions = Lists\n552                   .newArrayList(kylinConfig.getResourceStoreConnectionExceptions().split(\",\"));\n553           boolean hasException = false;\n554           for (String exception : connectionExceptions) {\n555               hasException = containsException(ex, exception);\n556   \n557               if (hasException)\n558                   break;\n559           }\n560           return hasException;\n561       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ExponentialBackoffRetry.java:\n 46       public <V> V doWithRetry(Callable<V> callable) throws IOException {\n 47           V result = null;\n 48           boolean done = false;\n 49   \n 50           while (!done) {\n 51               try {\n 52                   result = callable.call();\n 53                   done = true;\n 54               } catch (Throwable ex) {\n 55                   boolean shouldRetry = checkIfAllowRetry(ex);\n 56                   if (!shouldRetry) {\n 57                       throwIOException(ex);\n 58                   }\n 59               }\n 60           }\n 61   \n 62           return result;\n 63       }\n 78       private boolean checkIfAllowRetry(Throwable ex) {\n 79           if (config.isResourceStoreReconnectEnabled() && store.isUnreachableException(ex)) {\n 80               if (isTimeOut(config.getResourceStoreReconnectTimeoutMs())) {\n 81                   logger.error(\"Reconnect to resource store timeout, abandoning...\", ex);\n 82                   return false;\n 83               }\n 84   \n 85               long waitMs = getSleepTimeMs();\n 86               long seconds = waitMs / 1000;\n 87               logger.info(\"Will try to re-connect after {} seconds.\", seconds);\n 88               try {\n 89                   Thread.sleep(waitMs);\n 90               } catch (InterruptedException e) {\n 91                   throw new RuntimeException(\"Current thread for resource store's CRUD is interrupted, abandoning...\");\n 92               }\n 93               increaseRetryCount();\n 94               return true;\n 95           }\n 96   \n 97           return false;\n 98       }\n",
+            "cost": 0.10205,
+            "harness_id": "KylinOne",
+            "sanitizer": "Regular Expression Injection",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/persistence/ResourceStore.java:552:88",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 3
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/BasicService.java:\n 58       public CubeManager getCubeManager() {\n 59           return CubeManager.getInstance(getConfig());\n 60       }\n\nsrc/kylin/core-cube/src/main/java/org/apache/kylin/cube/CubeManager.java:\n 105       public static CubeManager getInstance(KylinConfig config) {\n 106           return config.getManager(CubeManager.class);\n 107       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:\n454       public <T> T getManager(Class<T> clz) {\n455           KylinConfig base = base();\n456           if (base != this)\n457               return base.getManager(clz);\n458   \n459           if (managersCache == null) {\n460               managersCache = new ConcurrentHashMap<>();\n461           }\n462   \n463           Object mgr = managersCache.get(clz);\n464           if (mgr != null)\n465               return (T) mgr;\n466   \n467           synchronized (clz) {\n468               mgr = managersCache.get(clz);\n469               if (mgr != null)\n470                   return (T) mgr;\n471   \n472               try {\n473                   logger.info(\"Creating new manager instance of {}\", clz);\n474   \n475                   // new manager via static Manager.newInstance()\n476                   Method method = clz.getDeclaredMethod(\"newInstance\", KylinConfig.class);\n477                   method.setAccessible(true); // override accessibility\n478                   mgr = method.invoke(null, this);\n479               } catch (Exception e) {\n480                   throw new RuntimeException(e);\n481               }\n482               managersCache.put(clz, mgr);\n483           }\n484           return (T) mgr;\n485       }\n",
+            "cost": 0.05425000000000001,
+            "harness_id": "KylinOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:478:23",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 4
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/BasicService.java:\n 58       public CubeManager getCubeManager() {\n 59           return CubeManager.getInstance(getConfig());\n 60       }\n\nsrc/kylin/core-cube/src/main/java/org/apache/kylin/cube/CubeManager.java:\n 105       public static CubeManager getInstance(KylinConfig config) {\n 106           return config.getManager(CubeManager.class);\n 107       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:\n454       public <T> T getManager(Class<T> clz) {\n455           KylinConfig base = base();\n456           if (base != this)\n457               return base.getManager(clz);\n458   \n459           if (managersCache == null) {\n460               managersCache = new ConcurrentHashMap<>();\n461           }\n462   \n463           Object mgr = managersCache.get(clz);\n464           if (mgr != null)\n465               return (T) mgr;\n466   \n467           synchronized (clz) {\n468               mgr = managersCache.get(clz);\n469               if (mgr != null)\n470                   return (T) mgr;\n471   \n472               try {\n473                   logger.info(\"Creating new manager instance of {}\", clz);\n474   \n475                   // new manager via static Manager.newInstance()\n476                   Method method = clz.getDeclaredMethod(\"newInstance\", KylinConfig.class);\n477                   method.setAccessible(true); // override accessibility\n478                   mgr = method.invoke(null, this);\n479               } catch (Exception e) {\n480                   throw new RuntimeException(e);\n481               }\n482               managersCache.put(clz, mgr);\n483           }\n484           return (T) mgr;\n485       }\n",
+            "cost": 0.057800000000000004,
+            "harness_id": "KylinOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:478:37",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 5
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/BasicService.java:\n 40       public KylinConfig getConfig() {\n 41           KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();\n 42   \n 43           if (kylinConfig == null) {\n 44               throw new IllegalArgumentException(\"Failed to load kylin config instance\");\n 45           }\n 46   \n 47           return kylinConfig;\n 48       }\n 58       public CubeManager getCubeManager() {\n 59           return CubeManager.getInstance(getConfig());\n 60       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:\n134       public static KylinConfig getInstanceFromEnv() {\n135           synchronized (KylinConfig.class) {\n136               KylinConfig config = THREAD_ENV_INSTANCE.get();\n137               if (config != null) {\n138                   return config;\n139               }\n140   \n141               if (SYS_ENV_INSTANCE == null) {\n142                   try {\n143                       //build default ordered properties will only be called once.\n144                       //This logic no need called by CoProcessor due to it didn't call getInstanceFromEnv.\n145                       buildDefaultOrderedProperties();\n146   \n147                       config = new KylinConfig();\n148                       config.reloadKylinConfig(buildSiteProperties());\n149                       VersionUtil.loadKylinVersion();\n150                       logger.info(\"Initialized a new KylinConfig from getInstanceFromEnv : \"\n151                               + System.identityHashCode(config));\n152                       SYS_ENV_INSTANCE = config;\n153                   } catch (IllegalArgumentException e) {\n154                       throw new IllegalStateException(\"Failed to find KylinConfig \", e);\n155                   }\n156               }\n157               return SYS_ENV_INSTANCE;\n158           }\n159       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/util/VersionUtil.java:\n33       public static void loadKylinVersion() {\n34           String version = System.getProperty(KYLIN_VERSION);\n35           if (version != null) {\n36               return;\n37           }\n38           File vfile = getDefaultVersionFile();\n39           if (vfile.exists()) {\n40               try (BufferedReader in = new BufferedReader(\n41                       new InputStreamReader(new FileInputStream(vfile), StandardCharsets.UTF_8));) {\n42                   String l = in.readLine();\n43                   if (l != null) {\n44                       System.setProperty(KYLIN_VERSION, l);\n45                   }\n46               } catch (IOException e) {\n47                   throw new RuntimeException(e);\n48               }\n49           }\n50       }\n",
+            "cost": 0.057050000000000003,
+            "harness_id": "KylinOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/util/VersionUtil.java:41:63",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 6
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/BasicService.java:\n 40       public KylinConfig getConfig() {\n 41           KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();\n 42   \n 43           if (kylinConfig == null) {\n 44               throw new IllegalArgumentException(\"Failed to load kylin config instance\");\n 45           }\n 46   \n 47           return kylinConfig;\n 48       }\n 58       public CubeManager getCubeManager() {\n 59           return CubeManager.getInstance(getConfig());\n 60       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:\n134       public static KylinConfig getInstanceFromEnv() {\n135           synchronized (KylinConfig.class) {\n136               KylinConfig config = THREAD_ENV_INSTANCE.get();\n137               if (config != null) {\n138                   return config;\n139               }\n140   \n141               if (SYS_ENV_INSTANCE == null) {\n142                   try {\n143                       //build default ordered properties will only be called once.\n144                       //This logic no need called by CoProcessor due to it didn't call getInstanceFromEnv.\n145                       buildDefaultOrderedProperties();\n146   \n147                       config = new KylinConfig();\n148                       config.reloadKylinConfig(buildSiteProperties());\n149                       VersionUtil.loadKylinVersion();\n150                       logger.info(\"Initialized a new KylinConfig from getInstanceFromEnv : \"\n151                               + System.identityHashCode(config));\n152                       SYS_ENV_INSTANCE = config;\n153                   } catch (IllegalArgumentException e) {\n154                       throw new IllegalStateException(\"Failed to find KylinConfig \", e);\n155                   }\n156               }\n157               return SYS_ENV_INSTANCE;\n158           }\n159       }\n366       private static Properties buildSiteProperties() {\n367           Properties conf = new Properties();\n368   \n369           OrderedProperties orderedProperties = buildSiteOrderedProps();\n370           for (Map.Entry<String, String> each : orderedProperties.entrySet()) {\n371               conf.put(each.getKey(), each.getValue().trim());\n372           }\n373   \n374           return conf;\n375       }\n378       private static OrderedProperties buildSiteOrderedProps() {\n379   \n380           try {\n381               // 1. load default configurations from classpath.\n382               // we have kylin-defaults.properties in kylin/core-common/src/main/resources\n383               // Load them each time will caused thread block when multiple query request to Kylin\n384               OrderedProperties orderedProperties = new OrderedProperties();\n385               orderedProperties.putAll(defaultOrderedProperties);\n386   \n387               // 2. load site conf, to keep backward compatibility it's still named kylin.properties\n388               // actually it's better to be named kylin-site.properties\n389               File propFile = getSitePropertiesFile();\n390               if (propFile == null || !propFile.exists()) {\n391                   logger.error(\"fail to locate \" + KYLIN_CONF_PROPERTIES_FILE + \" at '\"\n392                           + (propFile != null ? propFile.getAbsolutePath() : \"\") + \"'\");\n393                   throw new RuntimeException(\"fail to locate \" + KYLIN_CONF_PROPERTIES_FILE);\n394               }\n395               loadPropertiesFromInputStream(new FileInputStream(propFile), orderedProperties);\n396   \n397               // 3. still support kylin.properties.override as secondary override\n398               // not suggest to use it anymore\n399               File propOverrideFile = new File(propFile.getParentFile(), propFile.getName() + \".override\");\n400               if (propOverrideFile.exists()) {\n401                   loadPropertiesFromInputStream(new FileInputStream(propOverrideFile), orderedProperties);\n402               }\n403               return orderedProperties;\n404           } catch (IOException e) {\n405               throw new RuntimeException(e);\n406           }\n407       }\n",
+            "cost": 0.068275,
+            "harness_id": "KylinOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:395:63",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 7
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/BasicService.java:\n 40       public KylinConfig getConfig() {\n 41           KylinConfig kylinConfig = KylinConfig.getInstanceFromEnv();\n 42   \n 43           if (kylinConfig == null) {\n 44               throw new IllegalArgumentException(\"Failed to load kylin config instance\");\n 45           }\n 46   \n 47           return kylinConfig;\n 48       }\n 58       public CubeManager getCubeManager() {\n 59           return CubeManager.getInstance(getConfig());\n 60       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:\n134       public static KylinConfig getInstanceFromEnv() {\n135           synchronized (KylinConfig.class) {\n136               KylinConfig config = THREAD_ENV_INSTANCE.get();\n137               if (config != null) {\n138                   return config;\n139               }\n140   \n141               if (SYS_ENV_INSTANCE == null) {\n142                   try {\n143                       //build default ordered properties will only be called once.\n144                       //This logic no need called by CoProcessor due to it didn't call getInstanceFromEnv.\n145                       buildDefaultOrderedProperties();\n146   \n147                       config = new KylinConfig();\n148                       config.reloadKylinConfig(buildSiteProperties());\n149                       VersionUtil.loadKylinVersion();\n150                       logger.info(\"Initialized a new KylinConfig from getInstanceFromEnv : \"\n151                               + System.identityHashCode(config));\n152                       SYS_ENV_INSTANCE = config;\n153                   } catch (IllegalArgumentException e) {\n154                       throw new IllegalStateException(\"Failed to find KylinConfig \", e);\n155                   }\n156               }\n157               return SYS_ENV_INSTANCE;\n158           }\n159       }\n366       private static Properties buildSiteProperties() {\n367           Properties conf = new Properties();\n368   \n369           OrderedProperties orderedProperties = buildSiteOrderedProps();\n370           for (Map.Entry<String, String> each : orderedProperties.entrySet()) {\n371               conf.put(each.getKey(), each.getValue().trim());\n372           }\n373   \n374           return conf;\n375       }\n378       private static OrderedProperties buildSiteOrderedProps() {\n379   \n380           try {\n381               // 1. load default configurations from classpath.\n382               // we have kylin-defaults.properties in kylin/core-common/src/main/resources\n383               // Load them each time will caused thread block when multiple query request to Kylin\n384               OrderedProperties orderedProperties = new OrderedProperties();\n385               orderedProperties.putAll(defaultOrderedProperties);\n386   \n387               // 2. load site conf, to keep backward compatibility it's still named kylin.properties\n388               // actually it's better to be named kylin-site.properties\n389               File propFile = getSitePropertiesFile();\n390               if (propFile == null || !propFile.exists()) {\n391                   logger.error(\"fail to locate \" + KYLIN_CONF_PROPERTIES_FILE + \" at '\"\n392                           + (propFile != null ? propFile.getAbsolutePath() : \"\") + \"'\");\n393                   throw new RuntimeException(\"fail to locate \" + KYLIN_CONF_PROPERTIES_FILE);\n394               }\n395               loadPropertiesFromInputStream(new FileInputStream(propFile), orderedProperties);\n396   \n397               // 3. still support kylin.properties.override as secondary override\n398               // not suggest to use it anymore\n399               File propOverrideFile = new File(propFile.getParentFile(), propFile.getName() + \".override\");\n400               if (propOverrideFile.exists()) {\n401                   loadPropertiesFromInputStream(new FileInputStream(propOverrideFile), orderedProperties);\n402               }\n403               return orderedProperties;\n404           } catch (IOException e) {\n405               throw new RuntimeException(e);\n406           }\n407       }\n",
+            "cost": 0.065275,
+            "harness_id": "KylinOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:401:67",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 8
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/kylin-harnesses/kylin-harness-one/src/main/java/com/aixcc/kylin/harnesses/one/KylinOne.java:\n 46       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 47           new KylinOne().fuzz(input);\n 48       }\n 50       private void fuzz(byte[] data) {\n 51           ByteBuffer buf = ByteBuffer.wrap(data);\n 52           int count = buf.getInt();\n 53           System.err.println(\"count:\" + count);\n 54   \n 55           if (count > 255)\n 56               return;\n 57   \n 58           for (int i = 0; i < count; i++) {\n 59               int picker = buf.getInt();\n 60               System.err.println(\"picker: \" + picker);\n 61   \n 62               try {\n 63                   switch (picker) {\n 64                       case 33: {\n 65                           int data_size = buf.getInt();\n 66                           byte[] inner_data = new byte[data_size];\n 67                           buf.get(inner_data);\n 68                           String whole = new String(inner_data);\n 69   \n 70                           String[] parts = whole.split(\"\\0\");\n 71   \n 72                           if (parts.length < 2)\n 73                               return;\n 74   \n 75                           if (!isValidExecutableInput(parts[1]))\n 76                               return;\n 77   \n 78                           CubeService cubeService = new CubeService();\n 79                           CubeController cubeController = new CubeController();\n 80   \n 81                           CubeManager mockCubeManagerInstance = mock(CubeManager.class);\n 82                           CubeInstance mockCubeInstance = mock(CubeInstance.class);\n 83                           Segments<CubeSegment> mockSegments = mock(Segments.class);\n 84                           KylinConfig mockKylinConfig = mock(KylinConfig.class);\n 85   \n 86                           MockedStatic<KylinConfig> mockKylinConfigStatic = mockStatic(KylinConfig.class);\n 87                           MockedStatic<CubeManager> mockCubeManagerStatic = mockStatic(CubeManager.class);\n 88   \n 89                           try {\n 90                               mockKylinConfigStatic.when(KylinConfig::getInstanceFromEnv).thenReturn(mockKylinConfig);\n 91                               mockCubeManagerStatic.when(() -> CubeManager.getInstance(any(KylinConfig.class)))\n 92                                       .thenReturn(mockCubeManagerInstance);\n 93   \n 94                               when(mockCubeManagerInstance.getCube(parts[0])).thenReturn(mockCubeInstance);\n 95                               when(mockCubeInstance.getConfig()).thenReturn(mockKylinConfig);\n 96                               when(mockCubeInstance.getSegments()).thenReturn(mockSegments);\n 97                               when(mockSegments.iterator()).thenReturn(new ArrayList<CubeSegment>().iterator());\n 98   \n 99                               setKylinConfig(mockKylinConfig);\n100   \n101                               cubeController.setCubeService(cubeService);\n102                               cubeController.migrateCube(parts[0], parts[1]);\n103                           } finally {\n104                               mockKylinConfigStatic.close();\n105                               mockCubeManagerStatic.close();\n106                           }\n107                       }\n108                   }\n109               } catch (Exception e) {\n110                   continue;\n111               }\n112           }\n113       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/controller/CubeController.java:\n1041       @RequestMapping(value = \"/{cube}/{project}/migrate\", method = { RequestMethod.POST })\n1042       @ResponseBody\n1043       public void migrateCube(@PathVariable String cube, @PathVariable String project) {\n1044           CubeInstance cubeInstance = cubeService.getCubeManager().getCube(cube);\n1045           cubeService.migrateCube(cubeInstance, project);\n1046       }\n\nsrc/kylin/server-base/src/main/java/org/apache/kylin/rest/service/BasicService.java:\n 58       public CubeManager getCubeManager() {\n 59           return CubeManager.getInstance(getConfig());\n 60       }\n\nsrc/kylin/core-cube/src/main/java/org/apache/kylin/cube/CubeManager.java:\n 105       public static CubeManager getInstance(KylinConfig config) {\n 106           return config.getManager(CubeManager.class);\n 107       }\n\nsrc/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:\n454       public <T> T getManager(Class<T> clz) {\n455           KylinConfig base = base();\n456           if (base != this)\n457               return base.getManager(clz);\n458   \n459           if (managersCache == null) {\n460               managersCache = new ConcurrentHashMap<>();\n461           }\n462   \n463           Object mgr = managersCache.get(clz);\n464           if (mgr != null)\n465               return (T) mgr;\n466   \n467           synchronized (clz) {\n468               mgr = managersCache.get(clz);\n469               if (mgr != null)\n470                   return (T) mgr;\n471   \n472               try {\n473                   logger.info(\"Creating new manager instance of {}\", clz);\n474   \n475                   // new manager via static Manager.newInstance()\n476                   Method method = clz.getDeclaredMethod(\"newInstance\", KylinConfig.class);\n477                   method.setAccessible(true); // override accessibility\n478                   mgr = method.invoke(null, this);\n479               } catch (Exception e) {\n480                   throw new RuntimeException(e);\n481               }\n482               managersCache.put(clz, mgr);\n483           }\n484           return (T) mgr;\n485       }\n",
+            "cost": 0.05425000000000001,
+            "harness_id": "KylinOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/kylin/core-common/src/main/java/org/apache/kylin/common/KylinConfig.java:478:23",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 9
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "KylinOne",
+            "blob": [
+                "",
+                "AAAAAQAAACEAAAARY3ViZV9uYW1lAGBqYXp6ZWA="
+            ]
+        }
+    ]
+}

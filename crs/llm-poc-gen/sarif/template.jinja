@@ -1,0 +1,84 @@
+{
+    "version": "2.1.0",
+    "runs": [
+        {
+            "tool": {
+                "driver": {
+                    "name": "llm-poc-gen",
+                    "rules": {{ rules }}
+                }
+            },
+            "results": [
+                {% for result in results %}
+                {
+                    "ruleId": "{{ result.ruleId }}",
+                    "message": {
+                        "text": "{{ result.message }}"
+                    },
+                    "locations": [
+                        {% for location in result.locations %}
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "{{ location.uri }}"
+                                },
+                                "region": {
+                                    "startLine": {{ location.startLine }}
+                                    {% if location.startColumn != -1 %}
+                                    ,
+                                    "startColumn": {{ location.startColumn }}
+                                    {% endif %}
+                                }
+                            }
+                        }
+                        {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ]
+                    {% if result.flow %}
+                    ,
+                    "codeFlows": [
+                        {% for codeFlow in result.codeFlows %}
+                        {
+                            "threadFlows": [
+                                {
+                                    "locations": [
+                                        {% for location in codeFlow.locations %}
+                                        {
+                                            "location": {
+                                                "physicalLocation": {
+                                                    "artifactLocation": {
+                                                        "uri": "{{ location.uri }}"
+                                                    },
+                                                    "region": {
+                                                        "startLine": {{ location.startLine }}
+                                                        {% if location.startColumn != -1 %}
+                                                        ,
+                                                        "startColumn": {{ location.startColumn }}
+                                                        {% endif %}
+                                                    }
+                                                },
+                                                "logicalLocations": [
+                                                    {
+                                                      "fullyQualifiedName": "{{ location.fullyQualifiedName }}",
+                                                      "kind": "function"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                        {% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    ]
+                                }
+                            ]
+                        }
+                        {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ]
+                    {% endif %}
+                }
+                {% if not loop.last %}, {% endif %}
+                {% endfor %}
+            ]
+        }
+    ]
+}

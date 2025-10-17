@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PngChunk.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png.chunks</a> &gt; <span class="el_source">PngChunk.java</span></div><h1>PngChunk.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png.chunks;
+
+import java.io.ByteArrayInputStream;
+import java.util.Objects;
+
+import org.apache.commons.imaging.common.BinaryFileParser;
+
+/**
+ * A PNG image is composed of several chunks. This is the base class for the chunks, used by the parser.
+ *
+ * @see &lt;a href=&quot;https://en.wikipedia.org/wiki/Portable_Network_Graphics#%22Chunks%22_within_the_file&quot;&gt;Portable_Network_Graphics&lt;/a&gt;
+ */
+public class PngChunk extends BinaryFileParser {
+
+    private final int length;
+    private final int chunkType;
+    private final int crc;
+    private final byte[] bytes;
+
+    private final boolean[] propertyBits;
+    private final boolean ancillary;
+    private final boolean isPrivate;
+    private final boolean reserved;
+    private final boolean safeToCopy;
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param length    chunk length
+     * @param chunkType chunk type
+     * @param crc       CRC computed over the chunk type and chunk data (but not the length)
+     * @param bytes     chunk data bytes
+     * @throws NullPointerException if bytes is null.
+     */
+<span class="nc" id="L51">    public PngChunk(final int length, final int chunkType, final int crc, final byte[] bytes) {</span>
+<span class="nc" id="L52">        this.length = length;</span>
+<span class="nc" id="L53">        this.chunkType = chunkType;</span>
+<span class="nc" id="L54">        this.crc = crc;</span>
+<span class="nc" id="L55">        this.bytes = Objects.requireNonNull(bytes, &quot;bytes&quot;).clone();</span>
+
+<span class="nc" id="L57">        propertyBits = new boolean[4];</span>
+<span class="nc" id="L58">        int shift = 24;</span>
+<span class="nc" id="L59">        final int theMask = 1 &lt;&lt; 5;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (int i = 0; i &lt; propertyBits.length; i++) {</span>
+<span class="nc" id="L61">            final int theByte = 0xff &amp; chunkType &gt;&gt; shift;</span>
+<span class="nc" id="L62">            shift -= 8;</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            propertyBits[i] = (theByte &amp; theMask) &gt; 0;</span>
+        }
+
+<span class="nc" id="L66">        ancillary = propertyBits[0];</span>
+<span class="nc" id="L67">        isPrivate = propertyBits[1];</span>
+<span class="nc" id="L68">        reserved = propertyBits[2];</span>
+<span class="nc" id="L69">        safeToCopy = propertyBits[3];</span>
+<span class="nc" id="L70">    }</span>
+
+    /**
+     * Gets a copy of the chunk bytes.
+     *
+     * @return the chunk bytes
+     */
+    public byte[] getBytes() {
+<span class="nc" id="L78">        return bytes.clone();</span>
+    }
+
+    public int getChunkType() {
+<span class="nc" id="L82">        return chunkType;</span>
+    }
+
+    public int getCrc() {
+<span class="nc" id="L86">        return crc;</span>
+    }
+
+    /**
+     * Gets a new {@link ByteArrayInputStream} for the chunk bytes.
+     *
+     * &lt;p&gt;
+     * The caller is responsible for closing the resource.
+     * &lt;/p&gt;
+     *
+     * @return a ByteArrayInputStream for the chunk bytes
+     */
+    protected ByteArrayInputStream getDataStream() {
+<span class="nc" id="L99">        return new ByteArrayInputStream(bytes);</span>
+    }
+
+    public int getLength() {
+<span class="nc" id="L103">        return length;</span>
+    }
+
+    /**
+     * Gets a copy of the chunk property bits.
+     *
+     * @return the chunk property bits
+     */
+    public boolean[] getPropertyBits() {
+<span class="nc" id="L112">        return propertyBits.clone();</span>
+    }
+
+    public boolean isAncillary() {
+<span class="nc" id="L116">        return ancillary;</span>
+    }
+
+    public boolean isPrivate() {
+<span class="nc" id="L120">        return isPrivate;</span>
+    }
+
+    public boolean isReserved() {
+<span class="nc" id="L124">        return reserved;</span>
+    }
+
+    public boolean isSafeToCopy() {
+<span class="nc" id="L128">        return safeToCopy;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

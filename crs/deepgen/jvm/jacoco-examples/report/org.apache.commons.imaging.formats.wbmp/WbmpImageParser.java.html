@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WbmpImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.wbmp</a> &gt; <span class="el_source">WbmpImageParser.java</span></div><h1>WbmpImageParser.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+package org.apache.commons.imaging.formats.wbmp;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Properties;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.ImageMetadata;
+
+<span class="fc" id="L42">public class WbmpImageParser extends AbstractImageParser&lt;WbmpImagingParameters&gt; {</span>
+
+    static class WbmpHeader {
+        final int typeField;
+        final byte fixHeaderField;
+        final int width;
+        final int height;
+
+<span class="nc" id="L50">        WbmpHeader(final int typeField, final byte fixHeaderField, final int width, final int height) {</span>
+<span class="nc" id="L51">            this.typeField = typeField;</span>
+<span class="nc" id="L52">            this.fixHeaderField = fixHeaderField;</span>
+<span class="nc" id="L53">            this.width = width;</span>
+<span class="nc" id="L54">            this.height = height;</span>
+<span class="nc" id="L55">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L58">            pw.println(&quot;WbmpHeader&quot;);</span>
+<span class="nc" id="L59">            pw.println(&quot;TypeField: &quot; + typeField);</span>
+<span class="nc" id="L60">            pw.println(&quot;FixHeaderField: 0x&quot; + Integer.toHexString(0xff &amp; fixHeaderField));</span>
+<span class="nc" id="L61">            pw.println(&quot;Width: &quot; + width);</span>
+<span class="nc" id="L62">            pw.println(&quot;Height: &quot; + height);</span>
+<span class="nc" id="L63">        }</span>
+    }
+
+<span class="fc" id="L66">    private static final String DEFAULT_EXTENSION = ImageFormats.WBMP.getDefaultExtension();</span>
+
+<span class="fc" id="L68">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.WBMP.getExtensions();</span>
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L72">        readWbmpHeader(byteSource).dump(pw);</span>
+<span class="nc" id="L73">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L78">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="nc" id="L83">        return new ImageFormat[] { ImageFormats.WBMP, //</span>
+        };
+    }
+
+    @Override
+    public final BufferedImage getBufferedImage(final ByteSource byteSource, final WbmpImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L89">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L90">            final WbmpHeader wbmpHeader = readWbmpHeader(is);</span>
+<span class="nc" id="L91">            return readImage(wbmpHeader, is);</span>
+        }
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L97">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public WbmpImagingParameters getDefaultParameters() {
+<span class="nc" id="L102">        return new WbmpImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final WbmpImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L107">        return null;</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final WbmpImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L112">        final WbmpHeader wbmpHeader = readWbmpHeader(byteSource);</span>
+<span class="nc" id="L113">        return new ImageInfo(&quot;WBMP&quot;, 1, new ArrayList&lt;&gt;(), ImageFormats.WBMP, &quot;Wireless Application Protocol Bitmap&quot;, wbmpHeader.height, &quot;image/vnd.wap.wbmp&quot;,</span>
+                1, 0, 0, 0, 0, wbmpHeader.width, false, false, false, ImageInfo.ColorType.BW, ImageInfo.CompressionAlgorithm.NONE);
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final WbmpImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L119">        final WbmpHeader wbmpHeader = readWbmpHeader(byteSource);</span>
+<span class="nc" id="L120">        return new Dimension(wbmpHeader.width, wbmpHeader.height);</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final WbmpImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L125">        return null;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L130">        return &quot;Wireless Application Protocol Bitmap Format&quot;;</span>
+    }
+
+    private BufferedImage readImage(final WbmpHeader wbmpHeader, final InputStream is) throws IOException {
+<span class="nc" id="L134">        final int rowLength = (wbmpHeader.width + 7) / 8;</span>
+<span class="nc" id="L135">        final byte[] image = readBytes(&quot;Pixels&quot;, is, rowLength * wbmpHeader.height, &quot;Error reading image pixels&quot;);</span>
+<span class="nc" id="L136">        final DataBufferByte dataBuffer = new DataBufferByte(image, image.length);</span>
+<span class="nc" id="L137">        final WritableRaster raster = Raster.createPackedRaster(dataBuffer, wbmpHeader.width, wbmpHeader.height, 1, null);</span>
+<span class="nc" id="L138">        final int[] palette = { 0x000000, 0xffffff };</span>
+<span class="nc" id="L139">        final IndexColorModel colorModel = new IndexColorModel(1, 2, palette, 0, false, -1, DataBuffer.TYPE_BYTE);</span>
+<span class="nc" id="L140">        return new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+    }
+
+    private int readMultiByteInteger(final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L144">        int value = 0;</span>
+        int nextByte;
+<span class="nc" id="L146">        int totalBits = 0;</span>
+        do {
+<span class="nc" id="L148">            nextByte = readByte(&quot;Header&quot;, is, &quot;Error reading WBMP header&quot;);</span>
+<span class="nc" id="L149">            value &lt;&lt;= 7;</span>
+<span class="nc" id="L150">            value |= nextByte &amp; 0x7f;</span>
+<span class="nc" id="L151">            totalBits += 7;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            if (totalBits &gt; 31) {</span>
+<span class="nc" id="L153">                throw new ImagingException(&quot;Overflow reading WBMP multi-byte field&quot;);</span>
+            }
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        } while ((nextByte &amp; 0x80) != 0);</span>
+<span class="nc" id="L156">        return value;</span>
+    }
+
+    private WbmpHeader readWbmpHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L160">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L161">            return readWbmpHeader(is);</span>
+        }
+    }
+
+    private WbmpHeader readWbmpHeader(final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L166">        final int typeField = readMultiByteInteger(is);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (typeField != 0) {</span>
+<span class="nc" id="L168">            throw new ImagingException(&quot;Invalid/unsupported WBMP type &quot; + typeField);</span>
+        }
+
+<span class="nc" id="L171">        final byte fixHeaderField = readByte(&quot;FixHeaderField&quot;, is, &quot;Invalid WBMP File&quot;);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if ((fixHeaderField &amp; 0x9f) != 0) {</span>
+<span class="nc" id="L173">            throw new ImagingException(&quot;Invalid/unsupported WBMP FixHeaderField 0x&quot; + Integer.toHexString(0xff &amp; fixHeaderField));</span>
+        }
+
+<span class="nc" id="L176">        final int width = readMultiByteInteger(is);</span>
+
+<span class="nc" id="L178">        final int height = readMultiByteInteger(is);</span>
+
+<span class="nc" id="L180">        return new WbmpHeader(typeField, fixHeaderField, width, height);</span>
+    }
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final WbmpImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L185">        writeMultiByteInteger(os, 0); // typeField</span>
+<span class="nc" id="L186">        os.write(0); // fixHeaderField</span>
+<span class="nc" id="L187">        writeMultiByteInteger(os, src.getWidth());</span>
+<span class="nc" id="L188">        writeMultiByteInteger(os, src.getHeight());</span>
+
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        for (int y = 0; y &lt; src.getHeight(); y++) {</span>
+<span class="nc" id="L191">            int pixel = 0;</span>
+<span class="nc" id="L192">            int nextBit = 0x80;</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">            for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L194">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L195">                final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L196">                final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L197">                final int blue = 0xff &amp; argb &gt;&gt; 0;</span>
+<span class="nc" id="L198">                final int sample = (red + green + blue) / 3;</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                if (sample &gt; 127) {</span>
+<span class="nc" id="L200">                    pixel |= nextBit;</span>
+                }
+<span class="nc" id="L202">                nextBit &gt;&gt;&gt;= 1;</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">                if (nextBit == 0) {</span>
+<span class="nc" id="L204">                    os.write(pixel);</span>
+<span class="nc" id="L205">                    pixel = 0;</span>
+<span class="nc" id="L206">                    nextBit = 0x80;</span>
+                }
+            }
+<span class="nc bnc" id="L209" title="All 2 branches missed.">            if (nextBit != 0x80) {</span>
+<span class="nc" id="L210">                os.write(pixel);</span>
+            }
+        }
+<span class="nc" id="L213">    }</span>
+
+    private void writeMultiByteInteger(final OutputStream os, final int value) throws IOException {
+<span class="nc" id="L216">        boolean wroteYet = false;</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        for (int position = 4 * 7; position &gt; 0; position -= 7) {</span>
+<span class="nc" id="L218">            final int next7Bits = 0x7f &amp; value &gt;&gt;&gt; position;</span>
+<span class="nc bnc" id="L219" title="All 4 branches missed.">            if (next7Bits != 0 || wroteYet) {</span>
+<span class="nc" id="L220">                os.write(0x80 | next7Bits);</span>
+<span class="nc" id="L221">                wroteYet = true;</span>
+            }
+        }
+<span class="nc" id="L224">        os.write(0x7f &amp; value);</span>
+<span class="nc" id="L225">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

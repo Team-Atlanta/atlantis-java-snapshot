@@ -1,0 +1,12 @@
+diff --git a/src/main/java/io/jenkins/plugins/UtilPlug/UtilMain.java b/src/main/java/io/jenkins/plugins/UtilPlug/UtilMain.java
+index 0183853..d07ecd6 100644
+--- a/src/main/java/io/jenkins/plugins/UtilPlug/UtilMain.java
++++ b/src/main/java/io/jenkins/plugins/UtilPlug/UtilMain.java
+@@ -191,6 +191,7 @@ public class UtilMain implements RootAction {
+             processBuilder = new ProcessBuilder(cmds);
+             Process process = null;
+             try {
++                if("JenkinsTwoCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point JenkinsTwoCPVOne reached."));} catch (Throwable e) {}}
+                 process = processBuilder.start();
+             } catch (IOException ignored) {
+                 // Ignored, but the sanitizer should still throw an exception.

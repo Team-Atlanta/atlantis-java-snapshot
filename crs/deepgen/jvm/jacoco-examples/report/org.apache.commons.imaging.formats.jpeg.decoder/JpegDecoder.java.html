@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JpegDecoder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.decoder</a> &gt; <span class="el_source">JpegDecoder.java</span></div><h1>JpegDecoder.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+
+package org.apache.commons.imaging.formats.jpeg.decoder;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.color.ColorConversions;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+import org.apache.commons.imaging.formats.jpeg.JpegUtils;
+import org.apache.commons.imaging.formats.jpeg.segments.DhtSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.DhtSegment.HuffmanTable;
+import org.apache.commons.imaging.formats.jpeg.segments.DqtSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.DqtSegment.QuantizationTable;
+import org.apache.commons.imaging.formats.jpeg.segments.SofnSegment;
+import org.apache.commons.imaging.formats.jpeg.segments.SosSegment;
+
+<span class="fc" id="L48">public class JpegDecoder extends BinaryFileParser implements JpegUtils.Visitor {</span>
+
+<span class="fc" id="L50">    private static final int[] BAND_MASK_ARGB = { 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 };</span>
+<span class="fc" id="L51">    private static final int[] BAND_MASK_RGB = { 0x00ff0000, 0x0000ff00, 0x000000ff };</span>
+
+    /*
+     * JPEG is an advanced image format that takes significant computation to decode. Keep decoding fast: - Don't allocate memory inside loops, allocate it once
+     * and reuse. - Minimize calculations per pixel and per block (using lookup tables for YCbCr-&gt;RGB conversion doubled performance). - Math.round() is slow,
+     * use (int)(x+0.5f) instead for positive numbers.
+     */
+
+    private static int fastRound(final float x) {
+<span class="nc" id="L60">        return (int) (x + 0.5f);</span>
+    }
+
+    /**
+     * Returns the positions of where each interval in the provided array starts. The number of start positions is also the count of intervals while the number
+     * of restart markers found is equal to the number of start positions minus one (because restart markers are between intervals).
+     *
+     * @param scanPayload array to examine
+     * @return the start positions
+     */
+    static List&lt;Integer&gt; getIntervalStartPositions(final int[] scanPayload) {
+<span class="nc" id="L71">        final List&lt;Integer&gt; intervalStarts = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L72">        intervalStarts.add(0);</span>
+<span class="nc" id="L73">        boolean foundFF = false;</span>
+<span class="nc" id="L74">        boolean foundD0toD7 = false;</span>
+<span class="nc" id="L75">        int pos = 0;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        while (pos &lt; scanPayload.length) {</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (foundFF) {</span>
+                // found 0xFF D0 .. 0xFF D7 =&gt; RST marker
+<span class="nc bnc" id="L79" title="All 4 branches missed.">                if (scanPayload[pos] &gt;= (0xff &amp; JpegConstants.RST0_MARKER) &amp;&amp; scanPayload[pos] &lt;= (0xff &amp; JpegConstants.RST7_MARKER)) {</span>
+<span class="nc" id="L80">                    foundD0toD7 = true;</span>
+                } else { // found 0xFF followed by something else =&gt; no RST marker
+<span class="nc" id="L82">                    foundFF = false;</span>
+                }
+            }
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            if (scanPayload[pos] == 0xFF) {</span>
+<span class="nc" id="L87">                foundFF = true;</span>
+            }
+
+            // true if one of the RST markers was found
+<span class="nc bnc" id="L91" title="All 4 branches missed.">            if (foundFF &amp;&amp; foundD0toD7) {</span>
+                // we need to add the position after the current position because
+                // we had already read 0xFF and are now at 0xDn
+<span class="nc" id="L94">                intervalStarts.add(pos + 1);</span>
+<span class="nc" id="L95">                foundFF = foundD0toD7 = false;</span>
+            }
+<span class="nc" id="L97">            pos++;</span>
+        }
+<span class="nc" id="L99">        return intervalStarts;</span>
+    }
+
+    /**
+     * Returns an array of JpegInputStream where each field contains the JpegInputStream for one interval.
+     *
+     * @param scanPayload array to read intervals from
+     * @return JpegInputStreams for all intervals, at least one stream is always provided
+     */
+    static JpegInputStream[] splitByRstMarkers(final int[] scanPayload) {
+<span class="nc" id="L109">        final List&lt;Integer&gt; intervalStarts = getIntervalStartPositions(scanPayload);</span>
+        // get number of intervals in payload to init an array of appropriate length
+<span class="nc" id="L111">        final int intervalCount = intervalStarts.size();</span>
+<span class="nc" id="L112">        final JpegInputStream[] streams = Allocator.array(intervalCount, JpegInputStream[]::new, JpegInputStream.SHALLOW_SIZE);</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        for (int i = 0; i &lt; intervalCount; i++) {</span>
+<span class="nc" id="L114">            final int from = intervalStarts.get(i);</span>
+            int to;
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            if (i &lt; intervalCount - 1) {</span>
+                // because each restart marker needs two bytes the end of
+                // this interval is two bytes before the next interval starts
+<span class="nc" id="L119">                to = intervalStarts.get(i + 1) - 2;</span>
+            } else { // the last interval ends with the array
+<span class="nc" id="L121">                to = scanPayload.length;</span>
+            }
+<span class="nc" id="L123">            final int[] interval = Arrays.copyOfRange(scanPayload, from, to);</span>
+<span class="nc" id="L124">            streams[i] = new JpegInputStream(interval);</span>
+        }
+<span class="nc" id="L126">        return streams;</span>
+    }
+
+<span class="fc" id="L129">    private final DqtSegment.QuantizationTable[] quantizationTables = new DqtSegment.QuantizationTable[4];</span>
+<span class="fc" id="L130">    private final DhtSegment.HuffmanTable[] huffmanDCTables = new DhtSegment.HuffmanTable[4];</span>
+<span class="fc" id="L131">    private final DhtSegment.HuffmanTable[] huffmanACTables = new DhtSegment.HuffmanTable[4];</span>
+    private SofnSegment sofnSegment;
+    private SosSegment sosSegment;
+<span class="fc" id="L134">    private final float[][] scaledQuantizationTables = new float[4][];</span>
+    private BufferedImage image;
+    private ImagingException imageReadException;
+    private IOException ioException;
+
+<span class="fc" id="L139">    private final int[] zz = new int[64];</span>
+
+<span class="fc" id="L141">    private final int[] blockInt = new int[64];</span>
+
+<span class="fc" id="L143">    private final float[] block = new float[64];</span>
+
+    private boolean useTiffRgb;
+
+    private Block[] allocateMcuMemory() throws ImagingException {
+<span class="nc" id="L148">        final Block[] mcu = Allocator.array(sosSegment.numberOfComponents, Block[]::new, Block.SHALLOW_SIZE);</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        for (int i = 0; i &lt; sosSegment.numberOfComponents; i++) {</span>
+<span class="nc" id="L150">            final SosSegment.Component scanComponent = sosSegment.getComponents(i);</span>
+<span class="nc" id="L151">            SofnSegment.Component frameComponent = null;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            for (int j = 0; j &lt; sofnSegment.numberOfComponents; j++) {</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">                if (sofnSegment.getComponents(j).componentIdentifier == scanComponent.scanComponentSelector) {</span>
+<span class="nc" id="L154">                    frameComponent = sofnSegment.getComponents(j);</span>
+<span class="nc" id="L155">                    break;</span>
+                }
+            }
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (frameComponent == null) {</span>
+<span class="nc" id="L159">                throw new ImagingException(&quot;Invalid component&quot;);</span>
+            }
+<span class="nc" id="L161">            final Block fullBlock = new Block(8 * frameComponent.horizontalSamplingFactor, 8 * frameComponent.verticalSamplingFactor);</span>
+<span class="nc" id="L162">            mcu[i] = fullBlock;</span>
+        }
+<span class="nc" id="L164">        return mcu;</span>
+    }
+
+    @Override
+    public boolean beginSos() {
+<span class="fc" id="L169">        return true;</span>
+    }
+
+    public BufferedImage decode(final ByteSource byteSource) throws IOException, ImagingException {
+<span class="fc" id="L173">        final JpegUtils jpegUtils = new JpegUtils();</span>
+<span class="fc" id="L174">        jpegUtils.traverseJfif(byteSource, this);</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if (imageReadException != null) {</span>
+<span class="fc" id="L176">            throw imageReadException;</span>
+        }
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if (ioException != null) {</span>
+<span class="fc" id="L179">            throw ioException;</span>
+        }
+<span class="nc" id="L181">        return image;</span>
+    }
+
+    private int decode(final JpegInputStream is, final DhtSegment.HuffmanTable huffmanTable) throws ImagingException {
+        // &quot;DECODE&quot;, section F.2.2.3, figure F.16, page 109 of T.81
+<span class="nc" id="L186">        int i = 1;</span>
+<span class="nc" id="L187">        int code = is.nextBit();</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        while (code &gt; huffmanTable.getMaxCode(i)) {</span>
+<span class="nc" id="L189">            i++;</span>
+<span class="nc" id="L190">            code = code &lt;&lt; 1 | is.nextBit();</span>
+        }
+<span class="nc" id="L192">        int j = huffmanTable.getValPtr(i);</span>
+<span class="nc" id="L193">        j += code - huffmanTable.getMinCode(i);</span>
+<span class="nc" id="L194">        return huffmanTable.getHuffVal(j);</span>
+    }
+
+    private int extend(int v, final int t) {
+        // &quot;EXTEND&quot;, section F.2.2.1, figure F.12, page 105 of T.81
+<span class="nc" id="L199">        int vt = 1 &lt;&lt; t - 1;</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (v &lt; vt) {</span>
+<span class="nc" id="L201">            vt = (-1 &lt;&lt; t) + 1;</span>
+<span class="nc" id="L202">            v += vt;</span>
+        }
+<span class="nc" id="L204">        return v;</span>
+    }
+
+    private void readMcu(final JpegInputStream is, final int[] preds, final Block[] mcu) throws ImagingException {
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        for (int i = 0; i &lt; sosSegment.numberOfComponents; i++) {</span>
+<span class="nc" id="L209">            final SosSegment.Component scanComponent = sosSegment.getComponents(i);</span>
+<span class="nc" id="L210">            SofnSegment.Component frameComponent = null;</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">            for (int j = 0; j &lt; sofnSegment.numberOfComponents; j++) {</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">                if (sofnSegment.getComponents(j).componentIdentifier == scanComponent.scanComponentSelector) {</span>
+<span class="nc" id="L213">                    frameComponent = sofnSegment.getComponents(j);</span>
+<span class="nc" id="L214">                    break;</span>
+                }
+            }
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            if (frameComponent == null) {</span>
+<span class="nc" id="L218">                throw new ImagingException(&quot;Invalid component&quot;);</span>
+            }
+<span class="nc" id="L220">            final Block fullBlock = mcu[i];</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            for (int y = 0; y &lt; frameComponent.verticalSamplingFactor; y++) {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">                for (int x = 0; x &lt; frameComponent.horizontalSamplingFactor; x++) {</span>
+<span class="nc" id="L223">                    Arrays.fill(zz, 0);</span>
+                    // page 104 of T.81
+<span class="nc" id="L225">                    final int t = decode(is, huffmanDCTables[scanComponent.dcCodingTableSelector]);</span>
+<span class="nc" id="L226">                    int diff = receive(t, is);</span>
+<span class="nc" id="L227">                    diff = extend(diff, t);</span>
+<span class="nc" id="L228">                    zz[0] = preds[i] + diff;</span>
+<span class="nc" id="L229">                    preds[i] = zz[0];</span>
+
+                    // &quot;Decode_AC_coefficients&quot;, figure F.13, page 106 of T.81
+<span class="nc" id="L232">                    int k = 1;</span>
+                    while (true) {
+<span class="nc" id="L234">                        final int rs = decode(is, huffmanACTables[scanComponent.acCodingTableSelector]);</span>
+<span class="nc" id="L235">                        final int ssss = rs &amp; 0xf;</span>
+<span class="nc" id="L236">                        final int rrrr = rs &gt;&gt; 4;</span>
+<span class="nc" id="L237">                        final int r = rrrr;</span>
+
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                        if (ssss == 0) {</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                            if (r != 15) {</span>
+<span class="nc" id="L241">                                break;</span>
+                            }
+<span class="nc" id="L243">                            k += 16;</span>
+                        } else {
+<span class="nc" id="L245">                            k += r;</span>
+
+                            // &quot;Decode_ZZ(k)&quot;, figure F.14, page 107 of T.81
+<span class="nc" id="L248">                            zz[k] = receive(ssss, is);</span>
+<span class="nc" id="L249">                            zz[k] = extend(zz[k], ssss);</span>
+
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                            if (k == 63) {</span>
+<span class="nc" id="L252">                                break;</span>
+                            }
+<span class="nc" id="L254">                            k++;</span>
+                        }
+<span class="nc" id="L256">                    }</span>
+
+<span class="nc" id="L258">                    final int shift = 1 &lt;&lt; sofnSegment.precision - 1;</span>
+<span class="nc" id="L259">                    final int max = (1 &lt;&lt; sofnSegment.precision) - 1;</span>
+
+<span class="nc" id="L261">                    final float[] scaledQuantizationTable = scaledQuantizationTables[frameComponent.quantTabDestSelector];</span>
+<span class="nc" id="L262">                    ZigZag.zigZagToBlock(zz, blockInt);</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">                    for (int j = 0; j &lt; 64; j++) {</span>
+<span class="nc" id="L264">                        block[j] = blockInt[j] * scaledQuantizationTable[j];</span>
+                    }
+<span class="nc" id="L266">                    Dct.inverseDct8x8(block);</span>
+
+<span class="nc" id="L268">                    int dstRowOffset = 8 * y * 8 * frameComponent.horizontalSamplingFactor + 8 * x;</span>
+<span class="nc" id="L269">                    int srcNext = 0;</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                    for (int yy = 0; yy &lt; 8; yy++) {</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                        for (int xx = 0; xx &lt; 8; xx++) {</span>
+<span class="nc" id="L272">                            float sample = block[srcNext++];</span>
+<span class="nc" id="L273">                            sample += shift;</span>
+                            int result;
+<span class="nc bnc" id="L275" title="All 2 branches missed.">                            if (sample &lt; 0) {</span>
+<span class="nc" id="L276">                                result = 0;</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">                            } else if (sample &gt; max) {</span>
+<span class="nc" id="L278">                                result = max;</span>
+                            } else {
+<span class="nc" id="L280">                                result = fastRound(sample);</span>
+                            }
+<span class="nc" id="L282">                            fullBlock.samples[dstRowOffset + xx] = result;</span>
+                        }
+<span class="nc" id="L284">                        dstRowOffset += 8 * frameComponent.horizontalSamplingFactor;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L289">    }</span>
+
+    private int receive(final int ssss, final JpegInputStream is) throws ImagingException {
+        // &quot;RECEIVE&quot;, section F.2.2.4, figure F.17, page 110 of T.81
+<span class="nc" id="L293">        int i = 0;</span>
+<span class="nc" id="L294">        int v = 0;</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        while (i != ssss) {</span>
+<span class="nc" id="L296">            i++;</span>
+<span class="nc" id="L297">            v = (v &lt;&lt; 1) + is.nextBit();</span>
+        }
+<span class="nc" id="L299">        return v;</span>
+    }
+
+    private void rescaleMcu(final Block[] dataUnits, final int hSize, final int vSize, final Block[] ret) {
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        for (int i = 0; i &lt; dataUnits.length; i++) {</span>
+<span class="nc" id="L304">            final Block dataUnit = dataUnits[i];</span>
+<span class="nc bnc" id="L305" title="All 4 branches missed.">            if (dataUnit.width == hSize &amp;&amp; dataUnit.height == vSize) {</span>
+<span class="nc" id="L306">                System.arraycopy(dataUnit.samples, 0, ret[i].samples, 0, hSize * vSize);</span>
+            } else {
+<span class="nc" id="L308">                final int hScale = hSize / dataUnit.width;</span>
+<span class="nc" id="L309">                final int vScale = vSize / dataUnit.height;</span>
+<span class="nc bnc" id="L310" title="All 4 branches missed.">                if (hScale == 2 &amp;&amp; vScale == 2) {</span>
+<span class="nc" id="L311">                    int srcRowOffset = 0;</span>
+<span class="nc" id="L312">                    int dstRowOffset = 0;</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                    for (int y = 0; y &lt; dataUnit.height; y++) {</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">                        for (int x = 0; x &lt; hSize; x++) {</span>
+<span class="nc" id="L315">                            final int sample = dataUnit.samples[srcRowOffset + (x &gt;&gt; 1)];</span>
+<span class="nc" id="L316">                            ret[i].samples[dstRowOffset + x] = sample;</span>
+<span class="nc" id="L317">                            ret[i].samples[dstRowOffset + hSize + x] = sample;</span>
+                        }
+<span class="nc" id="L319">                        srcRowOffset += dataUnit.width;</span>
+<span class="nc" id="L320">                        dstRowOffset += 2 * hSize;</span>
+                    }
+<span class="nc" id="L322">                } else {</span>
+                    // FIXME: optimize
+<span class="nc" id="L324">                    int dstRowOffset = 0;</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">                    for (int y = 0; y &lt; vSize; y++) {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">                        for (int x = 0; x &lt; hSize; x++) {</span>
+<span class="nc" id="L327">                            ret[i].samples[dstRowOffset + x] = dataUnit.samples[y / vScale * dataUnit.width + x / hScale];</span>
+                        }
+<span class="nc" id="L329">                        dstRowOffset += hSize;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L334">    }</span>
+
+    /**
+     * Sets the decoder to treat incoming data as using the RGB color model. This extension to the JPEG specification is intended to support TIFF files that use
+     * JPEG compression.
+     */
+    public void setTiffRgb() {
+<span class="nc" id="L341">        useTiffRgb = true;</span>
+<span class="nc" id="L342">    }</span>
+
+    @Override
+    public boolean visitSegment(final int marker, final byte[] markerBytes, final int segmentLength, final byte[] segmentLengthBytes, final byte[] segmentData)
+            throws ImagingException, IOException {
+<span class="fc" id="L347">        final int[] sofnSegments = { JpegConstants.SOF0_MARKER, JpegConstants.SOF1_MARKER, JpegConstants.SOF2_MARKER, JpegConstants.SOF3_MARKER,</span>
+                JpegConstants.SOF5_MARKER, JpegConstants.SOF6_MARKER, JpegConstants.SOF7_MARKER, JpegConstants.SOF9_MARKER, JpegConstants.SOF10_MARKER,
+                JpegConstants.SOF11_MARKER, JpegConstants.SOF13_MARKER, JpegConstants.SOF14_MARKER, JpegConstants.SOF15_MARKER, };
+
+<span class="fc bfc" id="L351" title="All 2 branches covered.">        if (Arrays.binarySearch(sofnSegments, marker) &gt;= 0) {</span>
+<span class="pc bpc" id="L352" title="1 of 2 branches missed.">            if (marker != JpegConstants.SOF0_MARKER) {</span>
+<span class="fc" id="L353">                throw new ImagingException(&quot;Only sequential, baseline JPEGs &quot; + &quot;are supported at the moment&quot;);</span>
+            }
+<span class="nc" id="L355">            sofnSegment = new SofnSegment(marker, segmentData);</span>
+<span class="fc bfc" id="L356" title="All 2 branches covered.">        } else if (marker == JpegConstants.DQT_MARKER) {</span>
+<span class="fc" id="L357">            final DqtSegment dqtSegment = new DqtSegment(marker, segmentData);</span>
+<span class="pc bpc" id="L358" title="1 of 2 branches missed.">            for (final QuantizationTable table : dqtSegment.quantizationTables) {</span>
+<span class="nc bnc" id="L359" title="All 4 branches missed.">                if (0 &gt; table.destinationIdentifier || table.destinationIdentifier &gt;= quantizationTables.length) {</span>
+<span class="nc" id="L360">                    throw new ImagingException(&quot;Invalid quantization table identifier &quot; + table.destinationIdentifier);</span>
+                }
+<span class="nc" id="L362">                quantizationTables[table.destinationIdentifier] = table;</span>
+<span class="nc" id="L363">                final int mSize = 64;</span>
+<span class="nc" id="L364">                final int[] quantizationMatrixInt = Allocator.intArray(mSize);</span>
+<span class="nc" id="L365">                ZigZag.zigZagToBlock(table.getElements(), quantizationMatrixInt);</span>
+<span class="nc" id="L366">                final float[] quantizationMatrixFloat = Allocator.floatArray(mSize);</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">                for (int j = 0; j &lt; mSize; j++) {</span>
+<span class="nc" id="L368">                    quantizationMatrixFloat[j] = quantizationMatrixInt[j];</span>
+                }
+<span class="nc" id="L370">                Dct.scaleDequantizationMatrix(quantizationMatrixFloat);</span>
+<span class="nc" id="L371">                scaledQuantizationTables[table.destinationIdentifier] = quantizationMatrixFloat;</span>
+<span class="nc" id="L372">            }</span>
+<span class="pc bpc" id="L373" title="1 of 2 branches missed.">        } else if (marker == JpegConstants.DHT_MARKER) {</span>
+<span class="nc" id="L374">            final DhtSegment dhtSegment = new DhtSegment(marker, segmentData);</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">            for (final HuffmanTable table : dhtSegment.huffmanTables) {</span>
+                DhtSegment.HuffmanTable[] tables;
+<span class="nc bnc" id="L377" title="All 2 branches missed.">                if (table.tableClass == 0) {</span>
+<span class="nc" id="L378">                    tables = huffmanDCTables;</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">                } else if (table.tableClass == 1) {</span>
+<span class="nc" id="L380">                    tables = huffmanACTables;</span>
+                } else {
+<span class="nc" id="L382">                    throw new ImagingException(&quot;Invalid huffman table class &quot; + table.tableClass);</span>
+                }
+<span class="nc bnc" id="L384" title="All 4 branches missed.">                if (0 &gt; table.destinationIdentifier || table.destinationIdentifier &gt;= tables.length) {</span>
+<span class="nc" id="L385">                    throw new ImagingException(&quot;Invalid huffman table identifier &quot; + table.destinationIdentifier);</span>
+                }
+<span class="nc" id="L387">                tables[table.destinationIdentifier] = table;</span>
+<span class="nc" id="L388">            }</span>
+        }
+<span class="fc" id="L390">        return true;</span>
+    }
+
+    @Override
+    public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+<span class="fc" id="L395">        try (ByteArrayInputStream is = new ByteArrayInputStream(imageData)) {</span>
+            // read the scan header
+<span class="fc" id="L397">            final int segmentLength = read2Bytes(&quot;segmentLength&quot;, is, &quot;Not a Valid JPEG File&quot;, getByteOrder());</span>
+<span class="fc" id="L398">            final byte[] sosSegmentBytes = readBytes(&quot;SosSegment&quot;, is, segmentLength - 2, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="fc" id="L399">            sosSegment = new SosSegment(marker, sosSegmentBytes);</span>
+            // read the payload of the scan, this is the remainder of image data after the header
+            // the payload contains the entropy-encoded segments (or ECS) divided by RST markers
+            // or only one ECS if the entropy-encoded data is not divided by RST markers
+            // length of payload = length of image data - length of data already read
+<span class="fc" id="L404">            final int[] scanPayload = Allocator.intArray(imageData.length - segmentLength);</span>
+<span class="fc" id="L405">            int payloadReadCount = 0;</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">            while (payloadReadCount &lt; scanPayload.length) {</span>
+<span class="fc" id="L407">                scanPayload[payloadReadCount] = is.read();</span>
+<span class="fc" id="L408">                payloadReadCount++;</span>
+            }
+
+<span class="fc" id="L411">            int hMax = 0;</span>
+<span class="fc" id="L412">            int vMax = 0;</span>
+<span class="pc bnc" id="L413" title="All 2 branches missed.">            for (int i = 0; i &lt; sofnSegment.numberOfComponents; i++) {</span>
+<span class="nc" id="L414">                hMax = Math.max(hMax, sofnSegment.getComponents(i).horizontalSamplingFactor);</span>
+<span class="nc" id="L415">                vMax = Math.max(vMax, sofnSegment.getComponents(i).verticalSamplingFactor);</span>
+            }
+<span class="nc" id="L417">            final int hSize = 8 * hMax;</span>
+<span class="nc" id="L418">            final int vSize = 8 * vMax;</span>
+
+<span class="nc" id="L420">            final int xMCUs = (sofnSegment.width + hSize - 1) / hSize;</span>
+<span class="nc" id="L421">            final int yMCUs = (sofnSegment.height + vSize - 1) / vSize;</span>
+<span class="nc" id="L422">            final Block[] mcu = allocateMcuMemory();</span>
+<span class="nc" id="L423">            final Block[] scaledMCU = Allocator.array(mcu.length, Block[]::new, Block.SHALLOW_SIZE);</span>
+<span class="nc" id="L424">            Arrays.setAll(scaledMCU, i -&gt; new Block(hSize, vSize));</span>
+<span class="nc" id="L425">            final int[] preds = Allocator.intArray(sofnSegment.numberOfComponents);</span>
+            ColorModel colorModel;
+            WritableRaster raster;
+<span class="nc" id="L428">            Allocator.check(Integer.BYTES * sofnSegment.width * sofnSegment.height);</span>
+<span class="nc bnc" id="L429" title="All 4 branches missed.">            switch (sofnSegment.numberOfComponents) {</span>
+            case 4:
+                // Special handling for the application-RGB case: TIFF files with
+                // JPEG compression can support an alpha channel. This extension
+                // to the JPEG standard is implemented by specifying a color model
+                // with a fourth channel for alpha.
+<span class="nc bnc" id="L435" title="All 2 branches missed.">                if (useTiffRgb) {</span>
+<span class="nc" id="L436">                    colorModel = new DirectColorModel(32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);</span>
+<span class="nc" id="L437">                    raster = Raster.createPackedRaster(DataBuffer.TYPE_INT, sofnSegment.width, sofnSegment.height, BAND_MASK_ARGB, null);</span>
+                } else {
+<span class="nc" id="L439">                    colorModel = new DirectColorModel(24, 0x00ff0000, 0x0000ff00, 0x000000ff);</span>
+<span class="nc" id="L440">                    raster = Raster.createPackedRaster(DataBuffer.TYPE_INT, sofnSegment.width, sofnSegment.height, BAND_MASK_RGB, null);</span>
+                }
+
+<span class="nc" id="L443">                break;</span>
+            case 3:
+<span class="nc" id="L445">                colorModel = new DirectColorModel(24, 0x00ff0000, 0x0000ff00, 0x000000ff);</span>
+<span class="nc" id="L446">                raster = Raster.createPackedRaster(DataBuffer.TYPE_INT, sofnSegment.width, sofnSegment.height, new int[] { 0x00ff0000, 0x0000ff00, 0x000000ff },</span>
+                        null);
+<span class="nc" id="L448">                break;</span>
+            case 1:
+<span class="nc" id="L450">                colorModel = new DirectColorModel(24, 0x00ff0000, 0x0000ff00, 0x000000ff);</span>
+<span class="nc" id="L451">                raster = Raster.createPackedRaster(DataBuffer.TYPE_INT, sofnSegment.width, sofnSegment.height, new int[] { 0x00ff0000, 0x0000ff00, 0x000000ff },</span>
+                        null);
+                // FIXME: why do images come out too bright with CS_GRAY?
+                // colorModel = new ComponentColorModel(
+                // ColorSpace.getInstance(ColorSpace.CS_GRAY), false, true,
+                // Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+                // raster = colorModel.createCompatibleWritableRaster(
+                // sofnSegment.width, sofnSegment.height);
+<span class="nc" id="L459">                break;</span>
+            default:
+<span class="nc" id="L461">                throw new ImagingException(sofnSegment.numberOfComponents + &quot; components are invalid or unsupported&quot;);</span>
+            }
+<span class="nc" id="L463">            final DataBuffer dataBuffer = raster.getDataBuffer();</span>
+
+<span class="nc" id="L465">            final JpegInputStream[] bitInputStreams = splitByRstMarkers(scanPayload);</span>
+<span class="nc" id="L466">            int bitInputStreamCount = 0;</span>
+<span class="nc" id="L467">            JpegInputStream bitInputStream = bitInputStreams[0];</span>
+
+<span class="nc bnc" id="L469" title="All 2 branches missed.">            for (int y1 = 0; y1 &lt; vSize * yMCUs; y1 += vSize) {</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">                for (int x1 = 0; x1 &lt; hSize * xMCUs; x1 += hSize) {</span>
+                    // Provide the next interval if an interval is read until it's end
+                    // as long there are unread intervals available
+<span class="nc bnc" id="L473" title="All 2 branches missed.">                    if (!bitInputStream.hasNext()) {</span>
+<span class="nc" id="L474">                        bitInputStreamCount++;</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">                        if (bitInputStreamCount &lt; bitInputStreams.length) {</span>
+<span class="nc" id="L476">                            bitInputStream = bitInputStreams[bitInputStreamCount];</span>
+                        }
+                    }
+
+<span class="nc" id="L480">                    readMcu(bitInputStream, preds, mcu);</span>
+<span class="nc" id="L481">                    rescaleMcu(mcu, hSize, vSize, scaledMCU);</span>
+<span class="nc" id="L482">                    int srcRowOffset = 0;</span>
+<span class="nc" id="L483">                    int dstRowOffset = y1 * sofnSegment.width + x1;</span>
+
+                    // The TIFF-RGB logic was adapted from the original x2,y2 loops
+                    // but special handling was added for TIFF-JPEG RGB colorspace
+                    // and conditional checks were reorganized for efficiency
+<span class="nc bnc" id="L488" title="All 6 branches missed.">                    if (useTiffRgb &amp;&amp; (scaledMCU.length == 3 || scaledMCU.length == 4)) {</span>
+                        // The original (legacy) coding for the x2 and y2 loop was:
+                        // for(y2 = 0; y2 &lt; vSize &amp;&amp; y1 + y2 &lt; sofnSegment.height; y2++)
+                        // for(x2 = 0; x2 &lt; hSize &amp;&amp; x1 + x2 &lt; sofnSegment.width; x2++)
+                        // Here, we pre-compute the limits of the loop to reduce the
+                        // overhead for the loop conditional evaluation.
+                        final int x2Limit;
+<span class="nc bnc" id="L495" title="All 2 branches missed.">                        if (x1 + hSize &lt;= sofnSegment.width) {</span>
+<span class="nc" id="L496">                            x2Limit = hSize;</span>
+                        } else {
+<span class="nc" id="L498">                            x2Limit = sofnSegment.width - x1;</span>
+                        }
+                        final int y2Limit;
+<span class="nc bnc" id="L501" title="All 2 branches missed.">                        if (y1 + vSize &lt;= sofnSegment.height) {</span>
+<span class="nc" id="L502">                            y2Limit = vSize;</span>
+                        } else {
+<span class="nc" id="L504">                            y2Limit = sofnSegment.height - y1;</span>
+                        }
+
+<span class="nc bnc" id="L507" title="All 2 branches missed.">                        if (scaledMCU.length == 4) {</span>
+                            // RGBA colorspace
+                            // Although conventional JPEGs don't include an alpha channel
+                            // TIFF images that use JPEG encoding may do so. For example,
+                            // we have seen this variation in some false-color satellite images
+                            // from the U.S. National Weather Service. Ordinary JPEG files
+                            // may include an APP14 marker of type Unknowm indicating that
+                            // the scaledMCU.length of 3 should be interpreted as the RGB colorspace
+                            // and the 4-channel variation is interpreted as CYMK. But TIFF files
+                            // use their own tags to specify colorspace and do not include the APP14 marker.
+<span class="nc bnc" id="L517" title="All 2 branches missed.">                            for (int y2 = 0; y2 &lt; y2Limit; y2++) {</span>
+<span class="nc bnc" id="L518" title="All 2 branches missed.">                                for (int x2 = 0; x2 &lt; x2Limit; x2++) {</span>
+<span class="nc" id="L519">                                    final int r = scaledMCU[0].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L520">                                    final int g = scaledMCU[1].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L521">                                    final int b = scaledMCU[2].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L522">                                    final int a = scaledMCU[3].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L523">                                    final int rgb = a &lt;&lt; 24 | r &lt;&lt; 16 | g &lt;&lt; 8 | b;</span>
+<span class="nc" id="L524">                                    dataBuffer.setElem(dstRowOffset + x2, rgb);</span>
+                                }
+<span class="nc" id="L526">                                srcRowOffset += hSize;</span>
+<span class="nc" id="L527">                                dstRowOffset += sofnSegment.width;</span>
+                            }
+                        } else {
+                            // scaledMCU.length == 3, standard RGB
+<span class="nc bnc" id="L531" title="All 2 branches missed.">                            for (int y2 = 0; y2 &lt; y2Limit; y2++) {</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">                                for (int x2 = 0; x2 &lt; x2Limit; x2++) {</span>
+<span class="nc" id="L533">                                    final int r = scaledMCU[0].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L534">                                    final int g = scaledMCU[1].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L535">                                    final int b = scaledMCU[2].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L536">                                    final int rgb = r &lt;&lt; 16 | g &lt;&lt; 8 | b;</span>
+<span class="nc" id="L537">                                    dataBuffer.setElem(dstRowOffset + x2, rgb);</span>
+                                }
+<span class="nc" id="L539">                                srcRowOffset += hSize;</span>
+<span class="nc" id="L540">                                dstRowOffset += sofnSegment.width;</span>
+                            }
+                        }
+<span class="nc" id="L543">                    } else {</span>
+<span class="nc bnc" id="L544" title="All 4 branches missed.">                        for (int y2 = 0; y2 &lt; vSize &amp;&amp; y1 + y2 &lt; sofnSegment.height; y2++) {</span>
+<span class="nc bnc" id="L545" title="All 4 branches missed.">                            for (int x2 = 0; x2 &lt; hSize &amp;&amp; x1 + x2 &lt; sofnSegment.width; x2++) {</span>
+<span class="nc bnc" id="L546" title="All 2 branches missed.">                                if (scaledMCU.length == 4) {</span>
+<span class="nc" id="L547">                                    final int c = scaledMCU[0].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L548">                                    final int m = scaledMCU[1].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L549">                                    final int y = scaledMCU[2].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L550">                                    final int k = scaledMCU[3].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L551">                                    final int rgb = ColorConversions.convertCmykToRgb(c, m, y, k);</span>
+<span class="nc" id="L552">                                    dataBuffer.setElem(dstRowOffset + x2, rgb);</span>
+<span class="nc bnc" id="L553" title="All 2 branches missed.">                                } else if (scaledMCU.length == 3) {</span>
+<span class="nc" id="L554">                                    final int y = scaledMCU[0].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L555">                                    final int cb = scaledMCU[1].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L556">                                    final int cr = scaledMCU[2].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L557">                                    final int rgb = YCbCrConverter.convertYCbCrToRgb(y, cb, cr);</span>
+<span class="nc" id="L558">                                    dataBuffer.setElem(dstRowOffset + x2, rgb);</span>
+<span class="nc bnc" id="L559" title="All 2 branches missed.">                                } else if (mcu.length == 1) {</span>
+<span class="nc" id="L560">                                    final int y = scaledMCU[0].samples[srcRowOffset + x2];</span>
+<span class="nc" id="L561">                                    dataBuffer.setElem(dstRowOffset + x2, y &lt;&lt; 16 | y &lt;&lt; 8 | y);</span>
+<span class="nc" id="L562">                                } else {</span>
+<span class="nc" id="L563">                                    throw new ImagingException(&quot;Unsupported JPEG with &quot; + mcu.length + &quot; components&quot;);</span>
+                                }
+                            }
+<span class="nc" id="L566">                            srcRowOffset += hSize;</span>
+<span class="nc" id="L567">                            dstRowOffset += sofnSegment.width;</span>
+                        }
+                    }
+                }
+            }
+<span class="nc" id="L572">            image = new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+            // byte[] remainder = super.getStreamBytes(is);
+            // for (int i = 0; i &lt; remainder.length; i++)
+            // {
+            // System.out.println(&quot;&quot; + i + &quot; = &quot; +
+            // Integer.toHexString(remainder[i]));
+            // }
+<span class="nc" id="L579">        } catch (final ImagingException imageReadEx) {</span>
+<span class="nc" id="L580">            imageReadException = imageReadEx;</span>
+<span class="fc" id="L581">        } catch (final IOException ioEx) {</span>
+<span class="fc" id="L582">            ioException = ioEx;</span>
+<span class="fc" id="L583">        } catch (final RuntimeException ex) {</span>
+            // Corrupt images can throw NPE and IOOBE
+<span class="fc" id="L585">            imageReadException = new ImagingException(&quot;Error parsing JPEG&quot;, ex);</span>
+<span class="pc" id="L586">        }</span>
+<span class="fc" id="L587">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

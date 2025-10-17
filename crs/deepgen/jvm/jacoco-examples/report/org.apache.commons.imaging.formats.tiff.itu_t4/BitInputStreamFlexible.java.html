@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BitInputStreamFlexible.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.itu_t4</a> &gt; <span class="el_source">BitInputStreamFlexible.java</span></div><h1>BitInputStreamFlexible.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.itu_t4;
+
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.imaging.ImagingException;
+
+/**
+ * Input stream that allows reading up to 32 bits across byte boundaries in most significant bit first order.
+ */
+final class BitInputStreamFlexible extends FilterInputStream {
+    // TODO should be byte order conscious, that is, TIFF for reading
+    // samples size &lt; 8 - shouldn't that effect their order within byte?
+
+    private int cache;
+    private int cacheBitsRemaining;
+    private long bytesRead;
+
+    BitInputStreamFlexible(final InputStream is) {
+<span class="nc" id="L37">        super(is);</span>
+<span class="nc" id="L38">    }</span>
+
+    public void flushCache() {
+<span class="nc" id="L41">        cacheBitsRemaining = 0;</span>
+<span class="nc" id="L42">    }</span>
+
+    public long getBytesRead() {
+<span class="nc" id="L45">        return bytesRead;</span>
+    }
+
+    @Override
+    public int read() throws IOException {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (cacheBitsRemaining &gt; 0) {</span>
+<span class="nc" id="L51">            throw new ImagingException(&quot;BitInputStream: incomplete bit read&quot;);</span>
+        }
+<span class="nc" id="L53">        return in.read();</span>
+    }
+
+    public int readBits(int count) throws IOException {
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (count &lt;= 32) {</span>
+            // catch-all
+<span class="nc" id="L60">            int result = 0;</span>
+            // int done = 0;
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (cacheBitsRemaining &gt; 0) {</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">                if (count &gt;= cacheBitsRemaining) {</span>
+<span class="nc" id="L65">                    result = (1 &lt;&lt; cacheBitsRemaining) - 1 &amp; cache;</span>
+<span class="nc" id="L66">                    count -= cacheBitsRemaining;</span>
+<span class="nc" id="L67">                    cacheBitsRemaining = 0;</span>
+                } else {
+                    // cache &gt;&gt;= count;
+<span class="nc" id="L70">                    cacheBitsRemaining -= count;</span>
+<span class="nc" id="L71">                    result = (1 &lt;&lt; count) - 1 &amp; cache &gt;&gt; cacheBitsRemaining;</span>
+<span class="nc" id="L72">                    count = 0;</span>
+                }
+            }
+<span class="nc bnc" id="L75" title="All 2 branches missed.">            while (count &gt;= 8) {</span>
+<span class="nc" id="L76">                cache = in.read();</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">                if (cache &lt; 0) {</span>
+<span class="nc" id="L78">                    throw new ImagingException(&quot;Couldn't read bits&quot;);</span>
+                }
+                // System.out.println(&quot;cache 1: &quot; + cache + &quot; (&quot;
+                // + Integer.toHexString(cache) + &quot;, &quot;
+                // + Integer.toBinaryString(cache) + &quot;)&quot;);
+<span class="nc" id="L83">                bytesRead++;</span>
+<span class="nc" id="L84">                result = result &lt;&lt; 8 | 0xff &amp; cache;</span>
+<span class="nc" id="L85">                count -= 8;</span>
+            }
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (count &gt; 0) {</span>
+<span class="nc" id="L88">                cache = in.read();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                if (cache &lt; 0) {</span>
+<span class="nc" id="L90">                    throw new ImagingException(&quot;Couldn't read bits&quot;);</span>
+                }
+                // System.out.println(&quot;cache 2: &quot; + cache + &quot; (&quot;
+                // + Integer.toHexString(cache) + &quot;, &quot;
+                // + Integer.toBinaryString(cache) + &quot;)&quot;);
+<span class="nc" id="L95">                bytesRead++;</span>
+<span class="nc" id="L96">                cacheBitsRemaining = 8 - count;</span>
+<span class="nc" id="L97">                result = result &lt;&lt; count | (1 &lt;&lt; count) - 1 &amp; cache &gt;&gt; cacheBitsRemaining;</span>
+<span class="nc" id="L98">                count = 0;</span>
+            }
+
+<span class="nc" id="L101">            return result;</span>
+        }
+
+<span class="nc" id="L104">        throw new ImagingException(&quot;BitInputStream: unknown error&quot;);</span>
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

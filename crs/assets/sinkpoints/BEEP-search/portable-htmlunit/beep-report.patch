@@ -1,0 +1,12 @@
+diff --git a/src/main/java/org/htmlunit/javascript/host/xml/XSLTProcessor.java b/src/main/java/org/htmlunit/javascript/host/xml/XSLTProcessor.java
+index 0eb0ce5..d8f75e8 100644
+--- a/src/main/java/org/htmlunit/javascript/host/xml/XSLTProcessor.java
++++ b/src/main/java/org/htmlunit/javascript/host/xml/XSLTProcessor.java
+@@ -259,6 +259,7 @@ public class XSLTProcessor extends HtmlUnitScriptable {
+             containerDocument.appendChild(containerElement);
+ 
+             final DOMResult result = new DOMResult(containerElement);
++            if("HtmlunitOneCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point HtmlunitOneCPVOne reached."));} catch (Throwable e) {}}
+             transformer.transform(xmlSource, result);
+ 
+             final org.w3c.dom.Node transformedNode = result.getNode();

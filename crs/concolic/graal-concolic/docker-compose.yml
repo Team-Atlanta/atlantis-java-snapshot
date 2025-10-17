@@ -1,0 +1,13 @@
+services:
+  espresso-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: espresso-dev
+    volumes:
+      - ./graal-jdk-25-14:/graal-jdk
+      - mx_cache:/root/.mx
+      - ./tests:/tests
+
+volumes:
+  mx_cache:

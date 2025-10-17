@@ -1,0 +1,10 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - dev
+    volumes:
+      - ./jacoco-0.8.13:/src
+      - ./tests:/tests

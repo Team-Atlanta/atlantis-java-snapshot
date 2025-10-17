@@ -1,0 +1,20 @@
+name: "[jazzer-libafl] Team Atlanta LibAFL fork testing for Jazzer"
+
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - crs/fuzzers/jazzer-libafl/**
+
+jobs:
+  jazzer-libafl-build:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Rust
+      run: rustup toolchain install nightly --component llvm-tools && rustup default nightly
+    - name: Build with Cargo
+      working-directory: crs/fuzzers/jazzer-libafl/libafl_libfuzzer_runtime
+      run: cargo build

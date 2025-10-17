@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TagInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.taginfos</a> &gt; <span class="el_source">TagInfo.java</span></div><h1>TagInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.imaging.formats.tiff.taginfos;
+
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryType;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+
+public class TagInfo {
+    public static final int LENGTH_UNKNOWN = -1;
+    public final String name;
+    public final int tag;
+    public final List&lt;AbstractFieldType&gt; dataTypes;
+    public final int length;
+    public final TiffDirectoryType directoryType;
+    private final boolean isOffset;
+
+    public TagInfo(final String name, final int tag, final AbstractFieldType dataType) {
+<span class="nc" id="L41">        this(name, tag, dataType, LENGTH_UNKNOWN, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+<span class="nc" id="L42">    }</span>
+
+    public TagInfo(final String name, final int tag, final AbstractFieldType dataType, final int length) {
+<span class="nc" id="L45">        this(name, tag, Arrays.asList(dataType), length, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+<span class="nc" id="L46">    }</span>
+
+    public TagInfo(final String name, final int tag, final AbstractFieldType dataType, final int length, final TiffDirectoryType exifDirectory) {
+<span class="fc" id="L49">        this(name, tag, Arrays.asList(dataType), length, exifDirectory);</span>
+<span class="fc" id="L50">    }</span>
+
+    public TagInfo(final String name, final int tag, final AbstractFieldType dataType, final int length, final TiffDirectoryType exifDirectory,
+            final boolean isOffset) {
+<span class="fc" id="L54">        this(name, tag, Arrays.asList(dataType), length, exifDirectory, isOffset);</span>
+<span class="fc" id="L55">    }</span>
+
+    public TagInfo(final String name, final int tag, final List&lt;AbstractFieldType&gt; dataTypes, final int length, final TiffDirectoryType exifDirectory) {
+<span class="fc" id="L58">        this(name, tag, dataTypes, length, exifDirectory, false);</span>
+<span class="fc" id="L59">    }</span>
+
+    public TagInfo(final String name, final int tag, final List&lt;AbstractFieldType&gt; dataTypes, final int length, final TiffDirectoryType exifDirectory,
+<span class="fc" id="L62">            final boolean isOffset) {</span>
+<span class="fc" id="L63">        this.name = name;</span>
+<span class="fc" id="L64">        this.tag = tag;</span>
+<span class="fc" id="L65">        this.dataTypes = Collections.unmodifiableList(new ArrayList&lt;&gt;(dataTypes));</span>
+<span class="fc" id="L66">        this.length = length;</span>
+<span class="fc" id="L67">        this.directoryType = exifDirectory;</span>
+<span class="fc" id="L68">        this.isOffset = isOffset;</span>
+<span class="fc" id="L69">    }</span>
+
+    public byte[] encodeValue(final AbstractFieldType abstractFieldType, final Object value, final ByteOrder byteOrder) throws ImagingException {
+<span class="nc" id="L72">        return abstractFieldType.writeData(value, byteOrder);</span>
+    }
+
+    public String getDescription() {
+<span class="nc" id="L76">        return tag + &quot; (0x&quot; + Integer.toHexString(tag) + &quot;: &quot; + name + &quot;): &quot;;</span>
+    }
+
+    /**
+     *
+     * @param entry the TIFF field whose value to return
+     * @return the value of the TIFF field
+     * @throws ImagingException thrown by subclasses
+     */
+    public Object getValue(final TiffField entry) throws ImagingException {
+<span class="nc" id="L86">        return entry.getFieldType().getValue(entry);</span>
+    }
+
+    public boolean isOffset() {
+<span class="nc" id="L90">        return isOffset;</span>
+    }
+
+    public boolean isText() {
+<span class="nc" id="L94">        return false;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L99">        return &quot;[TagInfo. tag: &quot; + tag + &quot; (0x&quot; + Integer.toHexString(tag) + &quot;, name: &quot; + name + &quot;]&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

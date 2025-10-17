@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XpmImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.xpm</a> &gt; <span class="el_source">XpmImageParser.java</span></div><h1>XpmImageParser.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package org.apache.commons.imaging.formats.xpm;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DirectColorModel;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.UUID;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BasicCParser;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.palette.PaletteFactory;
+import org.apache.commons.imaging.palette.SimplePalette;
+
+<span class="fc" id="L54">public class XpmImageParser extends AbstractImageParser&lt;XpmImagingParameters&gt; {</span>
+
+    private static final class PaletteEntry {
+        int colorArgb;
+        int gray4LevelArgb;
+        int grayArgb;
+        boolean haveColor;
+        boolean haveGray;
+        boolean haveGray4Level;
+        boolean haveMono;
+        int index;
+        int monoArgb;
+
+        int getBestArgb() {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (haveColor) {</span>
+<span class="nc" id="L69">                return colorArgb;</span>
+            }
+<span class="nc bnc" id="L71" title="All 2 branches missed.">            if (haveGray) {</span>
+<span class="nc" id="L72">                return grayArgb;</span>
+            }
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            if (haveGray4Level) {</span>
+<span class="nc" id="L75">                return gray4LevelArgb;</span>
+            }
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (haveMono) {</span>
+<span class="nc" id="L78">                return monoArgb;</span>
+            }
+<span class="nc" id="L80">            return 0x00000000;</span>
+        }
+    }
+
+    private static final class XpmHeader {
+        final int height;
+        final int numCharsPerPixel;
+        final int numColors;
+<span class="nc" id="L88">        final Map&lt;Object, PaletteEntry&gt; palette = new HashMap&lt;&gt;();</span>
+        final int width;
+<span class="nc" id="L90">        int xHotSpot = -1;</span>
+        final boolean xpmExt;
+
+<span class="nc" id="L93">        int yHotSpot = -1;</span>
+
+        XpmHeader(final int width, final int height, final int numColors, final int numCharsPerPixel, final int xHotSpot, final int yHotSpot,
+<span class="nc" id="L96">                final boolean xpmExt) {</span>
+<span class="nc" id="L97">            this.width = width;</span>
+<span class="nc" id="L98">            this.height = height;</span>
+<span class="nc" id="L99">            this.numColors = numColors;</span>
+<span class="nc" id="L100">            this.numCharsPerPixel = numCharsPerPixel;</span>
+<span class="nc" id="L101">            this.xHotSpot = xHotSpot;</span>
+<span class="nc" id="L102">            this.yHotSpot = yHotSpot;</span>
+<span class="nc" id="L103">            this.xpmExt = xpmExt;</span>
+<span class="nc" id="L104">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L107">            pw.println(&quot;XpmHeader&quot;);</span>
+<span class="nc" id="L108">            pw.println(&quot;Width: &quot; + width);</span>
+<span class="nc" id="L109">            pw.println(&quot;Height: &quot; + height);</span>
+<span class="nc" id="L110">            pw.println(&quot;NumColors: &quot; + numColors);</span>
+<span class="nc" id="L111">            pw.println(&quot;NumCharsPerPixel: &quot; + numCharsPerPixel);</span>
+<span class="nc bnc" id="L112" title="All 4 branches missed.">            if (xHotSpot != -1 &amp;&amp; yHotSpot != -1) {</span>
+<span class="nc" id="L113">                pw.println(&quot;X hotspot: &quot; + xHotSpot);</span>
+<span class="nc" id="L114">                pw.println(&quot;Y hotspot: &quot; + yHotSpot);</span>
+            }
+<span class="nc" id="L116">            pw.println(&quot;XpmExt: &quot; + xpmExt);</span>
+<span class="nc" id="L117">        }</span>
+    }
+
+    private static final class XpmParseResult {
+        BasicCParser cParser;
+        XpmHeader xpmHeader;
+    }
+
+<span class="fc" id="L125">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.XPM.getExtensions();</span>
+    private static Map&lt;String, Integer&gt; colorNames;
+
+<span class="fc" id="L128">    private static final String DEFAULT_EXTENSION = ImageFormats.XPM.getDefaultExtension();</span>
+
+<span class="fc" id="L130">    private static final char[] WRITE_PALETTE = { ' ', '.', 'X', 'o', 'O', '+', '@', '#', '$', '%', '&amp;', '*', '=', '-', ';', ':', '&gt;', ',', '&lt;', '1', '2', '3',</span>
+            '4', '5', '6', '7', '8', '9', '0', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v',
+            'b', 'n', 'm', 'M', 'N', 'B', 'V', 'C', 'Z', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'P', 'I', 'U', 'Y', 'T', 'R', 'E', 'W', 'Q', '!', '~',
+            '^', '/', '(', ')', '_', '`', '\'', ']', '[', '{', '}', '|', };
+
+    private static void loadColorNames() throws ImagingException {
+<span class="nc" id="L136">        synchronized (XpmImageParser.class) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            if (colorNames != null) {</span>
+<span class="nc" id="L138">                return;</span>
+            }
+
+            try {
+<span class="nc" id="L142">                final InputStream rgbTxtStream = XpmImageParser.class.getResourceAsStream(&quot;rgb.txt&quot;);</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">                if (rgbTxtStream == null) {</span>
+<span class="nc" id="L144">                    throw new ImagingException(&quot;Couldn't find rgb.txt in our resources&quot;);</span>
+                }
+<span class="nc" id="L146">                final Map&lt;String, Integer&gt; colors = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L147">                try (InputStreamReader isReader = new InputStreamReader(rgbTxtStream, StandardCharsets.US_ASCII);</span>
+<span class="nc" id="L148">                        BufferedReader reader = new BufferedReader(isReader)) {</span>
+                    String line;
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                    while ((line = reader.readLine()) != null) {</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                        if (line.charAt(0) == '!') {</span>
+<span class="nc" id="L152">                            continue;</span>
+                        }
+                        try {
+<span class="nc" id="L155">                            final int red = Integer.parseInt(line.substring(0, 3).trim());</span>
+<span class="nc" id="L156">                            final int green = Integer.parseInt(line.substring(4, 7).trim());</span>
+<span class="nc" id="L157">                            final int blue = Integer.parseInt(line.substring(8, 11).trim());</span>
+<span class="nc" id="L158">                            final String colorName = line.substring(11).trim();</span>
+<span class="nc" id="L159">                            colors.put(colorName.toLowerCase(Locale.ROOT), 0xff000000 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue);</span>
+<span class="nc" id="L160">                        } catch (final NumberFormatException nfe) {</span>
+<span class="nc" id="L161">                            throw new ImagingException(&quot;Couldn't parse color in rgb.txt&quot;, nfe);</span>
+<span class="nc" id="L162">                        }</span>
+                    }
+                }
+<span class="nc" id="L165">                colorNames = colors;</span>
+<span class="nc" id="L166">            } catch (final IOException ioException) {</span>
+<span class="nc" id="L167">                throw new ImagingException(&quot;Could not parse rgb.txt&quot;, ioException);</span>
+<span class="nc" id="L168">            }</span>
+<span class="nc" id="L169">        }</span>
+<span class="nc" id="L170">    }</span>
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L174">        readXpmHeader(byteSource).dump(pw);</span>
+<span class="nc" id="L175">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L180">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="nc" id="L185">        return new ImageFormat[] { ImageFormats.XPM, //</span>
+        };
+    }
+
+    @Override
+    public final BufferedImage getBufferedImage(final ByteSource byteSource, final XpmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L191">        final XpmParseResult result = parseXpmHeader(byteSource);</span>
+<span class="nc" id="L192">        return readXpmImage(result.xpmHeader, result.cParser);</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L197">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public XpmImagingParameters getDefaultParameters() {
+<span class="nc" id="L202">        return new XpmImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final XpmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L207">        return null;</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final XpmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L212">        final XpmHeader xpmHeader = readXpmHeader(byteSource);</span>
+<span class="nc" id="L213">        boolean transparent = false;</span>
+<span class="nc" id="L214">        ImageInfo.ColorType colorType = ImageInfo.ColorType.BW;</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        for (final Entry&lt;Object, PaletteEntry&gt; entry : xpmHeader.palette.entrySet()) {</span>
+<span class="nc" id="L216">            final PaletteEntry paletteEntry = entry.getValue();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            if ((paletteEntry.getBestArgb() &amp; 0xff000000) != 0xff000000) {</span>
+<span class="nc" id="L218">                transparent = true;</span>
+            }
+<span class="nc bnc" id="L220" title="All 2 branches missed.">            if (paletteEntry.haveColor) {</span>
+<span class="nc" id="L221">                colorType = ImageInfo.ColorType.RGB;</span>
+<span class="nc bnc" id="L222" title="All 6 branches missed.">            } else if (colorType != ImageInfo.ColorType.RGB &amp;&amp; (paletteEntry.haveGray || paletteEntry.haveGray4Level)) {</span>
+<span class="nc" id="L223">                colorType = ImageInfo.ColorType.GRAYSCALE;</span>
+            }
+<span class="nc" id="L225">        }</span>
+<span class="nc" id="L226">        return new ImageInfo(&quot;XPM version 3&quot;, xpmHeader.numCharsPerPixel * 8, new ArrayList&lt;&gt;(), ImageFormats.XPM, &quot;X PixMap&quot;, xpmHeader.height,</span>
+                &quot;image/x-xpixmap&quot;, 1, 0, 0, 0, 0, xpmHeader.width, false, transparent, true, colorType, ImageInfo.CompressionAlgorithm.NONE);
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final XpmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L232">        final XpmHeader xpmHeader = readXpmHeader(byteSource);</span>
+<span class="nc" id="L233">        return new Dimension(xpmHeader.width, xpmHeader.height);</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final XpmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L238">        return null;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L243">        return &quot;X PixMap&quot;;</span>
+    }
+
+    private int parseColor(String color) throws ImagingException {
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (color.charAt(0) == '#') {</span>
+<span class="nc" id="L248">            color = color.substring(1);</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">            if (color.length() == 3) {</span>
+<span class="nc" id="L250">                final int red = Integer.parseInt(color.substring(0, 1), 16);</span>
+<span class="nc" id="L251">                final int green = Integer.parseInt(color.substring(1, 2), 16);</span>
+<span class="nc" id="L252">                final int blue = Integer.parseInt(color.substring(2, 3), 16);</span>
+<span class="nc" id="L253">                return 0xff000000 | red &lt;&lt; 20 | green &lt;&lt; 12 | blue &lt;&lt; 4;</span>
+            }
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            if (color.length() == 6) {</span>
+<span class="nc" id="L256">                return 0xff000000 | Integer.parseInt(color, 16);</span>
+            }
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            if (color.length() == 9) {</span>
+<span class="nc" id="L259">                final int red = Integer.parseInt(color.substring(0, 1), 16);</span>
+<span class="nc" id="L260">                final int green = Integer.parseInt(color.substring(3, 4), 16);</span>
+<span class="nc" id="L261">                final int blue = Integer.parseInt(color.substring(6, 7), 16);</span>
+<span class="nc" id="L262">                return 0xff000000 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue;</span>
+            }
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            if (color.length() == 12) {</span>
+<span class="nc" id="L265">                final int red = Integer.parseInt(color.substring(0, 1), 16);</span>
+<span class="nc" id="L266">                final int green = Integer.parseInt(color.substring(4, 5), 16);</span>
+<span class="nc" id="L267">                final int blue = Integer.parseInt(color.substring(8, 9), 16);</span>
+<span class="nc" id="L268">                return 0xff000000 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue;</span>
+            }
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            if (color.length() == 24) {</span>
+<span class="nc" id="L271">                final int red = Integer.parseInt(color.substring(0, 1), 16);</span>
+<span class="nc" id="L272">                final int green = Integer.parseInt(color.substring(8, 9), 16);</span>
+<span class="nc" id="L273">                final int blue = Integer.parseInt(color.substring(16, 17), 16);</span>
+<span class="nc" id="L274">                return 0xff000000 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue;</span>
+            }
+<span class="nc" id="L276">            return 0x00000000;</span>
+        }
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        if (color.charAt(0) == '%') {</span>
+<span class="nc" id="L279">            throw new ImagingException(&quot;HSV colors are not implemented &quot; + &quot;even in the XPM specification!&quot;);</span>
+        }
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if (&quot;None&quot;.equals(color)) {</span>
+<span class="nc" id="L282">            return 0x00000000;</span>
+        }
+<span class="nc" id="L284">        loadColorNames();</span>
+<span class="nc" id="L285">        final String colorLowercase = color.toLowerCase(Locale.ROOT);</span>
+<span class="nc" id="L286">        return colorNames.getOrDefault(colorLowercase, 0x00000000);</span>
+    }
+
+    private boolean parseNextString(final BasicCParser cParser, final StringBuilder stringBuilder) throws IOException, ImagingException {
+<span class="nc" id="L290">        stringBuilder.setLength(0);</span>
+<span class="nc" id="L291">        String token = cParser.nextToken();</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (token.charAt(0) != '&quot;') {</span>
+<span class="nc" id="L293">            throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;no string found where expected&quot;);</span>
+        }
+<span class="nc" id="L295">        BasicCParser.unescapeString(stringBuilder, token);</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        for (token = cParser.nextToken(); token.charAt(0) == '&quot;'; token = cParser.nextToken()) {</span>
+<span class="nc" id="L297">            BasicCParser.unescapeString(stringBuilder, token);</span>
+        }
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        if (&quot;,&quot;.equals(token)) {</span>
+<span class="nc" id="L300">            return true;</span>
+        }
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        if (&quot;}&quot;.equals(token)) {</span>
+<span class="nc" id="L303">            return false;</span>
+        }
+<span class="nc" id="L305">        throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;no ',' or '}' found where expected&quot;);</span>
+    }
+
+    private void parsePaletteEntries(final XpmHeader xpmHeader, final BasicCParser cParser) throws IOException, ImagingException {
+<span class="nc" id="L309">        final StringBuilder row = new StringBuilder();</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">        for (int i = 0; i &lt; xpmHeader.numColors; i++) {</span>
+<span class="nc" id="L311">            row.setLength(0);</span>
+<span class="nc" id="L312">            final boolean hasMore = parseNextString(cParser, row);</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">            if (!hasMore) {</span>
+<span class="nc" id="L314">                throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;file ended while reading palette&quot;);</span>
+            }
+<span class="nc" id="L316">            final String name = row.substring(0, xpmHeader.numCharsPerPixel);</span>
+<span class="nc" id="L317">            final String[] tokens = BasicCParser.tokenizeRow(row.substring(xpmHeader.numCharsPerPixel));</span>
+<span class="nc" id="L318">            final PaletteEntry paletteEntry = new PaletteEntry();</span>
+<span class="nc" id="L319">            paletteEntry.index = i;</span>
+<span class="nc" id="L320">            int previousKeyIndex = Integer.MIN_VALUE;</span>
+<span class="nc" id="L321">            final StringBuilder colorBuffer = new StringBuilder();</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">            for (int j = 0; j &lt; tokens.length; j++) {</span>
+<span class="nc" id="L323">                final String token = tokens[j];</span>
+<span class="nc" id="L324">                boolean isKey = false;</span>
+<span class="nc bnc" id="L325" title="All 12 branches missed.">                if (previousKeyIndex &lt; j - 1 &amp;&amp; &quot;m&quot;.equals(token) || &quot;g4&quot;.equals(token) || &quot;g&quot;.equals(token) || &quot;c&quot;.equals(token) || &quot;s&quot;.equals(token)) {</span>
+<span class="nc" id="L326">                    isKey = true;</span>
+                }
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                if (isKey) {</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">                    if (previousKeyIndex &gt;= 0) {</span>
+<span class="nc" id="L330">                        final String key = tokens[previousKeyIndex];</span>
+<span class="nc" id="L331">                        final String color = colorBuffer.toString();</span>
+<span class="nc" id="L332">                        colorBuffer.setLength(0);</span>
+<span class="nc" id="L333">                        populatePaletteEntry(paletteEntry, key, color);</span>
+                    }
+<span class="nc" id="L335">                    previousKeyIndex = j;</span>
+                } else {
+<span class="nc bnc" id="L337" title="All 2 branches missed.">                    if (previousKeyIndex &lt; 0) {</span>
+<span class="nc" id="L338">                        break;</span>
+                    }
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                    if (colorBuffer.length() &gt; 0) {</span>
+<span class="nc" id="L341">                        colorBuffer.append(' ');</span>
+                    }
+<span class="nc" id="L343">                    colorBuffer.append(token);</span>
+                }
+            }
+<span class="nc bnc" id="L346" title="All 4 branches missed.">            if (previousKeyIndex &gt;= 0 &amp;&amp; colorBuffer.length() &gt; 0) {</span>
+<span class="nc" id="L347">                final String key = tokens[previousKeyIndex];</span>
+<span class="nc" id="L348">                final String color = colorBuffer.toString();</span>
+<span class="nc" id="L349">                colorBuffer.setLength(0);</span>
+<span class="nc" id="L350">                populatePaletteEntry(paletteEntry, key, color);</span>
+            }
+<span class="nc" id="L352">            xpmHeader.palette.put(name, paletteEntry);</span>
+        }
+<span class="nc" id="L354">    }</span>
+
+    private XpmHeader parseXpmHeader(final BasicCParser cParser) throws ImagingException, IOException {
+        String name;
+        String token;
+<span class="nc" id="L359">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        if (!&quot;static&quot;.equals(token)) {</span>
+<span class="nc" id="L361">            throw new ImagingException(&quot;Parsing XPM file failed, no 'static' token&quot;);</span>
+        }
+<span class="nc" id="L363">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        if (!&quot;char&quot;.equals(token)) {</span>
+<span class="nc" id="L365">            throw new ImagingException(&quot;Parsing XPM file failed, no 'char' token&quot;);</span>
+        }
+<span class="nc" id="L367">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">        if (!&quot;*&quot;.equals(token)) {</span>
+<span class="nc" id="L369">            throw new ImagingException(&quot;Parsing XPM file failed, no '*' token&quot;);</span>
+        }
+<span class="nc" id="L371">        name = cParser.nextToken();</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L373">            throw new ImagingException(&quot;Parsing XPM file failed, no variable name&quot;);</span>
+        }
+<span class="nc bnc" id="L375" title="All 4 branches missed.">        if (name.charAt(0) != '_' &amp;&amp; !Character.isLetter(name.charAt(0))) {</span>
+<span class="nc" id="L376">            throw new ImagingException(&quot;Parsing XPM file failed, variable name &quot; + &quot;doesn't start with letter or underscore&quot;);</span>
+        }
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        for (int i = 0; i &lt; name.length(); i++) {</span>
+<span class="nc" id="L379">            final char c = name.charAt(i);</span>
+<span class="nc bnc" id="L380" title="All 4 branches missed.">            if (!Character.isLetterOrDigit(c) &amp;&amp; c != '_') {</span>
+<span class="nc" id="L381">                throw new ImagingException(&quot;Parsing XPM file failed, variable name &quot; + &quot;contains non-letter non-digit non-underscore&quot;);</span>
+            }
+        }
+<span class="nc" id="L384">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">        if (!&quot;[&quot;.equals(token)) {</span>
+<span class="nc" id="L386">            throw new ImagingException(&quot;Parsing XPM file failed, no '[' token&quot;);</span>
+        }
+<span class="nc" id="L388">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (!&quot;]&quot;.equals(token)) {</span>
+<span class="nc" id="L390">            throw new ImagingException(&quot;Parsing XPM file failed, no ']' token&quot;);</span>
+        }
+<span class="nc" id="L392">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">        if (!&quot;=&quot;.equals(token)) {</span>
+<span class="nc" id="L394">            throw new ImagingException(&quot;Parsing XPM file failed, no '=' token&quot;);</span>
+        }
+<span class="nc" id="L396">        token = cParser.nextToken();</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">        if (!&quot;{&quot;.equals(token)) {</span>
+<span class="nc" id="L398">            throw new ImagingException(&quot;Parsing XPM file failed, no '{' token&quot;);</span>
+        }
+
+<span class="nc" id="L401">        final StringBuilder row = new StringBuilder();</span>
+<span class="nc" id="L402">        final boolean hasMore = parseNextString(cParser, row);</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">        if (!hasMore) {</span>
+<span class="nc" id="L404">            throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;file too short&quot;);</span>
+        }
+<span class="nc" id="L406">        final XpmHeader xpmHeader = parseXpmValuesSection(row.toString());</span>
+<span class="nc" id="L407">        parsePaletteEntries(xpmHeader, cParser);</span>
+<span class="nc" id="L408">        return xpmHeader;</span>
+    }
+
+    private XpmParseResult parseXpmHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L412">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L413">            final StringBuilder firstComment = new StringBuilder();</span>
+<span class="nc" id="L414">            final ByteArrayOutputStream preprocessedFile = BasicCParser.preprocess(is, firstComment, null);</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">            if (!&quot;XPM&quot;.equals(firstComment.toString().trim())) {</span>
+<span class="nc" id="L416">                throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;signature isn't '/* XPM */'&quot;);</span>
+            }
+
+<span class="nc" id="L419">            final XpmParseResult xpmParseResult = new XpmParseResult();</span>
+<span class="nc" id="L420">            xpmParseResult.cParser = new BasicCParser(new ByteArrayInputStream(preprocessedFile.toByteArray()));</span>
+<span class="nc" id="L421">            xpmParseResult.xpmHeader = parseXpmHeader(xpmParseResult.cParser);</span>
+<span class="nc" id="L422">            return xpmParseResult;</span>
+        }
+    }
+
+    private XpmHeader parseXpmValuesSection(final String row) throws ImagingException {
+<span class="nc" id="L427">        final String[] tokens = BasicCParser.tokenizeRow(row);</span>
+<span class="nc bnc" id="L428" title="All 4 branches missed.">        if (tokens.length &lt; 4 || tokens.length &gt; 7) {</span>
+<span class="nc" id="L429">            throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;&lt;Values&gt; section has incorrect tokens&quot;);</span>
+        }
+        try {
+<span class="nc" id="L432">            final int width = Integer.parseInt(tokens[0]);</span>
+<span class="nc" id="L433">            final int height = Integer.parseInt(tokens[1]);</span>
+<span class="nc" id="L434">            final int numColors = Integer.parseInt(tokens[2]);</span>
+<span class="nc" id="L435">            final int numCharsPerPixel = Integer.parseInt(tokens[3]);</span>
+<span class="nc" id="L436">            int xHotSpot = -1;</span>
+<span class="nc" id="L437">            int yHotSpot = -1;</span>
+<span class="nc" id="L438">            boolean xpmExt = false;</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">            if (tokens.length &gt;= 6) {</span>
+<span class="nc" id="L440">                xHotSpot = Integer.parseInt(tokens[4]);</span>
+<span class="nc" id="L441">                yHotSpot = Integer.parseInt(tokens[5]);</span>
+            }
+<span class="nc bnc" id="L443" title="All 4 branches missed.">            if (tokens.length == 5 || tokens.length == 7) {</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">                if (!&quot;XPMEXT&quot;.equals(tokens[tokens.length - 1])) {</span>
+<span class="nc" id="L445">                    throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;can't parse &lt;Values&gt; section XPMEXT&quot;);</span>
+                }
+<span class="nc" id="L447">                xpmExt = true;</span>
+            }
+<span class="nc" id="L449">            return new XpmHeader(width, height, numColors, numCharsPerPixel, xHotSpot, yHotSpot, xpmExt);</span>
+<span class="nc" id="L450">        } catch (final NumberFormatException nfe) {</span>
+<span class="nc" id="L451">            throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;error parsing &lt;Values&gt; section&quot;, nfe);</span>
+        }
+    }
+
+    private String pixelsForIndex(int index, final int charsPerPixel) {
+<span class="nc" id="L456">        final StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="nc" id="L457">        int highestPower = 1;</span>
+<span class="nc bnc" id="L458" title="All 2 branches missed.">        for (int i = 1; i &lt; charsPerPixel; i++) {</span>
+<span class="nc" id="L459">            highestPower *= WRITE_PALETTE.length;</span>
+        }
+<span class="nc bnc" id="L461" title="All 2 branches missed.">        for (int i = 0; i &lt; charsPerPixel; i++) {</span>
+<span class="nc" id="L462">            final int multiple = index / highestPower;</span>
+<span class="nc" id="L463">            index -= multiple * highestPower;</span>
+<span class="nc" id="L464">            highestPower /= WRITE_PALETTE.length;</span>
+<span class="nc" id="L465">            stringBuilder.append(WRITE_PALETTE[multiple]);</span>
+        }
+<span class="nc" id="L467">        return stringBuilder.toString();</span>
+    }
+
+    private void populatePaletteEntry(final PaletteEntry paletteEntry, final String key, final String color) throws ImagingException {
+<span class="nc bnc" id="L471" title="All 5 branches missed.">        switch (key) {</span>
+        case &quot;m&quot;:
+<span class="nc" id="L473">            paletteEntry.monoArgb = parseColor(color);</span>
+<span class="nc" id="L474">            paletteEntry.haveMono = true;</span>
+<span class="nc" id="L475">            break;</span>
+        case &quot;g4&quot;:
+<span class="nc" id="L477">            paletteEntry.gray4LevelArgb = parseColor(color);</span>
+<span class="nc" id="L478">            paletteEntry.haveGray4Level = true;</span>
+<span class="nc" id="L479">            break;</span>
+        case &quot;g&quot;:
+<span class="nc" id="L481">            paletteEntry.grayArgb = parseColor(color);</span>
+<span class="nc" id="L482">            paletteEntry.haveGray = true;</span>
+<span class="nc" id="L483">            break;</span>
+        case &quot;s&quot;:
+        case &quot;c&quot;:
+<span class="nc" id="L486">            paletteEntry.colorArgb = parseColor(color);</span>
+<span class="nc" id="L487">            paletteEntry.haveColor = true;</span>
+<span class="nc" id="L488">            break;</span>
+        default:
+            break;
+        }
+<span class="nc" id="L492">    }</span>
+
+    private String randomName() {
+<span class="nc" id="L495">        final UUID uuid = UUID.randomUUID();</span>
+<span class="nc" id="L496">        final StringBuilder stringBuilder = new StringBuilder(&quot;a&quot;);</span>
+<span class="nc" id="L497">        long bits = uuid.getMostSignificantBits();</span>
+        // Long.toHexString() breaks for very big numbers
+<span class="nc bnc" id="L499" title="All 2 branches missed.">        for (int i = 64 - 8; i &gt;= 0; i -= 8) {</span>
+<span class="nc" id="L500">            stringBuilder.append(Integer.toHexString((int) (bits &gt;&gt; i &amp; 0xff)));</span>
+        }
+<span class="nc" id="L502">        bits = uuid.getLeastSignificantBits();</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">        for (int i = 64 - 8; i &gt;= 0; i -= 8) {</span>
+<span class="nc" id="L504">            stringBuilder.append(Integer.toHexString((int) (bits &gt;&gt; i &amp; 0xff)));</span>
+        }
+<span class="nc" id="L506">        return stringBuilder.toString();</span>
+    }
+
+    private XpmHeader readXpmHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L510">        return parseXpmHeader(byteSource).xpmHeader;</span>
+    }
+
+    private BufferedImage readXpmImage(final XpmHeader xpmHeader, final BasicCParser cParser) throws ImagingException, IOException {
+        ColorModel colorModel;
+        WritableRaster raster;
+        int bpp;
+<span class="nc bnc" id="L517" title="All 2 branches missed.">        if (xpmHeader.palette.size() &lt;= 1 &lt;&lt; 8) {</span>
+<span class="nc" id="L518">            final int[] palette = Allocator.intArray(xpmHeader.palette.size());</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">            for (final Entry&lt;Object, PaletteEntry&gt; entry : xpmHeader.palette.entrySet()) {</span>
+<span class="nc" id="L520">                final PaletteEntry paletteEntry = entry.getValue();</span>
+<span class="nc" id="L521">                palette[paletteEntry.index] = paletteEntry.getBestArgb();</span>
+<span class="nc" id="L522">            }</span>
+<span class="nc" id="L523">            colorModel = new IndexColorModel(8, xpmHeader.palette.size(), palette, 0, true, -1, DataBuffer.TYPE_BYTE);</span>
+            // Check allocation
+<span class="nc" id="L525">            final int bands = 1;</span>
+<span class="nc" id="L526">            final int scanlineStride = xpmHeader.width * bands;</span>
+<span class="nc" id="L527">            final int pixelStride = bands;</span>
+<span class="nc" id="L528">            final int size = scanlineStride * (xpmHeader.height - 1) + // first (h - 1) scans</span>
+                    pixelStride * xpmHeader.width; // last scan
+<span class="nc" id="L530">            Allocator.check(Byte.SIZE, size);</span>
+<span class="nc" id="L531">            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, xpmHeader.width, xpmHeader.height, bands, null);</span>
+<span class="nc" id="L532">            bpp = 8;</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">        } else if (xpmHeader.palette.size() &lt;= 1 &lt;&lt; 16) {</span>
+<span class="nc" id="L534">            final int[] palette = Allocator.intArray(xpmHeader.palette.size());</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">            for (final Entry&lt;Object, PaletteEntry&gt; entry : xpmHeader.palette.entrySet()) {</span>
+<span class="nc" id="L536">                final PaletteEntry paletteEntry = entry.getValue();</span>
+<span class="nc" id="L537">                palette[paletteEntry.index] = paletteEntry.getBestArgb();</span>
+<span class="nc" id="L538">            }</span>
+<span class="nc" id="L539">            colorModel = new IndexColorModel(16, xpmHeader.palette.size(), palette, 0, true, -1, DataBuffer.TYPE_USHORT);</span>
+            // Check allocation
+<span class="nc" id="L541">            final int bands = 1;</span>
+<span class="nc" id="L542">            final int scanlineStride = xpmHeader.width * bands;</span>
+<span class="nc" id="L543">            final int pixelStride = bands;</span>
+<span class="nc" id="L544">            final int size = scanlineStride * (xpmHeader.height - 1) + // first (h - 1) scans</span>
+                    pixelStride * xpmHeader.width; // last scan
+<span class="nc" id="L546">            Allocator.check(Short.SIZE, size);</span>
+<span class="nc" id="L547">            raster = Raster.createInterleavedRaster(DataBuffer.TYPE_USHORT, xpmHeader.width, xpmHeader.height, bands, null);</span>
+<span class="nc" id="L548">            bpp = 16;</span>
+<span class="nc" id="L549">        } else {</span>
+<span class="nc" id="L550">            colorModel = new DirectColorModel(32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);</span>
+<span class="nc" id="L551">            Allocator.check(Integer.SIZE, xpmHeader.width * xpmHeader.height);</span>
+<span class="nc" id="L552">            raster = Raster.createPackedRaster(DataBuffer.TYPE_INT, xpmHeader.width, xpmHeader.height,</span>
+                    new int[] { 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 }, null);
+<span class="nc" id="L554">            bpp = 32;</span>
+        }
+
+<span class="nc" id="L557">        final BufferedImage image = new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+<span class="nc" id="L558">        final DataBuffer dataBuffer = raster.getDataBuffer();</span>
+<span class="nc" id="L559">        final StringBuilder row = new StringBuilder();</span>
+<span class="nc" id="L560">        boolean hasMore = true;</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">        for (int y = 0; y &lt; xpmHeader.height; y++) {</span>
+<span class="nc" id="L562">            row.setLength(0);</span>
+<span class="nc" id="L563">            hasMore = parseNextString(cParser, row);</span>
+<span class="nc bnc" id="L564" title="All 4 branches missed.">            if (y &lt; xpmHeader.height - 1 &amp;&amp; !hasMore) {</span>
+<span class="nc" id="L565">                throw new ImagingException(&quot;Parsing XPM file failed, &quot; + &quot;insufficient image rows in file&quot;);</span>
+            }
+<span class="nc" id="L567">            final int rowOffset = y * xpmHeader.width;</span>
+<span class="nc bnc" id="L568" title="All 2 branches missed.">            for (int x = 0; x &lt; xpmHeader.width; x++) {</span>
+<span class="nc" id="L569">                final String index = row.substring(x * xpmHeader.numCharsPerPixel, (x + 1) * xpmHeader.numCharsPerPixel);</span>
+<span class="nc" id="L570">                final PaletteEntry paletteEntry = xpmHeader.palette.get(index);</span>
+<span class="nc bnc" id="L571" title="All 2 branches missed.">                if (paletteEntry == null) {</span>
+<span class="nc" id="L572">                    throw new ImagingException(&quot;No palette entry was defined &quot; + &quot;for &quot; + index);</span>
+                }
+<span class="nc bnc" id="L574" title="All 2 branches missed.">                if (bpp &lt;= 16) {</span>
+<span class="nc" id="L575">                    dataBuffer.setElem(rowOffset + x, paletteEntry.index);</span>
+                } else {
+<span class="nc" id="L577">                    dataBuffer.setElem(rowOffset + x, paletteEntry.getBestArgb());</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L582" title="All 2 branches missed.">        while (hasMore) {</span>
+<span class="nc" id="L583">            row.setLength(0);</span>
+<span class="nc" id="L584">            hasMore = parseNextString(cParser, row);</span>
+        }
+
+<span class="nc" id="L587">        final String token = cParser.nextToken();</span>
+<span class="nc bnc" id="L588" title="All 2 branches missed.">        if (!&quot;;&quot;.equals(token)) {</span>
+<span class="nc" id="L589">            throw new ImagingException(&quot;Last token wasn't ';'&quot;);</span>
+        }
+
+<span class="nc" id="L592">        return image;</span>
+    }
+
+    private String toColor(final int color) {
+<span class="nc" id="L596">        final String hex = Integer.toHexString(color);</span>
+<span class="nc bnc" id="L597" title="All 2 branches missed.">        if (hex.length() &lt; 6) {</span>
+<span class="nc" id="L598">            final char[] zeroes = Allocator.charArray(6 - hex.length());</span>
+<span class="nc" id="L599">            Arrays.fill(zeroes, '0');</span>
+<span class="nc" id="L600">            return &quot;#&quot; + new String(zeroes) + hex;</span>
+        }
+<span class="nc" id="L602">        return &quot;#&quot; + hex;</span>
+    }
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final XpmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L607">        final PaletteFactory paletteFactory = new PaletteFactory();</span>
+<span class="nc" id="L608">        final boolean hasTransparency = paletteFactory.hasTransparency(src, 1);</span>
+<span class="nc" id="L609">        SimplePalette palette = null;</span>
+<span class="nc" id="L610">        int maxColors = WRITE_PALETTE.length;</span>
+<span class="nc" id="L611">        int charsPerPixel = 1;</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">        while (palette == null) {</span>
+<span class="nc bnc" id="L613" title="All 2 branches missed.">            palette = paletteFactory.makeExactRgbPaletteSimple(src, hasTransparency ? maxColors - 1 : maxColors);</span>
+
+            // leave the loop if numbers would go beyond Integer.MAX_VALUE to avoid infinite loops
+            // test every operation from below if it would increase an int value beyond Integer.MAX_VALUE
+<span class="nc" id="L617">            final long nextMaxColors = maxColors * WRITE_PALETTE.length;</span>
+<span class="nc" id="L618">            final long nextCharsPerPixel = charsPerPixel + 1;</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">            if (nextMaxColors &gt; Integer.MAX_VALUE) {</span>
+<span class="nc" id="L620">                throw new ImagingException(&quot;Xpm: Can't write images with more than Integer.MAX_VALUE colors.&quot;);</span>
+            }
+<span class="nc bnc" id="L622" title="All 2 branches missed.">            if (nextCharsPerPixel &gt; Integer.MAX_VALUE) {</span>
+<span class="nc" id="L623">                throw new ImagingException(&quot;Xpm: Can't write images with more than Integer.MAX_VALUE chars per pixel.&quot;);</span>
+            }
+            // the code above makes sure that we never go beyond Integer.MAX_VALUE here
+<span class="nc bnc" id="L626" title="All 2 branches missed.">            if (palette == null) {</span>
+<span class="nc" id="L627">                maxColors *= WRITE_PALETTE.length;</span>
+<span class="nc" id="L628">                charsPerPixel++;</span>
+            }
+<span class="nc" id="L630">        }</span>
+<span class="nc" id="L631">        int colors = palette.length();</span>
+<span class="nc bnc" id="L632" title="All 2 branches missed.">        if (hasTransparency) {</span>
+<span class="nc" id="L633">            ++colors;</span>
+        }
+
+<span class="nc" id="L636">        String line = &quot;/* XPM */\n&quot;;</span>
+<span class="nc" id="L637">        os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L638">        line = &quot;static char *&quot; + randomName() + &quot;[] = {\n&quot;;</span>
+<span class="nc" id="L639">        os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L640">        line = &quot;\&quot;&quot; + src.getWidth() + &quot; &quot; + src.getHeight() + &quot; &quot; + colors + &quot; &quot; + charsPerPixel + &quot;\&quot;,\n&quot;;</span>
+<span class="nc" id="L641">        os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+
+<span class="nc bnc" id="L643" title="All 2 branches missed.">        for (int i = 0; i &lt; colors; i++) {</span>
+            String color;
+<span class="nc bnc" id="L645" title="All 2 branches missed.">            if (i &lt; palette.length()) {</span>
+<span class="nc" id="L646">                color = toColor(palette.getEntry(i));</span>
+            } else {
+<span class="nc" id="L648">                color = &quot;None&quot;;</span>
+            }
+<span class="nc" id="L650">            line = &quot;\&quot;&quot; + pixelsForIndex(i, charsPerPixel) + &quot; c &quot; + color + &quot;\&quot;,\n&quot;;</span>
+<span class="nc" id="L651">            os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+        }
+
+<span class="nc" id="L654">        String separator = &quot;&quot;;</span>
+<span class="nc bnc" id="L655" title="All 2 branches missed.">        for (int y = 0; y &lt; src.getHeight(); y++) {</span>
+<span class="nc" id="L656">            os.write(separator.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L657">            separator = &quot;,\n&quot;;</span>
+<span class="nc" id="L658">            line = &quot;\&quot;&quot;;</span>
+<span class="nc" id="L659">            os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc bnc" id="L660" title="All 2 branches missed.">            for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L661">                final int argb = src.getRGB(x, y);</span>
+<span class="nc bnc" id="L662" title="All 2 branches missed.">                if ((argb &amp; 0xff000000) == 0) {</span>
+<span class="nc" id="L663">                    line = pixelsForIndex(palette.length(), charsPerPixel);</span>
+                } else {
+<span class="nc" id="L665">                    line = pixelsForIndex(palette.getPaletteIndex(0xffffff &amp; argb), charsPerPixel);</span>
+                }
+<span class="nc" id="L667">                os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+            }
+<span class="nc" id="L669">            line = &quot;\&quot;&quot;;</span>
+<span class="nc" id="L670">            os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+        }
+
+<span class="nc" id="L673">        line = &quot;\n};\n&quot;;</span>
+<span class="nc" id="L674">        os.write(line.getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L675">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

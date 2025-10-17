@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffImageWriterLossless.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.write</a> &gt; <span class="el_source">TiffImageWriterLossless.java</span></div><h1>TiffImageWriterLossless.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.write;
+
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_HEADER_SIZE;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.imaging.FormatCompliance;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.formats.tiff.AbstractTiffElement;
+import org.apache.commons.imaging.formats.tiff.AbstractTiffElement.DataElement;
+import org.apache.commons.imaging.formats.tiff.AbstractTiffImageData;
+import org.apache.commons.imaging.formats.tiff.JpegImageData;
+import org.apache.commons.imaging.formats.tiff.TiffContents;
+import org.apache.commons.imaging.formats.tiff.TiffDirectory;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+import org.apache.commons.imaging.formats.tiff.TiffImagingParameters;
+import org.apache.commons.imaging.formats.tiff.TiffReader;
+import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
+
+/**
+ * TIFF lossless image writer.
+ */
+public class TiffImageWriterLossless extends AbstractTiffImageWriter {
+    private static final class BufferOutputStream extends OutputStream {
+        private final byte[] buffer;
+        private int index;
+
+<span class="nc" id="L56">        BufferOutputStream(final byte[] buffer, final int index) {</span>
+<span class="nc" id="L57">            this.buffer = buffer;</span>
+<span class="nc" id="L58">            this.index = index;</span>
+<span class="nc" id="L59">        }</span>
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (index + len &gt; buffer.length) {</span>
+<span class="nc" id="L64">                throw new ImagingException(&quot;Buffer overflow.&quot;);</span>
+            }
+<span class="nc" id="L66">            System.arraycopy(b, off, buffer, index, len);</span>
+<span class="nc" id="L67">            index += len;</span>
+<span class="nc" id="L68">        }</span>
+
+        @Override
+        public void write(final int b) throws IOException {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            if (index &gt;= buffer.length) {</span>
+<span class="nc" id="L73">                throw new ImagingException(&quot;Buffer overflow.&quot;);</span>
+            }
+
+<span class="nc" id="L76">            buffer[index++] = (byte) b;</span>
+<span class="nc" id="L77">        }</span>
+    }
+
+<span class="nc" id="L80">    private static final Comparator&lt;AbstractTiffElement&gt; ELEMENT_SIZE_COMPARATOR = Comparator.comparingInt(e -&gt; e.length);</span>
+<span class="nc" id="L81">    private static final Comparator&lt;AbstractTiffOutputItem&gt; ITEM_SIZE_COMPARATOR = Comparator.comparingInt(AbstractTiffOutputItem::getItemLength);</span>
+
+    private final byte[] exifBytes;
+
+<span class="nc" id="L85">    public TiffImageWriterLossless(final byte[] exifBytes) {</span>
+<span class="nc" id="L86">        this.exifBytes = exifBytes;</span>
+<span class="nc" id="L87">    }</span>
+
+    public TiffImageWriterLossless(final ByteOrder byteOrder, final byte[] exifBytes) {
+<span class="nc" id="L90">        super(byteOrder);</span>
+<span class="nc" id="L91">        this.exifBytes = exifBytes;</span>
+<span class="nc" id="L92">    }</span>
+
+    private List&lt;AbstractTiffElement&gt; analyzeOldTiff(final Map&lt;Integer, TiffOutputField&gt; frozenFields) throws ImagingException, IOException {
+        try {
+<span class="nc" id="L96">            final ByteSource byteSource = ByteSource.array(exifBytes);</span>
+<span class="nc" id="L97">            final FormatCompliance formatCompliance = FormatCompliance.getDefault();</span>
+<span class="nc" id="L98">            final TiffContents contents = new TiffReader(false).readContents(byteSource, new TiffImagingParameters(), formatCompliance);</span>
+
+<span class="nc" id="L100">            final List&lt;AbstractTiffElement&gt; elements = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L102">            final List&lt;TiffDirectory&gt; directories = contents.directories;</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">            for (final TiffDirectory directory : directories) {</span>
+<span class="nc" id="L104">                elements.add(directory);</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                for (final TiffField field : directory.getDirectoryEntries()) {</span>
+<span class="nc" id="L107">                    final AbstractTiffElement oversizeValue = field.getOversizeValueElement();</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">                    if (oversizeValue != null) {</span>
+<span class="nc" id="L109">                        final TiffOutputField frozenField = frozenFields.get(field.getTag());</span>
+<span class="nc bnc" id="L110" title="All 6 branches missed.">                        if (frozenField != null &amp;&amp; frozenField.getSeperateValue() != null &amp;&amp; Arrays.equals(frozenField.getData(), field.getByteArrayValue())) {</span>
+<span class="nc" id="L111">                            frozenField.getSeperateValue().setOffset(field.getOffset());</span>
+                        } else {
+<span class="nc" id="L113">                            elements.add(oversizeValue);</span>
+                        }
+                    }
+<span class="nc" id="L116">                }</span>
+
+<span class="nc" id="L118">                final JpegImageData jpegImageData = directory.getJpegImageData();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">                if (jpegImageData != null) {</span>
+<span class="nc" id="L120">                    elements.add(jpegImageData);</span>
+                }
+
+<span class="nc" id="L123">                final AbstractTiffImageData abstractTiffImageData = directory.getTiffImageData();</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                if (abstractTiffImageData != null) {</span>
+<span class="nc" id="L125">                    final DataElement[] data = abstractTiffImageData.getImageData();</span>
+<span class="nc" id="L126">                    Collections.addAll(elements, data);</span>
+                }
+<span class="nc" id="L128">            }</span>
+
+<span class="nc" id="L130">            elements.sort(AbstractTiffElement.COMPARATOR);</span>
+
+<span class="nc" id="L132">            final List&lt;AbstractTiffElement&gt; rewritableElements = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L133">            final int tolerance = 3;</span>
+<span class="nc" id="L134">            AbstractTiffElement start = null;</span>
+<span class="nc" id="L135">            long index = -1;</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            for (final AbstractTiffElement element : elements) {</span>
+<span class="nc" id="L137">                final long lastElementByte = element.offset + element.length;</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                if (start == null) {</span>
+<span class="nc" id="L139">                    start = element;</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                } else if (element.offset - index &gt; tolerance) {</span>
+<span class="nc" id="L141">                    rewritableElements.add(new AbstractTiffElement.Stub(start.offset, (int) (index - start.offset)));</span>
+<span class="nc" id="L142">                    start = element;</span>
+                }
+<span class="nc" id="L144">                index = lastElementByte;</span>
+<span class="nc" id="L145">            }</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            if (null != start) {</span>
+<span class="nc" id="L147">                rewritableElements.add(new AbstractTiffElement.Stub(start.offset, (int) (index - start.offset)));</span>
+            }
+
+<span class="nc" id="L150">            return rewritableElements;</span>
+<span class="nc" id="L151">        } catch (final ImagingException e) {</span>
+<span class="nc" id="L152">            throw new ImagingException(e.getMessage(), e);</span>
+        }
+    }
+
+    private long updateOffsetsStep(final List&lt;AbstractTiffElement&gt; analysis, final List&lt;AbstractTiffOutputItem&gt; outputItems) {
+        // items we cannot fit into a gap, we shall append to tail.
+<span class="nc" id="L158">        long overflowIndex = exifBytes.length;</span>
+
+        // make copy.
+<span class="nc" id="L161">        final List&lt;AbstractTiffElement&gt; unusedElements = new ArrayList&lt;&gt;(analysis);</span>
+
+        // should already be in order of offset, but make sure.
+<span class="nc" id="L164">        unusedElements.sort(AbstractTiffElement.COMPARATOR);</span>
+<span class="nc" id="L165">        Collections.reverse(unusedElements);</span>
+        // any items that represent a gap at the end of the exif segment, can be
+        // discarded.
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        while (!unusedElements.isEmpty()) {</span>
+<span class="nc" id="L169">            final AbstractTiffElement element = unusedElements.get(0);</span>
+<span class="nc" id="L170">            final long elementEnd = element.offset + element.length;</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">            if (elementEnd != overflowIndex) {</span>
+<span class="nc" id="L172">                break;</span>
+            }
+            // discarding a tail element. should only happen once.
+<span class="nc" id="L175">            overflowIndex -= element.length;</span>
+<span class="nc" id="L176">            unusedElements.remove(0);</span>
+<span class="nc" id="L177">        }</span>
+
+<span class="nc" id="L179">        unusedElements.sort(ELEMENT_SIZE_COMPARATOR);</span>
+<span class="nc" id="L180">        Collections.reverse(unusedElements);</span>
+
+        // make copy.
+<span class="nc" id="L183">        final List&lt;AbstractTiffOutputItem&gt; unplacedItems = new ArrayList&lt;&gt;(outputItems);</span>
+<span class="nc" id="L184">        unplacedItems.sort(ITEM_SIZE_COMPARATOR);</span>
+<span class="nc" id="L185">        Collections.reverse(unplacedItems);</span>
+
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        while (!unplacedItems.isEmpty()) {</span>
+            // pop off largest unplaced item.
+<span class="nc" id="L189">            final AbstractTiffOutputItem outputItem = unplacedItems.remove(0);</span>
+<span class="nc" id="L190">            final int outputItemLength = outputItem.getItemLength();</span>
+            // search for the smallest possible element large enough to hold the
+            // item.
+<span class="nc" id="L193">            AbstractTiffElement bestFit = null;</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            for (final AbstractTiffElement element : unusedElements) {</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                if (element.length &lt; outputItemLength) {</span>
+<span class="nc" id="L196">                    break;</span>
+                }
+<span class="nc" id="L198">                bestFit = element;</span>
+<span class="nc" id="L199">            }</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            if (null == bestFit) {</span>
+                // we couldn't place this item. overflow.
+<span class="nc bnc" id="L202" title="All 2 branches missed.">                if ((overflowIndex &amp; 1L) != 0) {</span>
+<span class="nc" id="L203">                    overflowIndex += 1;</span>
+                }
+<span class="nc" id="L205">                outputItem.setOffset(overflowIndex);</span>
+<span class="nc" id="L206">                overflowIndex += outputItemLength;</span>
+            } else {
+<span class="nc" id="L208">                long offset = bestFit.offset;</span>
+<span class="nc" id="L209">                int length = bestFit.length;</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                if ((offset &amp; 1L) != 0) {</span>
+                    // offsets have to be at a multiple of 2
+<span class="nc" id="L212">                    offset += 1;</span>
+<span class="nc" id="L213">                    length -= 1;</span>
+                }
+<span class="nc" id="L215">                outputItem.setOffset(offset);</span>
+<span class="nc" id="L216">                unusedElements.remove(bestFit);</span>
+
+<span class="nc bnc" id="L218" title="All 2 branches missed.">                if (length &gt; outputItemLength) {</span>
+                    // not a perfect fit.
+<span class="nc" id="L220">                    final long excessOffset = offset + outputItemLength;</span>
+<span class="nc" id="L221">                    final int excessLength = length - outputItemLength;</span>
+<span class="nc" id="L222">                    unusedElements.add(new AbstractTiffElement.Stub(excessOffset, excessLength));</span>
+                    // make sure the new element is in the correct order.
+<span class="nc" id="L224">                    unusedElements.sort(ELEMENT_SIZE_COMPARATOR);</span>
+<span class="nc" id="L225">                    Collections.reverse(unusedElements);</span>
+                }
+            }
+<span class="nc" id="L228">        }</span>
+
+<span class="nc" id="L230">        return overflowIndex;</span>
+    }
+
+    @Override
+    public void write(final OutputStream os, final TiffOutputSet outputSet) throws IOException, ImagingException {
+        // There are some fields whose address in the file must not change,
+        // unless of course their value is changed.
+<span class="nc" id="L237">        final Map&lt;Integer, TiffOutputField&gt; frozenFields = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L238">        final TiffOutputField makerNoteField = outputSet.findField(ExifTagConstants.EXIF_TAG_MAKER_NOTE);</span>
+<span class="nc bnc" id="L239" title="All 4 branches missed.">        if (makerNoteField != null &amp;&amp; makerNoteField.getSeperateValue() != null) {</span>
+<span class="nc" id="L240">            frozenFields.put(ExifTagConstants.EXIF_TAG_MAKER_NOTE.tag, makerNoteField);</span>
+        }
+<span class="nc" id="L242">        final List&lt;AbstractTiffElement&gt; analysis = analyzeOldTiff(frozenFields);</span>
+<span class="nc" id="L243">        final int oldLength = exifBytes.length;</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (analysis.isEmpty()) {</span>
+<span class="nc" id="L245">            throw new ImagingException(&quot;Couldn't analyze old tiff data.&quot;);</span>
+        }
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (analysis.size() == 1) {</span>
+<span class="nc" id="L248">            final AbstractTiffElement onlyElement = analysis.get(0);</span>
+<span class="nc bnc" id="L249" title="All 4 branches missed.">            if (onlyElement.offset == TIFF_HEADER_SIZE &amp;&amp; onlyElement.offset + onlyElement.length + TIFF_HEADER_SIZE == oldLength) {</span>
+                // no gaps in old data, safe to complete overwrite.
+<span class="nc" id="L251">                new TiffImageWriterLossy(byteOrder).write(os, outputSet);</span>
+<span class="nc" id="L252">                return;</span>
+            }
+        }
+<span class="nc" id="L255">        final Map&lt;Long, TiffOutputField&gt; frozenFieldOffsets = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        for (final Map.Entry&lt;Integer, TiffOutputField&gt; entry : frozenFields.entrySet()) {</span>
+<span class="nc" id="L257">            final TiffOutputField frozenField = entry.getValue();</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            if (frozenField.getSeperateValue().getOffset() != AbstractTiffOutputItem.UNDEFINED_VALUE) {</span>
+<span class="nc" id="L259">                frozenFieldOffsets.put(frozenField.getSeperateValue().getOffset(), frozenField);</span>
+            }
+<span class="nc" id="L261">        }</span>
+
+<span class="nc" id="L263">        final TiffOutputSummary outputSummary = validateDirectories(outputSet);</span>
+
+<span class="nc" id="L265">        final List&lt;AbstractTiffOutputItem&gt; allOutputItems = outputSet.getOutputItems(outputSummary);</span>
+<span class="nc" id="L266">        final List&lt;AbstractTiffOutputItem&gt; outputItems = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">        for (final AbstractTiffOutputItem outputItem : allOutputItems) {</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">            if (!frozenFieldOffsets.containsKey(outputItem.getOffset())) {</span>
+<span class="nc" id="L269">                outputItems.add(outputItem);</span>
+            }
+<span class="nc" id="L271">        }</span>
+
+<span class="nc" id="L273">        final long outputLength = updateOffsetsStep(analysis, outputItems);</span>
+
+<span class="nc" id="L275">        outputSummary.updateOffsets(byteOrder);</span>
+
+<span class="nc" id="L277">        writeStep(os, outputSet, analysis, outputItems, outputLength);</span>
+
+<span class="nc" id="L279">    }</span>
+
+    private void writeStep(final OutputStream os, final TiffOutputSet outputSet, final List&lt;AbstractTiffElement&gt; analysis,
+            final List&lt;AbstractTiffOutputItem&gt; outputItems, final long outputLength) throws IOException, ImagingException {
+<span class="nc" id="L283">        final TiffOutputDirectory rootDirectory = outputSet.getRootDirectory();</span>
+
+<span class="nc" id="L285">        final byte[] output = Allocator.byteArray(outputLength);</span>
+
+        // copy old data (including maker notes, etc.)
+<span class="nc" id="L288">        System.arraycopy(exifBytes, 0, output, 0, Math.min(exifBytes.length, output.length));</span>
+
+<span class="nc" id="L290">        try (BufferOutputStream headerStream = new BufferOutputStream(output, 0);</span>
+<span class="nc" id="L291">                BinaryOutputStream headerBinaryStream = BinaryOutputStream.create(headerStream, byteOrder)) {</span>
+<span class="nc" id="L292">            writeImageFileHeader(headerBinaryStream, rootDirectory.getOffset());</span>
+        }
+
+        // zero out the parsed pieces of old exif segment, in case we don't
+        // overwrite them.
+<span class="nc bnc" id="L297" title="All 2 branches missed.">        for (final AbstractTiffElement element : analysis) {</span>
+<span class="nc" id="L298">            Arrays.fill(output, (int) element.offset, (int) Math.min(element.offset + element.length, output.length), (byte) 0);</span>
+<span class="nc" id="L299">        }</span>
+
+        // write in the new items
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        for (final AbstractTiffOutputItem outputItem : outputItems) {</span>
+<span class="nc" id="L303">            try (BinaryOutputStream bos = BinaryOutputStream.create(new BufferOutputStream(output, (int) outputItem.getOffset()), byteOrder)) {</span>
+<span class="nc" id="L304">                outputItem.writeItem(bos);</span>
+            }
+<span class="nc" id="L306">        }</span>
+
+<span class="nc" id="L308">        os.write(output);</span>
+<span class="nc" id="L309">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

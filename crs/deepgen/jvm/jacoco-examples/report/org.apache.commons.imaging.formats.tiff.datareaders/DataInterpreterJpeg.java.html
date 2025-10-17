@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataInterpreterJpeg.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.datareaders</a> &gt; <span class="el_source">DataInterpreterJpeg.java</span></div><h1>DataInterpreterJpeg.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.imaging.formats.tiff.datareaders;
+
+import static org.apache.commons.imaging.formats.tiff.constants.AdobePhotoshopTagConstants.EXIF_TAG_JPEGTABLES;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.PHOTOMETRIC_INTERPRETATION_VALUE_RGB;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_PHOTOMETRIC_INTERPRETATION;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.ImageBuilder;
+import org.apache.commons.imaging.formats.jpeg.decoder.JpegDecoder;
+import org.apache.commons.imaging.formats.tiff.TiffDirectory;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+
+/**
+ * Provides logic for obtaining image data from a JPEG-encoded TIFF strip or tile (the &quot;block&quot;) from the source file.
+ */
+<span class="nc" id="L37">final class DataInterpreterJpeg {</span>
+
+    /**
+     * Interpret the content of a TIFF strip or tile obtained from the source file. The workingBuilder is an image builder that is configured to receive the
+     * extracted data.
+     * &lt;p&gt;
+     * The dimensions of the workingBuilder may or may not be identical to those of the source image. If the calling module is extracting a partial image, the
+     * workingBuilder will be sized so that its upper-left corner coordinate (row and column) and width and height are all even multiples of the dimensions of
+     * the tile or strip definition from the source. The reason for that approach is to simplify some of the logic in the legacy code by eliminating
+     * bounds-checking in the transfer loops.
+     * &lt;/p&gt;
+     *
+     * @param directory      the source directory containing JPEG tables
+     * @param workingBuilder the output image-builder to receive pixels.
+     * @param xBlock         column offset of the block within the workingBuilder
+     * @param yBlock         row offset of the block within the workingBuilder
+     * @param blockWidth     the width of the block (may be smaller than the full width of the JPEG image obtained from the source data)
+     * @param blockHeight    the height of the block (may be smaller than the full height of the JPEG image obtained from the source data)
+     * @param compressed     the raw bytes from the TIFF source file
+     * @throws ImagingException in the event of an unsupported feature or JPEG-specific encoding error
+     * @throws IOException      in the event of an unrecoverable I/O error
+     */
+    static void intepretBlock(final TiffDirectory directory, final ImageBuilder workingBuilder, final int xBlock, final int yBlock, final int blockWidth,
+            final int blockHeight, final byte[] compressed) throws ImagingException, IOException {
+        // the data for the block. The TIFF format can store some
+        // of the internal JPEG tables in a separate TIFF field (tag) called
+        // &quot;JPEG Tables&quot; which are used for all of the tiles in the file.
+        // So we need to concatenate the field bytes into the
+        // compressed sequence. Both the field bytes and compressed
+        // arrays start and end with the sequences SOI (0xffd8)
+        // and EOI (0xffd9). To concatenate the two, we need to get rid
+        // of the EOI from field bytes and SOI from compressed.
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (compressed.length &lt;= 4) {</span>
+<span class="nc" id="L70">            return;</span>
+        }
+
+        byte[] concat;
+
+<span class="nc" id="L75">        final byte[] field = directory.getFieldValue(EXIF_TAG_JPEGTABLES, false);</span>
+
+<span class="nc bnc" id="L77" title="All 4 branches missed.">        if (field == null || field.length == 0) {</span>
+            // The TIFF information was ommitted.
+            // We will just pass the compressed sequence to the
+            // decoder and let it throw the relevant exception.
+            // There is a possibility that some non-standard
+            // TIFF encoders might not use the JPEG Tables tag
+            // but embed to coding values in the compressed sequence
+<span class="nc" id="L84">            concat = compressed;</span>
+        } else {
+<span class="nc" id="L86">            concat = new byte[field.length + compressed.length - 4];</span>
+<span class="nc" id="L87">            System.arraycopy(field, 0, concat, 0, field.length - 2);</span>
+<span class="nc" id="L88">            System.arraycopy(compressed, 2, concat, field.length - 2, compressed.length - 2);</span>
+        }
+
+<span class="nc" id="L91">        final ByteSource bsArray = ByteSource.array(concat, &quot;JPEGtile&quot;);</span>
+
+        // Set up the decoder. In some cases, TIFF files may
+        // use the RGB encoding (which is slightly unusual for JPEGs).
+        // So check the photometric interpretation. If it is
+        // RGB, we make a special setting in the decoder. Otherwise,
+        // we let the decoder act according to the standard
+        // JPEG rules.
+<span class="nc" id="L99">        final JpegDecoder decoder = new JpegDecoder();</span>
+
+<span class="nc" id="L101">        final TiffField piField = directory.findField(TIFF_TAG_PHOTOMETRIC_INTERPRETATION);</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (piField != null) {</span>
+<span class="nc" id="L104">            final int pi = piField.getIntValue();</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (pi == PHOTOMETRIC_INTERPRETATION_VALUE_RGB) {</span>
+<span class="nc" id="L106">                decoder.setTiffRgb();</span>
+            }
+        }
+
+<span class="nc" id="L110">        final BufferedImage bImage = decoder.decode(bsArray);</span>
+        // a null result is not expected. An exception would
+        // be thrown if there was a formatting error
+<span class="nc" id="L113">        final int iWidth = bImage.getWidth();</span>
+<span class="nc" id="L114">        final int iHeight = bImage.getHeight();</span>
+<span class="nc" id="L115">        final int[] argb = new int[iWidth * iHeight];</span>
+<span class="nc" id="L116">        bImage.getRGB(0, 0, iWidth, iHeight, argb, 0, iWidth);</span>
+
+        // Limit iHeight and iWidth in case the JPEG block
+        // extends past the output image size
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        final int i1 = iHeight &gt; blockHeight ? blockHeight : iHeight;</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        final int j1 = iWidth &gt; blockWidth ? blockWidth : iWidth;</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        for (int i = 0; i &lt; i1; i++) {</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">            for (int j = 0; j &lt; j1; j++) {</span>
+<span class="nc" id="L125">                workingBuilder.setRgb(j + xBlock, i + yBlock, argb[i * iWidth + j]);</span>
+            }
+        }
+<span class="nc" id="L128">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

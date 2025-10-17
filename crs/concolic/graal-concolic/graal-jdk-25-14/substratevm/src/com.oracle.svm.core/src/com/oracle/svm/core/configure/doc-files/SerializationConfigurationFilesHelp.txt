@@ -1,0 +1,27 @@
+One or several (comma-separated) paths to JSON files that specify lists of serialization configurations.
+
+The structure is described in the following schema:
+
+  https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/assets/serialization-config-schema-v1.1.0.json
+
+Example:
+
+    {
+      "serialization": [
+        {
+        "condition" : {
+          "typeReachable" : "app.DataSerializer"
+        },
+        "name" : "java.util.ArrayList"
+      }
+      ]
+    }
+
+
+In rare cases an application might explicitly make calls to
+
+    ReflectionFactory.newConstructorForSerialization(Class<?> cl, Constructor<?> constructorToCall)
+
+The specified `constructorToCall` differs from the one that would be automatically used during regular serialization of `cl`.
+When a class is registered for run-time serialization, all potential custom constructors are automatically registered.
+As a result, this use case does not require any additional metadata.

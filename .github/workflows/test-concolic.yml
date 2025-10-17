@@ -1,0 +1,38 @@
+name: "[concolic] Team Atlanta Concolic Execution Testing"
+
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - crs/concolic/**
+
+jobs:
+  concolic-build-n-test:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        ssh-key: ${{ secrets.SSHKEY_GT_NOSGX_RSA }}
+        submodules: 'recursive'
+        lfs: false
+
+    - name: Build
+      run: |
+        # TODO: disable this for now
+        echo docker build \
+          -t executor-test:latest \
+          -f crs/concolic/Dockerfile.executor \
+          crs/concolic
+    - name: Test
+      run: |
+        # TODO: disable this for now
+        echo docker run \
+          --rm \
+          --privileged \
+          --cgroupns=host \
+          -w /executor \
+          executor-test:latest \
+          python3 /app/crs-cp-java-test/tests/test_server.py /app/crs-cp-java-test/metadata.json

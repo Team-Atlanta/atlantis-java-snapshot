@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PngWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">PngWriter.java</span></div><h1>PngWriter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.PixelDensity;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.internal.Debug;
+import org.apache.commons.imaging.palette.Palette;
+import org.apache.commons.imaging.palette.PaletteFactory;
+
+<span class="nc" id="L35">public class PngWriter {</span>
+
+    /*
+     * 1. IHDR: image header, which is the first chunk in a PNG data stream. 2. PLTE: palette table associated with indexed PNG images. 3. IDAT: image data
+     * chunks. 4. IEND: image trailer, which is the last chunk in a PNG data stream.
+     *
+     * The remaining 14 chunk types are termed ancillary chunk types, which encoders may generate and decoders may interpret.
+     *
+     * 1. Transparency information: tRNS (see 11.3.2: Transparency information). 2. Color space information: cHRM, gAMA, iCCP, sBIT, sRGB (see 11.3.3: Color
+     * space information). 3. Textual information: iTXt, tEXt, zTXt (see 11.3.4: Textual information). 4. Miscellaneous information: bKGD, hIST, pHYs, sPLT (see
+     * 11.3.5: Miscellaneous information). 5. Time information: tIME (see 11.3.6: Time stamp information).
+     */
+
+    private static final class ImageHeader {
+        public final int width;
+        public final int height;
+        public final byte bitDepth;
+        public final PngColorType pngColorType;
+        public final byte compressionMethod;
+        public final byte filterMethod;
+        public final InterlaceMethod interlaceMethod;
+
+        ImageHeader(final int width, final int height, final byte bitDepth, final PngColorType pngColorType, final byte compressionMethod,
+<span class="nc" id="L58">                final byte filterMethod, final InterlaceMethod interlaceMethod) {</span>
+<span class="nc" id="L59">            this.width = width;</span>
+<span class="nc" id="L60">            this.height = height;</span>
+<span class="nc" id="L61">            this.bitDepth = bitDepth;</span>
+<span class="nc" id="L62">            this.pngColorType = pngColorType;</span>
+<span class="nc" id="L63">            this.compressionMethod = compressionMethod;</span>
+<span class="nc" id="L64">            this.filterMethod = filterMethod;</span>
+<span class="nc" id="L65">            this.interlaceMethod = interlaceMethod;</span>
+<span class="nc" id="L66">        }</span>
+
+    }
+
+    private byte[] deflate(final byte[] bytes) throws IOException {
+<span class="nc" id="L71">        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {</span>
+<span class="nc" id="L72">            try (DeflaterOutputStream dos = new DeflaterOutputStream(baos)) {</span>
+<span class="nc" id="L73">                dos.write(bytes);</span>
+                // dos.flush() doesn't work - we must close it before baos.toByteArray()
+            }
+<span class="nc" id="L76">            return baos.toByteArray();</span>
+        }
+    }
+
+    private byte getBitDepth(final PngColorType pngColorType, final PngImagingParameters params) {
+<span class="nc" id="L81">        final byte depth = params.getBitDepth();</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        return pngColorType.isBitDepthAllowed(depth) ? depth : PngImagingParameters.DEFAULT_BIT_DEPTH;</span>
+    }
+
+    private boolean isValidISO_8859_1(final String s) {
+<span class="nc" id="L87">        final String roundtrip = new String(s.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.ISO_8859_1);</span>
+<span class="nc" id="L88">        return s.equals(roundtrip);</span>
+    }
+
+    private void writeChunk(final OutputStream os, final ChunkType chunkType, final byte[] data) throws IOException {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        final int dataLength = data == null ? 0 : data.length;</span>
+<span class="nc" id="L93">        writeInt(os, dataLength);</span>
+<span class="nc" id="L94">        os.write(chunkType.array);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (data != null) {</span>
+<span class="nc" id="L96">            os.write(data);</span>
+        }
+
+<span class="nc" id="L99">        final PngCrc pngCrc = new PngCrc();</span>
+
+<span class="nc" id="L101">        final long crc1 = pngCrc.startPartialCrc(chunkType.array, chunkType.array.length);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        final long crc2 = data == null ? crc1 : pngCrc.continuePartialCrc(crc1, data, data.length);</span>
+<span class="nc" id="L103">        final int crc = (int) pngCrc.finishPartialCrc(crc2);</span>
+
+<span class="nc" id="L105">        writeInt(os, crc);</span>
+<span class="nc" id="L106">    }</span>
+
+    private void writeChunkIDAT(final OutputStream os, final byte[] bytes) throws IOException {
+<span class="nc" id="L109">        writeChunk(os, ChunkType.IDAT, bytes);</span>
+<span class="nc" id="L110">    }</span>
+
+    private void writeChunkIEND(final OutputStream os) throws IOException {
+<span class="nc" id="L113">        writeChunk(os, ChunkType.IEND, null);</span>
+<span class="nc" id="L114">    }</span>
+
+    private void writeChunkIHDR(final OutputStream os, final ImageHeader value) throws IOException {
+<span class="nc" id="L117">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+<span class="nc" id="L118">        writeInt(baos, value.width);</span>
+<span class="nc" id="L119">        writeInt(baos, value.height);</span>
+<span class="nc" id="L120">        baos.write(0xff &amp; value.bitDepth);</span>
+<span class="nc" id="L121">        baos.write(0xff &amp; value.pngColorType.getValue());</span>
+<span class="nc" id="L122">        baos.write(0xff &amp; value.compressionMethod);</span>
+<span class="nc" id="L123">        baos.write(0xff &amp; value.filterMethod);</span>
+<span class="nc" id="L124">        baos.write(0xff &amp; value.interlaceMethod.ordinal());</span>
+
+<span class="nc" id="L126">        writeChunk(os, ChunkType.IHDR, baos.toByteArray());</span>
+<span class="nc" id="L127">    }</span>
+
+    private void writeChunkiTXt(final OutputStream os, final AbstractPngText.Itxt text) throws IOException, ImagingException {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (!isValidISO_8859_1(text.keyword)) {</span>
+<span class="nc" id="L131">            throw new ImagingException(&quot;PNG tEXt chunk keyword is not ISO-8859-1: &quot; + text.keyword);</span>
+        }
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (!isValidISO_8859_1(text.languageTag)) {</span>
+<span class="nc" id="L134">            throw new ImagingException(&quot;PNG tEXt chunk language tag is not ISO-8859-1: &quot; + text.languageTag);</span>
+        }
+
+<span class="nc" id="L137">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+        // keyword
+<span class="nc" id="L140">        baos.write(text.keyword.getBytes(StandardCharsets.ISO_8859_1));</span>
+<span class="nc" id="L141">        baos.write(0);</span>
+
+<span class="nc" id="L143">        baos.write(1); // compressed flag, true</span>
+<span class="nc" id="L144">        baos.write(PngConstants.COMPRESSION_DEFLATE_INFLATE); // compression method</span>
+
+        // language tag
+<span class="nc" id="L147">        baos.write(text.languageTag.getBytes(StandardCharsets.ISO_8859_1));</span>
+<span class="nc" id="L148">        baos.write(0);</span>
+
+        // translated keyword
+<span class="nc" id="L151">        baos.write(text.translatedKeyword.getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L152">        baos.write(0);</span>
+
+<span class="nc" id="L154">        baos.write(deflate(text.text.getBytes(StandardCharsets.UTF_8)));</span>
+
+<span class="nc" id="L156">        writeChunk(os, ChunkType.iTXt, baos.toByteArray());</span>
+<span class="nc" id="L157">    }</span>
+
+    private void writeChunkPHYS(final OutputStream os, final int xPPU, final int yPPU, final byte units) throws IOException {
+<span class="nc" id="L160">        final byte[] bytes = new byte[9];</span>
+<span class="nc" id="L161">        bytes[0] = (byte) (0xff &amp; xPPU &gt;&gt; 24);</span>
+<span class="nc" id="L162">        bytes[1] = (byte) (0xff &amp; xPPU &gt;&gt; 16);</span>
+<span class="nc" id="L163">        bytes[2] = (byte) (0xff &amp; xPPU &gt;&gt; 8);</span>
+<span class="nc" id="L164">        bytes[3] = (byte) (0xff &amp; xPPU &gt;&gt; 0);</span>
+<span class="nc" id="L165">        bytes[4] = (byte) (0xff &amp; yPPU &gt;&gt; 24);</span>
+<span class="nc" id="L166">        bytes[5] = (byte) (0xff &amp; yPPU &gt;&gt; 16);</span>
+<span class="nc" id="L167">        bytes[6] = (byte) (0xff &amp; yPPU &gt;&gt; 8);</span>
+<span class="nc" id="L168">        bytes[7] = (byte) (0xff &amp; yPPU &gt;&gt; 0);</span>
+<span class="nc" id="L169">        bytes[8] = units;</span>
+<span class="nc" id="L170">        writeChunk(os, ChunkType.pHYs, bytes);</span>
+<span class="nc" id="L171">    }</span>
+
+    private void writeChunkPLTE(final OutputStream os, final Palette palette) throws IOException {
+<span class="nc" id="L174">        final int length = palette.length();</span>
+<span class="nc" id="L175">        final byte[] bytes = Allocator.byteArray(length * 3);</span>
+
+        // Debug.debug(&quot;length&quot;, length);
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L179">            final int rgb = palette.getEntry(i);</span>
+<span class="nc" id="L180">            final int index = i * 3;</span>
+            // Debug.debug(&quot;index&quot;, index);
+<span class="nc" id="L182">            bytes[index + 0] = (byte) (0xff &amp; rgb &gt;&gt; 16);</span>
+<span class="nc" id="L183">            bytes[index + 1] = (byte) (0xff &amp; rgb &gt;&gt; 8);</span>
+<span class="nc" id="L184">            bytes[index + 2] = (byte) (0xff &amp; rgb &gt;&gt; 0);</span>
+        }
+
+<span class="nc" id="L187">        writeChunk(os, ChunkType.PLTE, bytes);</span>
+<span class="nc" id="L188">    }</span>
+
+    private void writeChunkSCAL(final OutputStream os, final double xUPP, final double yUPP, final byte units) throws IOException {
+<span class="nc" id="L191">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+        // unit specifier
+<span class="nc" id="L194">        baos.write(units);</span>
+
+        // units per pixel, x-axis
+<span class="nc" id="L197">        baos.write(String.valueOf(xUPP).getBytes(StandardCharsets.ISO_8859_1));</span>
+<span class="nc" id="L198">        baos.write(0);</span>
+
+<span class="nc" id="L200">        baos.write(String.valueOf(yUPP).getBytes(StandardCharsets.ISO_8859_1));</span>
+
+<span class="nc" id="L202">        writeChunk(os, ChunkType.sCAL, baos.toByteArray());</span>
+<span class="nc" id="L203">    }</span>
+
+    private void writeChunktEXt(final OutputStream os, final AbstractPngText.Text text) throws IOException, ImagingException {
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (!isValidISO_8859_1(text.keyword)) {</span>
+<span class="nc" id="L207">            throw new ImagingException(&quot;PNG tEXt chunk keyword is not ISO-8859-1: &quot; + text.keyword);</span>
+        }
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (!isValidISO_8859_1(text.text)) {</span>
+<span class="nc" id="L210">            throw new ImagingException(&quot;PNG tEXt chunk text is not ISO-8859-1: &quot; + text.text);</span>
+        }
+
+<span class="nc" id="L213">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+        // keyword
+<span class="nc" id="L216">        baos.write(text.keyword.getBytes(StandardCharsets.ISO_8859_1));</span>
+<span class="nc" id="L217">        baos.write(0);</span>
+
+        // text
+<span class="nc" id="L220">        baos.write(text.text.getBytes(StandardCharsets.ISO_8859_1));</span>
+
+<span class="nc" id="L222">        writeChunk(os, ChunkType.tEXt, baos.toByteArray());</span>
+<span class="nc" id="L223">    }</span>
+
+    private void writeChunkTRNS(final OutputStream os, final Palette palette) throws IOException {
+<span class="nc" id="L226">        final byte[] bytes = Allocator.byteArray(palette.length());</span>
+
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        for (int i = 0; i &lt; bytes.length; i++) {</span>
+<span class="nc" id="L229">            bytes[i] = (byte) (0xff &amp; palette.getEntry(i) &gt;&gt; 24);</span>
+        }
+
+<span class="nc" id="L232">        writeChunk(os, ChunkType.tRNS, bytes);</span>
+<span class="nc" id="L233">    }</span>
+
+    private void writeChunkXmpiTXt(final OutputStream os, final String xmpXml) throws IOException {
+
+<span class="nc" id="L237">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+        // keyword
+<span class="nc" id="L240">        baos.write(PngConstants.XMP_KEYWORD.getBytes(StandardCharsets.ISO_8859_1));</span>
+<span class="nc" id="L241">        baos.write(0);</span>
+
+<span class="nc" id="L243">        baos.write(1); // compressed flag, true</span>
+<span class="nc" id="L244">        baos.write(PngConstants.COMPRESSION_DEFLATE_INFLATE); // compression method</span>
+
+<span class="nc" id="L246">        baos.write(0); // language tag (ignore). TODO</span>
+
+        // translated keyword
+<span class="nc" id="L249">        baos.write(PngConstants.XMP_KEYWORD.getBytes(StandardCharsets.UTF_8));</span>
+<span class="nc" id="L250">        baos.write(0);</span>
+
+<span class="nc" id="L252">        baos.write(deflate(xmpXml.getBytes(StandardCharsets.UTF_8)));</span>
+
+<span class="nc" id="L254">        writeChunk(os, ChunkType.iTXt, baos.toByteArray());</span>
+<span class="nc" id="L255">    }</span>
+
+    private void writeChunkzTXt(final OutputStream os, final AbstractPngText.Ztxt text) throws IOException, ImagingException {
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (!isValidISO_8859_1(text.keyword)) {</span>
+<span class="nc" id="L259">            throw new ImagingException(&quot;PNG zTXt chunk keyword is not ISO-8859-1: &quot; + text.keyword);</span>
+        }
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (!isValidISO_8859_1(text.text)) {</span>
+<span class="nc" id="L262">            throw new ImagingException(&quot;PNG zTXt chunk text is not ISO-8859-1: &quot; + text.text);</span>
+        }
+
+<span class="nc" id="L265">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+        // keyword
+<span class="nc" id="L268">        baos.write(text.keyword.getBytes(StandardCharsets.ISO_8859_1));</span>
+<span class="nc" id="L269">        baos.write(0);</span>
+
+        // compression method
+<span class="nc" id="L272">        baos.write(PngConstants.COMPRESSION_DEFLATE_INFLATE);</span>
+
+        // text
+<span class="nc" id="L275">        baos.write(deflate(text.text.getBytes(StandardCharsets.ISO_8859_1)));</span>
+
+<span class="nc" id="L277">        writeChunk(os, ChunkType.zTXt, baos.toByteArray());</span>
+<span class="nc" id="L278">    }</span>
+
+    /*
+     * between two chunk types indicates alternatives. Table 5.3 - Chunk ordering rules Critical chunks (shall appear in this order, except PLTE is optional)
+     * Chunk name Multiple allowed Ordering constraints IHDR No Shall be first PLTE No Before first IDAT IDAT Yes Multiple IDAT chunks shall be consecutive IEND
+     * No Shall be last Ancillary chunks (need not appear in this order) Chunk name Multiple allowed Ordering constraints cHRM No Before PLTE and IDAT gAMA No
+     * Before PLTE and IDAT iCCP No Before PLTE and IDAT. If the iCCP chunk is present, the sRGB chunk should not be present. sBIT No Before PLTE and IDAT sRGB
+     * No Before PLTE and IDAT. If the sRGB chunk is present, the iCCP chunk should not be present. bKGD No After PLTE; before IDAT hIST No After PLTE; before
+     * IDAT tRNS No After PLTE; before IDAT pHYs No Before IDAT sCAL No Before IDAT sPLT Yes Before IDAT tIME No None iTXt Yes None tEXt Yes None zTXt Yes None
+     */
+
+    /**
+     * Writes an image to an output stream.
+     *
+     * @param src            The image to write.
+     * @param os             The output stream to write to.
+     * @param params         The parameters to use (can be {@code NULL} to use the default {@link PngImagingParameters}).
+     * @param paletteFactory The palette factory to use (can be {@code NULL} to use the default {@link PaletteFactory}).
+     * @throws ImagingException When errors are detected.
+     * @throws IOException      When IO problems occur.
+     */
+    public void writeImage(final BufferedImage src, final OutputStream os, PngImagingParameters params, PaletteFactory paletteFactory)
+            throws ImagingException, IOException {
+<span class="nc bnc" id="L301" title="All 2 branches missed.">        if (params == null) {</span>
+<span class="nc" id="L302">            params = new PngImagingParameters();</span>
+        }
+<span class="nc bnc" id="L304" title="All 2 branches missed.">        if (paletteFactory == null) {</span>
+<span class="nc" id="L305">            paletteFactory = new PaletteFactory();</span>
+        }
+<span class="nc" id="L307">        final int compressionLevel = Deflater.DEFAULT_COMPRESSION;</span>
+
+<span class="nc" id="L309">        final int width = src.getWidth();</span>
+<span class="nc" id="L310">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L312">        final boolean hasAlpha = paletteFactory.hasTransparency(src);</span>
+<span class="nc" id="L313">        Debug.debug(&quot;hasAlpha: &quot; + hasAlpha);</span>
+        // int transparency = paletteFactory.getTransparency(src);
+
+<span class="nc" id="L316">        boolean isGrayscale = paletteFactory.isGrayscale(src);</span>
+<span class="nc" id="L317">        Debug.debug(&quot;isGrayscale: &quot; + isGrayscale);</span>
+
+        PngColorType pngColorType;
+        {
+<span class="nc" id="L321">            final boolean forceIndexedColor = params.isForceIndexedColor();</span>
+<span class="nc" id="L322">            final boolean forceTrueColor = params.isForceTrueColor();</span>
+
+<span class="nc bnc" id="L324" title="All 4 branches missed.">            if (forceIndexedColor &amp;&amp; forceTrueColor) {</span>
+<span class="nc" id="L325">                throw new ImagingException(&quot;Params: Cannot force both indexed and true color modes&quot;);</span>
+            }
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            if (forceIndexedColor) {</span>
+<span class="nc" id="L328">                pngColorType = PngColorType.INDEXED_COLOR;</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">            } else if (forceTrueColor) {</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                pngColorType = hasAlpha ? PngColorType.TRUE_COLOR_WITH_ALPHA : PngColorType.TRUE_COLOR;</span>
+<span class="nc" id="L331">                isGrayscale = false;</span>
+            } else {
+<span class="nc" id="L333">                pngColorType = PngColorType.getColorType(hasAlpha, isGrayscale);</span>
+            }
+<span class="nc" id="L335">            Debug.debug(&quot;colorType: &quot; + pngColorType);</span>
+        }
+
+<span class="nc" id="L338">        final byte bitDepth = getBitDepth(pngColorType, params);</span>
+<span class="nc" id="L339">        Debug.debug(&quot;bitDepth: &quot; + bitDepth);</span>
+
+        int sampleDepth;
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        if (pngColorType == PngColorType.INDEXED_COLOR) {</span>
+<span class="nc" id="L343">            sampleDepth = 8;</span>
+        } else {
+<span class="nc" id="L345">            sampleDepth = bitDepth;</span>
+        }
+<span class="nc" id="L347">        Debug.debug(&quot;sampleDepth: &quot; + sampleDepth);</span>
+
+        {
+<span class="nc" id="L350">            PngConstants.PNG_SIGNATURE.writeTo(os);</span>
+        }
+        {
+            // IHDR must be first
+
+<span class="nc" id="L355">            final byte compressionMethod = PngConstants.COMPRESSION_TYPE_INFLATE_DEFLATE;</span>
+<span class="nc" id="L356">            final byte filterMethod = PngConstants.FILTER_METHOD_ADAPTIVE;</span>
+<span class="nc" id="L357">            final InterlaceMethod interlaceMethod = InterlaceMethod.NONE;</span>
+
+<span class="nc" id="L359">            final ImageHeader imageHeader = new ImageHeader(width, height, bitDepth, pngColorType, compressionMethod, filterMethod, interlaceMethod);</span>
+
+<span class="nc" id="L361">            writeChunkIHDR(os, imageHeader);</span>
+        }
+
+        // {
+        // sRGB No Before PLTE and IDAT. If the sRGB chunk is present, the
+        // iCCP chunk should not be present.
+
+        // charles
+        // }
+
+<span class="nc" id="L371">        Palette palette = null;</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">        if (pngColorType == PngColorType.INDEXED_COLOR) {</span>
+            // PLTE No Before first IDAT
+
+<span class="nc" id="L375">            final int maxColors = 256;</span>
+
+<span class="nc bnc" id="L377" title="All 2 branches missed.">            if (hasAlpha) {</span>
+<span class="nc" id="L378">                palette = paletteFactory.makeQuantizedRgbaPalette(src, hasAlpha, maxColors);</span>
+<span class="nc" id="L379">                writeChunkPLTE(os, palette);</span>
+<span class="nc" id="L380">                writeChunkTRNS(os, palette);</span>
+            } else {
+<span class="nc" id="L382">                palette = paletteFactory.makeQuantizedRgbPalette(src, maxColors);</span>
+<span class="nc" id="L383">                writeChunkPLTE(os, palette);</span>
+            }
+        }
+
+<span class="nc" id="L387">        final Object pixelDensityObj = params.getPixelDensity();</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">        if (pixelDensityObj != null) {</span>
+<span class="nc" id="L389">            final PixelDensity pixelDensity = (PixelDensity) pixelDensityObj;</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            if (pixelDensity.isUnitless()) {</span>
+<span class="nc" id="L391">                writeChunkPHYS(os, (int) Math.round(pixelDensity.getRawHorizontalDensity()), (int) Math.round(pixelDensity.getRawVerticalDensity()), (byte) 0);</span>
+            } else {
+<span class="nc" id="L393">                writeChunkPHYS(os, (int) Math.round(pixelDensity.horizontalDensityMetres()), (int) Math.round(pixelDensity.verticalDensityMetres()), (byte) 1);</span>
+            }
+        }
+
+<span class="nc" id="L397">        final PhysicalScale physicalScale = params.getPhysicalScale();</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">        if (physicalScale != null) {</span>
+<span class="nc" id="L399">            writeChunkSCAL(os, physicalScale.getHorizontalUnitsPerPixel(), physicalScale.getVerticalUnitsPerPixel(),</span>
+<span class="nc bnc" id="L400" title="All 2 branches missed.">                    physicalScale.isInMeters() ? (byte) 1 : (byte) 2);</span>
+        }
+
+<span class="nc" id="L403">        final String xmpXml = params.getXmpXml();</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">        if (xmpXml != null) {</span>
+<span class="nc" id="L405">            writeChunkXmpiTXt(os, xmpXml);</span>
+        }
+
+<span class="nc" id="L408">        final List&lt;? extends AbstractPngText&gt; outputTexts = params.getTextChunks();</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        if (outputTexts != null) {</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">            for (final AbstractPngText text : outputTexts) {</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">                if (text instanceof AbstractPngText.Text) {</span>
+<span class="nc" id="L412">                    writeChunktEXt(os, (AbstractPngText.Text) text);</span>
+<span class="nc bnc" id="L413" title="All 2 branches missed.">                } else if (text instanceof AbstractPngText.Ztxt) {</span>
+<span class="nc" id="L414">                    writeChunkzTXt(os, (AbstractPngText.Ztxt) text);</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">                } else if (text instanceof AbstractPngText.Itxt) {</span>
+<span class="nc" id="L416">                    writeChunkiTXt(os, (AbstractPngText.Itxt) text);</span>
+                } else {
+<span class="nc" id="L418">                    throw new ImagingException(&quot;Unknown text to embed in PNG: &quot; + text);</span>
+                }
+<span class="nc" id="L420">            }</span>
+        }
+
+        {
+            // Debug.debug(&quot;writing IDAT&quot;);
+
+            // IDAT Yes Multiple IDAT chunks shall be consecutive
+
+            // 28 March 2022. At this time, we only apply the predictor
+            // for non-grayscale, true-color images. This choice is made
+            // out of caution and is not necessarily required by the PNG
+            // spec. We may broaden the use of predictors in future versions.
+<span class="nc bnc" id="L432" title="All 6 branches missed.">            final boolean usePredictor = params.isPredictorEnabled() &amp;&amp; !isGrayscale &amp;&amp; palette == null;</span>
+
+            byte[] uncompressed;
+<span class="nc bnc" id="L435" title="All 2 branches missed.">            if (!usePredictor) {</span>
+<span class="nc" id="L436">                final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+<span class="nc bnc" id="L438" title="All 4 branches missed.">                final boolean useAlpha = pngColorType == PngColorType.GREYSCALE_WITH_ALPHA || pngColorType == PngColorType.TRUE_COLOR_WITH_ALPHA;</span>
+
+<span class="nc" id="L440">                final int[] row = Allocator.intArray(width);</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">                for (int y = 0; y &lt; height; y++) {</span>
+                    // Debug.debug(&quot;y&quot;, y + &quot;/&quot; + height);
+<span class="nc" id="L443">                    src.getRGB(0, y, width, 1, row, 0, width);</span>
+
+<span class="nc" id="L445">                    baos.write(FilterType.NONE.ordinal());</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">                    for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L447">                        final int argb = row[x];</span>
+
+<span class="nc bnc" id="L449" title="All 2 branches missed.">                        if (palette != null) {</span>
+<span class="nc" id="L450">                            final int index = palette.getPaletteIndex(argb);</span>
+<span class="nc" id="L451">                            baos.write(0xff &amp; index);</span>
+<span class="nc" id="L452">                        } else {</span>
+<span class="nc" id="L453">                            final int alpha = 0xff &amp; argb &gt;&gt; 24;</span>
+<span class="nc" id="L454">                            final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L455">                            final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L456">                            final int blue = 0xff &amp; argb &gt;&gt; 0;</span>
+
+<span class="nc bnc" id="L458" title="All 2 branches missed.">                            if (isGrayscale) {</span>
+<span class="nc" id="L459">                                final int gray = (red + green + blue) / 3;</span>
+                                // if (y == 0)
+                                // {
+                                // Debug.debug(&quot;gray: &quot; + x + &quot;, &quot; + y +
+                                // &quot; argb: 0x&quot;
+                                // + Integer.toHexString(argb) + &quot; gray: 0x&quot;
+                                // + Integer.toHexString(gray));
+                                // // Debug.debug(x + &quot;, &quot; + y + &quot; gray&quot;, gray);
+                                // // Debug.debug(x + &quot;, &quot; + y + &quot; gray&quot;, gray);
+                                // Debug.debug(x + &quot;, &quot; + y + &quot; gray&quot;, gray +
+                                // &quot; &quot; + Integer.toHexString(gray));
+                                // Debug.debug();
+                                // }
+<span class="nc" id="L472">                                baos.write(gray);</span>
+<span class="nc" id="L473">                            } else {</span>
+<span class="nc" id="L474">                                baos.write(red);</span>
+<span class="nc" id="L475">                                baos.write(green);</span>
+<span class="nc" id="L476">                                baos.write(blue);</span>
+                            }
+<span class="nc bnc" id="L478" title="All 2 branches missed.">                            if (useAlpha) {</span>
+<span class="nc" id="L479">                                baos.write(alpha);</span>
+                            }
+                        }
+                    }
+                }
+<span class="nc" id="L484">                uncompressed = baos.toByteArray();</span>
+<span class="nc" id="L485">            } else {</span>
+<span class="nc" id="L486">                final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+<span class="nc bnc" id="L488" title="All 4 branches missed.">                final boolean useAlpha = pngColorType == PngColorType.GREYSCALE_WITH_ALPHA || pngColorType == PngColorType.TRUE_COLOR_WITH_ALPHA;</span>
+
+<span class="nc" id="L490">                final int[] row = Allocator.intArray(width);</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">                for (int y = 0; y &lt; height; y++) {</span>
+                    // Debug.debug(&quot;y&quot;, y + &quot;/&quot; + height);
+<span class="nc" id="L493">                    src.getRGB(0, y, width, 1, row, 0, width);</span>
+
+<span class="nc" id="L495">                    int priorA = 0;</span>
+<span class="nc" id="L496">                    int priorR = 0;</span>
+<span class="nc" id="L497">                    int priorG = 0;</span>
+<span class="nc" id="L498">                    int priorB = 0;</span>
+<span class="nc" id="L499">                    baos.write(FilterType.SUB.ordinal());</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">                    for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L501">                        final int argb = row[x];</span>
+<span class="nc" id="L502">                        final int alpha = 0xff &amp; argb &gt;&gt; 24;</span>
+<span class="nc" id="L503">                        final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L504">                        final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L505">                        final int blue = 0xff &amp; argb;</span>
+
+<span class="nc" id="L507">                        baos.write(red - priorR);</span>
+<span class="nc" id="L508">                        baos.write(green - priorG);</span>
+<span class="nc" id="L509">                        baos.write(blue - priorB);</span>
+<span class="nc" id="L510">                        priorR = red;</span>
+<span class="nc" id="L511">                        priorG = green;</span>
+<span class="nc" id="L512">                        priorB = blue;</span>
+
+<span class="nc bnc" id="L514" title="All 2 branches missed.">                        if (useAlpha) {</span>
+<span class="nc" id="L515">                            baos.write(alpha - priorA);</span>
+<span class="nc" id="L516">                            priorA = alpha;</span>
+                        }
+                    }
+                }
+<span class="nc" id="L520">                uncompressed = baos.toByteArray();</span>
+            }
+
+            // Debug.debug(&quot;uncompressed&quot;, uncompressed.length);
+
+<span class="nc" id="L525">            final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+<span class="nc" id="L526">            final int chunkSize = 256 * 1024;</span>
+<span class="nc" id="L527">            final Deflater deflater = new Deflater(compressionLevel);</span>
+<span class="nc" id="L528">            final DeflaterOutputStream dos = new DeflaterOutputStream(baos, deflater, chunkSize);</span>
+
+<span class="nc bnc" id="L530" title="All 2 branches missed.">            for (int index = 0; index &lt; uncompressed.length; index += chunkSize) {</span>
+<span class="nc" id="L531">                final int end = Math.min(uncompressed.length, index + chunkSize);</span>
+<span class="nc" id="L532">                final int length = end - index;</span>
+
+<span class="nc" id="L534">                dos.write(uncompressed, index, length);</span>
+<span class="nc" id="L535">                dos.flush();</span>
+<span class="nc" id="L536">                baos.flush();</span>
+
+<span class="nc" id="L538">                final byte[] compressed = baos.toByteArray();</span>
+<span class="nc" id="L539">                baos.reset();</span>
+<span class="nc bnc" id="L540" title="All 2 branches missed.">                if (compressed.length &gt; 0) {</span>
+                    // Debug.debug(&quot;compressed&quot;, compressed.length);
+<span class="nc" id="L542">                    writeChunkIDAT(os, compressed);</span>
+                }
+
+            }
+            {
+<span class="nc" id="L547">                dos.finish();</span>
+<span class="nc" id="L548">                final byte[] compressed = baos.toByteArray();</span>
+<span class="nc bnc" id="L549" title="All 2 branches missed.">                if (compressed.length &gt; 0) {</span>
+                    // Debug.debug(&quot;compressed final&quot;, compressed.length);
+<span class="nc" id="L551">                    writeChunkIDAT(os, compressed);</span>
+                }
+            }
+        }
+
+        {
+            // IEND No Shall be last
+
+<span class="nc" id="L559">            writeChunkIEND(os);</span>
+        }
+
+        /*
+         * Ancillary chunks (need not appear in this order) Chunk name Multiple allowed Ordering constraints cHRM No Before PLTE and IDAT gAMA No Before PLTE
+         * and IDAT iCCP No Before PLTE and IDAT. If the iCCP chunk is present, the sRGB chunk should not be present. sBIT No Before PLTE and IDAT sRGB No
+         * Before PLTE and IDAT. If the sRGB chunk is present, the iCCP chunk should not be present. bKGD No After PLTE; before IDAT hIST No After PLTE; before
+         * IDAT tRNS No After PLTE; before IDAT pHYs No Before IDAT sCAL No Before IDAT sPLT Yes Before IDAT tIME No None iTXt Yes None tEXt Yes None zTXt Yes
+         * None
+         */
+
+<span class="nc" id="L570">        os.close();</span>
+<span class="nc" id="L571">    } // todo: filter types</span>
+      // proper color types
+      // srgb, etc.
+
+    private void writeInt(final OutputStream os, final int value) throws IOException {
+<span class="nc" id="L576">        os.write(0xff &amp; value &gt;&gt; 24);</span>
+<span class="nc" id="L577">        os.write(0xff &amp; value &gt;&gt; 16);</span>
+<span class="nc" id="L578">        os.write(0xff &amp; value &gt;&gt; 8);</span>
+<span class="nc" id="L579">        os.write(0xff &amp; value &gt;&gt; 0);</span>
+<span class="nc" id="L580">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

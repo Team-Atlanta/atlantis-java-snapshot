@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Dithering.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.palette</a> &gt; <span class="el_source">Dithering.java</span></div><h1>Dithering.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.palette;
+
+import java.awt.image.BufferedImage;
+
+import org.apache.commons.imaging.ImagingException;
+
+/**
+ * Dithering algorithms to use when quantizing an image to palette form.
+ */
+public final class Dithering {
+    private static int adjustPixel(final int argb, final int errA, final int errR, final int errG, final int errB, final int mul) {
+<span class="nc" id="L28">        int a = argb &gt;&gt; 24 &amp; 0xff;</span>
+<span class="nc" id="L29">        int r = argb &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L30">        int g = argb &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L31">        int b = argb &amp; 0xff;</span>
+
+<span class="nc" id="L33">        a += errA * mul / 16;</span>
+<span class="nc" id="L34">        r += errR * mul / 16;</span>
+<span class="nc" id="L35">        g += errG * mul / 16;</span>
+<span class="nc" id="L36">        b += errB * mul / 16;</span>
+
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (a &lt; 0) {</span>
+<span class="nc" id="L39">            a = 0;</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        } else if (a &gt; 0xff) {</span>
+<span class="nc" id="L41">            a = 0xff;</span>
+        }
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (r &lt; 0) {</span>
+<span class="nc" id="L44">            r = 0;</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        } else if (r &gt; 0xff) {</span>
+<span class="nc" id="L46">            r = 0xff;</span>
+        }
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (g &lt; 0) {</span>
+<span class="nc" id="L49">            g = 0;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        } else if (g &gt; 0xff) {</span>
+<span class="nc" id="L51">            g = 0xff;</span>
+        }
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (b &lt; 0) {</span>
+<span class="nc" id="L54">            b = 0;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        } else if (b &gt; 0xff) {</span>
+<span class="nc" id="L56">            b = 0xff;</span>
+        }
+
+<span class="nc" id="L59">        return a &lt;&lt; 24 | r &lt;&lt; 16 | g &lt;&lt; 8 | b;</span>
+    }
+
+    /**
+     * Changes the given image to only use colors from the given palette, applying Floyd-Steinberg dithering in the process. Ensure that your alpha values in
+     * the image and in the palette are consistent.
+     *
+     * @param image   the image to change
+     * @param palette the palette to use
+     * @throws ImagingException if it fails to read the palette index
+     */
+    public static void applyFloydSteinbergDithering(final BufferedImage image, final Palette palette) throws ImagingException {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        for (int y = 0; y &lt; image.getHeight(); y++) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            for (int x = 0; x &lt; image.getWidth(); x++) {</span>
+<span class="nc" id="L73">                final int argb = image.getRGB(x, y);</span>
+<span class="nc" id="L74">                final int index = palette.getPaletteIndex(argb);</span>
+<span class="nc" id="L75">                final int nextArgb = palette.getEntry(index);</span>
+<span class="nc" id="L76">                image.setRGB(x, y, nextArgb);</span>
+
+<span class="nc" id="L78">                final int a = argb &gt;&gt; 24 &amp; 0xff;</span>
+<span class="nc" id="L79">                final int r = argb &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L80">                final int g = argb &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L81">                final int b = argb &amp; 0xff;</span>
+
+<span class="nc" id="L83">                final int na = nextArgb &gt;&gt; 24 &amp; 0xff;</span>
+<span class="nc" id="L84">                final int nr = nextArgb &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L85">                final int ng = nextArgb &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L86">                final int nb = nextArgb &amp; 0xff;</span>
+
+<span class="nc" id="L88">                final int errA = a - na;</span>
+<span class="nc" id="L89">                final int errR = r - nr;</span>
+<span class="nc" id="L90">                final int errG = g - ng;</span>
+<span class="nc" id="L91">                final int errB = b - nb;</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                if (x + 1 &lt; image.getWidth()) {</span>
+<span class="nc" id="L94">                    int update = adjustPixel(image.getRGB(x + 1, y), errA, errR, errG, errB, 7);</span>
+<span class="nc" id="L95">                    image.setRGB(x + 1, y, update);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                    if (y + 1 &lt; image.getHeight()) {</span>
+<span class="nc" id="L97">                        update = adjustPixel(image.getRGB(x + 1, y + 1), errA, errR, errG, errB, 1);</span>
+<span class="nc" id="L98">                        image.setRGB(x + 1, y + 1, update);</span>
+                    }
+                }
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                if (y + 1 &lt; image.getHeight()) {</span>
+<span class="nc" id="L102">                    int update = adjustPixel(image.getRGB(x, y + 1), errA, errR, errG, errB, 5);</span>
+<span class="nc" id="L103">                    image.setRGB(x, y + 1, update);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                    if (x - 1 &gt;= 0) {</span>
+<span class="nc" id="L105">                        update = adjustPixel(image.getRGB(x - 1, y + 1), errA, errR, errG, errB, 3);</span>
+<span class="nc" id="L106">                        image.setRGB(x - 1, y + 1, update);</span>
+                    }
+
+                }
+            }
+        }
+<span class="nc" id="L112">    }</span>
+
+    private Dithering() {
+        // no instances.
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

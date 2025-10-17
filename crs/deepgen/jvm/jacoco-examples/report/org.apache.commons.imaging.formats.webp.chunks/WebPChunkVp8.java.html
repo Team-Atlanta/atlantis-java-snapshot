@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebPChunkVp8.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.webp.chunks</a> &gt; <span class="el_source">WebPChunkVp8.java</span></div><h1>WebPChunkVp8.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.webp.chunks;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import org.apache.commons.imaging.ImagingException;
+
+/**
+ * VP8 (bitstream) chunk.
+ *
+ * &lt;pre&gt;{@code
+ *  0                   1                   2                   3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                      ChunkHeader('VP8 ')                      |
+ * |                                                               |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * :                           VP8 data                            :
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * }&lt;/pre&gt;
+ *
+ * @see &lt;a href=&quot;https://developers.google.com/speed/webp/docs/riff_container#simple_file_format_lossy&quot;&gt;Simple File Format (Lossy)&lt;/a&gt;
+ * @see &lt;a href=&quot;https://datatracker.ietf.org/doc/html/rfc6386&quot;&gt;VP8 Data Format and Decoding Guide&lt;/a&gt;
+ * @since 1.0-alpha4
+ */
+public final class WebPChunkVp8 extends WebPChunk {
+    private final int versionNumber;
+    private final int width;
+    private final int height;
+    private final int horizontalScale;
+    private final int verticalScale;
+
+    /**
+     * Create a VP8 chunk.
+     *
+     * @param type  chunk type.
+     * @param size  chunk size.
+     * @param bytes chunk data.
+     * @throws ImagingException if the chunk data and the size provided do not match.
+     */
+    public WebPChunkVp8(final int type, final int size, final byte[] bytes) throws ImagingException {
+<span class="nc" id="L58">        super(type, size, bytes);</span>
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (size &lt; 10) {</span>
+<span class="nc" id="L61">            throw new ImagingException(&quot;Invalid VP8 chunk&quot;);</span>
+        }
+
+        /*
+         * https://datatracker.ietf.org/doc/html/rfc6386#section-9
+         */
+
+        /*
+         * Frame Header:
+         *
+         * 1. A 1-bit frame type (0 for key frames, 1 for interframes).
+         *
+         * 2. A 3-bit version number (0 - 3 are defined as four different profiles with different decoding complexity; other values may be defined for future
+         * variants of the VP8 data format).
+         *
+         * 3. A 1-bit show_frame flag (0 when current frame is not for display, 1 when current frame is for display).
+         *
+         * 4. A 19-bit field containing the size of the first data partition in bytes.
+         */
+
+<span class="nc" id="L81">        final int b0 = bytes[0] &amp; 0xFF;</span>
+        // int b1 = bytes[1] &amp; 0xFF;
+        // int b2 = bytes[2] &amp; 0xFF;
+
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if ((b0 &amp; 0b1) != 0) {</span>
+<span class="nc" id="L86">            throw new ImagingException(&quot;Invalid VP8 chunk: should be key frame&quot;);</span>
+        }
+
+<span class="nc" id="L89">        this.versionNumber = (b0 &amp; 0b1110) &gt;&gt; 1;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ((b0 &amp; 0b0001_0000) == 0) {</span>
+<span class="nc" id="L91">            throw new ImagingException(&quot;Invalid VP8 chunk: frame should to be display&quot;);</span>
+        }
+
+        // int firstDataPartitionSize = (b0 &gt;&gt;&gt; 5) + (b1 &lt;&lt; 3) + (b2 &lt;&lt; 11);
+
+        /*
+         * Key Frame:
+         *
+         * Start code byte 0 0x9d Start code byte 1 0x01 Start code byte 2 0x2a
+         *
+         * 16 bits : (2 bits Horizontal Scale &lt;&lt; 14) | Width (14 bits) 16 bits : (2 bits Vertical Scale &lt;&lt; 14) | Height (14 bits)
+         */
+
+<span class="nc" id="L104">        final int b3 = bytes[3] &amp; 0xFF;</span>
+<span class="nc" id="L105">        final int b4 = bytes[4] &amp; 0xFF;</span>
+<span class="nc" id="L106">        final int b5 = bytes[5] &amp; 0xFF;</span>
+<span class="nc" id="L107">        final int b6 = bytes[6] &amp; 0xFF;</span>
+<span class="nc" id="L108">        final int b7 = bytes[7] &amp; 0xFF;</span>
+<span class="nc" id="L109">        final int b8 = bytes[8] &amp; 0xFF;</span>
+<span class="nc" id="L110">        final int b9 = bytes[9] &amp; 0xFF;</span>
+
+<span class="nc bnc" id="L112" title="All 6 branches missed.">        if (b3 != 0x9D || b4 != 0x01 || b5 != 0x2A) {</span>
+<span class="nc" id="L113">            throw new ImagingException(&quot;Invalid VP8 chunk: invalid signature&quot;);</span>
+        }
+
+<span class="nc" id="L116">        this.width = b6 + ((b7 &amp; 0b0011_1111) &lt;&lt; 8);</span>
+<span class="nc" id="L117">        this.horizontalScale = b7 &gt;&gt; 6;</span>
+<span class="nc" id="L118">        this.height = b8 + ((b9 &amp; 0b0011_1111) &lt;&lt; 8);</span>
+<span class="nc" id="L119">        this.verticalScale = b9 &gt;&gt; 6;</span>
+<span class="nc" id="L120">    }</span>
+
+    @Override
+    public void dump(final PrintWriter pw, final int offset) throws ImagingException, IOException {
+<span class="nc" id="L124">        super.dump(pw, offset);</span>
+<span class="nc" id="L125">        pw.println(&quot;  Version Number: &quot; + getVersionNumber());</span>
+<span class="nc" id="L126">        pw.println(&quot;  Width: &quot; + getWidth());</span>
+<span class="nc" id="L127">        pw.println(&quot;  Height: &quot; + getHeight());</span>
+<span class="nc" id="L128">        pw.println(&quot;  Horizontal Scale: &quot; + getHorizontalScale());</span>
+<span class="nc" id="L129">        pw.println(&quot;  Vertical Scale: &quot; + getVerticalScale());</span>
+<span class="nc" id="L130">    }</span>
+
+    /**
+     * @return the height.
+     */
+    public int getHeight() {
+<span class="nc" id="L136">        return height;</span>
+    }
+
+    /**
+     * @return the horizontal scale.
+     */
+    public int getHorizontalScale() {
+<span class="nc" id="L143">        return horizontalScale;</span>
+    }
+
+    /**
+     * @return the version number.
+     */
+    public int getVersionNumber() {
+<span class="nc" id="L150">        return versionNumber;</span>
+    }
+
+    /**
+     * @return the vertical scale.
+     */
+    public int getVerticalScale() {
+<span class="nc" id="L157">        return verticalScale;</span>
+    }
+
+    /**
+     * @return the width.
+     */
+    public int getWidth() {
+<span class="nc" id="L164">        return width;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

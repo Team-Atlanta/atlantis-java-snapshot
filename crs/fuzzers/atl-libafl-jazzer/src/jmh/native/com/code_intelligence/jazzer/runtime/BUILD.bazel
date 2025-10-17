@@ -1,0 +1,17 @@
+load("@rules_jni//jni:defs.bzl", "cc_jni_library")
+
+package(default_testonly = True)
+
+cc_jni_library(
+    name = "fuzzer_callbacks",
+    srcs = ["fuzzer_callbacks.cpp"],
+    linkopts = [
+        "-lrt",  # Needed by libafl
+    ],
+    visibility = ["//src/jmh/java/com/code_intelligence/jazzer/runtime:__pkg__"],
+    deps = [
+        "//src/jmh/java/com/code_intelligence/jazzer/runtime:fuzzer_callbacks.hdrs",
+        "//src/main/native/com/code_intelligence/jazzer/driver:sanitizer_hooks_with_pc",
+        "@libafl_libfuzzer//:libfuzzer_no_main",
+    ],
+)

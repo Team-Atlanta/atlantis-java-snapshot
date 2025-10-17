@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ByteConversions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.common</a> &gt; <span class="el_source">ByteConversions.java</span></div><h1>ByteConversions.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.common;
+
+import java.nio.ByteOrder;
+import java.util.Arrays;
+
+/**
+ * Convenience methods for converting data types to and from byte arrays.
+ */
+public final class ByteConversions {
+    public static byte[] toBytes(final double value, final ByteOrder byteOrder) {
+<span class="nc" id="L27">        final byte[] result = new byte[8];</span>
+<span class="nc" id="L28">        toBytes(value, byteOrder, result, 0);</span>
+<span class="nc" id="L29">        return result;</span>
+    }
+
+    private static void toBytes(final double value, final ByteOrder byteOrder, final byte[] result, final int offset) {
+<span class="nc" id="L33">        final long bits = Double.doubleToRawLongBits(value);</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (byteOrder == ByteOrder.LITTLE_ENDIAN) {</span>
+<span class="nc" id="L35">            result[offset + 0] = (byte) (0xff &amp; bits &gt;&gt; 0);</span>
+<span class="nc" id="L36">            result[offset + 1] = (byte) (0xff &amp; bits &gt;&gt; 8);</span>
+<span class="nc" id="L37">            result[offset + 2] = (byte) (0xff &amp; bits &gt;&gt; 16);</span>
+<span class="nc" id="L38">            result[offset + 3] = (byte) (0xff &amp; bits &gt;&gt; 24);</span>
+<span class="nc" id="L39">            result[offset + 4] = (byte) (0xff &amp; bits &gt;&gt; 32);</span>
+<span class="nc" id="L40">            result[offset + 5] = (byte) (0xff &amp; bits &gt;&gt; 40);</span>
+<span class="nc" id="L41">            result[offset + 6] = (byte) (0xff &amp; bits &gt;&gt; 48);</span>
+<span class="nc" id="L42">            result[offset + 7] = (byte) (0xff &amp; bits &gt;&gt; 56);</span>
+        } else {
+<span class="nc" id="L44">            result[offset + 7] = (byte) (0xff &amp; bits &gt;&gt; 0);</span>
+<span class="nc" id="L45">            result[offset + 6] = (byte) (0xff &amp; bits &gt;&gt; 8);</span>
+<span class="nc" id="L46">            result[offset + 5] = (byte) (0xff &amp; bits &gt;&gt; 16);</span>
+<span class="nc" id="L47">            result[offset + 4] = (byte) (0xff &amp; bits &gt;&gt; 24);</span>
+<span class="nc" id="L48">            result[offset + 3] = (byte) (0xff &amp; bits &gt;&gt; 32);</span>
+<span class="nc" id="L49">            result[offset + 2] = (byte) (0xff &amp; bits &gt;&gt; 40);</span>
+<span class="nc" id="L50">            result[offset + 1] = (byte) (0xff &amp; bits &gt;&gt; 48);</span>
+<span class="nc" id="L51">            result[offset + 0] = (byte) (0xff &amp; bits &gt;&gt; 56);</span>
+        }
+<span class="nc" id="L53">    }</span>
+
+    public static byte[] toBytes(final double[] values, final ByteOrder byteOrder) {
+<span class="nc" id="L56">        return toBytes(values, 0, values.length, byteOrder);</span>
+    }
+
+    private static byte[] toBytes(final double[] values, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L60">        final byte[] result = Allocator.byteArray(length * 8);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L62">            toBytes(values[offset + i], byteOrder, result, i * 8);</span>
+        }
+<span class="nc" id="L64">        return result;</span>
+    }
+
+    public static byte[] toBytes(final float value, final ByteOrder byteOrder) {
+<span class="nc" id="L68">        final byte[] result = new byte[4];</span>
+<span class="nc" id="L69">        toBytes(value, byteOrder, result, 0);</span>
+<span class="nc" id="L70">        return result;</span>
+    }
+
+    private static void toBytes(final float value, final ByteOrder byteOrder, final byte[] result, final int offset) {
+<span class="nc" id="L74">        final int bits = Float.floatToRawIntBits(value);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (byteOrder == ByteOrder.LITTLE_ENDIAN) {</span>
+<span class="nc" id="L76">            result[offset + 0] = (byte) (0xff &amp; bits &gt;&gt; 0);</span>
+<span class="nc" id="L77">            result[offset + 1] = (byte) (0xff &amp; bits &gt;&gt; 8);</span>
+<span class="nc" id="L78">            result[offset + 2] = (byte) (0xff &amp; bits &gt;&gt; 16);</span>
+<span class="nc" id="L79">            result[offset + 3] = (byte) (0xff &amp; bits &gt;&gt; 24);</span>
+        } else {
+<span class="nc" id="L81">            result[offset + 3] = (byte) (0xff &amp; bits &gt;&gt; 0);</span>
+<span class="nc" id="L82">            result[offset + 2] = (byte) (0xff &amp; bits &gt;&gt; 8);</span>
+<span class="nc" id="L83">            result[offset + 1] = (byte) (0xff &amp; bits &gt;&gt; 16);</span>
+<span class="nc" id="L84">            result[offset + 0] = (byte) (0xff &amp; bits &gt;&gt; 24);</span>
+        }
+<span class="nc" id="L86">    }</span>
+
+    public static byte[] toBytes(final float[] values, final ByteOrder byteOrder) {
+<span class="nc" id="L89">        return toBytes(values, 0, values.length, byteOrder);</span>
+    }
+
+    private static byte[] toBytes(final float[] values, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L93">        final byte[] result = Allocator.byteArray(length * 4);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L95">            toBytes(values[offset + i], byteOrder, result, i * 4);</span>
+        }
+<span class="nc" id="L97">        return result;</span>
+    }
+
+    public static byte[] toBytes(final int value, final ByteOrder byteOrder) {
+<span class="nc" id="L101">        final byte[] result = new byte[4];</span>
+<span class="nc" id="L102">        toBytes(value, byteOrder, result, 0);</span>
+<span class="nc" id="L103">        return result;</span>
+    }
+
+    private static void toBytes(final int value, final ByteOrder byteOrder, final byte[] result, final int offset) {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L108">            result[offset + 0] = (byte) (value &gt;&gt; 24);</span>
+<span class="nc" id="L109">            result[offset + 1] = (byte) (value &gt;&gt; 16);</span>
+<span class="nc" id="L110">            result[offset + 2] = (byte) (value &gt;&gt; 8);</span>
+<span class="nc" id="L111">            result[offset + 3] = (byte) (value &gt;&gt; 0);</span>
+        } else {
+<span class="nc" id="L113">            result[offset + 3] = (byte) (value &gt;&gt; 24);</span>
+<span class="nc" id="L114">            result[offset + 2] = (byte) (value &gt;&gt; 16);</span>
+<span class="nc" id="L115">            result[offset + 1] = (byte) (value &gt;&gt; 8);</span>
+<span class="nc" id="L116">            result[offset + 0] = (byte) (value &gt;&gt; 0);</span>
+        }
+<span class="nc" id="L118">    }</span>
+
+    public static byte[] toBytes(final int[] values, final ByteOrder byteOrder) {
+<span class="nc" id="L121">        return toBytes(values, 0, values.length, byteOrder);</span>
+    }
+
+    private static byte[] toBytes(final int[] values, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L125">        final byte[] result = Allocator.byteArray(length * 4);</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L127">            toBytes(values[offset + i], byteOrder, result, i * 4);</span>
+        }
+<span class="nc" id="L129">        return result;</span>
+    }
+
+    /**
+     * Encodes an eight-byte (long) into an array of bytes based on the specified byte order.
+     *
+     * @param value     a standard data primitive of type long
+     * @param byteOrder the byte order to be used for encoding
+     * @return an array of length 8
+     */
+    public static byte[] toBytes(final long value, final ByteOrder byteOrder) {
+<span class="nc" id="L140">        final byte[] result = new byte[8];</span>
+<span class="nc" id="L141">        toBytes(value, byteOrder, result, 0);</span>
+<span class="nc" id="L142">        return result;</span>
+    }
+
+    private static void toBytes(final long value, final ByteOrder byteOrder, final byte[] result, final int offset) {
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L147">            result[offset + 0] = (byte) (value &gt;&gt; 56);</span>
+<span class="nc" id="L148">            result[offset + 1] = (byte) (value &gt;&gt; 48);</span>
+<span class="nc" id="L149">            result[offset + 2] = (byte) (value &gt;&gt; 40);</span>
+<span class="nc" id="L150">            result[offset + 3] = (byte) (value &gt;&gt; 32);</span>
+<span class="nc" id="L151">            result[offset + 4] = (byte) (value &gt;&gt; 24);</span>
+<span class="nc" id="L152">            result[offset + 5] = (byte) (value &gt;&gt; 16);</span>
+<span class="nc" id="L153">            result[offset + 6] = (byte) (value &gt;&gt; 8);</span>
+<span class="nc" id="L154">            result[offset + 7] = (byte) value;</span>
+        } else {
+<span class="nc" id="L156">            result[offset + 7] = (byte) (value &gt;&gt; 56);</span>
+<span class="nc" id="L157">            result[offset + 6] = (byte) (value &gt;&gt; 48);</span>
+<span class="nc" id="L158">            result[offset + 5] = (byte) (value &gt;&gt; 40);</span>
+<span class="nc" id="L159">            result[offset + 4] = (byte) (value &gt;&gt; 32);</span>
+<span class="nc" id="L160">            result[offset + 3] = (byte) (value &gt;&gt; 24);</span>
+<span class="nc" id="L161">            result[offset + 2] = (byte) (value &gt;&gt; 16);</span>
+<span class="nc" id="L162">            result[offset + 1] = (byte) (value &gt;&gt; 8);</span>
+<span class="nc" id="L163">            result[offset + 0] = (byte) value;</span>
+        }
+<span class="nc" id="L165">    }</span>
+
+    public static byte[] toBytes(final RationalNumber value, final ByteOrder byteOrder) {
+<span class="nc" id="L168">        final byte[] result = new byte[8];</span>
+<span class="nc" id="L169">        toBytes(value, byteOrder, result, 0);</span>
+<span class="nc" id="L170">        return result;</span>
+    }
+
+    private static void toBytes(final RationalNumber value, final ByteOrder byteOrder, final byte[] result, final int offset) {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L175">            result[offset + 0] = (byte) (value.numerator &gt;&gt; 24);</span>
+<span class="nc" id="L176">            result[offset + 1] = (byte) (value.numerator &gt;&gt; 16);</span>
+<span class="nc" id="L177">            result[offset + 2] = (byte) (value.numerator &gt;&gt; 8);</span>
+<span class="nc" id="L178">            result[offset + 3] = (byte) (value.numerator &gt;&gt; 0);</span>
+<span class="nc" id="L179">            result[offset + 4] = (byte) (value.divisor &gt;&gt; 24);</span>
+<span class="nc" id="L180">            result[offset + 5] = (byte) (value.divisor &gt;&gt; 16);</span>
+<span class="nc" id="L181">            result[offset + 6] = (byte) (value.divisor &gt;&gt; 8);</span>
+<span class="nc" id="L182">            result[offset + 7] = (byte) (value.divisor &gt;&gt; 0);</span>
+        } else {
+<span class="nc" id="L184">            result[offset + 3] = (byte) (value.numerator &gt;&gt; 24);</span>
+<span class="nc" id="L185">            result[offset + 2] = (byte) (value.numerator &gt;&gt; 16);</span>
+<span class="nc" id="L186">            result[offset + 1] = (byte) (value.numerator &gt;&gt; 8);</span>
+<span class="nc" id="L187">            result[offset + 0] = (byte) (value.numerator &gt;&gt; 0);</span>
+<span class="nc" id="L188">            result[offset + 7] = (byte) (value.divisor &gt;&gt; 24);</span>
+<span class="nc" id="L189">            result[offset + 6] = (byte) (value.divisor &gt;&gt; 16);</span>
+<span class="nc" id="L190">            result[offset + 5] = (byte) (value.divisor &gt;&gt; 8);</span>
+<span class="nc" id="L191">            result[offset + 4] = (byte) (value.divisor &gt;&gt; 0);</span>
+        }
+<span class="nc" id="L193">    }</span>
+
+    public static byte[] toBytes(final RationalNumber[] values, final ByteOrder byteOrder) {
+<span class="nc" id="L196">        return toBytes(values, 0, values.length, byteOrder);</span>
+    }
+
+    private static byte[] toBytes(final RationalNumber[] values, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L200">        final byte[] result = Allocator.byteArray(length * 8);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L202">            toBytes(values[offset + i], byteOrder, result, i * 8);</span>
+        }
+<span class="nc" id="L204">        return result;</span>
+    }
+
+    public static byte[] toBytes(final short value, final ByteOrder byteOrder) {
+<span class="nc" id="L208">        final byte[] result = new byte[2];</span>
+<span class="nc" id="L209">        toBytes(value, byteOrder, result, 0);</span>
+<span class="nc" id="L210">        return result;</span>
+    }
+
+    private static void toBytes(final short value, final ByteOrder byteOrder, final byte[] result, final int offset) {
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L215">            result[offset + 0] = (byte) (value &gt;&gt; 8);</span>
+<span class="nc" id="L216">            result[offset + 1] = (byte) (value &gt;&gt; 0);</span>
+        } else {
+<span class="nc" id="L218">            result[offset + 1] = (byte) (value &gt;&gt; 8);</span>
+<span class="nc" id="L219">            result[offset + 0] = (byte) (value &gt;&gt; 0);</span>
+        }
+<span class="nc" id="L221">    }</span>
+
+    public static byte[] toBytes(final short[] values, final ByteOrder byteOrder) {
+<span class="nc" id="L224">        return toBytes(values, 0, values.length, byteOrder);</span>
+    }
+
+    private static byte[] toBytes(final short[] values, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L228">        final byte[] result = Allocator.byteArray(length * 2);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L230">            toBytes(values[offset + i], byteOrder, result, i * 2);</span>
+        }
+<span class="nc" id="L232">        return result;</span>
+    }
+
+    public static double toDouble(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L236">        return toDouble(bytes, 0, byteOrder);</span>
+    }
+
+    private static double toDouble(final byte[] bytes, final int offset, final ByteOrder byteOrder) {
+<span class="nc" id="L240">        final long byte0 = 0xffL &amp; bytes[offset + 0];</span>
+<span class="nc" id="L241">        final long byte1 = 0xffL &amp; bytes[offset + 1];</span>
+<span class="nc" id="L242">        final long byte2 = 0xffL &amp; bytes[offset + 2];</span>
+<span class="nc" id="L243">        final long byte3 = 0xffL &amp; bytes[offset + 3];</span>
+<span class="nc" id="L244">        final long byte4 = 0xffL &amp; bytes[offset + 4];</span>
+<span class="nc" id="L245">        final long byte5 = 0xffL &amp; bytes[offset + 5];</span>
+<span class="nc" id="L246">        final long byte6 = 0xffL &amp; bytes[offset + 6];</span>
+<span class="nc" id="L247">        final long byte7 = 0xffL &amp; bytes[offset + 7];</span>
+        final long bits;
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L250">            bits = byte0 &lt;&lt; 56 | byte1 &lt;&lt; 48 | byte2 &lt;&lt; 40 | byte3 &lt;&lt; 32 | byte4 &lt;&lt; 24 | byte5 &lt;&lt; 16 | byte6 &lt;&lt; 8 | byte7 &lt;&lt; 0;</span>
+        } else {
+<span class="nc" id="L252">            bits = byte7 &lt;&lt; 56 | byte6 &lt;&lt; 48 | byte5 &lt;&lt; 40 | byte4 &lt;&lt; 32 | byte3 &lt;&lt; 24 | byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0 &lt;&lt; 0;</span>
+        }
+<span class="nc" id="L254">        return Double.longBitsToDouble(bits);</span>
+    }
+
+    public static double[] toDoubles(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L258">        return toDoubles(bytes, 0, bytes.length, byteOrder);</span>
+    }
+
+    private static double[] toDoubles(final byte[] bytes, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L262">        final double[] result = Allocator.doubleArray(length / 8);</span>
+<span class="nc" id="L263">        Arrays.setAll(result, i -&gt; toDouble(bytes, offset + 8 * i, byteOrder));</span>
+<span class="nc" id="L264">        return result;</span>
+    }
+
+    public static float toFloat(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L268">        return toFloat(bytes, 0, byteOrder);</span>
+    }
+
+    private static float toFloat(final byte[] bytes, final int offset, final ByteOrder byteOrder) {
+<span class="nc" id="L272">        final int byte0 = 0xff &amp; bytes[offset + 0];</span>
+<span class="nc" id="L273">        final int byte1 = 0xff &amp; bytes[offset + 1];</span>
+<span class="nc" id="L274">        final int byte2 = 0xff &amp; bytes[offset + 2];</span>
+<span class="nc" id="L275">        final int byte3 = 0xff &amp; bytes[offset + 3];</span>
+        final int bits;
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L278">            bits = byte0 &lt;&lt; 24 | byte1 &lt;&lt; 16 | byte2 &lt;&lt; 8 | byte3 &lt;&lt; 0;</span>
+        } else {
+<span class="nc" id="L280">            bits = byte3 &lt;&lt; 24 | byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0 &lt;&lt; 0;</span>
+        }
+<span class="nc" id="L282">        return Float.intBitsToFloat(bits);</span>
+    }
+
+    public static float[] toFloats(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L286">        return toFloats(bytes, 0, bytes.length, byteOrder);</span>
+    }
+
+    private static float[] toFloats(final byte[] bytes, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L290">        final float[] result = Allocator.floatArray(length / 4);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        for (int i = 0; i &lt; result.length; i++) {</span>
+<span class="nc" id="L292">            result[i] = toFloat(bytes, offset + 4 * i, byteOrder);</span>
+        }
+<span class="nc" id="L294">        return result;</span>
+    }
+
+    public static int toInt(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="fc" id="L298">        return toInt(bytes, 0, byteOrder);</span>
+    }
+
+    public static int toInt(final byte[] bytes, final int offset, final ByteOrder byteOrder) {
+<span class="fc" id="L302">        final int byte0 = 0xff &amp; bytes[offset + 0];</span>
+<span class="fc" id="L303">        final int byte1 = 0xff &amp; bytes[offset + 1];</span>
+<span class="fc" id="L304">        final int byte2 = 0xff &amp; bytes[offset + 2];</span>
+<span class="fc" id="L305">        final int byte3 = 0xff &amp; bytes[offset + 3];</span>
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L307">            return byte0 &lt;&lt; 24 | byte1 &lt;&lt; 16 | byte2 &lt;&lt; 8 | byte3;</span>
+        }
+<span class="fc" id="L309">        return byte3 &lt;&lt; 24 | byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0;</span>
+    }
+
+    public static int[] toInts(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L313">        return toInts(bytes, 0, bytes.length, byteOrder);</span>
+    }
+
+    private static int[] toInts(final byte[] bytes, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L317">        final int[] result = Allocator.intArray(length / 4);</span>
+<span class="nc" id="L318">        Arrays.setAll(result, i -&gt; toInt(bytes, offset + 4 * i, byteOrder));</span>
+<span class="nc" id="L319">        return result;</span>
+    }
+
+    /**
+     * Extracts an eight-byte long integer from the specified byte array. This method assumes that the byte array is of sufficiently large size to encode a long
+     * integer.
+     *
+     * @param bytes     an array of size at least 8
+     * @param byteOrder the byte-order for interpreting the input bytes
+     * @return an eight-byte signed integer
+     */
+    public static long toLong(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="fc" id="L331">        return toLong(bytes, 0, byteOrder);</span>
+    }
+
+    private static long toLong(final byte[] bytes, final int offset, final ByteOrder byteOrder) {
+<span class="fc" id="L335">        final long byte0 = 0xffL &amp; bytes[offset + 0];</span>
+<span class="fc" id="L336">        final long byte1 = 0xffL &amp; bytes[offset + 1];</span>
+<span class="fc" id="L337">        final long byte2 = 0xffL &amp; bytes[offset + 2];</span>
+<span class="fc" id="L338">        final long byte3 = 0xffL &amp; bytes[offset + 3];</span>
+<span class="fc" id="L339">        final long byte4 = 0xffL &amp; bytes[offset + 4];</span>
+<span class="fc" id="L340">        final long byte5 = 0xffL &amp; bytes[offset + 5];</span>
+<span class="fc" id="L341">        final long byte6 = 0xffL &amp; bytes[offset + 6];</span>
+<span class="fc" id="L342">        final long byte7 = 0xffL &amp; bytes[offset + 7];</span>
+
+<span class="pc bpc" id="L344" title="1 of 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L345">            return byte0 &lt;&lt; 56 | byte1 &lt;&lt; 48 | byte2 &lt;&lt; 40 | byte3 &lt;&lt; 32 | byte4 &lt;&lt; 24 | byte5 &lt;&lt; 16 | byte6 &lt;&lt; 8 | byte7;</span>
+        }
+<span class="fc" id="L347">        return byte7 &lt;&lt; 56 | byte6 &lt;&lt; 48 | byte5 &lt;&lt; 40 | byte4 &lt;&lt; 32 | byte3 &lt;&lt; 24 | byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0;</span>
+    }
+
+    /**
+     * Extracts an array of eight-byte long integers from the specified array of bytes. The size of the result array is computed based on the size of the input
+     * byte array.
+     *
+     * @param bytes     a valid array
+     * @param byteOrder the byte-order for interpreting the input bytes
+     * @return an array of zero or more eight-byte signed integers
+     */
+    public static long[] toLongs(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L359">        return toLongs(bytes, 0, bytes.length, byteOrder);</span>
+    }
+
+    private static long[] toLongs(final byte[] bytes, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L363">        final long[] result = Allocator.longArray(length / 8);</span>
+<span class="nc" id="L364">        Arrays.setAll(result, i -&gt; toLong(bytes, offset + 8 * i, byteOrder));</span>
+<span class="nc" id="L365">        return result;</span>
+    }
+
+    /**
+     * Interprets the content of a specified bytes array to create an instance of the RationalNumber class.
+     *
+     * @param bytes        a valid array dimensioned to at least 8.
+     * @param byteOrder    the byte order for integer conversion
+     * @param unsignedType indicates whether the extracted value is an unsigned type.
+     * @return a valid instance
+     */
+    public static RationalNumber toRational(final byte[] bytes, final ByteOrder byteOrder, final boolean unsignedType) {
+<span class="nc" id="L377">        return toRational(bytes, 0, byteOrder, unsignedType);</span>
+    }
+
+    private static RationalNumber toRational(final byte[] bytes, final int offset, final ByteOrder byteOrder, final boolean unsignedType) {
+<span class="nc" id="L381">        final int byte0 = 0xff &amp; bytes[offset + 0];</span>
+<span class="nc" id="L382">        final int byte1 = 0xff &amp; bytes[offset + 1];</span>
+<span class="nc" id="L383">        final int byte2 = 0xff &amp; bytes[offset + 2];</span>
+<span class="nc" id="L384">        final int byte3 = 0xff &amp; bytes[offset + 3];</span>
+<span class="nc" id="L385">        final int byte4 = 0xff &amp; bytes[offset + 4];</span>
+<span class="nc" id="L386">        final int byte5 = 0xff &amp; bytes[offset + 5];</span>
+<span class="nc" id="L387">        final int byte6 = 0xff &amp; bytes[offset + 6];</span>
+<span class="nc" id="L388">        final int byte7 = 0xff &amp; bytes[offset + 7];</span>
+        final int numerator;
+        final int divisor;
+<span class="nc bnc" id="L391" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L392">            numerator = byte0 &lt;&lt; 24 | byte1 &lt;&lt; 16 | byte2 &lt;&lt; 8 | byte3;</span>
+<span class="nc" id="L393">            divisor = byte4 &lt;&lt; 24 | byte5 &lt;&lt; 16 | byte6 &lt;&lt; 8 | byte7;</span>
+        } else {
+<span class="nc" id="L395">            numerator = byte3 &lt;&lt; 24 | byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0;</span>
+<span class="nc" id="L396">            divisor = byte7 &lt;&lt; 24 | byte6 &lt;&lt; 16 | byte5 &lt;&lt; 8 | byte4;</span>
+        }
+<span class="nc" id="L398">        return new RationalNumber(numerator, divisor, unsignedType);</span>
+    }
+
+    public static RationalNumber[] toRationals(final byte[] bytes, final ByteOrder byteOrder, final boolean unsignedType) {
+<span class="nc" id="L402">        return toRationals(bytes, 0, bytes.length, byteOrder, unsignedType);</span>
+    }
+
+    private static RationalNumber[] toRationals(final byte[] bytes, final int offset, final int length, final ByteOrder byteOrder, final boolean unsignedType) {
+<span class="nc" id="L406">        final RationalNumber[] result = new RationalNumber[length / 8];</span>
+<span class="nc" id="L407">        Arrays.setAll(result, i -&gt; toRational(bytes, offset + 8 * i, byteOrder, unsignedType));</span>
+<span class="nc" id="L408">        return result;</span>
+    }
+
+    public static short toShort(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L412">        return toShort(bytes, 0, byteOrder);</span>
+    }
+
+    private static short toShort(final byte[] bytes, final int offset, final ByteOrder byteOrder) {
+<span class="nc" id="L416">        return (short) toUInt16(bytes, offset, byteOrder);</span>
+    }
+
+    public static short[] toShorts(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L420">        return toShorts(bytes, 0, bytes.length, byteOrder);</span>
+    }
+
+    private static short[] toShorts(final byte[] bytes, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L424">        final short[] result = Allocator.shortArray(length / 2);</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">        for (int i = 0; i &lt; result.length; i++) {</span>
+<span class="nc" id="L426">            result[i] = toShort(bytes, offset + 2 * i, byteOrder);</span>
+        }
+<span class="nc" id="L428">        return result;</span>
+    }
+
+    public static int toUInt16(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="fc" id="L432">        return toUInt16(bytes, 0, byteOrder);</span>
+    }
+
+    public static int toUInt16(final byte[] bytes, final int offset, final ByteOrder byteOrder) {
+<span class="fc" id="L436">        final int byte0 = 0xff &amp; bytes[offset + 0];</span>
+<span class="fc" id="L437">        final int byte1 = 0xff &amp; bytes[offset + 1];</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="fc" id="L439">            return byte0 &lt;&lt; 8 | byte1;</span>
+        }
+<span class="fc" id="L441">        return byte1 &lt;&lt; 8 | byte0;</span>
+    }
+
+    public static int[] toUInt16s(final byte[] bytes, final ByteOrder byteOrder) {
+<span class="nc" id="L445">        return toUInt16s(bytes, 0, bytes.length, byteOrder);</span>
+    }
+
+    private static int[] toUInt16s(final byte[] bytes, final int offset, final int length, final ByteOrder byteOrder) {
+<span class="nc" id="L449">        final int[] result = Allocator.intArray(length / 2);</span>
+<span class="nc" id="L450">        Arrays.setAll(result, i -&gt; toUInt16(bytes, offset + 2 * i, byteOrder));</span>
+<span class="nc" id="L451">        return result;</span>
+    }
+
+    private ByteConversions() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

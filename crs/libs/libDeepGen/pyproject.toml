@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libdeepgen"
+version = "0.1.0"
+description = "A framework for synthesizing seeds generators"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "atomics>=1.0.3",
+    "libagents @ git+ssh://git@github.com/Team-Atlanta/libAgents.git",
+    "protobuf>=5.29.0",
+    "psutil>=7.0.0",
+    "grammarinator @ git+https://github.com/renatahodovan/grammarinator.git@68b0350",
+    "pyzmq>=26.4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["libDeepGen*"]
+
+[dependency-groups]
+dev = [
+    "apscheduler>=3.11.0",
+]

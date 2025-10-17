@@ -1,0 +1,1564 @@
+
+Target project:
+
+rdf4j
+
+Relevant code files:
+
+
+```java
+// src/rdf4j-harnesses/rdf4j-harness-one/src/main/java/com/aixcc/rdf4j/harnesses/one/Rdf4jOne.java
+     1  package com.aixcc.rdf4j.harnesses.one;
+     2
+     3  import com.code_intelligence.jazzer.api.FuzzerSecurityIssueLow;
+     4  import com.code_intelligence.jazzer.api.FuzzerSecurityIssueMedium;
+     5  import com.code_intelligence.jazzer.api.FuzzerSecurityIssueHigh;
+     6  import com.code_intelligence.jazzer.api.FuzzerSecurityIssueCritical;
+     7  import org.eclipse.rdf4j.common.io.ZipUtil;
+     8  import org.eclipse.rdf4j.rio.rdfxml.RDFXMLParser;
+     9  import org.eclipse.rdf4j.rio.trix.TriXParser;
+    10  import java.io.ByteArrayInputStream;
+    11  import java.io.File;
+    12  import java.io.FileOutputStream;
+    13  import java.nio.ByteBuffer;
+    14  import java.nio.file.Files;
+    15  import java.nio.file.Path;
+    16  import java.nio.file.Paths;
+    17  import java.util.Arrays;
+    18  import java.util.zip.ZipEntry;
+    19  import java.util.zip.ZipFile;
+    20  import java.util.zip.ZipOutputStream;
+    21
+    22  public class Rdf4jOne {
+    23      public static void fuzzerTestOneInput(byte[] data) throws Throwable {
+    24          new Rdf4jOne().fuzz(data);
+    25      }
+    26
+    27      public void fuzz(byte[] data) throws Throwable {
+    28          if (data.length < Integer.BYTES + Integer.BYTES + 1) {
+    29              return;
+    30          }
+    31
+    32          ByteBuffer buf = ByteBuffer.wrap(data);
+    33          int picker = buf.getInt();
+    34          int count = buf.getInt();
+    35          byte[] whole = Arrays.copyOfRange(data, Integer.BYTES * 2, data.length);
+    36          if (count > 255) {
+    37              return;
+    38          }
+    39
+    40          for (int i = 0; i < count; i++) {
+    41              try {
+    42                  switch (picker) {
+    43                      case 3:
+    44                          extract(whole);
+    45                          break;
+    46                      case 5:
+    47                          new RDFXMLParser().parse(new ByteArrayInputStream(whole), "");
+    48                          break;
+    49                      case 6:
+    50                          new TriXParser().parse(new ByteArrayInputStream(whole), "");
+    51                          break;
+    52                      default:
+    53                          throw new Exception("unsupported");
+    54                  }
+    55              } catch (FuzzerSecurityIssueLow |
+    56                       FuzzerSecurityIssueMedium |
+    57                       FuzzerSecurityIssueHigh |
+    58                       FuzzerSecurityIssueCritical e) {
+    59                  throw e;
+    60              } catch (Throwable e) {
+    61              }
+    62          }
+    63      }
+    64
+    65      public void extract(byte[] data) throws Throwable {
+    66          Path dir = Paths.get("/tmp/rdf4j");
+    67          Files.createDirectories(dir);
+    68
+    69          File f = new File("/tmp/rdf4j/testnotok.zip");
+    70                  try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(f))) {
+    71                          ZipEntry e = new ZipEntry(new String(data));
+    72                          out.putNextEntry(e);
+    73                          out.write("hello world".getBytes());
+    74                          out.closeEntry();
+    75                  }
+    76
+    77                  ZipFile zf = new ZipFile(f);
+    78          Path extractDir = Paths.get("/tmp/rdf4j/extract");
+    79          Files.createDirectories(extractDir);
+    80
+    81          ZipUtil.extract(zf, extractDir.toFile());
+    82          Files.deleteIfExists(dir);
+    83      }
+    84  }
+```
+
+```java
+// src/rdf4j/rio/rdfxml/src/main/java/org/eclipse/rdf4j/rio/rdfxml/RDFXMLParser.java
+     1  /*******************************************************************************
+     2   * Copyright (c) 2015 Eclipse RDF4J contributors, Aduna, and others.
+     3   * All rights reserved. This program and the accompanying materials
+     4   * are made available under the terms of the Eclipse Distribution License v1.0
+     5   * which accompanies this distribution, and is available at
+     6   * http://www.eclipse.org/org/documents/edl-v10.php.
+     7   *******************************************************************************/
+     8  package org.eclipse.rdf4j.rio.rdfxml;
+     9
+    10  import java.io.IOException;
+    11  import java.io.InputStream;
+    12  import java.io.Reader;
+    13  import java.util.Collection;
+    14  import java.util.Collections;
+    15  import java.util.HashSet;
+    16  import java.util.Iterator;
+    17  import java.util.Set;
+    18  import java.util.Stack;
+    19
+    20  import javax.xml.transform.sax.SAXResult;
+    21
+    22  import org.apache.commons.io.input.BOMInputStream;
+    23  import org.eclipse.rdf4j.common.net.ParsedURI;
+    24  import org.eclipse.rdf4j.common.xml.XMLReaderFactory;
+    25  import org.eclipse.rdf4j.common.xml.XMLUtil;
+    26  import org.eclipse.rdf4j.model.IRI;
+    27  import org.eclipse.rdf4j.model.Literal;
+    28  import org.eclipse.rdf4j.model.Resource;
+    29  import org.eclipse.rdf4j.model.Statement;
+    30  import org.eclipse.rdf4j.model.Value;
+    31  import org.eclipse.rdf4j.model.ValueFactory;
+    32  import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+    33  import org.eclipse.rdf4j.model.vocabulary.RDF;
+    34  import org.eclipse.rdf4j.rio.RDFFormat;
+    35  import org.eclipse.rdf4j.rio.RDFHandlerException;
+    36  import org.eclipse.rdf4j.rio.RDFParseException;
+    37  import org.eclipse.rdf4j.rio.RioSetting;
+    38  import org.eclipse.rdf4j.rio.helpers.AbstractRDFParser;
+    39  import org.eclipse.rdf4j.rio.helpers.XMLParserSettings;
+    40  import org.xml.sax.ErrorHandler;
+    41  import org.xml.sax.InputSource;
+    42  import org.xml.sax.Locator;
+    43  import org.xml.sax.SAXException;
+    44  import org.xml.sax.SAXNotRecognizedException;
+    45  import org.xml.sax.SAXNotSupportedException;
+    46  import org.xml.sax.SAXParseException;
+    47  import org.xml.sax.XMLReader;
+    48
+    49  /**
+    50   * A parser for XML-serialized RDF. This parser operates directly on the SAX events generated by a SAX-enabled
+    51   * XML parser. The XML parser should be compliant with SAX2. You should specify which SAX parser should be
+    52   * used by setting the <code>org.xml.sax.driver</code> property. This parser is not thread-safe, therefore
+    53   * it's public methods are synchronized.
+    54   * <p>
+    55   * To parse a document using this parser:
+    56   * <ul>
+    57   * <li>Create an instance of RDFXMLParser, optionally supplying it with your own ValueFactory.
+    58   * <li>Set the RDFHandler.
+    59   * <li>Optionally, set the ParseErrorListener and/or ParseLocationListener.
+    60   * <li>Optionally, specify whether the parser should verify the data it parses and whether it should stop
+    61   * immediately when it finds an error in the data (both default to <tt>true</tt>).
+    62   * <li>Call the parse method.
+    63   * </ul>
+    64   * Example code:
+    65   *
+    66   * <pre>
+    67   * // Use the SAX2-compliant Xerces parser:
+    68   * System.setProperty(&quot;org.xml.sax.driver&quot;, &quot;org.apache.xerces.parsers.SAXParser&quot;);
+    69   *
+    70   * RDFParser parser = new RDFXMLParser();
+    71   * parser.setRDFHandler(myRDFHandler);
+    72   * parser.setParseErrorListener(myParseErrorListener);
+    73   * parser.setVerifyData(true);
+    74   * parser.stopAtFirstError(false);
+    75   *
+    76   * // Parse the data from inputStream, resolving any
+    77   * // relative URIs against http://foo/bar:
+    78   * parser.parse(inputStream, &quot;http://foo/bar&quot;);
+    79   * </pre>
+    80   *
+    81   * @see org.eclipse.rdf4j.model.ValueFactory
+    82   * @see org.eclipse.rdf4j.rio.RDFHandler
+    83   * @see org.eclipse.rdf4j.rio.ParseErrorListener
+    84   * @see org.eclipse.rdf4j.rio.ParseLocationListener
+    85   * @author Arjohn Kampman
+    86   */
+    87  public class RDFXMLParser extends AbstractRDFParser implements ErrorHandler {
+    88
+    89          /*-----------*
+    90           * Variables *
+    91           *-----------*/
+    92
+    93          /**
+    94           * A filter filtering calls to SAX methods specifically for this parser.
+    95           */
+    96          private SAXFilter saxFilter;
+    97
+    98          /**
+    99           * The base URI of the document. This variable is set when <tt>parse(inputStream, baseURI)</tt> is called
+   100           * and will not be changed during parsing.
+   101           */
+   102          private String documentURI;
+   103
+   104          /**
+   105           * The language of literal values as can be specified using xml:lang attributes. This variable is
+   106           * set/modified by the SAXFilter during parsing such that it always represents the language of the context
+   107           * in which elements are reported.
+   108           */
+   109          private String xmlLang;
+   110
+   111          /**
+   112           * A stack of node- and property elements.
+   113           */
+   114          private Stack<Object> elementStack = new Stack<Object>();
+   115
+   116          /**
+   117           * A set containing URIs that have been generated as a result of rdf:ID attributes. These URIs should be
+   118           * unique within a single document.
+   119           */
+   120          private Set<IRI> usedIDs = new HashSet<IRI>();
+   121
+   122          /*--------------*
+   123           * Constructors *
+   124           *--------------*/
+   125
+   126          /**
+   127           * Creates a new RDFXMLParser that will use a {@link SimpleValueFactory} to create RDF model objects.
+   128           */
+   129          public RDFXMLParser() {
+   130                  this(SimpleValueFactory.getInstance());
+   131          }
+   132
+   133          /**
+   134           * Creates a new RDFXMLParser that will use the supplied <tt>ValueFactory</tt> to create RDF model
+   135           * objects.
+   136           *
+   137           * @param valueFactory
+   138           *        A ValueFactory.
+   139           */
+   140          public RDFXMLParser(ValueFactory valueFactory) {
+   141                  super(valueFactory);
+   142
+   143                  // SAXFilter does some filtering and verifying of SAX events
+   144                  saxFilter = new SAXFilter(this);
+   145          }
+   146
+   147          /*---------*
+   148           * Methods *
+   149           *---------*/
+   150
+   151          @Override
+   152          public final RDFFormat getRDFFormat() {
+   153                  return RDFFormat.RDFXML;
+   154          }
+   155
+   156          /**
+   157           * Sets the parser in a mode to parse stand-alone RDF documents. In stand-alone RDF documents, the
+   158           * enclosing <tt>rdf:RDF</tt> root element is optional if this root element contains just one element
+   159           * (e.g. <tt>rdf:Description</tt>.
+   160           */
+   161          public void setParseStandAloneDocuments(boolean standAloneDocs) {
+   162                  getParserConfig().set(XMLParserSettings.PARSE_STANDALONE_DOCUMENTS, standAloneDocs);
+   163          }
+   164
+   165          /**
+   166           * Returns whether the parser is currently in a mode to parse stand-alone RDF documents.
+   167           *
+   168           * @see #setParseStandAloneDocuments
+   169           */
+   170          public boolean getParseStandAloneDocuments() {
+   171                  return getParserConfig().get(XMLParserSettings.PARSE_STANDALONE_DOCUMENTS);
+   172          }
+   173
+   174          /**
+   175           * Parses the data from the supplied InputStream, using the supplied baseURI to resolve any relative URI
+   176           * references.
+   177           *
+   178           * @param in
+   179           *        The InputStream from which to read the data, must not be <tt>null</tt>.
+   180           * @param baseURI
+   181           *        The URI associated with the data in the InputStream, must not be <tt>null</tt>.
+   182           * @throws IOException
+   183           *         If an I/O error occurred while data was read from the InputStream.
+   184           * @throws RDFParseException
+   185           *         If the parser has found an unrecoverable parse error.
+   186           * @throws RDFHandlerException
+   187           *         If the configured statement handler encountered an unrecoverable error.
+   188           * @throws IllegalArgumentException
+   189           *         If the supplied input stream or base URI is <tt>null</tt>.
+   190           */
+   191          @Override
+   192          public synchronized void parse(InputStream in, String baseURI)
+   193                  throws IOException, RDFParseException, RDFHandlerException
+   194          {
+   195                  if (in == null) {
+   196                          throw new IllegalArgumentException("Input stream cannot be 'null'");
+   197                  }
+   198                  if (baseURI == null) {
+   199                          throw new IllegalArgumentException("Base URI cannot be 'null'");
+   200                  }
+   201
+   202                  InputSource inputSource = new InputSource(new BOMInputStream(in, false));
+   203                  inputSource.setSystemId(baseURI);
+   204
+   205                  parse(inputSource);
+   206          }
+   207
+   208          /**
+   209           * Parses the data from the supplied Reader, using the supplied baseURI to resolve any relative URI
+   210           * references.
+   211           *
+   212           * @param reader
+   213           *        The Reader from which to read the data, must not be <tt>null</tt>.
+   214           * @param baseURI
+   215           *        The URI associated with the data in the InputStream, must not be <tt>null</tt>.
+   216           * @throws IOException
+   217           *         If an I/O error occurred while data was read from the InputStream.
+   218           * @throws RDFParseException
+   219           *         If the parser has found an unrecoverable parse error.
+   220           * @throws RDFHandlerException
+   221           *         If the configured statement handler has encountered an unrecoverable error.
+   222           * @throws IllegalArgumentException
+   223           *         If the supplied reader or base URI is <tt>null</tt>.
+   224           */
+   225          @Override
+   226          public synchronized void parse(Reader reader, String baseURI)
+   227                  throws IOException, RDFParseException, RDFHandlerException
+   228          {
+   229                  if (reader == null) {
+   230                          throw new IllegalArgumentException("Reader cannot be 'null'");
+   231                  }
+   232                  if (baseURI == null) {
+   233                          throw new IllegalArgumentException("Base URI cannot be 'null'");
+   234                  }
+   235
+   236                  InputSource inputSource = new InputSource(reader);
+   237                  inputSource.setSystemId(baseURI);
+   238
+   239                  parse(inputSource);
+   240          }
+   241
+   242          private void parse(InputSource inputSource)
+   243                  throws IOException, RDFParseException, RDFHandlerException
+   244          {
+   245                  clear();
+   246
+   247                  try {
+   248                          documentURI = inputSource.getSystemId();
+   249
+   250                          saxFilter.setParseStandAloneDocuments(
+   251                                          getParserConfig().get(XMLParserSettings.PARSE_STANDALONE_DOCUMENTS));
+   252
+   253                          // saxFilter.clear();
+   254                          saxFilter.setDocumentURI(documentURI);
+   255
+   256                          XMLReader xmlReader;
+   257
+   258                          if (getParserConfig().isSet(XMLParserSettings.CUSTOM_XML_READER)) {
+   259                                  xmlReader = getParserConfig().get(XMLParserSettings.CUSTOM_XML_READER);
+   260                          }
+   261                          else {
+   262                                  xmlReader = XMLReaderFactory.createXMLReader();
+   263                          }
+   264
+   265                          xmlReader.setContentHandler(saxFilter);
+   266                          xmlReader.setErrorHandler(this);
+   267
+   268                          // Set all compulsory feature settings, using the defaults if they are
+   269                          // not explicitly set
+   270                          for (RioSetting<Boolean> aSetting : getCompulsoryXmlFeatureSettings()) {
+   271                                  try {
+   272                                          xmlReader.setFeature(aSetting.getKey(), getParserConfig().get(aSetting));
+   273                                  }
+   274                                  catch (SAXNotRecognizedException e) {
+   275                                          reportWarning(String.format("%s is not a recognized SAX feature.", aSetting.getKey()));
+   276                                  }
+   277                                  catch (SAXNotSupportedException e) {
+   278                                          reportWarning(String.format("%s is not a supported SAX feature.", aSetting.getKey()));
+   279                                  }
+   280                          }
+   281
+   282                          // Set all compulsory property settings, using the defaults if they are
+   283                          // not explicitly set
+   284                          for (RioSetting<?> aSetting : getCompulsoryXmlPropertySettings()) {
+   285                                  try {
+   286                                          xmlReader.setProperty(aSetting.getKey(), getParserConfig().get(aSetting));
+   287                                  }
+   288                                  catch (SAXNotRecognizedException e) {
+   289                                          reportWarning(String.format("%s is not a recognized SAX property.", aSetting.getKey()));
+   290                                  }
+   291                                  catch (SAXNotSupportedException e) {
+   292                                          reportWarning(String.format("%s is not a supported SAX property.", aSetting.getKey()));
+   293                                  }
+   294                          }
+   295
+   296                          // Check for any optional feature settings that are explicitly set in
+   297                          // the parser config
+   298                          for (RioSetting<Boolean> aSetting : getOptionalXmlFeatureSettings()) {
+   299                                  try {
+   300                                          if (getParserConfig().isSet(aSetting)) {
+   301                                                  xmlReader.setFeature(aSetting.getKey(), getParserConfig().get(aSetting));
+   302                                          }
+   303                                  }
+   304                                  catch (SAXNotRecognizedException e) {
+   305                                          reportWarning(String.format("%s is not a recognized SAX feature.", aSetting.getKey()));
+   306                                  }
+   307                                  catch (SAXNotSupportedException e) {
+   308                                          reportWarning(String.format("%s is not a supported SAX feature.", aSetting.getKey()));
+   309                                  }
+   310                          }
+   311
+   312                          // Check for any optional property settings that are explicitly set in
+   313                          // the parser config
+   314                          for (RioSetting<?> aSetting : getOptionalXmlPropertySettings()) {
+   315                                  try {
+   316                                          if (getParserConfig().isSet(aSetting)) {
+   317                                                  xmlReader.setProperty(aSetting.getKey(), getParserConfig().get(aSetting));
+   318                                          }
+   319                                  }
+   320                                  catch (SAXNotRecognizedException e) {
+   321                                          reportWarning(String.format("%s is not a recognized SAX property.", aSetting.getKey()));
+   322                                  }
+   323                                  catch (SAXNotSupportedException e) {
+   324                                          reportWarning(String.format("%s is not a supported SAX property.", aSetting.getKey()));
+   325                                  }
+   326                          }
+   327
+   328                          xmlReader.parse(inputSource);
+   329                  }
+   330                  catch (SAXParseException e) {
+   331                          Exception wrappedExc = e.getException();
+   332
+   333                          if (wrappedExc == null) {
+   334                                  reportFatalError(e, e.getLineNumber(), e.getColumnNumber());
+   335                          }
+   336                          else {
+   337                                  reportFatalError(wrappedExc, e.getLineNumber(), e.getColumnNumber());
+   338                          }
+   339                  }
+   340                  catch (SAXException e) {
+   341                          Exception wrappedExc = e.getException();
+   342
+   343                          if (wrappedExc == null) {
+   344                                  reportFatalError(e);
+   345                          }
+   346                          else if (wrappedExc instanceof RDFParseException) {
+   347                                  throw (RDFParseException)wrappedExc;
+   348                          }
+   349                          else if (wrappedExc instanceof RDFHandlerException) {
+   350                                  throw (RDFHandlerException)wrappedExc;
+   351                          }
+   352                          else {
+   353                                  reportFatalError(wrappedExc);
+   354                          }
+   355                  }
+   356                  finally {
+   357                          // Clean up
+   358                          saxFilter.clear();
+   359                          xmlLang = null;
+   360                          elementStack.clear();
+   361                          usedIDs.clear();
+   362                          clear();
+   363                  }
+   364          }
+   365
+   366          /**
+   367           * Returns a collection of settings that will always be set as XML parser properties using
+   368           * {@link XMLReader#setProperty(String, Object)}
+   369           * <p>
+   370           * Subclasses can override this to specify more supported settings.
+   371           *
+   372           * @return A collection of {@link RioSetting}s that indicate which properties will always be setup using
+   373           *         {@link XMLReader#setProperty(String, Object)}.
+   374           */
+   375          public Collection<RioSetting<?>> getCompulsoryXmlPropertySettings() {
+   376                  return Collections.<RioSetting<?>> emptyList();
+   377          }
+   378
+   379          /**
+   380           * Returns a collection of settings that will always be set as XML parser features using
+   381           * {@link XMLReader#setFeature(String, boolean)}.
+   382           * <p>
+   383           * Subclasses can override this to specify more supported settings.
+   384           *
+   385           * @return A collection of {@link RioSetting}s that indicate which boolean settings will always be setup
+   386           *         using {@link XMLReader#setFeature(String, boolean)}.
+   387           */
+   388          public Collection<RioSetting<Boolean>> getCompulsoryXmlFeatureSettings() {
+   389                  Set<RioSetting<Boolean>> results = new HashSet<RioSetting<Boolean>>();
+   390                  results.add(XMLParserSettings.SECURE_PROCESSING);
+   391                  return results;
+   392          }
+   393
+   394          /**
+   395           * Returns a collection of settings that will be used, if set in {@link #getParserConfig()}, as XML parser
+   396           * properties using {@link XMLReader#setProperty(String, Object)}
+   397           * <p>
+   398           * Subclasses can override this to specify more supported settings.
+   399           *
+   400           * @return A collection of {@link RioSetting}s that indicate which properties can be setup using
+   401           *         {@link XMLReader#setProperty(String, Object)}.
+   402           */
+   403          public Collection<RioSetting<?>> getOptionalXmlPropertySettings() {
+   404                  return Collections.<RioSetting<?>> emptyList();
+   405          }
+   406
+   407          /**
+   408           * Returns a collection of settings that will be used, if set in {@link #getParserConfig()}, as XML parser
+   409           * features using {@link XMLReader#setFeature(String, boolean)}.
+   410           * <p>
+   411           * Subclasses can override this to specify more supported settings.
+   412           *
+   413           * @return A collection of {@link RioSetting}s that indicate which boolean settings can be setup using
+   414           *         {@link XMLReader#setFeature(String, boolean)}.
+   415           */
+   416          public Collection<RioSetting<Boolean>> getOptionalXmlFeatureSettings() {
+   417                  Set<RioSetting<Boolean>> results = new HashSet<RioSetting<Boolean>>();
+   418                  results.add(XMLParserSettings.LOAD_EXTERNAL_DTD);
+   419                  return results;
+   420          }
+   421
+   422          @Override
+   423          public Collection<RioSetting<?>> getSupportedSettings() {
+   424                  // Override to add RDF/XML specific supported settings
+   425                  Set<RioSetting<?>> results = new HashSet<RioSetting<?>>(super.getSupportedSettings());
+   426
+   427                  results.addAll(getCompulsoryXmlPropertySettings());
+   428                  results.addAll(getCompulsoryXmlFeatureSettings());
+   429                  results.addAll(getOptionalXmlPropertySettings());
+   430                  results.addAll(getOptionalXmlFeatureSettings());
+   431
+   432                  results.add(XMLParserSettings.CUSTOM_XML_READER);
+   433                  results.add(XMLParserSettings.FAIL_ON_DUPLICATE_RDF_ID);
+   434                  results.add(XMLParserSettings.FAIL_ON_INVALID_NCNAME);
+   435                  results.add(XMLParserSettings.FAIL_ON_INVALID_QNAME);
+   436                  results.add(XMLParserSettings.FAIL_ON_MISMATCHED_TAGS);
+   437                  results.add(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+   438                  results.add(XMLParserSettings.FAIL_ON_SAX_NON_FATAL_ERRORS);
+   439                  results.add(XMLParserSettings.PARSE_STANDALONE_DOCUMENTS);
+   440
+   441                  return results;
+   442          }
+   443
+   444          public SAXResult getSAXResult(String baseURI) {
+   445                  if (baseURI == null) {
+   446                          throw new IllegalArgumentException("Base URI cannot be 'null'");
+   447                  }
+   448                  documentURI = baseURI;
+   449                  saxFilter.setDocumentURI(baseURI);
+   450
+   451                  return new SAXResult(saxFilter);
+   452          }
+   453
+   454          void startDocument()
+   455                  throws RDFParseException, RDFHandlerException
+   456          {
+   457                  if (rdfHandler != null) {
+   458                          rdfHandler.startRDF();
+   459                  }
+   460          }
+   461
+   462          void endDocument()
+   463                  throws RDFParseException, RDFHandlerException
+   464          {
+   465                  if (rdfHandler != null) {
+   466                          rdfHandler.endRDF();
+   467                  }
+   468          }
+   469
+   470          /*-----------------------------*
+   471           * Methods called by SAXFilter *
+   472           *-----------------------------*/
+   473
+   474          @Override
+   475          protected void setBaseURI(ParsedURI baseURI) {
+   476                  // Note: we need to override this method to allow SAXFilter to access it
+   477                  super.setBaseURI(baseURI);
+   478          }
+   479
+   480          @Override
+   481          protected void setBaseURI(String baseURI) {
+   482                  // Note: we need to override this method to allow SAXFilter to access it
+   483                  super.setBaseURI(baseURI);
+   484          }
+   485
+   486          void setXMLLang(String xmlLang) {
+   487                  if ("".equals(xmlLang)) {
+   488                          this.xmlLang = null;
+   489                  }
+   490                  else {
+   491                          this.xmlLang = xmlLang;
+   492                  }
+   493          }
+   494
+   495          void startElement(String namespaceURI, String localName, String qName, Atts atts)
+   496                  throws RDFParseException, RDFHandlerException
+   497          {
+   498                  if (topIsProperty()) {
+   499                          // this element represents the subject and/or object of a statement
+   500                          processNodeElt(namespaceURI, localName, qName, atts, false);
+   501                  }
+   502                  else {
+   503                          // this element represents a property
+   504                          processPropertyElt(namespaceURI, localName, qName, atts, false);
+   505                  }
+   506          }
+   507
+   508          void endElement(String namespaceURI, String localName, String qName)
+   509                  throws RDFParseException, RDFHandlerException
+   510          {
+   511                  Object topElement = peekStack(0);
+   512
+   513                  if (topElement instanceof NodeElement) {
+   514                          // Check if top node is 'volatile', meaning that it doesn't have a
+   515                          // start- and end element associated with it.
+   516                          if (((NodeElement)topElement).isVolatile()) {
+   517                                  elementStack.pop();
+   518                          }
+   519                  }
+   520                  else {
+   521                          // topElement instanceof PropertyElement
+   522                          PropertyElement predicate = (PropertyElement)topElement;
+   523
+   524                          if (predicate.parseCollection()) {
+   525                                  Resource lastListResource = predicate.getLastListResource();
+   526
+   527                                  if (lastListResource == null) {
+   528                                          // no last list resource, list must have been empty.
+   529                                          NodeElement subject = (NodeElement)peekStack(1);
+   530
+   531                                          reportStatement(subject.getResource(), predicate.getURI(), RDF.NIL);
+   532
+   533                                          handleReification(RDF.NIL);
+   534                                  }
+   535                                  else {
+   536                                          // Generate the final tail of the list.
+   537                                          reportStatement(lastListResource, RDF.REST, RDF.NIL);
+   538                                  }
+   539                          }
+   540
+   541                  }
+   542
+   543                  elementStack.pop();
+   544          }
+   545
+   546          void emptyElement(String namespaceURI, String localName, String qName, Atts atts)
+   547                  throws RDFParseException, RDFHandlerException
+   548          {
+   549                  if (topIsProperty()) {
+   550                          // this element represents the subject and/or object of a statement
+   551                          processNodeElt(namespaceURI, localName, qName, atts, true);
+   552                  }
+   553                  else {
+   554                          // this element represents a property
+   555                          processPropertyElt(namespaceURI, localName, qName, atts, true);
+   556                  }
+   557          }
+   558
+   559          void text(String text)
+   560                  throws RDFParseException, RDFHandlerException
+   561          {
+   562                  if (!topIsProperty()) {
+   563                          reportError("unexpected literal", XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+   564                          return;
+   565                  }
+   566
+   567                  PropertyElement propEl = (PropertyElement)peekStack(0);
+   568                  IRI datatype = propEl.getDatatype();
+   569
+   570                  Literal lit = createLiteral(text, xmlLang, datatype);
+   571
+   572                  NodeElement subject = (NodeElement)peekStack(1);
+   573                  PropertyElement predicate = (PropertyElement)peekStack(0);
+   574
+   575                  reportStatement(subject.getResource(), predicate.getURI(), lit);
+   576
+   577                  handleReification(lit);
+   578          }
+   579
+   580          /*------------------------*
+   581           * RDF processing methods *
+   582           *------------------------*/
+   583
+   584          /* Process a node element (can be both subject and object) */
+   585          private void processNodeElt(String namespaceURI, String localName, String qName, Atts atts,
+   586                          boolean isEmptyElt)
+   587                  throws RDFParseException, RDFHandlerException
+   588          {
+   589                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   590                          // Check the element name
+   591                          checkNodeEltName(namespaceURI, localName, qName);
+   592                  }
+   593
+   594                  Resource nodeResource = getNodeResource(atts);
+   595                  NodeElement nodeElement = new NodeElement(nodeResource);
+   596
+   597                  if (!elementStack.isEmpty()) {
+   598                          // node can be object of a statement, or part of an rdf:List
+   599                          NodeElement subject = (NodeElement)peekStack(1);
+   600                          PropertyElement predicate = (PropertyElement)peekStack(0);
+   601
+   602                          if (predicate.parseCollection()) {
+   603                                  Resource lastListRes = predicate.getLastListResource();
+   604                                  Resource newListRes = createNode();
+   605
+   606                                  if (lastListRes == null) {
+   607                                          // first element in the list
+   608                                          reportStatement(subject.getResource(), predicate.getURI(), newListRes);
+   609
+   610                                          handleReification(newListRes);
+   611                                  }
+   612                                  else {
+   613                                          // not the first element in the list
+   614                                          reportStatement(lastListRes, RDF.REST, newListRes);
+   615                                  }
+   616
+   617                                  reportStatement(newListRes, RDF.FIRST, nodeResource);
+   618
+   619                                  predicate.setLastListResource(newListRes);
+   620                          }
+   621                          else {
+   622                                  reportStatement(subject.getResource(), predicate.getURI(), nodeResource);
+   623
+   624                                  handleReification(nodeResource);
+   625                          }
+   626                  }
+   627
+   628                  if (!localName.equals("Description") || !namespaceURI.equals(RDF.NAMESPACE)) {
+   629                          // element name is uri's type
+   630                          IRI className = null;
+   631                          if ("".equals(namespaceURI)) {
+   632                                  // No namespace, use base URI
+   633                                  className = buildResourceFromLocalName(localName);
+   634                          }
+   635                          else {
+   636                                  className = createURI(namespaceURI + localName);
+   637                          }
+   638                          reportStatement(nodeResource, RDF.TYPE, className);
+   639                  }
+   640
+   641                  Att type = atts.removeAtt(RDF.NAMESPACE, "type");
+   642                  if (type != null) {
+   643                          // rdf:type attribute, value is a URI-reference
+   644                          IRI className = resolveURI(type.getValue());
+   645
+   646                          reportStatement(nodeResource, RDF.TYPE, className);
+   647                  }
+   648
+   649                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   650                          checkRDFAtts(atts);
+   651                  }
+   652
+   653                  processSubjectAtts(nodeElement, atts);
+   654
+   655                  if (!isEmptyElt) {
+   656                          elementStack.push(nodeElement);
+   657                  }
+   658          }
+   659
+   660          /**
+   661           * Retrieves the resource of a node element (subject or object) using relevant attributes (rdf:ID,
+   662           * rdf:about and rdf:nodeID) from its attributes list.
+   663           *
+   664           * @return a resource or a bNode.
+   665           */
+   666          private Resource getNodeResource(Atts atts)
+   667                  throws RDFParseException
+   668          {
+   669                  Att id = atts.removeAtt(RDF.NAMESPACE, "ID");
+   670                  Att about = atts.removeAtt(RDF.NAMESPACE, "about");
+   671                  Att nodeID = atts.removeAtt(RDF.NAMESPACE, "nodeID");
+   672
+   673                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   674                          int definedAttsCount = 0;
+   675
+   676                          if (id != null) {
+   677                                  definedAttsCount++;
+   678                          }
+   679                          if (about != null) {
+   680                                  definedAttsCount++;
+   681                          }
+   682                          if (nodeID != null) {
+   683                                  definedAttsCount++;
+   684                          }
+   685
+   686                          if (definedAttsCount > 1) {
+   687                                  reportError("Only one of the attributes rdf:ID, rdf:about or rdf:nodeID can be used here",
+   688                                                  XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+   689                          }
+   690                  }
+   691
+   692                  Resource result = null;
+   693
+   694                  if (id != null) {
+   695                          result = buildURIFromID(id.getValue());
+   696                  }
+   697                  else if (about != null) {
+   698                          result = resolveURI(about.getValue());
+   699                  }
+   700                  else if (nodeID != null) {
+   701                          result = createNode(nodeID.getValue());
+   702                  }
+   703                  else {
+   704                          // No resource specified, generate a bNode
+   705                          result = createNode();
+   706                  }
+   707
+   708                  return result;
+   709          }
+   710
+   711          /** processes subject attributes. */
+   712          private void processSubjectAtts(NodeElement nodeElt, Atts atts)
+   713                  throws RDFParseException, RDFHandlerException
+   714          {
+   715                  Resource subject = nodeElt.getResource();
+   716
+   717                  Iterator<Att> iter = atts.iterator();
+   718
+   719                  while (iter.hasNext()) {
+   720                          Att att = iter.next();
+   721
+   722                          IRI predicate = createURI(att.getURI());
+   723                          Literal lit = createLiteral(att.getValue(), xmlLang, null);
+   724
+   725                          reportStatement(subject, predicate, lit);
+   726                  }
+   727          }
+   728
+   729          private void processPropertyElt(String namespaceURI, String localName, String qName, Atts atts,
+   730                          boolean isEmptyElt)
+   731                  throws RDFParseException, RDFHandlerException
+   732          {
+   733                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   734                          checkPropertyEltName(namespaceURI, localName, qName,
+   735                                          XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+   736                  }
+   737
+   738                  // Get the URI of the property
+   739                  IRI propURI = null;
+   740                  if (namespaceURI.equals("")) {
+   741                          // no namespace URI
+   742                          reportError("unqualified property element <" + qName + "> not allowed",
+   743                                          XMLParserSettings.FAIL_ON_INVALID_QNAME);
+   744                          // Use base URI as namespace:
+   745                          propURI = buildResourceFromLocalName(localName);
+   746                  }
+   747                  else {
+   748                          propURI = createURI(namespaceURI + localName);
+   749                  }
+   750
+   751                  // List expansion rule
+   752                  if (propURI.equals(RDF.LI)) {
+   753                          NodeElement subject = (NodeElement)peekStack(0);
+   754                          propURI = createURI(RDF.NAMESPACE + "_" + subject.getNextLiCounter());
+   755                  }
+   756
+   757                  // Push the property on the stack.
+   758                  PropertyElement predicate = new PropertyElement(propURI);
+   759                  elementStack.push(predicate);
+   760
+   761                  // Check if property has a reification ID
+   762                  Att id = atts.removeAtt(RDF.NAMESPACE, "ID");
+   763                  if (id != null) {
+   764                          IRI reifURI = buildURIFromID(id.getValue());
+   765                          predicate.setReificationURI(reifURI);
+   766                  }
+   767
+   768                  // Check for presence of rdf:parseType attribute
+   769                  Att parseType = atts.removeAtt(RDF.NAMESPACE, "parseType");
+   770
+   771                  if (parseType != null) {
+   772                          if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   773                                  checkNoMoreAtts(atts);
+   774                          }
+   775
+   776                          String parseTypeValue = parseType.getValue();
+   777
+   778                          if (parseTypeValue.equals("Resource")) {
+   779                                  Resource objectResource = createNode();
+   780                                  NodeElement subject = (NodeElement)peekStack(1);
+   781
+   782                                  reportStatement(subject.getResource(), propURI, objectResource);
+   783
+   784                                  if (isEmptyElt) {
+   785                                          handleReification(objectResource);
+   786                                  }
+   787                                  else {
+   788                                          NodeElement object = new NodeElement(objectResource);
+   789                                          object.setIsVolatile(true);
+   790                                          elementStack.push(object);
+   791                                  }
+   792                          }
+   793                          else if (parseTypeValue.equals("Collection")) {
+   794                                  if (isEmptyElt) {
+   795                                          NodeElement subject = (NodeElement)peekStack(1);
+   796                                          reportStatement(subject.getResource(), propURI, RDF.NIL);
+   797                                          handleReification(RDF.NIL);
+   798                                  }
+   799                                  else {
+   800                                          predicate.setParseCollection(true);
+   801                                  }
+   802                          }
+   803                          else {
+   804                                  // other parseType
+   805                                  if (!parseTypeValue.equals("Literal")) {
+   806                                          reportWarning("unknown parseType: " + parseType.getValue());
+   807                                  }
+   808
+   809                                  if (isEmptyElt) {
+   810                                          NodeElement subject = (NodeElement)peekStack(1);
+   811
+   812                                          Literal lit = createLiteral("", null, RDF.XMLLITERAL);
+   813
+   814                                          reportStatement(subject.getResource(), propURI, lit);
+   815
+   816                                          handleReification(lit);
+   817                                  }
+   818                                  else {
+   819                                          // The next string is an rdf:XMLLiteral
+   820                                          predicate.setDatatype(RDF.XMLLITERAL);
+   821
+   822                                          saxFilter.setParseLiteralMode();
+   823                                  }
+   824                          }
+   825                  }
+   826                  // parseType == null
+   827                  else if (isEmptyElt) {
+   828                          // empty element without an rdf:parseType attribute
+   829
+   830                          // Note: we handle rdf:datatype attributes here to allow datatyped
+   831                          // empty strings in documents. The current spec does have a
+   832                          // production rule that matches this, which is likely to be an
+   833                          // omission on its part.
+   834                          Att datatype = atts.getAtt(RDF.NAMESPACE, "datatype");
+   835
+   836                          if (atts.size() == 0 || atts.size() == 1 && datatype != null) {
+   837                                  // element had no attributes, or only the optional
+   838                                  // rdf:ID and/or rdf:datatype attributes.
+   839                                  NodeElement subject = (NodeElement)peekStack(1);
+   840
+   841                                  IRI dtURI = null;
+   842                                  if (datatype != null) {
+   843                                          dtURI = createURI(datatype.getValue());
+   844                                  }
+   845
+   846                                  Literal lit = createLiteral("", xmlLang, dtURI);
+   847
+   848                                  reportStatement(subject.getResource(), propURI, lit);
+   849                                  handleReification(lit);
+   850                          }
+   851                          else {
+   852                                  // Create resource for the statement's object.
+   853                                  Resource resourceRes = getPropertyResource(atts);
+   854
+   855                                  // All special rdf attributes have been checked/removed.
+   856                                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   857                                          checkRDFAtts(atts);
+   858                                  }
+   859
+   860                                  NodeElement resourceElt = new NodeElement(resourceRes);
+   861                                  NodeElement subject = (NodeElement)peekStack(1);
+   862
+   863                                  reportStatement(subject.getResource(), propURI, resourceRes);
+   864                                  handleReification(resourceRes);
+   865
+   866                                  Att type = atts.removeAtt(RDF.NAMESPACE, "type");
+   867                                  if (type != null) {
+   868                                          // rdf:type attribute, value is a URI-reference
+   869                                          IRI className = resolveURI(type.getValue());
+   870
+   871                                          reportStatement(resourceRes, RDF.TYPE, className);
+   872                                  }
+   873
+   874                                  processSubjectAtts(resourceElt, atts);
+   875                          }
+   876                  }
+   877                  else {
+   878                          // Not an empty element, sub elements will follow.
+   879
+   880                          // Check for rdf:datatype attribute
+   881                          Att datatype = atts.removeAtt(RDF.NAMESPACE, "datatype");
+   882                          if (datatype != null) {
+   883                                  IRI dtURI = resolveURI(datatype.getValue());
+   884                                  predicate.setDatatype(dtURI);
+   885                          }
+   886
+   887                          // No more attributes are expected.
+   888                          if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   889                                  checkNoMoreAtts(atts);
+   890                          }
+   891                  }
+   892
+   893                  if (isEmptyElt) {
+   894                          // Empty element has been pushed on the stack
+   895                          // at the start of this method, remove it.
+   896                          elementStack.pop();
+   897                  }
+   898          }
+   899
+   900          /**
+   901           * Retrieves the object resource of a property element using relevant attributes (rdf:resource and
+   902           * rdf:nodeID) from its attributes list.
+   903           *
+   904           * @return a resource or a bNode.
+   905           */
+   906          private Resource getPropertyResource(Atts atts)
+   907                  throws RDFParseException
+   908          {
+   909                  Att resource = atts.removeAtt(RDF.NAMESPACE, "resource");
+   910                  Att nodeID = atts.removeAtt(RDF.NAMESPACE, "nodeID");
+   911
+   912                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES)) {
+   913                          int definedAttsCount = 0;
+   914
+   915                          if (resource != null) {
+   916                                  definedAttsCount++;
+   917                          }
+   918                          if (nodeID != null) {
+   919                                  definedAttsCount++;
+   920                          }
+   921
+   922                          if (definedAttsCount > 1) {
+   923                                  reportError("Only one of the attributes rdf:resource or rdf:nodeID can be used here",
+   924                                                  XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+   925                          }
+   926                  }
+   927
+   928                  Resource result = null;
+   929
+   930                  if (resource != null) {
+   931                          result = resolveURI(resource.getValue());
+   932                  }
+   933                  else if (nodeID != null) {
+   934                          result = createNode(nodeID.getValue());
+   935                  }
+   936                  else {
+   937                          // No resource specified, generate a bNode
+   938                          result = createNode();
+   939                  }
+   940
+   941                  return result;
+   942          }
+   943
+   944          /*
+   945           * Processes any rdf:ID attributes that generate reified statements. This method assumes that a
+   946           * PropertyElement (which can have an rdf:ID attribute) is on top of the stack, and a NodeElement is below
+   947           * that.
+   948           */
+   949          private void handleReification(Value value)
+   950                  throws RDFParseException, RDFHandlerException
+   951          {
+   952                  PropertyElement predicate = (PropertyElement)peekStack(0);
+   953
+   954                  if (predicate.isReified()) {
+   955                          NodeElement subject = (NodeElement)peekStack(1);
+   956                          IRI reifRes = predicate.getReificationURI();
+   957                          reifyStatement(reifRes, subject.getResource(), predicate.getURI(), value);
+   958                  }
+   959          }
+   960
+   961          private void reifyStatement(Resource reifNode, Resource subj, IRI pred, Value obj)
+   962                  throws RDFParseException, RDFHandlerException
+   963          {
+   964                  reportStatement(reifNode, RDF.TYPE, RDF.STATEMENT);
+   965                  reportStatement(reifNode, RDF.SUBJECT, subj);
+   966                  reportStatement(reifNode, RDF.PREDICATE, pred);
+   967                  reportStatement(reifNode, RDF.OBJECT, obj);
+   968          }
+   969
+   970          /**
+   971           * Builds a Resource from a non-qualified localname.
+   972           */
+   973          private IRI buildResourceFromLocalName(String localName)
+   974                  throws RDFParseException
+   975          {
+   976                  return resolveURI("#" + localName);
+   977          }
+   978
+   979          /**
+   980           * Builds a Resource from the value of an rdf:ID attribute.
+   981           */
+   982          private IRI buildURIFromID(String id)
+   983                  throws RDFParseException
+   984          {
+   985                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_INVALID_NCNAME)) {
+   986                          // Check if 'id' is a legal NCName
+   987                          if (!XMLUtil.isNCName(id)) {
+   988                                  reportError("Not an XML Name: " + id, XMLParserSettings.FAIL_ON_INVALID_NCNAME);
+   989                          }
+   990                  }
+   991
+   992                  IRI uri = resolveURI("#" + id);
+   993
+   994                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_DUPLICATE_RDF_ID)) {
+   995                          // ID (URI) should be unique in the current document
+   996                          if (!usedIDs.add(uri)) {
+   997                                  // URI was not added because the set already contained an equal
+   998                                  // strings
+   999                                  reportError("ID '" + id + "' has already been defined",
+  1000                                                  XMLParserSettings.FAIL_ON_DUPLICATE_RDF_ID);
+  1001                          }
+  1002                  }
+  1003
+  1004                  return uri;
+  1005          }
+  1006
+  1007          @Override
+  1008          protected Resource createNode(String nodeID)
+  1009                  throws RDFParseException
+  1010          {
+  1011                  if (getParserConfig().get(XMLParserSettings.FAIL_ON_INVALID_NCNAME)) {
+  1012                          // Check if 'nodeID' is a legal NCName
+  1013                          if (!XMLUtil.isNCName(nodeID)) {
+  1014                                  reportError("Not an XML Name: " + nodeID, XMLParserSettings.FAIL_ON_INVALID_NCNAME);
+  1015                          }
+  1016                  }
+  1017
+  1018                  return super.createNode(nodeID);
+  1019          }
+  1020
+  1021          private Object peekStack(int distFromTop) {
+  1022                  return elementStack.get(elementStack.size() - 1 - distFromTop);
+  1023          }
+  1024
+  1025          private boolean topIsProperty() {
+  1026                  return elementStack.isEmpty() || peekStack(0) instanceof PropertyElement;
+  1027          }
+  1028
+  1029          /**
+  1030           * Checks whether the node element name is from the RDF namespace and, if so, if it is allowed to be used
+  1031           * in a node element. If the name is equal to one of the disallowed names (RDF, ID, about, parseType,
+  1032           * resource, nodeID, datatype and li), an error is generated. If the name is not defined in the RDF
+  1033           * namespace, but it claims that it is from this namespace, a warning is generated.
+  1034           */
+  1035          private void checkNodeEltName(String namespaceURI, String localName, String qName)
+  1036                  throws RDFParseException
+  1037          {
+  1038                  if (RDF.NAMESPACE.equals(namespaceURI)) {
+  1039
+  1040                          if (localName.equals("Description") || localName.equals("Seq") || localName.equals("Bag")
+  1041                                          || localName.equals("Alt") || localName.equals("Statement")
+  1042                                          || localName.equals("Property") || localName.equals("List") || localName.equals("subject")
+  1043                                          || localName.equals("predicate") || localName.equals("object") || localName.equals("type")
+  1044                                          || localName.equals("value") || localName.equals("first") || localName.equals("rest")
+  1045                                          || localName.equals("nil") || localName.startsWith("_"))
+  1046                          {
+  1047                                  // These are OK
+  1048                          }
+  1049                          else if (localName.equals("li") || localName.equals("RDF") || localName.equals("ID")
+  1050                                          || localName.equals("about") || localName.equals("parseType")
+  1051                                          || localName.equals("resource") || localName.equals("nodeID")
+  1052                                          || localName.equals("datatype"))
+  1053                          {
+  1054                                  reportError("<" + qName + "> not allowed as node element",
+  1055                                                  XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+  1056                          }
+  1057                          else if (localName.equals("bagID") || localName.equals("aboutEach")
+  1058                                          || localName.equals("aboutEachPrefix"))
+  1059                          {
+  1060                                  reportError(qName + " is no longer a valid RDF name",
+  1061                                                  XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+  1062                          }
+  1063                          else {
+  1064                                  reportWarning("unknown rdf element <" + qName + ">");
+  1065                          }
+  1066                  }
+  1067          }
+  1068
+  1069          /**
+  1070           * Checks whether the property element name is from the RDF namespace and, if so, if it is allowed to be
+  1071           * used in a property element. If the name is equal to one of the disallowed names (RDF, ID, about,
+  1072           * parseType, resource and li), an error is generated. If the name is not defined in the RDF namespace,
+  1073           * but it claims that it is from this namespace, a warning is generated.
+  1074           *
+  1075           * @param setting
+  1076           */
+  1077          private void checkPropertyEltName(String namespaceURI, String localName, String qName,
+  1078                          RioSetting<Boolean> setting)
+  1079                  throws RDFParseException
+  1080          {
+  1081                  if (RDF.NAMESPACE.equals(namespaceURI)) {
+  1082
+  1083                          if (localName.equals("li") || localName.equals("Seq") || localName.equals("Bag")
+  1084                                          || localName.equals("Alt") || localName.equals("Statement")
+  1085                                          || localName.equals("Property") || localName.equals("List") || localName.equals("subject")
+  1086                                          || localName.equals("predicate") || localName.equals("object") || localName.equals("type")
+  1087                                          || localName.equals("value") || localName.equals("first") || localName.equals("rest")
+  1088                                          || localName.equals("nil") || localName.startsWith("_"))
+  1089                          {
+  1090                                  // These are OK
+  1091                          }
+  1092                          else if (localName.equals("Description") || localName.equals("RDF") || localName.equals("ID")
+  1093                                          || localName.equals("about") || localName.equals("parseType")
+  1094                                          || localName.equals("resource") || localName.equals("nodeID")
+  1095                                          || localName.equals("datatype"))
+  1096                          {
+  1097                                  reportError("<" + qName + "> not allowed as property element", setting);
+  1098                          }
+  1099                          else if (localName.equals("bagID") || localName.equals("aboutEach")
+  1100                                          || localName.equals("aboutEachPrefix"))
+  1101                          {
+  1102                                  reportError(qName + " is no longer a valid RDF name", setting);
+  1103                          }
+  1104                          else {
+  1105                                  reportWarning("unknown rdf element <" + qName + ">");
+  1106                          }
+  1107                  }
+  1108          }
+  1109
+  1110          /**
+  1111           * Checks whether 'atts' contains attributes from the RDF namespace that are not allowed as attributes. If
+  1112           * such an attribute is found, an error is generated and the attribute is removed from 'atts'. If the
+  1113           * attribute is not defined in the RDF namespace, but it claims that it is from this namespace, a warning
+  1114           * is generated.
+  1115           */
+  1116          private void checkRDFAtts(Atts atts)
+  1117                  throws RDFParseException
+  1118          {
+  1119                  Iterator<Att> iter = atts.iterator();
+  1120
+  1121                  while (iter.hasNext()) {
+  1122                          Att att = iter.next();
+  1123
+  1124                          if (RDF.NAMESPACE.equals(att.getNamespace())) {
+  1125                                  String localName = att.getLocalName();
+  1126
+  1127                                  if (localName.equals("Seq") || localName.equals("Bag") || localName.equals("Alt")
+  1128                                                  || localName.equals("Statement") || localName.equals("Property")
+  1129                                                  || localName.equals("List") || localName.equals("subject")
+  1130                                                  || localName.equals("predicate") || localName.equals("object")
+  1131                                                  || localName.equals("type") || localName.equals("value") || localName.equals("first")
+  1132                                                  || localName.equals("rest") || localName.equals("nil") || localName.startsWith("_"))
+  1133                                  {
+  1134                                          // These are OK
+  1135                                  }
+  1136                                  else if (localName.equals("Description") || localName.equals("li") || localName.equals("RDF")
+  1137                                                  || localName.equals("ID") || localName.equals("about")
+  1138                                                  || localName.equals("parseType") || localName.equals("resource")
+  1139                                                  || localName.equals("nodeID") || localName.equals("datatype"))
+  1140                                  {
+  1141                                          reportError("'" + att.getQName() + "' not allowed as attribute name",
+  1142                                                          XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+  1143                                          iter.remove();
+  1144                                  }
+  1145                                  else if (localName.equals("bagID") || localName.equals("aboutEach")
+  1146                                                  || localName.equals("aboutEachPrefix"))
+  1147                                  {
+  1148                                          reportError(att.getQName() + " is no longer a valid RDF name",
+  1149                                                          XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+  1150                                  }
+  1151                                  else {
+  1152                                          reportWarning("unknown rdf attribute '" + att.getQName() + "'");
+  1153                                  }
+  1154                          }
+  1155                  }
+  1156          }
+  1157
+  1158          /**
+  1159           * Checks whether 'atts' is empty. If this is not the case, a warning is generated for each attribute that
+  1160           * is still present.
+  1161           */
+  1162          private void checkNoMoreAtts(Atts atts)
+  1163                  throws RDFParseException
+  1164          {
+  1165                  if (atts.size() > 0) {
+  1166                          Iterator<Att> iter = atts.iterator();
+  1167
+  1168                          while (iter.hasNext()) {
+  1169                                  Att att = iter.next();
+  1170
+  1171                                  reportError("unexpected attribute '" + att.getQName() + "'",
+  1172                                                  XMLParserSettings.FAIL_ON_NON_STANDARD_ATTRIBUTES);
+  1173                                  iter.remove();
+  1174                          }
+  1175                  }
+  1176          }
+  1177
+  1178          /**
+  1179           * Reports a stament to the configured RDFHandlerException.
+  1180           *
+  1181           * @param subject
+  1182           *        The statement's subject.
+  1183           * @param predicate
+  1184           *        The statement's predicate.
+  1185           * @param object
+  1186           *        The statement's object.
+  1187           * @throws RDFHandlerException
+  1188           *         If the configured RDFHandlerException throws an RDFHandlerException.
+  1189           */
+  1190          private void reportStatement(Resource subject, IRI predicate, Value object)
+  1191                  throws RDFParseException, RDFHandlerException
+  1192          {
+  1193                  Statement st = createStatement(subject, predicate, object);
+  1194                  if (rdfHandler != null) {
+  1195                          rdfHandler.handleStatement(st);
+  1196                  }
+  1197          }
+  1198
+  1199          @Override
+  1200          protected Literal createLiteral(String label, String lang, IRI datatype)
+  1201                  throws RDFParseException
+  1202          {
+  1203                  Locator locator = saxFilter.getLocator();
+  1204                  if (locator != null) {
+  1205                          return createLiteral(label, lang, datatype, locator.getLineNumber(), locator.getColumnNumber());
+  1206                  }
+  1207                  else {
+  1208                          return createLiteral(label, lang, datatype, -1, -1);
+  1209                  }
+  1210          }
+  1211
+  1212          /**
+  1213           * Overrides {@link AbstractRDFParser#reportWarning(String)}, adding line- and column number information
+  1214           * to the error.
+  1215           */
+  1216          @Override
+  1217          protected void reportWarning(String msg) {
+  1218                  Locator locator = saxFilter.getLocator();
+  1219                  if (locator != null) {
+  1220                          reportWarning(msg, locator.getLineNumber(), locator.getColumnNumber());
+  1221                  }
+  1222                  else {
+  1223                          reportWarning(msg, -1, -1);
+  1224                  }
+  1225          }
+  1226
+  1227          /**
+  1228           * Overrides {@link AbstractRDFParser#reportError(String, RioSetting)}, adding line- and column number
+  1229           * information to the error.
+  1230           */
+  1231          @Override
+  1232          protected void reportError(String msg, RioSetting<Boolean> setting)
+  1233                  throws RDFParseException
+  1234          {
+  1235                  Locator locator = saxFilter.getLocator();
+  1236                  if (locator != null) {
+  1237                          reportError(msg, locator.getLineNumber(), locator.getColumnNumber(), setting);
+  1238                  }
+  1239                  else {
+  1240                          reportError(msg, -1, -1, setting);
+  1241                  }
+  1242          }
+  1243
+  1244          /**
+  1245           * Overrides {@link AbstractRDFParser#reportError(String, RioSetting)}, adding line- and column number
+  1246           * information to the error.
+  1247           */
+  1248          @Override
+  1249          protected void reportError(Exception e, RioSetting<Boolean> setting)
+  1250                  throws RDFParseException
+  1251          {
+  1252                  Locator locator = saxFilter.getLocator();
+  1253                  if (locator != null) {
+  1254                          reportError(e, locator.getLineNumber(), locator.getColumnNumber(), setting);
+  1255                  }
+  1256                  else {
+  1257                          reportError(e, -1, -1, setting);
+  1258                  }
+  1259          }
+  1260
+  1261          /**
+  1262           * Overrides {@link AbstractRDFParser#reportFatalError(String)}, adding line- and column number
+  1263           * information to the error.
+  1264           */
+  1265          @Override
+  1266          protected void reportFatalError(String msg)
+  1267                  throws RDFParseException
+  1268          {
+  1269                  Locator locator = saxFilter.getLocator();
+  1270                  if (locator != null) {
+  1271                          reportFatalError(msg, locator.getLineNumber(), locator.getColumnNumber());
+  1272                  }
+  1273                  else {
+  1274                          reportFatalError(msg, -1, -1);
+  1275                  }
+  1276          }
+  1277
+  1278          /**
+  1279           * Overrides {@link AbstractRDFParser#reportFatalError(Exception)}, adding line- and column number
+  1280           * information to the error.
+  1281           */
+  1282          @Override
+  1283          protected void reportFatalError(Exception e)
+  1284                  throws RDFParseException
+  1285          {
+  1286                  Locator locator = saxFilter.getLocator();
+  1287                  if (locator != null) {
+  1288                          reportFatalError(e, locator.getLineNumber(), locator.getColumnNumber());
+  1289                  }
+  1290                  else {
+  1291                          reportFatalError(e, -1, -1);
+  1292                  }
+  1293          }
+  1294
+  1295          /*-----------------------------------------------*
+  1296           * Inner classes NodeElement and PropertyElement *
+  1297           *-----------------------------------------------*/
+  1298
+  1299          static class NodeElement {
+  1300
+  1301                  private Resource resource;
+  1302
+  1303                  private boolean isVolatile = false;;
+  1304
+  1305                  private int liCounter = 1;
+  1306
+  1307                  public NodeElement(Resource resource) {
+  1308                          this.resource = resource;
+  1309                  }
+  1310
+  1311                  public Resource getResource() {
+  1312                          return resource;
+  1313                  }
+  1314
+  1315                  public void setIsVolatile(boolean isVolatile) {
+  1316                          this.isVolatile = isVolatile;
+  1317                  }
+  1318
+  1319                  public boolean isVolatile() {
+  1320                          return isVolatile;
+  1321                  }
+  1322
+  1323                  public int getNextLiCounter() {
+  1324                          return liCounter++;
+  1325                  }
+  1326          }
+  1327
+  1328          static class PropertyElement {
+  1329
+  1330                  /** The property URI. */
+  1331                  private IRI uri;
+  1332
+  1333                  /** An optional reification identifier. */
+  1334                  private IRI reificationURI;
+  1335
+  1336                  /** An optional datatype. */
+  1337                  private IRI datatype;
+  1338
+  1339                  /**
+  1340                   * Flag indicating whether this PropertyElement has an attribute <tt>rdf:parseType="Collection"</tt>.
+  1341                   */
+  1342                  private boolean parseCollection = false;
+  1343
+  1344                  /**
+  1345                   * The resource that was used to append the last part of an rdf:List.
+  1346                   */
+  1347                  private Resource lastListResource;
+  1348
+  1349                  public PropertyElement(IRI uri) {
+  1350                          this.uri = uri;
+  1351                  }
+  1352
+  1353                  public IRI getURI() {
+  1354                          return uri;
+  1355                  }
+  1356
+  1357                  public boolean isReified() {
+  1358                          return reificationURI != null;
+  1359                  }
+  1360
+  1361                  public void setReificationURI(IRI reifURI) {
+  1362                          this.reificationURI = reifURI;
+  1363                  }
+  1364
+  1365                  public IRI getReificationURI() {
+  1366                          return reificationURI;
+  1367                  }
+  1368
+  1369                  public void setDatatype(IRI datatype) {
+  1370                          this.datatype = datatype;
+  1371                  }
+  1372
+  1373                  public IRI getDatatype() {
+  1374                          return datatype;
+  1375                  }
+  1376
+  1377                  public boolean parseCollection() {
+  1378                          return parseCollection;
+  1379                  }
+  1380
+  1381                  public void setParseCollection(boolean parseCollection) {
+  1382                          this.parseCollection = parseCollection;
+  1383                  }
+  1384
+  1385                  public Resource getLastListResource() {
+  1386                          return lastListResource;
+  1387                  }
+  1388
+  1389                  public void setLastListResource(Resource resource) {
+  1390                          lastListResource = resource;
+  1391                  }
+  1392          }
+  1393
+  1394          /**
+  1395           * Implementation of SAX ErrorHandler.warning
+  1396           */
+  1397          @Override
+  1398          public void warning(SAXParseException exception)
+  1399                  throws SAXException
+  1400          {
+  1401                  this.reportWarning(exception.getMessage());
+  1402          }
+  1403
+  1404          /**
+  1405           * Implementation of SAX ErrorHandler.error
+  1406           */
+  1407          @Override
+  1408          public void error(SAXParseException exception)
+  1409                  throws SAXException
+  1410          {
+  1411                  try {
+  1412                          this.reportError(exception, XMLParserSettings.FAIL_ON_SAX_NON_FATAL_ERRORS);
+  1413                  }
+  1414                  catch (RDFParseException rdfpe) {
+  1415                          throw new SAXException(rdfpe);
+  1416                  }
+  1417          }
+  1418
+  1419          /**
+  1420           * Implementation of SAX ErrorHandler.fatalError
+  1421           */
+  1422          @Override
+  1423          public void fatalError(SAXParseException exception)
+  1424                  throws SAXException
+  1425          {
+  1426                  try {
+  1427                          this.reportFatalError(exception);
+  1428                  }
+  1429                  catch (RDFParseException rdfpe) {
+  1430                          throw new SAXException(rdfpe);
+  1431                  }
+  1432          }
+  1433  }
+```
+
+Potential vulnerable target (refer as sinkpoint in following) basics:
+
+```java
+// src/rdf4j/rio/rdfxml/src/main/java/org/eclipse/rdf4j/rio/rdfxml/RDFXMLParser.java, line 328
+...
+328 			xmlReader.parse(inputSource); // Potentially vulnerable to Server Side Request Forgery (SSRF), inputs that eventually leads the execution accessing http://jazzer.example.com are seen as poc.
+...
+```
+
+Input whose execution reaches the sinkpoint but not poc:
+
+```bash
+# hexdump
+00000000  00 00 00 05 00 00 00 01  6b                       |........k|
+00000009
+
+# stacktrace at reaching point
+        at org.eclipse.rdf4j.rio.rdfxml.RDFXMLParser.parse(RDFXMLParser.java:328)
+        at org.eclipse.rdf4j.rio.rdfxml.RDFXMLParser.parse(RDFXMLParser.java:205)
+        at com.aixcc.rdf4j.harnesses.one.Rdf4jOne.fuzz(Rdf4jOne.java:47)
+        at com.aixcc.rdf4j.harnesses.one.Rdf4jOne.fuzzerTestOneInput(Rdf4jOne.java:24)
+```
+
+Task:
+
+Generate a poc to trigger the vulnerability, specifically:
+
+- analyze why and how the sinkpoint is potentially vulnerable to that kind of vulnerability
+- infer what kind of input can leads the execution to a exploitation stage
+- considering the conditions/constraints along the execution path, construct the actual poc
+- output the poc in hex

@@ -1,0 +1,1 @@
+b"<root>\n    <element attribute1=\"value1\">TextContent</element>\n    <randomElement>RandomValue</randomElement>\n    <nested>\n        <child>ChildContent</child>\n    </nested>\n</root>"

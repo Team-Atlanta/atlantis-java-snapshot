@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractTiffImageData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">AbstractTiffImageData.java</span></div><h1>AbstractTiffImageData.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+import java.io.IOException;
+import java.nio.ByteOrder;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.formats.tiff.constants.TiffPlanarConfiguration;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.datareaders.DataReaderStrips;
+import org.apache.commons.imaging.formats.tiff.datareaders.DataReaderTiled;
+import org.apache.commons.imaging.formats.tiff.datareaders.ImageDataReader;
+import org.apache.commons.imaging.formats.tiff.photometricinterpreters.PhotometricInterpreter;
+
+<span class="nc" id="L30">public abstract class AbstractTiffImageData {</span>
+
+    public static class Data extends AbstractTiffElement.DataElement {
+
+        public Data(final long offset, final int length, final byte[] data) {
+<span class="nc" id="L35">            super(offset, length, data);</span>
+<span class="nc" id="L36">        }</span>
+
+        @Override
+        public String getElementDescription() {
+<span class="nc" id="L40">            return &quot;TIFF image data: &quot; + getDataLength() + &quot; bytes&quot;;</span>
+        }
+
+    }
+
+    public static class Strips extends AbstractTiffImageData {
+
+        private final AbstractTiffElement.DataElement[] strips;
+        // public final byte strips[][];
+        public final int rowsPerStrip;
+
+<span class="nc" id="L51">        public Strips(final AbstractTiffElement.DataElement[] strips, final int rowsPerStrip) {</span>
+<span class="nc" id="L52">            this.strips = strips;</span>
+<span class="nc" id="L53">            this.rowsPerStrip = rowsPerStrip;</span>
+<span class="nc" id="L54">        }</span>
+
+        @Override
+        public ImageDataReader getDataReader(final TiffDirectory directory, final PhotometricInterpreter photometricInterpreter, final int bitsPerPixel,
+                final int[] bitsPerSample, final int predictor, final int samplesPerPixel, final int width, final int height, final int compression,
+                final TiffPlanarConfiguration planarConfiguration, final ByteOrder byteorder) throws IOException, ImagingException {
+<span class="nc" id="L60">            final int sampleFormat = extractSampleFormat(directory);</span>
+<span class="nc" id="L61">            return new DataReaderStrips(directory, photometricInterpreter, bitsPerPixel, bitsPerSample, predictor, samplesPerPixel, sampleFormat, width, height,</span>
+                    compression, planarConfiguration, byteorder, rowsPerStrip, this);
+        }
+
+        @Override
+        public AbstractTiffElement.DataElement[] getImageData() {
+<span class="nc" id="L67">            return strips;</span>
+        }
+
+        public AbstractTiffElement.DataElement getImageData(final int offset) {
+<span class="nc" id="L71">            return strips[offset];</span>
+        }
+
+        public int getImageDataLength() {
+<span class="nc" id="L75">            return strips.length;</span>
+        }
+
+        @Override
+        public boolean stripsNotTiles() {
+<span class="nc" id="L80">            return true;</span>
+        }
+
+    }
+
+    public static class Tiles extends AbstractTiffImageData {
+
+        public final AbstractTiffElement.DataElement[] tiles;
+
+        // public final byte tiles[][];
+        private final int tileWidth;
+        private final int tileLength;
+
+<span class="nc" id="L93">        public Tiles(final AbstractTiffElement.DataElement[] tiles, final int tileWidth, final int tileLength) {</span>
+<span class="nc" id="L94">            this.tiles = tiles;</span>
+<span class="nc" id="L95">            this.tileWidth = tileWidth;</span>
+<span class="nc" id="L96">            this.tileLength = tileLength;</span>
+<span class="nc" id="L97">        }</span>
+
+        @Override
+        public ImageDataReader getDataReader(final TiffDirectory directory, final PhotometricInterpreter photometricInterpreter, final int bitsPerPixel,
+                final int[] bitsPerSample, final int predictor, final int samplesPerPixel, final int width, final int height, final int compression,
+                final TiffPlanarConfiguration planarConfiguration, final ByteOrder byteOrder) throws IOException, ImagingException {
+<span class="nc" id="L103">            final int sampleFormat = extractSampleFormat(directory);</span>
+<span class="nc" id="L104">            return new DataReaderTiled(directory, photometricInterpreter, tileWidth, tileLength, bitsPerPixel, bitsPerSample, predictor, samplesPerPixel,</span>
+                    sampleFormat, width, height, compression, planarConfiguration, byteOrder, this);
+        }
+
+        @Override
+        public AbstractTiffElement.DataElement[] getImageData() {
+<span class="nc" id="L110">            return tiles;</span>
+        }
+
+        /**
+         * Gets the height of individual tiles. Note that if the overall image height is not a multiple of the tile height, then the last row of tiles may
+         * extend beyond the image height.
+         *
+         * @return an integer value greater than zero
+         */
+        public int getTileHeight() {
+<span class="nc" id="L120">            return tileLength;</span>
+        }
+
+        /**
+         * Gets the width of individual tiles. Note that if the overall image width is not a multiple of the tile width, then the last column of tiles may
+         * extend beyond the image width.
+         *
+         * @return an integer value greater than zero
+         */
+        public int getTileWidth() {
+<span class="nc" id="L130">            return tileWidth;</span>
+        }
+
+        @Override
+        public boolean stripsNotTiles() {
+<span class="nc" id="L135">            return false;</span>
+        }
+
+        // public TiffElement[] getElements()
+        // {
+        // return tiles;
+        // }
+    }
+
+    private static int extractSampleFormat(final TiffDirectory directory) throws ImagingException {
+<span class="nc" id="L145">        final short[] sSampleFmt = directory.getFieldValue(TiffTagConstants.TIFF_TAG_SAMPLE_FORMAT, false);</span>
+<span class="nc bnc" id="L146" title="All 4 branches missed.">        if (sSampleFmt != null &amp;&amp; sSampleFmt.length &gt; 0) {</span>
+<span class="nc" id="L147">            return sSampleFmt[0];</span>
+        }
+<span class="nc" id="L149">        return 0; // unspecified format</span>
+    }
+
+    public abstract ImageDataReader getDataReader(TiffDirectory directory, PhotometricInterpreter photometricInterpreter, int bitsPerPixel, int[] bitsPerSample,
+            int predictor, int samplesPerPixel, int width, int height, int compression, TiffPlanarConfiguration planarConfiguration, ByteOrder byteOrder)
+            throws IOException, ImagingException;
+
+    public abstract AbstractTiffElement.DataElement[] getImageData();
+
+    public abstract boolean stripsNotTiles();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PgmWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.pnm</a> &gt; <span class="el_source">PgmWriter.java</span></div><h1>PgmWriter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.pnm;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.imaging.ImagingException;
+
+final class PgmWriter implements PnmWriter {
+
+    private final boolean rawBits;
+
+<span class="nc" id="L30">    PgmWriter(final boolean rawBits) {</span>
+<span class="nc" id="L31">        this.rawBits = rawBits;</span>
+<span class="nc" id="L32">    }</span>
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final PnmImagingParameters params) throws ImagingException, IOException {
+        // System.out.println
+        // (b1 == 0x50 &amp;&amp; b2 == 0x36)
+<span class="nc" id="L38">        os.write(0x50);</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        os.write(rawBits ? 0x35 : 0x32);</span>
+<span class="nc" id="L40">        os.write(PnmConstants.PNM_SEPARATOR);</span>
+
+<span class="nc" id="L42">        final int width = src.getWidth();</span>
+<span class="nc" id="L43">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L45">        os.write(Integer.toString(width).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L46">        os.write(PnmConstants.PNM_SEPARATOR);</span>
+
+<span class="nc" id="L48">        os.write(Integer.toString(height).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L49">        os.write(PnmConstants.PNM_SEPARATOR);</span>
+
+<span class="nc" id="L51">        os.write(Integer.toString(255).getBytes(StandardCharsets.US_ASCII)); // max component value</span>
+<span class="nc" id="L52">        os.write(PnmConstants.PNM_NEWLINE);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L56">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L57">                final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L58">                final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L59">                final int blue = 0xff &amp; argb &gt;&gt; 0;</span>
+<span class="nc" id="L60">                final int sample = (red + green + blue) / 3;</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">                if (rawBits) {</span>
+<span class="nc" id="L63">                    os.write((byte) sample);</span>
+                } else {
+<span class="nc" id="L65">                    os.write(Integer.toString(sample).getBytes(StandardCharsets.US_ASCII)); // max component value</span>
+<span class="nc" id="L66">                    os.write(PnmConstants.PNM_SEPARATOR);</span>
+                }
+            }
+        }
+<span class="nc" id="L70">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

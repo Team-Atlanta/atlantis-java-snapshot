@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhotoshopApp13Data.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.iptc</a> &gt; <span class="el_source">PhotoshopApp13Data.java</span></div><h1>PhotoshopApp13Data.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.imaging.formats.jpeg.iptc;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class PhotoshopApp13Data {
+    private final List&lt;IptcRecord&gt; records;
+    private final List&lt;IptcBlock&gt; rawBlocks;
+
+<span class="nc" id="L28">    public PhotoshopApp13Data(final List&lt;IptcRecord&gt; records, final List&lt;IptcBlock&gt; rawBlocks) {</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        this.rawBlocks = rawBlocks == null ? Collections.emptyList() : Collections.unmodifiableList(rawBlocks);</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        this.records = records == null ? Collections.emptyList() : Collections.unmodifiableList(records);</span>
+<span class="nc" id="L31">    }</span>
+
+    public List&lt;IptcBlock&gt; getNonIptcBlocks() {
+<span class="nc" id="L34">        final List&lt;IptcBlock&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        for (final IptcBlock block : rawBlocks) {</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">            if (!block.isIptcBlock()) {</span>
+<span class="nc" id="L37">                result.add(block);</span>
+            }
+<span class="nc" id="L39">        }</span>
+<span class="nc" id="L40">        return result;</span>
+    }
+
+    public List&lt;IptcBlock&gt; getRawBlocks() {
+<span class="nc" id="L44">        return new ArrayList&lt;&gt;(rawBlocks);</span>
+    }
+
+    public List&lt;IptcRecord&gt; getRecords() {
+<span class="nc" id="L48">        return new ArrayList&lt;&gt;(records);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

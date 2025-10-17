@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SofnSegment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.segments</a> &gt; <span class="el_source">SofnSegment.java</span></div><h1>SofnSegment.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.jpeg.segments;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+
+public class SofnSegment extends AbstractSegment {
+
+    public static class Component {
+        static final int SHALLOW_SIZE = 32;
+        public final int componentIdentifier;
+        public final int horizontalSamplingFactor;
+        public final int verticalSamplingFactor;
+        public final int quantTabDestSelector;
+
+<span class="nc" id="L41">        public Component(final int componentIdentifier, final int horizontalSamplingFactor, final int veritcalSamplingFactor, final int quantTabDestSelector) {</span>
+<span class="nc" id="L42">            this.componentIdentifier = componentIdentifier;</span>
+<span class="nc" id="L43">            this.horizontalSamplingFactor = horizontalSamplingFactor;</span>
+<span class="nc" id="L44">            this.verticalSamplingFactor = veritcalSamplingFactor;</span>
+<span class="nc" id="L45">            this.quantTabDestSelector = quantTabDestSelector;</span>
+<span class="nc" id="L46">        }</span>
+    }
+
+<span class="nc" id="L49">    private static final Logger LOGGER = Logger.getLogger(SofnSegment.class.getName());</span>
+    public final int width;
+    public final int height;
+    public final int numberOfComponents;
+    public final int precision;
+
+    private final Component[] components;
+
+    public SofnSegment(final int marker, final byte[] segmentData) throws IOException, ImagingException {
+<span class="nc" id="L58">        this(marker, segmentData.length, new ByteArrayInputStream(segmentData));</span>
+<span class="nc" id="L59">    }</span>
+
+    public SofnSegment(final int marker, final int markerLength, final InputStream is) throws IOException, ImagingException {
+<span class="nc" id="L62">        super(marker, markerLength);</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L65">            LOGGER.finest(&quot;SOF0Segment markerLength: &quot; + markerLength);</span>
+        }
+
+<span class="nc" id="L68">        precision = readByte(&quot;precision&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L69">        height = read2Bytes(&quot;height&quot;, is, &quot;Not a Valid JPEG File&quot;, getByteOrder());</span>
+<span class="nc" id="L70">        width = read2Bytes(&quot;width&quot;, is, &quot;Not a Valid JPEG File&quot;, getByteOrder());</span>
+<span class="nc" id="L71">        numberOfComponents = readByte(&quot;numberOfComponents&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (numberOfComponents &lt; 0) {</span>
+<span class="nc" id="L73">            throw new ImagingException(&quot;The number of components in a SOF0Segment cannot be less than 0!&quot;);</span>
+        }
+<span class="nc" id="L75">        components = Allocator.array(numberOfComponents, Component[]::new, Component.SHALLOW_SIZE);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        for (int i = 0; i &lt; numberOfComponents; i++) {</span>
+<span class="nc" id="L77">            final int componentIdentifier = readByte(&quot;ComponentIdentifier&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+
+<span class="nc" id="L79">            final int hvSamplingFactors = readByte(&quot;SamplingFactors&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L80">            final int horizontalSamplingFactor = hvSamplingFactors &gt;&gt; 4 &amp; 0xf;</span>
+<span class="nc" id="L81">            final int verticalSamplingFactor = hvSamplingFactors &amp; 0xf;</span>
+<span class="nc" id="L82">            final int quantTabDestSelector = readByte(&quot;QuantTabDestSel&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L83">            components[i] = new Component(componentIdentifier, horizontalSamplingFactor, verticalSamplingFactor, quantTabDestSelector);</span>
+        }
+<span class="nc" id="L85">    }</span>
+
+    /**
+     * Returns a copy of all the components.
+     *
+     * @return the components
+     */
+    public Component[] getComponents() {
+<span class="nc" id="L93">        return components.clone();</span>
+    }
+
+    /**
+     * Returns the component at the specified index.
+     *
+     * @param index the array index
+     * @return the component
+     */
+    public Component getComponents(final int index) {
+<span class="nc" id="L103">        return components[index];</span>
+    }
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L108">        return &quot;SOFN (SOF&quot; + (marker - JpegConstants.SOF0_MARKER) + &quot;) (&quot; + getSegmentType() + &quot;)&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PpmFileInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.pnm</a> &gt; <span class="el_source">PpmFileInfo.java</span></div><h1>PpmFileInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.pnm;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+
+final class PpmFileInfo extends AbstractFileInfo {
+    private final int max;
+    private final float scale;
+    private final int bytesPerSample;
+
+    PpmFileInfo(final int width, final int height, final boolean rawBits, final int max) throws ImagingException {
+<span class="fc" id="L33">        super(width, height, rawBits);</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (max &lt;= 0) {</span>
+<span class="fc" id="L35">            throw new ImagingException(&quot;PPM maxVal &quot; + max + &quot; is out of range [1;65535]&quot;);</span>
+        }
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (max &lt;= 255) {</span>
+<span class="fc" id="L38">            scale = 255f;</span>
+<span class="fc" id="L39">            bytesPerSample = 1;</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        } else if (max &lt;= 65535) {</span>
+<span class="fc" id="L41">            scale = 65535f;</span>
+<span class="fc" id="L42">            bytesPerSample = 2;</span>
+        } else {
+<span class="fc" id="L44">            throw new ImagingException(&quot;PPM maxVal &quot; + max + &quot; is out of range [1;65535]&quot;);</span>
+        }
+<span class="fc" id="L46">        this.max = max;</span>
+<span class="fc" id="L47">    }</span>
+
+    @Override
+    public int getBitDepth() {
+<span class="nc" id="L51">        return max;</span>
+    }
+
+    @Override
+    public ImageInfo.ColorType getColorType() {
+<span class="nc" id="L56">        return ImageInfo.ColorType.RGB;</span>
+    }
+
+    @Override
+    public ImageFormat getImageType() {
+<span class="nc" id="L61">        return ImageFormats.PPM;</span>
+    }
+
+    @Override
+    public String getImageTypeDescription() {
+<span class="nc" id="L66">        return &quot;PPM: portable pixmap file format&quot;;</span>
+    }
+
+    @Override
+    public String getMimeType() {
+<span class="nc" id="L71">        return &quot;image/x-portable-pixmap&quot;;</span>
+    }
+
+    @Override
+    public int getNumComponents() {
+<span class="nc" id="L76">        return 3;</span>
+    }
+
+    @Override
+    public int getRgb(final InputStream is) throws IOException {
+<span class="fc" id="L81">        int red = readSample(is, bytesPerSample);</span>
+<span class="fc" id="L82">        int green = readSample(is, bytesPerSample);</span>
+<span class="fc" id="L83">        int blue = readSample(is, bytesPerSample);</span>
+
+<span class="fc" id="L85">        red = scaleSample(red, scale, max);</span>
+<span class="fc" id="L86">        green = scaleSample(green, scale, max);</span>
+<span class="fc" id="L87">        blue = scaleSample(blue, scale, max);</span>
+<span class="fc" id="L88">        final int alpha = 0xff;</span>
+
+<span class="fc" id="L90">        return (0xff &amp; alpha) &lt;&lt; 24 | (0xff &amp; red) &lt;&lt; 16 | (0xff &amp; green) &lt;&lt; 8 | (0xff &amp; blue) &lt;&lt; 0;</span>
+    }
+
+    @Override
+    public int getRgb(final WhiteSpaceReader wsr) throws IOException {
+<span class="fc" id="L95">        int red = Integer.parseInt(wsr.readtoWhiteSpace());</span>
+<span class="fc" id="L96">        int green = Integer.parseInt(wsr.readtoWhiteSpace());</span>
+<span class="fc" id="L97">        int blue = Integer.parseInt(wsr.readtoWhiteSpace());</span>
+
+<span class="fc" id="L99">        red = scaleSample(red, scale, max);</span>
+<span class="fc" id="L100">        green = scaleSample(green, scale, max);</span>
+<span class="fc" id="L101">        blue = scaleSample(blue, scale, max);</span>
+<span class="fc" id="L102">        final int alpha = 0xff;</span>
+
+<span class="fc" id="L104">        return (0xff &amp; alpha) &lt;&lt; 24 | (0xff &amp; red) &lt;&lt; 16 | (0xff &amp; green) &lt;&lt; 8 | (0xff &amp; blue) &lt;&lt; 0;</span>
+    }
+
+    @Override
+    public boolean hasAlpha() {
+<span class="fc" id="L109">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

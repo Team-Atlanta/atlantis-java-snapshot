@@ -1,0 +1,28 @@
+FROM ghcr.io/aixcc-finals/base-builder-jvm:v1.3.0
+
+COPY crs/fuzzers/aixcc-jazzer /src/aixcc-jazzer
+WORKDIR /src/aixcc-jazzer
+RUN yes | adduser --disabled-password builder && \
+    chown -R builder .
+
+USER builder:builder
+RUN echo "build --java_runtime_version=local_jdk_17" >> .bazelrc \
+    && echo "build --cxxopt=-stdlib=libc++" >> .bazelrc \
+    && echo "build --linkopt=-lc++" >> .bazelrc
+RUN bazel build \
+    //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar \
+    //deploy:jazzer-api \
+    //deploy:jazzer-junit \
+    //launcher:jazzer
+RUN mkdir out && \
+    cp $(bazel cquery --output=files //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar) out/jazzer_agent_deploy.jar && \
+    cp $(bazel cquery --output=files //launcher:jazzer) out/jazzer_driver && \
+    cp $(bazel cquery --output=files //deploy:jazzer-api) out/jazzer_api_deploy.jar && \
+    cp $(bazel cquery --output=files //deploy:jazzer-junit) out/jazzer_junit.jar
+
+USER root
+RUN mkdir /classpath && mkdir /classpath/aixcc-jazzer && \
+    cp out/jazzer_agent_deploy.jar /classpath/aixcc-jazzer/jazzer_standalone_deploy.jar && \
+    cp out/jazzer_driver /classpath/aixcc-jazzer/jazzer && \
+    cp out/jazzer_junit.jar /classpath/aixcc-jazzer/ && \
+    cp out/jazzer_api_deploy.jar /classpath/aixcc-jazzer/

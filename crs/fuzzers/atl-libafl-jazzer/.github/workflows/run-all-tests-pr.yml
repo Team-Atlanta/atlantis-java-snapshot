@@ -1,0 +1,67 @@
+name: CI PR
+on:
+  pull_request:
+    branches: [ main ]
+  merge_group:
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  build_and_test:
+    runs-on: ${{ matrix.os }}
+    name: Build & Test
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2019, macos-14]
+        jdk: [21]
+        include:
+          - jdk: 21
+            # Workaround for https://github.com/bazelbuild/bazel/issues/14502
+            extra_bazel_args: "--jvmopt=-Djava.security.manager=allow"
+#          - os: ubuntu-22.04
+#            arch: "linux"
+#            bazel_args: "//launcher/android:jazzer_android"
+          - os: ubuntu-22.04
+            # Use JDK 8 only on Ubuntu in PRs.
+            jdk: 8
+          - os: macos-14
+            arch: "macos-arm64"
+            bazel_args: "--xcode_version_config=//.github:host_xcodes"
+          - os: windows-2019
+            arch: "windows"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Set Build Buddy config
+        run: .github/scripts/echoBuildBuddyConfig.sh ${{ secrets.BUILDBUDDY_API_KEY }} >> $GITHUB_ENV
+        shell: bash
+
+      - name: Build & Test
+        run: bazelisk test ${{env.BUILD_BUDDY_CONFIG}} --java_runtime_version=remotejdk_${{ matrix.jdk }} ${{ matrix.bazel_args }} ${{ matrix.extra_bazel_args }} --build_tag_filters="-no-${{ matrix.arch }},-no-${{ matrix.arch }}-jdk${{ matrix.jdk }},-no-jdk${{ matrix.jdk }}" --test_tag_filters="-no-${{ matrix.arch }},-no-${{ matrix.arch }}-jdk${{ matrix.jdk }},-no-jdk${{ matrix.jdk }}" //...
+
+      - name: Copy Bazel log
+        if: always()
+        shell: bash
+        run: cp "$(readlink bazel-out)"/../../../java.log* .
+
+      - name: Upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testlogs-${{ matrix.arch }}-${{ matrix.jdk }}
+          # https://github.com/actions/upload-artifact/issues/92#issuecomment-711107236
+          path: |
+            bazel-testlogs*/**/test.log
+            java.log*

@@ -1,0 +1,397 @@
+{
+    "sinks": {
+        "Server Side Request Forgery (SSRF)": [
+            {
+                "path": "src/pac4j/pac4j-cas/src/main/java/org/pac4j/cas/credentials/authenticator/CasRestAuthenticator.java",
+                "line": 54,
+                "column": 63
+            },
+            {
+                "path": "src/pac4j/pac4j-oidc/src/main/java/org/pac4j/oidc/client/AzureAdClient.java",
+                "line": 81,
+                "column": 63
+            },
+            {
+                "path": "src/pac4j/pac4j-cas/src/main/java/org/pac4j/cas/client/rest/AbstractCasRestClient.java",
+                "line": 43,
+                "column": 43
+            },
+            {
+                "path": "src/pac4j/pac4j-cas/src/main/java/org/pac4j/cas/client/rest/AbstractCasRestClient.java",
+                "line": 42,
+                "column": 45
+            },
+            {
+                "path": "src/pac4j/pac4j-http/src/main/java/org/pac4j/http/credentials/authenticator/RestAuthenticator.java",
+                "line": 106,
+                "column": 63
+            },
+            {
+                "path": "src/pac4j/pac4j-cas/src/main/java/org/pac4j/cas/client/rest/AbstractCasRestClient.java",
+                "line": 61,
+                "column": 43
+            },
+            {
+                "path": "src/pac4j/pac4j-cas/src/main/java/org/pac4j/cas/client/rest/AbstractCasRestClient.java",
+                "line": 60,
+                "column": 45
+            }
+        ],
+        "Remote Code Execution": [
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/JavaSerializationHelper.java",
+                "line": 82,
+                "column": 32
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/CommonHelper.java",
+                "line": 337,
+                "column": 53
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/CommonHelper.java",
+                "line": 335,
+                "column": 53
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/config/ConfigBuilder.java",
+                "line": 25,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/config/ConfigBuilder.java",
+                "line": 27,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-couch/src/main/java/org/pac4j/couch/profile/service/CouchProfileService.java",
+                "line": 83,
+                "column": 68
+            },
+            {
+                "path": "src/pac4j/pac4j-couch/src/main/java/org/pac4j/couch/profile/service/CouchProfileService.java",
+                "line": 128,
+                "column": 72
+            },
+            {
+                "path": "src/pac4j/pac4j-couch/src/main/java/org/pac4j/couch/profile/service/CouchProfileService.java",
+                "line": 147,
+                "column": 50
+            },
+            {
+                "path": "src/pac4j/pac4j-http/src/main/java/org/pac4j/http/credentials/authenticator/RestAuthenticator.java",
+                "line": 82,
+                "column": 40
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/profile/JsonHelper.java",
+                "line": 51,
+                "column": 46
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/profile/linkedin2/LinkedIn2ProfilePicture.java",
+                "line": 435,
+                "column": 43
+            },
+            {
+                "path": "src/pac4j/pac4j-oidc/src/main/java/org/pac4j/oidc/client/AzureAdClient.java",
+                "line": 94,
+                "column": 68
+            }
+        ],
+        "load arbitrary library": [
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/config/ConfigBuilder.java",
+                "line": 25,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/config/ConfigBuilder.java",
+                "line": 27,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/CommonHelper.java",
+                "line": 335,
+                "column": 53
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/CommonHelper.java",
+                "line": 337,
+                "column": 53
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/pac4j/pac4j-cas/src/main/java/org/pac4j/cas/config/CasConfiguration.java",
+                "line": 125,
+                "column": 57
+            },
+            {
+                "path": "src/pac4j/pac4j-config/src/main/java/org/pac4j/config/ldaptive/LdaptiveAuthenticatorBuilder.java",
+                "line": 184,
+                "column": 64
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/authorization/authorizer/RequireAnyAttributeAuthorizer.java",
+                "line": 48,
+                "column": 51
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/authorization/authorizer/RequireAnyAttributeAuthorizer.java",
+                "line": 44,
+                "column": 55
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/authorization/checker/DefaultAuthorizationChecker.java",
+                "line": 39,
+                "column": 54
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/authorization/generator/FromAttributesAuthorizationGenerator.java",
+                "line": 100,
+                "column": 69
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/authorization/generator/FromAttributesAuthorizationGenerator.java",
+                "line": 104,
+                "column": 81
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/authorization/generator/SpringSecurityPropertiesAuthorizationGenerator.java",
+                "line": 28,
+                "column": 52
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/client/finder/DefaultSecurityClientFinder.java",
+                "line": 49,
+                "column": 80
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/engine/DefaultLogoutLogic.java",
+                "line": 78,
+                "column": 52
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/exception/http/RedirectionActionHelper.java",
+                "line": 78,
+                "column": 78
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/exception/http/RedirectionActionHelper.java",
+                "line": 78,
+                "column": 54
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/exception/http/RedirectionActionHelper.java",
+                "line": 78,
+                "column": 29
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/http/ajax/DefaultAjaxRequestResolver.java",
+                "line": 52,
+                "column": 63
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/matching/checker/DefaultMatchingChecker.java",
+                "line": 57,
+                "column": 51
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/matching/matcher/HeaderMatcher.java",
+                "line": 55,
+                "column": 39
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/matching/matcher/PathMatcher.java",
+                "line": 53,
+                "column": 46
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/matching/matcher/PathMatcher.java",
+                "line": 76,
+                "column": 46
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/converter/GenderConverter.java",
+                "line": 20,
+                "column": 41
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/converter/GenderConverter.java",
+                "line": 21,
+                "column": 43
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/converter/GenderConverter.java",
+                "line": 26,
+                "column": 41
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/converter/GenderConverter.java",
+                "line": 27,
+                "column": 43
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/converter/LocaleConverter.java",
+                "line": 20,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/converter/LocaleConverter.java",
+                "line": 21,
+                "column": 44
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/converter/UrlConverter.java",
+                "line": 22,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/service/AbstractProfileService.java",
+                "line": 58,
+                "column": 47
+            },
+            {
+                "path": "src/pac4j/pac4j-http/src/main/java/org/pac4j/http/authorization/authorizer/IpRegexpAuthorizer.java",
+                "line": 43,
+                "column": 40
+            },
+            {
+                "path": "src/pac4j/pac4j-http/src/main/java/org/pac4j/http/credentials/authenticator/AbstractRegexpAuthenticator.java",
+                "line": 28,
+                "column": 40
+            },
+            {
+                "path": "src/pac4j/pac4j-http/src/main/java/org/pac4j/http/credentials/extractor/DigestAuthExtractor.java",
+                "line": 87,
+                "column": 54
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/client/GenericOAuth20Client.java",
+                "line": 72,
+                "column": 47
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/profile/JsonHelper.java",
+                "line": 72,
+                "column": 47
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/profile/JsonHelper.java",
+                "line": 74,
+                "column": 42
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/profile/facebook/converter/FacebookRelationshipStatusConverter.java",
+                "line": 19,
+                "column": 34
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/profile/facebook/converter/FacebookRelationshipStatusConverter.java",
+                "line": 20,
+                "column": 34
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/profile/ok/OkProfileDefinition.java",
+                "line": 62,
+                "column": 69
+            },
+            {
+                "path": "src/pac4j/pac4j-saml-opensamlv3/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 878,
+                "column": 73
+            },
+            {
+                "path": "src/pac4j/pac4j-saml/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 878,
+                "column": 73
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/client/GenericOAuth20Client.java",
+                "line": 120,
+                "column": 42
+            },
+            {
+                "path": "src/pac4j/pac4j-oauth/src/main/java/org/pac4j/oauth/client/GenericOAuth20Client.java",
+                "line": 120,
+                "column": 56
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/pac4j/pac4j-saml-opensamlv3/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 834,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-saml-opensamlv3/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 890,
+                "column": 58
+            },
+            {
+                "path": "src/pac4j/pac4j-saml-opensamlv3/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 903,
+                "column": 94
+            },
+            {
+                "path": "src/pac4j/pac4j-saml/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 834,
+                "column": 62
+            },
+            {
+                "path": "src/pac4j/pac4j-saml/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 890,
+                "column": 59
+            },
+            {
+                "path": "src/pac4j/pac4j-saml/src/main/java/org/pac4j/saml/config/SAML2Configuration.java",
+                "line": 903,
+                "column": 95
+            },
+            {
+                "path": "src/pac4j/pac4j-saml-opensamlv3/src/main/java/org/pac4j/saml/metadata/SAML2ServiceProviderMetadataResolver.java",
+                "line": 177,
+                "column": 47
+            },
+            {
+                "path": "src/pac4j/pac4j-saml/src/main/java/org/pac4j/saml/metadata/SAML2ServiceProviderMetadataResolver.java",
+                "line": 177,
+                "column": 47
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                "U0I2NDpyTzBBQlhRQUhVUmxjMlZ5YVdGc2FYcGxJSFJvYVhNZ1kyeGhjM002SUU1dmJtVT0="
+            ],
+            "code": "src/pac4j-harnesses/pac4j-harness-one/src/main/java/com/aixcc/pac4j/harnesses/one/Pac4jOne.java:\n10       public static void fuzzerTestOneInput(byte[] data) {\n11           try {\n12               final InternalAttributeHandler handler = new InternalAttributeHandler();\n13               handler.restore(new String(data));\n14           } catch (FuzzerSecurityIssueLow | FuzzerSecurityIssueMedium | FuzzerSecurityIssueHigh | FuzzerSecurityIssueCritical e) {\n15               throw e;\n16           } catch (Exception e) {\n17           }\n18       }\n\nsrc/pac4j/pac4j-core/src/main/java/org/pac4j/core/profile/InternalAttributeHandler.java:\n 70       public Object restore(final Object value) {\n 71           if (value != null && value instanceof String) {\n 72               final String sValue = (String) value;\n 73               if (sValue.startsWith(PREFIX)) {\n 74                   if (sValue.startsWith(PREFIX_BOOLEAN)) {\n 75                       return Boolean.parseBoolean(sValue.substring(PREFIX_BOOLEAN.length()));\n 76                   } else if (sValue.startsWith(PREFIX_INT)) {\n 77                       return Integer.parseInt(sValue.substring(PREFIX_INT.length()));\n 78                   } else if (sValue.startsWith(PREFIX_LONG)) {\n 79                       return Long.parseLong(sValue.substring(PREFIX_LONG.length()));\n 80                   } else if (sValue.startsWith(PREFIX_DATE)) {\n 81                       final String d = sValue.substring(PREFIX_DATE.length());\n 82                       try {\n 83                           return newSdf().parse(d);\n 84                       } catch (final ParseException e) {\n 85                           logger.warn(\"Unable to parse stringified date: {}\", d, e);\n 86                       }\n 87                   } else if (sValue.startsWith(PREFIX_URI)) {\n 88                       final String uri = sValue.substring(PREFIX_URI.length());\n 89                       try {\n 90                           return new URI(uri);\n 91                       } catch (final URISyntaxException e) {\n 92                           logger.warn(\"Unable to parse stringified URI: {}\", uri, e);\n 93                       }\n 94                   } else if (sValue.startsWith(PREFIX_SB64)) {\n 95                       return serializationHelper.deserializeFromBase64(sValue.substring(PREFIX_SB64.length()));\n 96                   }\n 97               }\n 98           }\n 99           return value;\n100       }\n\nsrc/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/JavaSerializationHelper.java:\n 68       public Serializable deserializeFromBase64(final String base64) {\n 69           return deserializeFromBytes(Base64.getDecoder().decode(base64));\n 70       }\n 78       public Serializable deserializeFromBytes(final byte[] bytes) {\n 79           Serializable o = null;\n 80           try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);\n 81                ObjectInputStream ois = new RestrictedObjectInputStream(bais, this.trustedPackages, this.trustedClasses)) {\n 82               o = (Serializable) ois.readObject();\n 83           } catch (final IOException | ClassNotFoundException e) {\n 84               logger.warn(\"cannot Java deserialize object\", e);\n 85           }\n 86           return o;\n 87       }\n145           private RestrictedObjectInputStream(final InputStream in, final Set<String> trustedPackages,\n146                                               final Set<Class<?>> trustedClasses) throws IOException {\n147               super(in);\n148               this.trustedPackages = trustedPackages;\n149               this.trustedClasses = trustedClasses.stream().collect(Collectors.toMap(Class::getName, Function.identity()));\n150           }\n",
+            "cost": 0.36417000000000005,
+            "harness_id": "id_1",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/JavaSerializationHelper.java:82:32",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 1
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "id_1",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/pac4j/pac4j-core/src/main/java/org/pac4j/core/util/JavaSerializationHelper.java:82:32",
+            "status": "error",
+            "id": 2
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "id_1",
+            "blob": [
+                "U0I2NDpyTzBBQlhRQUhVUmxjMlZ5YVdGc2FYcGxJSFJvYVhNZ1kyeGhjM002SUU1dmJtVT0="
+            ]
+        }
+    ]
+}

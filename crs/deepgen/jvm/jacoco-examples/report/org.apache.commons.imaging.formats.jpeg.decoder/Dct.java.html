@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Dct.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.decoder</a> &gt; <span class="el_source">Dct.java</span></div><h1>Dct.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+
+package org.apache.commons.imaging.formats.jpeg.decoder;
+
+final class Dct {
+    /*
+     * The book &quot;JPEG still image data compression standard&quot;, by Pennebaker and Mitchell, Chapter 4, discusses a number of approaches to the fast DCT. Here's
+     * the cost, excluding modified (de)quantization, for transforming an 8x8 block:
+     *
+     * Algorithm Adds Multiplies RightShifts Total Naive 896 1024 0 1920 &quot;Symmetries&quot; 448 224 0 672 Vetterli and Ligtenberg 464 208 0 672 Arai, Agui and
+     * Nakajima (AA&amp;N) 464 80 0 544 Feig 8x8 462 54 6 522 Fused mul/add (a pipe dream) 416
+     *
+     * IJG's libjpeg, FFmpeg, and a number of others use AA&amp;N.
+     *
+     * It would appear that Feig does 4-5% less operations, and multiplications are reduced from 80 in AA&amp;N to only 54. But in practice:
+     *
+     * Benchmarks, Intel Core i3 @ 2.93 GHz in long mode, 4 GB RAM Time taken to do 100 million IDCTs (less is better): Rene' Stöckel's Feig, int: 45.07
+     * seconds My Feig, floating point: 36.252 seconds AA&amp;N, unrolled loops, double[][] -&gt; double[][]: 25.167 seconds
+     *
+     * Clearly Feig is hopeless. I suspect the performance killer is simply the weight of the algorithm: massive number of local variables, large code size, and
+     * lots of random array accesses.
+     *
+     * Also, AA&amp;N can be optimized a lot: AA&amp;N, rolled loops, double[][] -&gt; double[][]: 21.162 seconds AA&amp;N, rolled loops, float[][] -&gt; float[][]: no
+     * improvement, but at some stage Hotspot might start doing SIMD, so let's use float AA&amp;N, rolled loops, float[] -&gt; float[][]: 19.979 seconds apparently 2D
+     * arrays are slow! AA&amp;N, rolled loops, inlined 1D AA&amp;N transform, float[] transformed in-place: 18.5 seconds AA&amp;N, previous version rewritten in C and
+     * compiled with &quot;gcc -O3&quot; takes: 8.5 seconds (probably due to heavy use of SIMD)
+     *
+     * Other brave attempts: AA&amp;N, best float version converted to 16:16 fixed point: 23.923 seconds
+     *
+     * Anyway the best float version stays. 18.5 seconds = 5.4 million transforms per second per core :-)
+     */
+
+<span class="nc" id="L46">    private static final float[] DCT_SCALING_FACTORS = { (float) (0.5 / Math.sqrt(2.0)), (float) (0.25 / Math.cos(Math.PI / 16.0)),</span>
+<span class="nc" id="L47">            (float) (0.25 / Math.cos(2.0 * Math.PI / 16.0)), (float) (0.25 / Math.cos(3.0 * Math.PI / 16.0)), (float) (0.25 / Math.cos(4.0 * Math.PI / 16.0)),</span>
+<span class="nc" id="L48">            (float) (0.25 / Math.cos(5.0 * Math.PI / 16.0)), (float) (0.25 / Math.cos(6.0 * Math.PI / 16.0)),</span>
+<span class="nc" id="L49">            (float) (0.25 / Math.cos(7.0 * Math.PI / 16.0)), };</span>
+
+<span class="nc" id="L51">    private static final float[] IDCT_SCALING_FACTORS = { (float) (2.0 * 4.0 / Math.sqrt(2.0) * 0.0625), (float) (4.0 * Math.cos(Math.PI / 16.0) * 0.125),</span>
+<span class="nc" id="L52">            (float) (4.0 * Math.cos(2.0 * Math.PI / 16.0) * 0.125), (float) (4.0 * Math.cos(3.0 * Math.PI / 16.0) * 0.125),</span>
+<span class="nc" id="L53">            (float) (4.0 * Math.cos(4.0 * Math.PI / 16.0) * 0.125), (float) (4.0 * Math.cos(5.0 * Math.PI / 16.0) * 0.125),</span>
+<span class="nc" id="L54">            (float) (4.0 * Math.cos(6.0 * Math.PI / 16.0) * 0.125), (float) (4.0 * Math.cos(7.0 * Math.PI / 16.0) * 0.125), };</span>
+
+<span class="nc" id="L56">    private static final float A1 = (float) Math.cos(2.0 * Math.PI / 8.0);</span>
+<span class="nc" id="L57">    private static final float A2 = (float) (Math.cos(Math.PI / 8.0) - Math.cos(3.0 * Math.PI / 8.0));</span>
+<span class="nc" id="L58">    private static final float A3 = A1;</span>
+<span class="nc" id="L59">    private static final float A4 = (float) (Math.cos(Math.PI / 8.0) + Math.cos(3.0 * Math.PI / 8.0));</span>
+<span class="nc" id="L60">    private static final float A5 = (float) Math.cos(3.0 * Math.PI / 8.0);</span>
+
+<span class="nc" id="L62">    private static final float C2 = (float) (2.0 * Math.cos(Math.PI / 8));</span>
+<span class="nc" id="L63">    private static final float C4 = (float) (2.0 * Math.cos(2 * Math.PI / 8));</span>
+<span class="nc" id="L64">    private static final float C6 = (float) (2.0 * Math.cos(3 * Math.PI / 8));</span>
+<span class="nc" id="L65">    private static final float Q = C2 - C6;</span>
+<span class="nc" id="L66">    private static final float R = C2 + C6;</span>
+
+    /**
+     * Fast forward Dct using AA&amp;N. Taken from the book &quot;JPEG still image data compression standard&quot;, by Pennebaker and Mitchell, chapter 4, figure &quot;4-8&quot;.
+     *
+     * @param vector vector.
+     */
+    public static void forwardDct8(final float[] vector) {
+<span class="nc" id="L74">        final float a00 = vector[0] + vector[7];</span>
+<span class="nc" id="L75">        final float a10 = vector[1] + vector[6];</span>
+<span class="nc" id="L76">        final float a20 = vector[2] + vector[5];</span>
+<span class="nc" id="L77">        final float a30 = vector[3] + vector[4];</span>
+<span class="nc" id="L78">        final float a40 = vector[3] - vector[4];</span>
+<span class="nc" id="L79">        final float a50 = vector[2] - vector[5];</span>
+<span class="nc" id="L80">        final float a60 = vector[1] - vector[6];</span>
+<span class="nc" id="L81">        final float a70 = vector[0] - vector[7];</span>
+
+<span class="nc" id="L83">        final float a01 = a00 + a30;</span>
+<span class="nc" id="L84">        final float a11 = a10 + a20;</span>
+<span class="nc" id="L85">        final float a21 = a10 - a20;</span>
+<span class="nc" id="L86">        final float a31 = a00 - a30;</span>
+        // Avoid some negations:
+        // float a41 = -a40 - a50;
+<span class="nc" id="L89">        final float neg_a41 = a40 + a50;</span>
+<span class="nc" id="L90">        final float a51 = a50 + a60;</span>
+<span class="nc" id="L91">        final float a61 = a60 + a70;</span>
+
+<span class="nc" id="L93">        final float a22 = a21 + a31;</span>
+
+<span class="nc" id="L95">        final float a23 = a22 * A1;</span>
+<span class="nc" id="L96">        final float mul5 = (a61 - neg_a41) * A5;</span>
+<span class="nc" id="L97">        final float a43 = neg_a41 * A2 - mul5;</span>
+<span class="nc" id="L98">        final float a53 = a51 * A3;</span>
+<span class="nc" id="L99">        final float a63 = a61 * A4 - mul5;</span>
+
+<span class="nc" id="L101">        final float a54 = a70 + a53;</span>
+<span class="nc" id="L102">        final float a74 = a70 - a53;</span>
+
+<span class="nc" id="L104">        vector[0] = a01 + a11;</span>
+<span class="nc" id="L105">        vector[4] = a01 - a11;</span>
+<span class="nc" id="L106">        vector[2] = a31 + a23;</span>
+<span class="nc" id="L107">        vector[6] = a31 - a23;</span>
+<span class="nc" id="L108">        vector[5] = a74 + a43;</span>
+<span class="nc" id="L109">        vector[1] = a54 + a63;</span>
+<span class="nc" id="L110">        vector[7] = a54 - a63;</span>
+<span class="nc" id="L111">        vector[3] = a74 - a43;</span>
+<span class="nc" id="L112">    }</span>
+
+    public static void forwardDct8x8(final float[] matrix) {
+        float a00, a10, a20, a30, a40, a50, a60, a70;
+        float a01, a11, a21, a31, neg_a41, a51, a61;
+        float a22, a23, mul5, a43, a53, a63;
+        float a54, a74;
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        for (int i = 0; i &lt; 8; i++) {</span>
+<span class="nc" id="L121">            a00 = matrix[8 * i] + matrix[8 * i + 7];</span>
+<span class="nc" id="L122">            a10 = matrix[8 * i + 1] + matrix[8 * i + 6];</span>
+<span class="nc" id="L123">            a20 = matrix[8 * i + 2] + matrix[8 * i + 5];</span>
+<span class="nc" id="L124">            a30 = matrix[8 * i + 3] + matrix[8 * i + 4];</span>
+<span class="nc" id="L125">            a40 = matrix[8 * i + 3] - matrix[8 * i + 4];</span>
+<span class="nc" id="L126">            a50 = matrix[8 * i + 2] - matrix[8 * i + 5];</span>
+<span class="nc" id="L127">            a60 = matrix[8 * i + 1] - matrix[8 * i + 6];</span>
+<span class="nc" id="L128">            a70 = matrix[8 * i] - matrix[8 * i + 7];</span>
+<span class="nc" id="L129">            a01 = a00 + a30;</span>
+<span class="nc" id="L130">            a11 = a10 + a20;</span>
+<span class="nc" id="L131">            a21 = a10 - a20;</span>
+<span class="nc" id="L132">            a31 = a00 - a30;</span>
+<span class="nc" id="L133">            neg_a41 = a40 + a50;</span>
+<span class="nc" id="L134">            a51 = a50 + a60;</span>
+<span class="nc" id="L135">            a61 = a60 + a70;</span>
+<span class="nc" id="L136">            a22 = a21 + a31;</span>
+<span class="nc" id="L137">            a23 = a22 * A1;</span>
+<span class="nc" id="L138">            mul5 = (a61 - neg_a41) * A5;</span>
+<span class="nc" id="L139">            a43 = neg_a41 * A2 - mul5;</span>
+<span class="nc" id="L140">            a53 = a51 * A3;</span>
+<span class="nc" id="L141">            a63 = a61 * A4 - mul5;</span>
+<span class="nc" id="L142">            a54 = a70 + a53;</span>
+<span class="nc" id="L143">            a74 = a70 - a53;</span>
+<span class="nc" id="L144">            matrix[8 * i] = a01 + a11;</span>
+<span class="nc" id="L145">            matrix[8 * i + 4] = a01 - a11;</span>
+<span class="nc" id="L146">            matrix[8 * i + 2] = a31 + a23;</span>
+<span class="nc" id="L147">            matrix[8 * i + 6] = a31 - a23;</span>
+<span class="nc" id="L148">            matrix[8 * i + 5] = a74 + a43;</span>
+<span class="nc" id="L149">            matrix[8 * i + 1] = a54 + a63;</span>
+<span class="nc" id="L150">            matrix[8 * i + 7] = a54 - a63;</span>
+<span class="nc" id="L151">            matrix[8 * i + 3] = a74 - a43;</span>
+        }
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        for (int i = 0; i &lt; 8; i++) {</span>
+<span class="nc" id="L155">            a00 = matrix[i] + matrix[56 + i];</span>
+<span class="nc" id="L156">            a10 = matrix[8 + i] + matrix[48 + i];</span>
+<span class="nc" id="L157">            a20 = matrix[16 + i] + matrix[40 + i];</span>
+<span class="nc" id="L158">            a30 = matrix[24 + i] + matrix[32 + i];</span>
+<span class="nc" id="L159">            a40 = matrix[24 + i] - matrix[32 + i];</span>
+<span class="nc" id="L160">            a50 = matrix[16 + i] - matrix[40 + i];</span>
+<span class="nc" id="L161">            a60 = matrix[8 + i] - matrix[48 + i];</span>
+<span class="nc" id="L162">            a70 = matrix[i] - matrix[56 + i];</span>
+<span class="nc" id="L163">            a01 = a00 + a30;</span>
+<span class="nc" id="L164">            a11 = a10 + a20;</span>
+<span class="nc" id="L165">            a21 = a10 - a20;</span>
+<span class="nc" id="L166">            a31 = a00 - a30;</span>
+<span class="nc" id="L167">            neg_a41 = a40 + a50;</span>
+<span class="nc" id="L168">            a51 = a50 + a60;</span>
+<span class="nc" id="L169">            a61 = a60 + a70;</span>
+<span class="nc" id="L170">            a22 = a21 + a31;</span>
+<span class="nc" id="L171">            a23 = a22 * A1;</span>
+<span class="nc" id="L172">            mul5 = (a61 - neg_a41) * A5;</span>
+<span class="nc" id="L173">            a43 = neg_a41 * A2 - mul5;</span>
+<span class="nc" id="L174">            a53 = a51 * A3;</span>
+<span class="nc" id="L175">            a63 = a61 * A4 - mul5;</span>
+<span class="nc" id="L176">            a54 = a70 + a53;</span>
+<span class="nc" id="L177">            a74 = a70 - a53;</span>
+<span class="nc" id="L178">            matrix[i] = a01 + a11;</span>
+<span class="nc" id="L179">            matrix[32 + i] = a01 - a11;</span>
+<span class="nc" id="L180">            matrix[16 + i] = a31 + a23;</span>
+<span class="nc" id="L181">            matrix[48 + i] = a31 - a23;</span>
+<span class="nc" id="L182">            matrix[40 + i] = a74 + a43;</span>
+<span class="nc" id="L183">            matrix[8 + i] = a54 + a63;</span>
+<span class="nc" id="L184">            matrix[56 + i] = a54 - a63;</span>
+<span class="nc" id="L185">            matrix[24 + i] = a74 - a43;</span>
+        }
+<span class="nc" id="L187">    }</span>
+
+    /**
+     * Fast inverse Dct using AA&amp;N. This is taken from the beautiful [BROEKN URL] http://vsr.finermatik.tu-chemnitz.de/~jan/MPEG/HTML/IDCT.html which gives easy
+     * equations and properly explains constants and scaling factors. Terms have been inlined and the negation optimized out of existence.
+     *
+     * @param vector vector.
+     */
+    public static void inverseDct8(final float[] vector) {
+        // B1
+<span class="nc" id="L197">        final float a2 = vector[2] - vector[6];</span>
+<span class="nc" id="L198">        final float a3 = vector[2] + vector[6];</span>
+<span class="nc" id="L199">        final float a4 = vector[5] - vector[3];</span>
+<span class="nc" id="L200">        final float tmp1 = vector[1] + vector[7];</span>
+<span class="nc" id="L201">        final float tmp2 = vector[3] + vector[5];</span>
+<span class="nc" id="L202">        final float a5 = tmp1 - tmp2;</span>
+<span class="nc" id="L203">        final float a6 = vector[1] - vector[7];</span>
+<span class="nc" id="L204">        final float a7 = tmp1 + tmp2;</span>
+
+        // M
+<span class="nc" id="L207">        final float tmp4 = C6 * (a4 + a6);</span>
+        // Eliminate the negative:
+        // float b4 = -Q*a4 - tmp4;
+<span class="nc" id="L210">        final float neg_b4 = Q * a4 + tmp4;</span>
+<span class="nc" id="L211">        final float b6 = R * a6 - tmp4;</span>
+<span class="nc" id="L212">        final float b2 = a2 * C4;</span>
+<span class="nc" id="L213">        final float b5 = a5 * C4;</span>
+
+        // A1
+<span class="nc" id="L216">        final float tmp3 = b6 - a7;</span>
+<span class="nc" id="L217">        final float n0 = tmp3 - b5;</span>
+<span class="nc" id="L218">        final float n1 = vector[0] - vector[4];</span>
+<span class="nc" id="L219">        final float n2 = b2 - a3;</span>
+<span class="nc" id="L220">        final float n3 = vector[0] + vector[4];</span>
+<span class="nc" id="L221">        final float neg_n5 = neg_b4;</span>
+
+        // A2
+<span class="nc" id="L224">        final float m3 = n1 + n2;</span>
+<span class="nc" id="L225">        final float m4 = n3 + a3;</span>
+<span class="nc" id="L226">        final float m5 = n1 - n2;</span>
+<span class="nc" id="L227">        final float m6 = n3 - a3;</span>
+        // float m7 = n5 - n0;
+<span class="nc" id="L229">        final float neg_m7 = neg_n5 + n0;</span>
+
+        // A3
+<span class="nc" id="L232">        vector[0] = m4 + a7;</span>
+<span class="nc" id="L233">        vector[1] = m3 + tmp3;</span>
+<span class="nc" id="L234">        vector[2] = m5 - n0;</span>
+<span class="nc" id="L235">        vector[3] = m6 + neg_m7;</span>
+<span class="nc" id="L236">        vector[4] = m6 - neg_m7;</span>
+<span class="nc" id="L237">        vector[5] = m5 + n0;</span>
+<span class="nc" id="L238">        vector[6] = m3 - tmp3;</span>
+<span class="nc" id="L239">        vector[7] = m4 - a7;</span>
+<span class="nc" id="L240">    }</span>
+
+    public static void inverseDct8x8(final float[] matrix) {
+        float a2, a3, a4, tmp1, tmp2, a5, a6, a7;
+        float tmp4, neg_b4, b6, b2, b5;
+        float tmp3, n0, n1, n2, n3, neg_n5;
+        float m3, m4, m5, m6, neg_m7;
+
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        for (int i = 0; i &lt; 8; i++) {</span>
+<span class="nc" id="L249">            a2 = matrix[8 * i + 2] - matrix[8 * i + 6];</span>
+<span class="nc" id="L250">            a3 = matrix[8 * i + 2] + matrix[8 * i + 6];</span>
+<span class="nc" id="L251">            a4 = matrix[8 * i + 5] - matrix[8 * i + 3];</span>
+<span class="nc" id="L252">            tmp1 = matrix[8 * i + 1] + matrix[8 * i + 7];</span>
+<span class="nc" id="L253">            tmp2 = matrix[8 * i + 3] + matrix[8 * i + 5];</span>
+<span class="nc" id="L254">            a5 = tmp1 - tmp2;</span>
+<span class="nc" id="L255">            a6 = matrix[8 * i + 1] - matrix[8 * i + 7];</span>
+<span class="nc" id="L256">            a7 = tmp1 + tmp2;</span>
+<span class="nc" id="L257">            tmp4 = C6 * (a4 + a6);</span>
+<span class="nc" id="L258">            neg_b4 = Q * a4 + tmp4;</span>
+<span class="nc" id="L259">            b6 = R * a6 - tmp4;</span>
+<span class="nc" id="L260">            b2 = a2 * C4;</span>
+<span class="nc" id="L261">            b5 = a5 * C4;</span>
+<span class="nc" id="L262">            tmp3 = b6 - a7;</span>
+<span class="nc" id="L263">            n0 = tmp3 - b5;</span>
+<span class="nc" id="L264">            n1 = matrix[8 * i] - matrix[8 * i + 4];</span>
+<span class="nc" id="L265">            n2 = b2 - a3;</span>
+<span class="nc" id="L266">            n3 = matrix[8 * i] + matrix[8 * i + 4];</span>
+<span class="nc" id="L267">            neg_n5 = neg_b4;</span>
+<span class="nc" id="L268">            m3 = n1 + n2;</span>
+<span class="nc" id="L269">            m4 = n3 + a3;</span>
+<span class="nc" id="L270">            m5 = n1 - n2;</span>
+<span class="nc" id="L271">            m6 = n3 - a3;</span>
+<span class="nc" id="L272">            neg_m7 = neg_n5 + n0;</span>
+<span class="nc" id="L273">            matrix[8 * i] = m4 + a7;</span>
+<span class="nc" id="L274">            matrix[8 * i + 1] = m3 + tmp3;</span>
+<span class="nc" id="L275">            matrix[8 * i + 2] = m5 - n0;</span>
+<span class="nc" id="L276">            matrix[8 * i + 3] = m6 + neg_m7;</span>
+<span class="nc" id="L277">            matrix[8 * i + 4] = m6 - neg_m7;</span>
+<span class="nc" id="L278">            matrix[8 * i + 5] = m5 + n0;</span>
+<span class="nc" id="L279">            matrix[8 * i + 6] = m3 - tmp3;</span>
+<span class="nc" id="L280">            matrix[8 * i + 7] = m4 - a7;</span>
+        }
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        for (int i = 0; i &lt; 8; i++) {</span>
+<span class="nc" id="L284">            a2 = matrix[16 + i] - matrix[48 + i];</span>
+<span class="nc" id="L285">            a3 = matrix[16 + i] + matrix[48 + i];</span>
+<span class="nc" id="L286">            a4 = matrix[40 + i] - matrix[24 + i];</span>
+<span class="nc" id="L287">            tmp1 = matrix[8 + i] + matrix[56 + i];</span>
+<span class="nc" id="L288">            tmp2 = matrix[24 + i] + matrix[40 + i];</span>
+<span class="nc" id="L289">            a5 = tmp1 - tmp2;</span>
+<span class="nc" id="L290">            a6 = matrix[8 + i] - matrix[56 + i];</span>
+<span class="nc" id="L291">            a7 = tmp1 + tmp2;</span>
+<span class="nc" id="L292">            tmp4 = C6 * (a4 + a6);</span>
+<span class="nc" id="L293">            neg_b4 = Q * a4 + tmp4;</span>
+<span class="nc" id="L294">            b6 = R * a6 - tmp4;</span>
+<span class="nc" id="L295">            b2 = a2 * C4;</span>
+<span class="nc" id="L296">            b5 = a5 * C4;</span>
+<span class="nc" id="L297">            tmp3 = b6 - a7;</span>
+<span class="nc" id="L298">            n0 = tmp3 - b5;</span>
+<span class="nc" id="L299">            n1 = matrix[i] - matrix[32 + i];</span>
+<span class="nc" id="L300">            n2 = b2 - a3;</span>
+<span class="nc" id="L301">            n3 = matrix[i] + matrix[32 + i];</span>
+<span class="nc" id="L302">            neg_n5 = neg_b4;</span>
+<span class="nc" id="L303">            m3 = n1 + n2;</span>
+<span class="nc" id="L304">            m4 = n3 + a3;</span>
+<span class="nc" id="L305">            m5 = n1 - n2;</span>
+<span class="nc" id="L306">            m6 = n3 - a3;</span>
+<span class="nc" id="L307">            neg_m7 = neg_n5 + n0;</span>
+<span class="nc" id="L308">            matrix[i] = m4 + a7;</span>
+<span class="nc" id="L309">            matrix[8 + i] = m3 + tmp3;</span>
+<span class="nc" id="L310">            matrix[16 + i] = m5 - n0;</span>
+<span class="nc" id="L311">            matrix[24 + i] = m6 + neg_m7;</span>
+<span class="nc" id="L312">            matrix[32 + i] = m6 - neg_m7;</span>
+<span class="nc" id="L313">            matrix[40 + i] = m5 + n0;</span>
+<span class="nc" id="L314">            matrix[48 + i] = m3 - tmp3;</span>
+<span class="nc" id="L315">            matrix[56 + i] = m4 - a7;</span>
+        }
+<span class="nc" id="L317">    }</span>
+
+    public static void scaleDequantizationMatrix(final float[] matrix) {
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        for (int y = 0; y &lt; 8; y++) {</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">            for (int x = 0; x &lt; 8; x++) {</span>
+<span class="nc" id="L322">                matrix[8 * y + x] *= IDCT_SCALING_FACTORS[y] * IDCT_SCALING_FACTORS[x];</span>
+            }
+        }
+<span class="nc" id="L325">    }</span>
+
+    public static void scaleDequantizationVector(final float[] vector) {
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        for (int x = 0; x &lt; 8; x++) {</span>
+<span class="nc" id="L329">            vector[x] *= IDCT_SCALING_FACTORS[x];</span>
+        }
+<span class="nc" id="L331">    }</span>
+
+    public static void scaleQuantizationMatrix(final float[] matrix) {
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        for (int y = 0; y &lt; 8; y++) {</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">            for (int x = 0; x &lt; 8; x++) {</span>
+<span class="nc" id="L336">                matrix[8 * y + x] *= DCT_SCALING_FACTORS[y] * DCT_SCALING_FACTORS[x];</span>
+            }
+        }
+<span class="nc" id="L339">    }</span>
+
+    public static void scaleQuantizationVector(final float[] vector) {
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        for (int x = 0; x &lt; 8; x++) {</span>
+<span class="nc" id="L343">            vector[x] *= DCT_SCALING_FACTORS[x];</span>
+        }
+<span class="nc" id="L345">    }</span>
+
+    private Dct() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

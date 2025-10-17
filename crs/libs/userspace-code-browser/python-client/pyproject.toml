@@ -1,0 +1,17 @@
+[project]
+name = "code_browser_client"
+version = "0.1.0"
+dependencies = [
+    "protobuf>=5.29.4", 
+    "grpcio==1.71.0", 
+    "pytest"
+]
+
+[build-system]
+requires = [
+    "setuptools", 
+    "wheel", 
+    "grpcio-tools==1.71.0",
+    "protoletariat==3.3.9"
+]
+build-backend = "setuptools.build_meta"

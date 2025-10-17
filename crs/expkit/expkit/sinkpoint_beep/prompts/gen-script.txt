@@ -1,0 +1,51 @@
+Target project:
+
+PROMPT_CP_NAME
+
+Potential vulnerable target (refer as sinkpoint in following) basics:
+
+```java
+// PROMPT_SINKPOINT_FILE_PATH, PROMPT_SINKPOINT_LINENO
+...
+PROMPT_SINKPOINT_LINE_CONTENT
+// PROMPT_SINKPOINT_VULN_DESC
+...
+```
+
+Input whose execution reaches the sinkpoint but not poc:
+
+```bash
+# hexdump
+PROMPT_BEEPSEED_HEXDUMP
+
+# stacktrace at reaching point
+PROMPT_BEEPSEED_STACKTRACE
+```
+
+Task:
+
+We are conducting AI-driven security testing, our Jazzer fuzzer has produced an input that leads the execution to reach the sinkpoint shown above but not a proof of concept (PoC). You need to write a python script to generate input which can eventually exploit this sinkpoint and trigger the targeted Jazzer sanitizer.
+
+Context informatin about the sinkpoint:
+
+The above listed is the context information about a sinkpoint in the target project, which contains project name, sinkpoint information, stacktrace while reaching the sinkpoint, and the hexdump of the input that leads to the sinkpoint. You should check the related code files to understand the context, such as the basic input format, the basic code context of the target project reaching that sinkpoint, the potential conditions/constraints along the execution path which may affect the exploitation, and think harder to write a PoC generation python script that can trigger the Jazzer sanitizer.
+
+Note that:
+
+- triggering the Jazzer sanitizer to prove successful exploitation is the eventual goal of the generation script
+- analyze the sinkpoint, its related vulnerability context, its related code files, and the input that leads to the sinkpoint
+- do not stuck at one point, this is a sinkpoint candidate instead of a confirmed vulnerability, so quickly reason and check relevant context and propose generation script, and if you find it is not exploitable, just return the unimplemented example below
+
+Format of the generated script:
+
+- To allow our tool correctly utilize the script, it must implement a function named `gen_one_seed` that returns one PoC for that fuzzing harness in bytes. An example is shown below.
+- This is just a suspicious sinkpoint, not a confirmed vulnerability. If you confirmed it is not exploitable after reasoning, you should just return the below unimplemented example, with a comment "NOT EXPLOITABLE" in `gen_one_seed` function.
+
+<example>
+def gen_one_seed() -> bytes: # for real usage
+    # TODO: implement this to do poc generation
+    pass
+
+if __name__ == "__main__":
+    gen_one_seed() # for testing
+</example>

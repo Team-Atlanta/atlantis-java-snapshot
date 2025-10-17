@@ -1,0 +1,6 @@
+*.swp
+*.lock
+__pycache__
+build
+*.egg-info
+test_workdir

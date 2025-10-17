@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.common</a> &gt; <span class="el_source">ImageBuilder.java</span></div><h1>ImageBuilder.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.imaging.common;
+
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
+import java.awt.image.RasterFormatException;
+import java.awt.image.WritableRaster;
+import java.util.Properties;
+
+/*
+ * Development notes:
+ * This class was introduced to the Apache Commons Imaging library in
+ * order to improve performance in building images.  The setRGB method
+ * provided by this class represents a substantial improvement in speed
+ * compared to that of the BufferedImage class that was originally used
+ * in Apache Sanselan.
+ *   This increase is attained because ImageBuilder is a highly specialized
+ * class that does not need to perform the general-purpose logic required
+ * for BufferedImage.  If you need to modify this class to add new
+ * image formats or functionality, keep in mind that some of its methods
+ * are invoked literally millions of times when building an image.
+ * Since even the introduction of something as small as a single conditional
+ * inside of setRGB could result in a noticeable increase in the
+ * time to read a file, changes should be made with care.
+ *    During development, I experimented with inlining the setRGB logic
+ * in some of the code that uses it. This approach did not significantly
+ * improve performance, leading me to speculate that the Java JIT compiler
+ * might have inlined the method at run time.  Further investigation
+ * is required.
+ */
+
+/**
+ * A utility class primary intended for storing data obtained by reading image files.
+ */
+public class ImageBuilder {
+    private final int[] data;
+    private final int width;
+    private final int height;
+    private final boolean hasAlpha;
+    private final boolean isAlphaPremultiplied;
+
+    /**
+     * Constructs an ImageBuilder instance.
+     *
+     * @param width    the width of the image to be built
+     * @param height   the height of the image to be built
+     * @param hasAlpha indicates whether the image has an alpha channel (the selection of alpha channel does not change the memory requirements for the
+     *                 ImageBuilder or resulting BufferedImage.
+     * @throws RasterFormatException if {@code width} or {@code height} are equal or less than zero
+     */
+<span class="fc" id="L72">    public ImageBuilder(final int width, final int height, final boolean hasAlpha) {</span>
+<span class="fc" id="L73">        checkDimensions(width, height);</span>
+
+<span class="fc" id="L75">        data = Allocator.intArray(width * height);</span>
+<span class="fc" id="L76">        this.width = width;</span>
+<span class="fc" id="L77">        this.height = height;</span>
+<span class="fc" id="L78">        this.hasAlpha = hasAlpha;</span>
+<span class="fc" id="L79">        this.isAlphaPremultiplied = false;</span>
+<span class="fc" id="L80">    }</span>
+
+    /**
+     * Constructs an ImageBuilder instance.
+     *
+     * @param width                the width of the image to be built
+     * @param height               the height of the image to be built
+     * @param hasAlpha             indicates whether the image has an alpha channel (the selection of alpha channel does not change the memory requirements for
+     *                             the ImageBuilder or resulting BufferedImage.
+     * @param isAlphaPremultiplied indicates whether alpha values are pre-multiplied; this setting is relevant only if alpha is true.
+     * @throws RasterFormatException if {@code width} or {@code height} are equal or less than zero
+     */
+<span class="nc" id="L92">    public ImageBuilder(final int width, final int height, final boolean hasAlpha, final boolean isAlphaPremultiplied) {</span>
+<span class="nc" id="L93">        checkDimensions(width, height);</span>
+<span class="nc" id="L94">        data = Allocator.intArray(width * height);</span>
+<span class="nc" id="L95">        this.width = width;</span>
+<span class="nc" id="L96">        this.height = height;</span>
+<span class="nc" id="L97">        this.hasAlpha = hasAlpha;</span>
+<span class="nc" id="L98">        this.isAlphaPremultiplied = isAlphaPremultiplied;</span>
+<span class="nc" id="L99">    }</span>
+
+    /**
+     * Performs a check on the specified sub-region to verify that it is within the constraints of the ImageBuilder bounds.
+     *
+     * @param x the X coordinate of the upper-left corner of the specified rectangular region
+     * @param y the Y coordinate of the upper-left corner of the specified rectangular region
+     * @param w the width of the specified rectangular region
+     * @param h the height of the specified rectangular region
+     * @throws RasterFormatException if width or height are equal or less than zero, or if the subimage is outside raster (on x or y axis)
+     */
+    private void checkBounds(final int x, final int y, final int w, final int h) {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (w &lt;= 0) {</span>
+<span class="nc" id="L112">            throw new RasterFormatException(&quot;negative or zero subimage width&quot;);</span>
+        }
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (h &lt;= 0) {</span>
+<span class="nc" id="L115">            throw new RasterFormatException(&quot;negative or zero subimage height&quot;);</span>
+        }
+<span class="nc bnc" id="L117" title="All 4 branches missed.">        if (x &lt; 0 || x &gt;= width) {</span>
+<span class="nc" id="L118">            throw new RasterFormatException(&quot;subimage x is outside raster&quot;);</span>
+        }
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (x + w &gt; width) {</span>
+<span class="nc" id="L121">            throw new RasterFormatException(&quot;subimage (x+width) is outside raster&quot;);</span>
+        }
+<span class="nc bnc" id="L123" title="All 4 branches missed.">        if (y &lt; 0 || y &gt;= height) {</span>
+<span class="nc" id="L124">            throw new RasterFormatException(&quot;subimage y is outside raster&quot;);</span>
+        }
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (y + h &gt; height) {</span>
+<span class="nc" id="L127">            throw new RasterFormatException(&quot;subimage (y+height) is outside raster&quot;);</span>
+        }
+<span class="nc" id="L129">    }</span>
+
+    /**
+     * Checks for valid dimensions and throws {@link RasterFormatException} if the inputs are invalid.
+     *
+     * @param width  image width (must be greater than zero)
+     * @param height image height (must be greater than zero)
+     * @throws RasterFormatException if {@code width} or {@code height} are equal or less than zero
+     */
+    private void checkDimensions(final int width, final int height) {
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (width &lt;= 0) {</span>
+<span class="fc" id="L140">            throw new RasterFormatException(&quot;zero or negative width value&quot;);</span>
+        }
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        if (height &lt;= 0) {</span>
+<span class="fc" id="L143">            throw new RasterFormatException(&quot;zero or negative height value&quot;);</span>
+        }
+<span class="fc" id="L145">    }</span>
+
+    /**
+     * Create a BufferedImage using the data stored in the ImageBuilder.
+     *
+     * @return a valid BufferedImage.
+     */
+    public BufferedImage getBufferedImage() {
+<span class="fc" id="L153">        return makeBufferedImage(data, width, height, hasAlpha);</span>
+    }
+
+    /**
+     * Gets the height of the ImageBuilder pixel field
+     *
+     * @return a positive integer
+     */
+    public int getHeight() {
+<span class="nc" id="L162">        return height;</span>
+    }
+
+    /**
+     * Gets the RGB or ARGB value for the pixel at the position (x,y) within the image builder pixel field. For performance reasons no bounds checking is
+     * applied.
+     *
+     * @param x the X coordinate of the pixel to be read
+     * @param y the Y coordinate of the pixel to be read
+     * @return the RGB or ARGB pixel value
+     */
+    public int getRgb(final int x, final int y) {
+<span class="nc" id="L174">        final int rowOffset = y * width;</span>
+<span class="nc" id="L175">        return data[rowOffset + x];</span>
+    }
+
+    /**
+     * Gets a subimage from the ImageBuilder using the specified parameters. If the parameters specify a rectangular region that is not entirely contained
+     * within the bounds defined by the ImageBuilder, this method will throw a RasterFormatException. This runtime-exception behavior is consistent with the
+     * behavior of the getSubimage method provided by BufferedImage.
+     *
+     * @param x the X coordinate of the upper-left corner of the specified rectangular region
+     * @param y the Y coordinate of the upper-left corner of the specified rectangular region
+     * @param w the width of the specified rectangular region
+     * @param h the height of the specified rectangular region
+     * @return a BufferedImage that constructed from the data within the specified rectangular region
+     * @throws RasterFormatException f the specified area is not contained within this ImageBuilder
+     */
+    public BufferedImage getSubimage(final int x, final int y, final int w, final int h) {
+<span class="nc" id="L191">        checkBounds(x, y, w, h);</span>
+
+        // Transcribe the data to an output image array
+<span class="nc" id="L194">        final int[] argb = Allocator.intArray(w * h);</span>
+<span class="nc" id="L195">        int k = 0;</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        for (int iRow = 0; iRow &lt; h; iRow++) {</span>
+<span class="nc" id="L197">            final int dIndex = (iRow + y) * width + x;</span>
+<span class="nc" id="L198">            System.arraycopy(this.data, dIndex, argb, k, w);</span>
+<span class="nc" id="L199">            k += w;</span>
+
+        }
+
+<span class="nc" id="L203">        return makeBufferedImage(argb, w, h, hasAlpha);</span>
+
+    }
+
+    /**
+     * Gets a subset of the ImageBuilder content using the specified parameters to indicate an area of interest. If the parameters specify a rectangular region
+     * that is not entirely contained within the bounds defined by the ImageBuilder, this method will throw a RasterFormatException. This run- time exception is
+     * consistent with the behavior of the getSubimage method provided by BufferedImage.
+     *
+     * @param x the X coordinate of the upper-left corner of the specified rectangular region
+     * @param y the Y coordinate of the upper-left corner of the specified rectangular region
+     * @param w the width of the specified rectangular region
+     * @param h the height of the specified rectangular region
+     * @return a valid instance of the specified width and height.
+     * @throws RasterFormatException if the specified area is not contained within this ImageBuilder
+     */
+    public ImageBuilder getSubset(final int x, final int y, final int w, final int h) {
+<span class="nc" id="L220">        checkBounds(x, y, w, h);</span>
+<span class="nc" id="L221">        final ImageBuilder b = new ImageBuilder(w, h, hasAlpha, isAlphaPremultiplied);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        for (int i = 0; i &lt; h; i++) {</span>
+<span class="nc" id="L223">            final int srcDex = (i + y) * width + x;</span>
+<span class="nc" id="L224">            final int outDex = i * w;</span>
+<span class="nc" id="L225">            System.arraycopy(data, srcDex, b.data, outDex, w);</span>
+        }
+<span class="nc" id="L227">        return b;</span>
+    }
+
+    /**
+     * Gets the width of the ImageBuilder pixel field
+     *
+     * @return a positive integer
+     */
+    public int getWidth() {
+<span class="nc" id="L236">        return width;</span>
+    }
+
+    private BufferedImage makeBufferedImage(final int[] argb, final int w, final int h, final boolean useAlpha) {
+        ColorModel colorModel;
+        WritableRaster raster;
+<span class="fc" id="L242">        final DataBufferInt buffer = new DataBufferInt(argb, w * h);</span>
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if (useAlpha) {</span>
+<span class="nc" id="L244">            colorModel = new DirectColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000,</span>
+                    isAlphaPremultiplied, DataBuffer.TYPE_INT);
+<span class="nc" id="L246">            raster = Raster.createPackedRaster(buffer, w, h, w, new int[] { 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 }, null);</span>
+        } else {
+<span class="fc" id="L248">            colorModel = new DirectColorModel(24, 0x00ff0000, 0x0000ff00, 0x000000ff);</span>
+<span class="fc" id="L249">            raster = Raster.createPackedRaster(buffer, w, h, w, new int[] { 0x00ff0000, 0x0000ff00, 0x000000ff }, null);</span>
+        }
+<span class="fc" id="L251">        return new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+    }
+
+    /**
+     * Sets the RGB or ARGB value for the pixel at position (x,y) within the image builder pixel field. For performance reasons, no bounds checking is applied.
+     *
+     * @param x    the X coordinate of the pixel to be set.
+     * @param y    the Y coordinate of the pixel to be set.
+     * @param argb the RGB or ARGB value to be stored.
+     * @throws ArithmeticException      if the index computation overflows an int.
+     * @throws IllegalArgumentException if the resulting index is illegal.
+     */
+    public void setRgb(final int x, final int y, final int argb) {
+        // Throw ArithmeticException if the result overflows an int.
+<span class="fc" id="L265">        final int rowOffset = Math.multiplyExact(y, width);</span>
+        // Throw ArithmeticException if the result overflows an int.
+<span class="fc" id="L267">        final int index = Math.addExact(rowOffset, x);</span>
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        if (index &gt; data.length) {</span>
+<span class="nc" id="L269">            throw new IllegalArgumentException(&quot;setRGB: Illegal array index.&quot;);</span>
+        }
+<span class="fc" id="L271">        data[index] = argb;</span>
+<span class="fc" id="L272">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

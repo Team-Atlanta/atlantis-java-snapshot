@@ -1,0 +1,12 @@
+diff --git a/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java b/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java
+index 12aa729..21399f0 100644
+--- a/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java
++++ b/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java
+@@ -551,6 +551,7 @@ loop2:          while (i < len) {
+         }
+ 
+         try {
++            if("BatikOneCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point BatikOneCPVOne reached."));} catch (Throwable e) {}}
+             return (stream = urlC.getInputStream());
+         } catch (IOException e) {
+             if (urlC instanceof HttpURLConnection) {

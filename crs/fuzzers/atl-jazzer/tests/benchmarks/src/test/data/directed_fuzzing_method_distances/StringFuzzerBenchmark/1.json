@@ -1,0 +1,25 @@
+{
+  "target_location": {
+    "coord": {
+      "line_num": -1,
+      "method_name": "secondStage",
+      "file_name": "StringFuzzerTarget.java",
+      "bytecode_offset": 0,
+      "method_desc": "(B)V",
+      "method_signature": "com.example.StringFuzzerTarget: void secondStage(byte)",
+      "class_name": "com.example.StringFuzzerTarget"
+    },
+    "ana_reachability": {
+      "StringFuzzer": true
+    },
+    "ana_exploitability": {}
+  },
+  "distance_map": {
+    "com.example.StringFuzzerTarget: void secondStage(byte)": {
+      "method_distance": 0
+    },
+    "com.example.StringFuzzer: void fuzzerTestOneInput(byte[])": {
+      "method_distance": 50
+    }
+  }
+}

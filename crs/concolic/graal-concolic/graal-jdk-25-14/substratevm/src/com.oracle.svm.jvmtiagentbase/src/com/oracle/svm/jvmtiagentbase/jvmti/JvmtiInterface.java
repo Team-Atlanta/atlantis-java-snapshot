@@ -1,0 +1,366 @@
+/*
+ * Copyright (c) 2019, 2020, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+package com.oracle.svm.jvmtiagentbase.jvmti;
+
+import org.graalvm.nativeimage.c.CContext;
+import org.graalvm.nativeimage.c.function.CFunctionPointer;
+import org.graalvm.nativeimage.c.function.InvokeCFunctionPointer;
+import org.graalvm.nativeimage.c.struct.CField;
+import org.graalvm.nativeimage.c.struct.CStruct;
+import org.graalvm.nativeimage.c.type.CCharPointer;
+import org.graalvm.nativeimage.c.type.CCharPointerPointer;
+import org.graalvm.nativeimage.c.type.CIntPointer;
+import org.graalvm.nativeimage.c.type.WordPointer;
+import org.graalvm.word.PointerBase;
+
+import com.oracle.svm.core.jni.headers.JNIFieldId;
+import com.oracle.svm.core.jni.headers.JNIMethodId;
+import com.oracle.svm.core.jni.headers.JNINativeInterface;
+import com.oracle.svm.core.jni.headers.JNIObjectHandle;
+
+@CStruct(value = "jvmtiInterface_1")
+@CContext(JvmtiDirectives.class)
+public interface JvmtiInterface extends PointerBase {
+    // Checkstyle: stop
+
+    int JVMTI_VERSION_1_2 = 0x30010200;
+    int JVMTI_VERSION_9 = 0x30090000;
+    @SuppressWarnings("unused")//
+    int JVMTI_VERSION_11 = 0x300B0000;
+    int JVMTI_VERSION_19 = 0x30130000;
+
+    @CField("GetVersionNumber")
+    GetVersionNumberFunctionPointer GetVersionNumber();
+
+    interface GetVersionNumberFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, CIntPointer versionPtr);
+    }
+
+    @CField("GetJNIFunctionTable")
+    GetJNIFunctionTableFunctionPointer GetJNIFunctionTable();
+
+    interface GetJNIFunctionTableFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, WordPointer functionTablePointer);
+    }
+
+    @CField("SetJNIFunctionTable")
+    SetJNIFunctionTableFunctionPointer SetJNIFunctionTable();
+
+    interface SetJNIFunctionTableFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNINativeInterface functionTable);
+    }
+
+    @CField("Allocate")
+    AllocateFunctionPointer Allocate();
+
+    interface AllocateFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, long size, CCharPointerPointer mem);
+    }
+
+    @CField("Deallocate")
+    DeallocateFunctionPointer Deallocate();
+
+    interface DeallocateFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, PointerBase mem);
+    }
+
+    @CField("SetEventCallbacks")
+    SetEventCallbacksFunctionPointer SetEventCallbacks();
+
+    interface SetEventCallbacksFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JvmtiEventCallbacks callbacks, int sizeOfCallbacks);
+    }
+
+    @CField("SetEventNotificationMode")
+    SetEventNotificationModeFunctionPointer SetEventNotificationMode();
+
+    interface SetEventNotificationModeFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JvmtiEventMode mode, JvmtiEvent type, JNIObjectHandle thread);
+    }
+
+    @CField("GetFrameCount")
+    GetFrameCountFunctionPointer GetFrameCount();
+
+    interface GetFrameCountFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIObjectHandle thread, CIntPointer countPtr);
+    }
+
+    @CField("GetStackTrace")
+    GetStackTraceFunctionPointer GetStackTrace();
+
+    interface GetStackTraceFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIObjectHandle thread, int startDepth, int maxFrameCount, WordPointer frameBuffer, CIntPointer countPtr);
+    }
+
+    @CField("GetLineNumberTable")
+    GetLineNumberTableFunctionPointer GetLineNumberTable();
+
+    interface GetLineNumberTableFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIMethodId method, CIntPointer entryCountPtr, WordPointer tablePtr);
+    }
+
+    @CField("GetMethodDeclaringClass")
+    GetMethodDeclaringClassFunctionPointer GetMethodDeclaringClass();
+
+    interface GetMethodDeclaringClassFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIMethodId method, WordPointer declaringClassPtr);
+    }
+
+    @CField("IsMethodNative")
+    IsMethodNativeFunctionPointer IsMethodNative();
+
+    interface IsMethodNativeFunctionPointer extends CFunctionPointer {
+        /* isNativePtr is a jboolean - an unsigned 8-bit value */
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIMethodId method, CCharPointer isNativePtr);
+    }
+
+    @CField("GetCapabilities")
+    CapabilitiesFunctionPointer GetCapabilities();
+
+    @CField("AddCapabilities")
+    CapabilitiesFunctionPointer AddCapabilities();
+
+    interface CapabilitiesFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JvmtiCapabilities capabilitiesPtr);
+    }
+
+    @CField("SetBreakpoint")
+    SetBreakpointFunctionPointer SetBreakpoint();
+
+    interface SetBreakpointFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIMethodId method, long location);
+    }
+
+    /*
+     * Note that the GetLocal*() functions execute a safepoint operation even for the current thread
+     * and we have seen it cause serious scalability issues, presumably from the fix of JDK-8249293.
+     */
+
+    @CField("GetLocalObject")
+    GetLocalFunctionPointer GetLocalObject();
+
+    interface GetLocalFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIObjectHandle thread, int depth, int slot, PointerBase valuePtr);
+    }
+
+    @CField("GetLocalInstance")
+    GetLocalInstanceFunctionPointer GetLocalInstance();
+
+    interface GetLocalInstanceFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIObjectHandle thread, int depth, PointerBase valuePtr);
+    }
+
+    @CField("GetCurrentThread")
+    GetCurrentThreadFunctionPointer GetCurrentThread();
+
+    interface GetCurrentThreadFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, PointerBase threadPtr);
+    }
+
+    @CField("GetClassLoader")
+    GetClassLoaderFunctionPointer GetClassLoader();
+
+    interface GetClassLoaderFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIObjectHandle clazz, PointerBase classLoaderPtr);
+    }
+
+    @CField("GetSourceFileName")
+    GetSourceFileNameFunctionPointer GetSourceFileName();
+
+    interface GetSourceFileNameFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIObjectHandle clazz, CCharPointerPointer sourceName);
+    }
+
+    @CField("GetMethodName")
+    GetMethodNameFunctionPointer GetMethodName();
+
+    interface GetMethodNameFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIMethodId method, CCharPointerPointer namePtr, CCharPointerPointer signature, CCharPointerPointer genericPtr);
+    }
+
+    @CField("GetFieldDeclaringClass")
+    GetFieldDeclaringClassFunctionPointer GetFieldDeclaringClass();
+
+    interface GetFieldDeclaringClassFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv env, JNIObjectHandle klass, JNIFieldId method, WordPointer declaringClassPtr);
+    }
+
+    @CField("GetClassSignature")
+    GetClassSignatureFunctionPointer GetClassSignature();
+
+    interface GetClassSignatureFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle klass, CCharPointerPointer signaturePtr, CCharPointerPointer genericPtr);
+    }
+
+    @CField("GetClassModifiers")
+    GetClassModifiersFunctionPointer GetClassModifiers();
+
+    interface GetClassModifiersFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle klass, CIntPointer modifiersPtr);
+    }
+
+    @CField("GetClassMethods")
+    GetClassMethodsFunctionPointer GetClassMethods();
+
+    interface GetClassMethodsFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle klass, CIntPointer methodCountPtr, WordPointer methodsPtr);
+    }
+
+    @CField("GetMethodModifiers")
+    GetMethodModifiersFunctionPointer GetMethodModifiers();
+
+    interface GetMethodModifiersFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIMethodId method, CIntPointer modifiersPtr);
+    }
+
+    @CField("GetFieldModifiers")
+    GetFieldModifiersFunctionPointer GetFieldModifiers();
+
+    interface GetFieldModifiersFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle klass, JNIFieldId field, CIntPointer modifiersPtr);
+    }
+
+    @CField("GetImplementedInterfaces")
+    GetImplementedInterfacesFunctionPointer GetImplementedInterfaces();
+
+    interface GetImplementedInterfacesFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle klass, CIntPointer interfaceCountPtr, WordPointer interfacesPtr);
+    }
+
+    @CField("GetFieldName")
+    GetFieldNameFunctionPointer GetFieldName();
+
+    interface GetFieldNameFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle klass, JNIFieldId field, CCharPointerPointer namePtr, CCharPointerPointer signaturePTr, CCharPointerPointer genericPtr);
+    }
+
+    @CField("ForceEarlyReturnObject")
+    ForceEarlyReturnObjectFunctionPointer ForceEarlyReturnObject();
+
+    interface ForceEarlyReturnObjectFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle thread, JNIObjectHandle value);
+    }
+
+    @CField("GetSystemProperty")
+    GetSystemPropertyFunctionPointer GetSystemProperty();
+
+    interface GetSystemPropertyFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, CCharPointer property, CCharPointerPointer valuePtr);
+    }
+
+    @CField("GetSystemProperties")
+    GetSystemPropertiesFunctionPointer GetSystemProperties();
+
+    interface GetSystemPropertiesFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, CIntPointer countPtr, WordPointer propertyPtr);
+    }
+
+    @CField("GetBytecodes")
+    GetBytecodesFunctionPointer GetBytecodes();
+
+    interface GetBytecodesFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIMethodId method, CIntPointer bytecodeCountPtr, CCharPointerPointer bytecodesPtr);
+    }
+
+    @CField("GetConstantPool")
+    GetConstantPoolFunctionPointer GetConstantPool();
+
+    interface GetConstantPoolFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle clazz, CIntPointer constantPoolCountPtr, CIntPointer constantPoolByteCountPtr, CCharPointerPointer constantPoolBytesPtr);
+    }
+
+    @CField("GetJLocationFormat")
+    GetJLocationFormatFunctionPointer GetJLocationFormat();
+
+    interface GetJLocationFormatFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, CIntPointer formatPtr);
+    }
+
+    @CField("GetLoadedClasses")
+    GetLoadedClassesFunctionPointer GetLoadedClasses();
+
+    interface GetLoadedClassesFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, CIntPointer classCountPtr, WordPointer classesPtr);
+    }
+
+    @CField("GetNamedModule")
+    GetNamedModuleFunctionPointer GetNamedModule();
+
+    interface GetNamedModuleFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle classLoader, CCharPointer packageName, PointerBase modulePtr);
+    }
+
+    @CField("GetAllModules")
+    GetAllModulesFunctionPointer GetAllModules();
+
+    interface GetAllModulesFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, CIntPointer moduleCountPtr, PointerBase modulesPtr);
+    }
+
+    @CField("AddModuleOpens")
+    AddModuleOpensFunctionPointer AddModuleOpens();
+
+    interface AddModuleOpensFunctionPointer extends CFunctionPointer {
+        @InvokeCFunctionPointer
+        JvmtiError invoke(JvmtiEnv jvmtiEnv, JNIObjectHandle module, CCharPointer pkgName, JNIObjectHandle toModule);
+    }
+}

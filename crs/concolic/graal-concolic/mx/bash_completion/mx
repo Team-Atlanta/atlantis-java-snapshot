@@ -1,0 +1,98 @@
+_mx() {
+    local cur prev opts commands
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    #  read options & commands
+    IFS='|' read opts commands <<< $(_mx_completion)
+
+    #  complete fetch-jdk
+    if [[ "${prev}" == "fetch-jdk" ]]; then
+        local jdk_ids=$(mx fetch-jdk --list)
+        COMPREPLY=($(compgen -W "${jdk_ids}" -- $cur))
+        return 0
+    fi
+
+    # complete command arguments
+    for command in $commands; do
+        if [[ "${prev}" == "${command}" ]]; then
+            # unusable output
+            #local help=$(mx help ${command})
+            local help=""
+            COMPREPLY=($(compgen -W "${help}" -- $cur))
+            return 0
+        fi
+    done;
+    #  complete the arguments
+    if [[ "${cur}" == -* ]]; then
+        COMPREPLY=($(compgen -W "${opts}" -- $cur))
+        return 0
+    fi
+
+    COMPREPLY=($(compgen -W "${commands}" -- $cur))
+    return 0
+}
+
+_mx_completion() {
+    local project_hash=$(echo -n $PWD | sha1sum | awk '{print $1}')
+    local tmp_file="/tmp/mx-bash-completion-${project_hash}"
+    if [[ ! -f $tmp_file ]]; then
+        mx help 2>/dev/null | awk '
+            BEGIN {
+                # state
+                state_options=0;
+                state_commands=0;
+                # counts
+                nr_options=0;
+                nr_commands=0;
+            }
+            {
+                # reset
+                if ($0 == "") {
+                    state_options=0;
+                    next;
+                }
+
+                # arguments
+                if ($1 == "optional" && $2 == "arguments:") {
+                    state_options=1;
+                    next;
+                }
+                if (state_options) {
+                    for (i = 1; i <= NF; i++) {
+                        if (index($i, "-") == 1) {
+                            options[nr_options] = $i;
+                            nr_options++;
+                        }
+                    }
+                    next;
+                }
+
+                # commands
+                if ($1 == "available" && $2 == "commands:") {
+                    state_commands=1;
+                    next;
+                };
+                if (state_commands && $1 != "") {
+                    commands[nr_commands] = $1;
+                    nr_commands++;
+                }
+            }
+            END {
+                for (i = 0; i < nr_options; i++) {
+                    printf("%s ", options[i]);
+                }
+                printf("%s ", "|");
+                for (i = 0; i < nr_commands; i++) {
+                    printf("%s ", commands[i]);
+                }
+            }' > $tmp_file
+    fi
+    cat $tmp_file
+}
+
+# Use default bash autocomplete behavior if mx autocomplete fails.
+complete -F _mx -o default mx
+
+# vi: syntax=bash

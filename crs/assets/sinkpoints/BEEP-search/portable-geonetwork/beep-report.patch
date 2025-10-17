@@ -1,0 +1,12 @@
+diff --git a/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/localfilesystem/LocalFilesystemHarvester.java b/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/localfilesystem/LocalFilesystemHarvester.java
+index 335ceac..a219d8b 100644
+--- a/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/localfilesystem/LocalFilesystemHarvester.java
++++ b/harvesters/src/main/java/org/fao/geonet/kernel/harvest/harvester/localfilesystem/LocalFilesystemHarvester.java
+@@ -236,6 +236,7 @@ public class LocalFilesystemHarvester extends AbstractHarvester<HarvestResult, L
+ 		}
+ 		log.info("Running the before script: " + params.beforeScript);
+         List<String> args = new ArrayList<String>(Arrays.asList(params.beforeScript.split(" ")));
++        if("GeonetworkOneCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point GeonetworkOneCPVOne reached."));} catch (Throwable e) {}}
+         Process process = new ProcessBuilder(args).
+ 				redirectError(ProcessBuilder.Redirect.INHERIT).
+ 				redirectOutput(ProcessBuilder.Redirect.INHERIT).

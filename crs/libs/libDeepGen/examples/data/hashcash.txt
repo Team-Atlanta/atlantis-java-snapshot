@@ -1,0 +1,32 @@
+import os
+import time
+import hashlib
+
+def gen_one_seed():
+    id = "hashcash"
+    difficulty = 1
+    resource = f"{id}-{os.getpid()}"
+    
+    print(f"Hashcash script {id} starting. Finding hash for '{resource}' with difficulty {difficulty} (leading hex zeros)")
+    start_time = time.time()
+    start_cpu_time = time.process_time()
+    
+    nonce = 0
+    while True:
+        nonce += 1
+        input_str = f"{resource}:{nonce}"
+        hash_hex = hashlib.sha1(input_str.encode('utf-8')).hexdigest()
+        
+        if hash_hex.startswith('0' * difficulty):
+            break
+            
+        # Optional: Add a check for excessive nonce values or time limit if needed
+        # if nonce % 1000000 == 0:
+        #    print(f"Script {id}: Nonce {nonce}...")
+    
+    end_time = time.time()
+    end_cpu_time = time.process_time()
+    
+    print(f"Hashcash script {id} finished. Found nonce: {nonce}. Hash: {hash_hex}. \
+          CPU time: {end_cpu_time - start_cpu_time:.4f}s. Wall time: {end_time - start_time:.4f}s")
+    return input_str.encode('utf-8')

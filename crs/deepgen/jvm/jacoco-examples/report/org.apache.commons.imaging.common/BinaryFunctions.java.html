@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BinaryFunctions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.common</a> &gt; <span class="el_source">BinaryFunctions.java</span></div><h1>BinaryFunctions.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.common;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.RandomAccessFiles;
+
+/**
+ * Convenience methods for various binary and I/O operations.
+ */
+public final class BinaryFunctions {
+
+<span class="fc" id="L35">    private static final Logger LOGGER = Logger.getLogger(BinaryFunctions.class.getName());</span>
+
+    public static int charsToQuad(final char c1, final char c2, final char c3, final char c4) {
+<span class="fc" id="L38">        return (0xff &amp; c1) &lt;&lt; 24 | (0xff &amp; c2) &lt;&lt; 16 | (0xff &amp; c3) &lt;&lt; 8 | (0xff &amp; c4) &lt;&lt; 0;</span>
+    }
+
+    public static boolean compareBytes(final byte[] a, final int aStart, final byte[] b, final int bStart, final int length) {
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (a.length &lt; aStart + length) {</span>
+<span class="nc" id="L43">            return false;</span>
+        }
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (b.length &lt; bStart + length) {</span>
+<span class="nc" id="L46">            return false;</span>
+        }
+
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">            if (a[aStart + i] != b[bStart + i]) {</span>
+<span class="nc" id="L51">                return false;</span>
+            }
+        }
+
+<span class="nc" id="L55">        return true;</span>
+    }
+
+    public static int findNull(final byte[] src, final int start, final String message) throws ImagingException {
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        for (int i = start; i &lt; src.length; i++) {</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (src[i] == 0) {</span>
+<span class="nc" id="L61">                return i;</span>
+            }
+        }
+<span class="nc" id="L64">        throw new ImagingException(message);</span>
+    }
+
+    public static int findNull(final byte[] src, final String message) throws ImagingException {
+<span class="nc" id="L68">        return findNull(src, 0, message);</span>
+    }
+
+    public static byte[] getBytes(final RandomAccessFile raf, final long pos, final int length, final String exception) throws IOException {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (length &lt; 0) {</span>
+<span class="nc" id="L73">            throw new IOException(String.format(&quot;%s, invalid length: %d&quot;, exception, length));</span>
+        }
+<span class="nc" id="L75">        Allocator.checkByteArray(length);</span>
+<span class="nc" id="L76">        return RandomAccessFiles.read(raf, pos, length);</span>
+
+    }
+
+    public static byte[] head(final byte[] bytes, int count) {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (count &gt; bytes.length) {</span>
+<span class="nc" id="L82">            count = bytes.length;</span>
+        }
+<span class="nc" id="L84">        return slice(bytes, 0, count);</span>
+    }
+
+    public static void logByteBits(final String msg, final byte i) {
+<span class="nc" id="L88">        LOGGER.finest(msg + &quot;: '&quot; + Integer.toBinaryString(0xff &amp; i));</span>
+<span class="nc" id="L89">    }</span>
+
+    public static void logCharQuad(final String msg, final int i) {
+<span class="nc" id="L92">        LOGGER.finest(msg + &quot;: '&quot; + (char) (0xff &amp; i &gt;&gt; 24) + (char) (0xff &amp; i &gt;&gt; 16) + (char) (0xff &amp; i &gt;&gt; 8) + (char) (0xff &amp; i &gt;&gt; 0) + &quot;'&quot;);</span>
+
+<span class="nc" id="L94">    }</span>
+
+    public static void printCharQuad(final PrintWriter pw, final String msg, final int i) {
+<span class="nc" id="L97">        pw.println(msg + &quot;: '&quot; + (char) (0xff &amp; i &gt;&gt; 24) + (char) (0xff &amp; i &gt;&gt; 16) + (char) (0xff &amp; i &gt;&gt; 8) + (char) (0xff &amp; i &gt;&gt; 0) + &quot;'&quot;);</span>
+
+<span class="nc" id="L99">    }</span>
+
+    /**
+     * Convert a quad into a byte array.
+     *
+     * @param quad quad
+     * @return a byte array
+     */
+    public static byte[] quadsToByteArray(final int quad) {
+<span class="nc" id="L108">        final byte[] arr = new byte[4];</span>
+<span class="nc" id="L109">        arr[0] = (byte) (quad &gt;&gt; 24);</span>
+<span class="nc" id="L110">        arr[1] = (byte) (quad &gt;&gt; 16);</span>
+<span class="nc" id="L111">        arr[2] = (byte) (quad &gt;&gt; 8);</span>
+<span class="nc" id="L112">        arr[3] = (byte) quad;</span>
+<span class="nc" id="L113">        return arr;</span>
+    }
+
+    public static int read2Bytes(final String name, final InputStream is, final String exception, final ByteOrder byteOrder) throws IOException {
+<span class="fc" id="L117">        final int byte0 = is.read();</span>
+<span class="fc" id="L118">        final int byte1 = is.read();</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        if ((byte0 | byte1) &lt; 0) {</span>
+<span class="fc" id="L120">            throw new IOException(exception);</span>
+        }
+
+        final int result;
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="fc" id="L125">            result = byte0 &lt;&lt; 8 | byte1;</span>
+        } else {
+<span class="fc" id="L127">            result = byte1 &lt;&lt; 8 | byte0;</span>
+        }
+
+<span class="fc" id="L130">        return result;</span>
+    }
+
+    public static int read3Bytes(final String name, final InputStream is, final String exception, final ByteOrder byteOrder) throws IOException {
+<span class="nc" id="L134">        final int byte0 = is.read();</span>
+<span class="nc" id="L135">        final int byte1 = is.read();</span>
+<span class="nc" id="L136">        final int byte2 = is.read();</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if ((byte0 | byte1 | byte2) &lt; 0) {</span>
+<span class="nc" id="L138">            throw new IOException(exception);</span>
+        }
+
+        final int result;
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L143">            result = byte0 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte2 &lt;&lt; 0;</span>
+        } else {
+<span class="nc" id="L145">            result = byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0 &lt;&lt; 0;</span>
+        }
+
+<span class="nc" id="L148">        return result;</span>
+    }
+
+    public static int read4Bytes(final String name, final InputStream is, final String exception, final ByteOrder byteOrder) throws IOException {
+<span class="fc" id="L152">        final int byte0 = is.read();</span>
+<span class="fc" id="L153">        final int byte1 = is.read();</span>
+<span class="fc" id="L154">        final int byte2 = is.read();</span>
+<span class="fc" id="L155">        final int byte3 = is.read();</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if ((byte0 | byte1 | byte2 | byte3) &lt; 0) {</span>
+<span class="fc" id="L157">            throw new IOException(exception);</span>
+        }
+
+        final int result;
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="fc" id="L162">            result = byte0 &lt;&lt; 24 | byte1 &lt;&lt; 16 | byte2 &lt;&lt; 8 | byte3 &lt;&lt; 0;</span>
+        } else {
+<span class="fc" id="L164">            result = byte3 &lt;&lt; 24 | byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0 &lt;&lt; 0;</span>
+        }
+
+<span class="fc" id="L167">        return result;</span>
+    }
+
+    /**
+     * Read eight bytes from the specified input stream, adjust for byte order, and return a long integer.
+     *
+     * @param name      a descriptive identifier used for diagnostic purposes
+     * @param is        a valid input stream
+     * @param exception application-defined message to be used for constructing an exception if an error condition is triggered.
+     * @param byteOrder the order in which the InputStream marshals data
+     * @return a long integer interpreted from next 8 bytes in the InputStream
+     * @throws IOException in the event of a non-recoverable error, such as an attempt to read past the end of file.
+     */
+    public static long read8Bytes(final String name, final InputStream is, final String exception, final ByteOrder byteOrder) throws IOException {
+
+<span class="fc" id="L182">        final long byte0 = is.read();</span>
+<span class="fc" id="L183">        final long byte1 = is.read();</span>
+<span class="fc" id="L184">        final long byte2 = is.read();</span>
+<span class="fc" id="L185">        final long byte3 = is.read();</span>
+<span class="fc" id="L186">        final long byte4 = is.read();</span>
+<span class="fc" id="L187">        final long byte5 = is.read();</span>
+<span class="fc" id="L188">        final long byte6 = is.read();</span>
+<span class="fc" id="L189">        final long byte7 = is.read();</span>
+
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if ((byte0 | byte1 | byte2 | byte3 | byte4 | byte5 | byte6 | byte7) &lt; 0) {</span>
+<span class="fc" id="L192">            throw new IOException(exception);</span>
+        }
+
+        final long result;
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+<span class="nc" id="L197">            result = byte0 &lt;&lt; 56 | byte1 &lt;&lt; 48 | byte2 &lt;&lt; 40 | byte3 &lt;&lt; 32 | byte4 &lt;&lt; 24 | byte5 &lt;&lt; 16 | byte6 &lt;&lt; 8 | byte7 &lt;&lt; 0;</span>
+        } else {
+<span class="fc" id="L199">            result = byte7 &lt;&lt; 56 | byte6 &lt;&lt; 48 | byte5 &lt;&lt; 40 | byte4 &lt;&lt; 32 | byte3 &lt;&lt; 24 | byte2 &lt;&lt; 16 | byte1 &lt;&lt; 8 | byte0 &lt;&lt; 0;</span>
+        }
+
+<span class="fc" id="L202">        return result;</span>
+    }
+
+    public static void readAndVerifyBytes(final InputStream is, final BinaryConstant expected, final String exception) throws ImagingException, IOException {
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        for (int i = 0; i &lt; expected.size(); i++) {</span>
+<span class="fc" id="L207">            final int data = is.read();</span>
+<span class="fc" id="L208">            final byte b = (byte) (0xff &amp; data);</span>
+
+<span class="fc bfc" id="L210" title="All 2 branches covered.">            if (data &lt; 0) {</span>
+<span class="fc" id="L211">                throw new ImagingException(&quot;Unexpected EOF.&quot;);</span>
+            }
+
+<span class="fc bfc" id="L214" title="All 2 branches covered.">            if (b != expected.get(i)) {</span>
+<span class="fc" id="L215">                throw new ImagingException(exception);</span>
+            }
+        }
+<span class="fc" id="L218">    }</span>
+
+    public static void readAndVerifyBytes(final InputStream is, final byte[] expected, final String exception) throws ImagingException, IOException {
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        for (final byte element : expected) {</span>
+<span class="fc" id="L222">            final int data = is.read();</span>
+<span class="fc" id="L223">            final byte b = (byte) (0xff &amp; data);</span>
+
+<span class="fc bfc" id="L225" title="All 2 branches covered.">            if (data &lt; 0) {</span>
+<span class="fc" id="L226">                throw new ImagingException(&quot;Unexpected EOF.&quot;);</span>
+            }
+
+<span class="fc bfc" id="L229" title="All 2 branches covered.">            if (b != element) {</span>
+<span class="fc" id="L230">                throw new ImagingException(exception);</span>
+            }
+        }
+<span class="nc" id="L233">    }</span>
+
+    public static byte readByte(final String name, final InputStream is, final String exceptionMessage) throws IOException {
+<span class="fc" id="L236">        final int result = is.read();</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        if (result &lt; 0) {</span>
+<span class="fc" id="L238">            throw new IOException(exceptionMessage);</span>
+        }
+<span class="fc" id="L240">        return (byte) (0xff &amp; result);</span>
+    }
+
+    public static byte[] readBytes(final InputStream is, final int count) throws IOException {
+<span class="nc" id="L244">        return readBytes(&quot;&quot;, is, count, &quot;Unexpected EOF&quot;);</span>
+    }
+
+    public static byte[] readBytes(final String name, final InputStream is, final int length) throws IOException {
+<span class="nc" id="L248">        return readBytes(name, is, length, name + &quot; could not be read.&quot;);</span>
+    }
+
+    public static byte[] readBytes(final String name, final InputStream is, final int length, final String exception) throws IOException {
+        try {
+<span class="fc" id="L253">            return IOUtils.toByteArray(is, Allocator.check(length));</span>
+<span class="fc" id="L254">        } catch (final IOException e) {</span>
+<span class="fc" id="L255">            throw new IOException(exception + &quot;, name: &quot; + name + &quot;, length: &quot; + length);</span>
+        }
+    }
+
+    public static byte[] remainingBytes(final String name, final byte[] bytes, final int count) {
+<span class="nc" id="L260">        return slice(bytes, count, bytes.length - count);</span>
+    }
+
+    /**
+     * Consumes the {@code InputStream} (without closing it) searching for a quad. It will stop either when the quad is found, or when there are no more bytes
+     * in the input stream.
+     *
+     * &lt;p&gt;
+     * Returns {@code true} if it found the quad, and {@code false} otherwise.
+     *
+     * @param quad a quad (the needle)
+     * @param bis  an input stream (the haystack)
+     * @return {@code true} if it found the quad, and {@code false} otherwise
+     * @throws IOException if it fails to read from the given input stream
+     */
+    public static boolean searchQuad(final int quad, final InputStream bis) throws IOException {
+<span class="nc" id="L276">        final byte[] needle = BinaryFunctions.quadsToByteArray(quad);</span>
+<span class="nc" id="L277">        int b = -1;</span>
+<span class="nc" id="L278">        int position = 0;</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        while ((b = bis.read()) != -1) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">            if (needle[position] == b) {</span>
+<span class="nc" id="L281">                position++;</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                if (position == needle.length) {</span>
+<span class="nc" id="L283">                    return true;</span>
+                }
+            } else {
+<span class="nc" id="L286">                position = 0;</span>
+            }
+        }
+<span class="nc" id="L289">        return false;</span>
+    }
+
+    public static long skipBytes(final InputStream is, final long length) throws IOException {
+<span class="fc" id="L293">        return skipBytes(is, length, &quot;Couldn't skip bytes&quot;);</span>
+    }
+
+    public static long skipBytes(final InputStream is, final long length, final String exMessage) throws IOException {
+        try {
+<span class="fc" id="L298">            return IOUtils.skip(is, length);</span>
+<span class="nc" id="L299">        } catch (final IOException e) {</span>
+<span class="nc" id="L300">            throw new IOException(exMessage, e);</span>
+        }
+    }
+
+    public static byte[] slice(final byte[] bytes, final int start, final int count) {
+<span class="nc" id="L305">        final byte[] result = Allocator.byteArray(count);</span>
+<span class="nc" id="L306">        System.arraycopy(bytes, start, result, 0, count);</span>
+<span class="nc" id="L307">        return result;</span>
+    }
+
+    public static boolean startsWith(final byte[] buffer, final BinaryConstant search) {
+<span class="nc bnc" id="L311" title="All 4 branches missed.">        if (buffer == null || buffer.length &lt; search.size()) {</span>
+<span class="nc" id="L312">            return false;</span>
+        }
+
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        for (int i = 0; i &lt; search.size(); i++) {</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">            if (buffer[i] != search.get(i)) {</span>
+<span class="nc" id="L317">                return false;</span>
+            }
+        }
+
+<span class="nc" id="L321">        return true;</span>
+    }
+
+    public static boolean startsWith(final byte[] buffer, final byte[] search) {
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (search == null) {</span>
+<span class="nc" id="L326">            return false;</span>
+        }
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if (buffer == null) {</span>
+<span class="nc" id="L329">            return false;</span>
+        }
+<span class="nc bnc" id="L331" title="All 2 branches missed.">        if (search.length &gt; buffer.length) {</span>
+<span class="nc" id="L332">            return false;</span>
+        }
+
+<span class="nc bnc" id="L335" title="All 2 branches missed.">        for (int i = 0; i &lt; search.length; i++) {</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">            if (search[i] != buffer[i]) {</span>
+<span class="nc" id="L337">                return false;</span>
+            }
+        }
+
+<span class="nc" id="L341">        return true;</span>
+    }
+
+    private BinaryFunctions() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

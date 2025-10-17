@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScanExpediterInterlaced.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">ScanExpediterInterlaced.java</span></div><h1>ScanExpediterInterlaced.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkPlte;
+import org.apache.commons.imaging.formats.png.transparencyfilters.AbstractTransparencyFilter;
+
+final class ScanExpediterInterlaced extends AbstractScanExpediter {
+<span class="nc" id="L28">    private static final int[] STARTING_ROW = { 0, 0, 4, 0, 2, 0, 1 };</span>
+<span class="nc" id="L29">    private static final int[] STARTING_COL = { 0, 4, 0, 2, 0, 1, 0 };</span>
+<span class="nc" id="L30">    private static final int[] ROW_INCREMENT = { 8, 8, 8, 4, 4, 2, 2 };</span>
+<span class="nc" id="L31">    private static final int[] COL_INCREMENT = { 8, 8, 4, 4, 2, 2, 1 };</span>
+//    private static final int[] Block_Height = { 8, 8, 4, 4, 2, 2, 1 };
+//    private static final int[] Block_Width = { 8, 4, 4, 2, 2, 1, 1 };
+
+    ScanExpediterInterlaced(final int width, final int height, final InputStream is, final BufferedImage bi, final PngColorType pngColorType,
+            final int bitDepth, final int bitsPerPixel, final PngChunkPlte pngChunkPLTE, final GammaCorrection gammaCorrection,
+            final AbstractTransparencyFilter abstractTransparencyFilter) {
+<span class="nc" id="L38">        super(width, height, is, bi, pngColorType, bitDepth, bitsPerPixel, pngChunkPLTE, gammaCorrection, abstractTransparencyFilter);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void drive() throws ImagingException, IOException {
+
+<span class="nc" id="L44">        int pass = 1;</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        while (pass &lt;= 7) {</span>
+<span class="nc" id="L46">            byte[] prev = null;</span>
+
+<span class="nc" id="L48">            int y = STARTING_ROW[pass - 1];</span>
+            // int y_stride = ROW_INCREMENT[pass - 1];
+            // final boolean rows_in_pass = (y &lt; height);
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            while (y &lt; height) {</span>
+<span class="nc" id="L52">                int x = STARTING_COL[pass - 1];</span>
+<span class="nc" id="L53">                int pixelIndexInScanline = 0;</span>
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                if (x &lt; width) {</span>
+                    // only get data if there are pixels in this scanline/pass
+<span class="nc" id="L57">                    final int columnsInRow = 1 + (width - STARTING_COL[pass - 1] - 1) / COL_INCREMENT[pass - 1];</span>
+<span class="nc" id="L58">                    final int bitsPerScanLine = bitsPerPixel * columnsInRow;</span>
+<span class="nc" id="L59">                    final int pixelBytesPerScanLine = getBitsToBytesRoundingUp(bitsPerScanLine);</span>
+
+<span class="nc" id="L61">                    final byte[] unfiltered = getNextScanline(is, pixelBytesPerScanLine, prev, bytesPerPixel);</span>
+
+<span class="nc" id="L63">                    prev = unfiltered;</span>
+
+<span class="nc" id="L65">                    final BitParser fBitParser = new BitParser(unfiltered, bitsPerPixel, bitDepth);</span>
+
+<span class="nc bnc" id="L67" title="All 2 branches missed.">                    while (x &lt; width) {</span>
+<span class="nc" id="L68">                        visit(x, y, bi, fBitParser, pixelIndexInScanline);</span>
+
+<span class="nc" id="L70">                        x += COL_INCREMENT[pass - 1];</span>
+<span class="nc" id="L71">                        pixelIndexInScanline++;</span>
+                    }
+                }
+<span class="nc" id="L74">                y += ROW_INCREMENT[pass - 1];</span>
+<span class="nc" id="L75">            }</span>
+<span class="nc" id="L76">            pass += 1;</span>
+<span class="nc" id="L77">        }</span>
+<span class="nc" id="L78">    }</span>
+
+    private void visit(final int x, final int y, final BufferedImage bi, final BitParser fBitParser, final int pixelIndexInScanline)
+            throws ImagingException, IOException {
+<span class="nc" id="L82">        final int rgb = getRgb(fBitParser, pixelIndexInScanline);</span>
+<span class="nc" id="L83">        bi.setRGB(x, y, rgb);</span>
+<span class="nc" id="L84">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,10 @@
+---
+library: false
+name: sinks-query-pack
+version: 1.0.0
+dependencies:
+  codeql/java-all: "*"
+dataExtensions:
+  - models/*.yml
+defaultSuite:
+  - query: queries/sinks.ql

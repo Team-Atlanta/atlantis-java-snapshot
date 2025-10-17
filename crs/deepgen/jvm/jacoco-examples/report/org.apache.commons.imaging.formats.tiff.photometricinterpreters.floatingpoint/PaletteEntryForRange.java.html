@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaletteEntryForRange.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.photometricinterpreters.floatingpoint</a> &gt; <span class="el_source">PaletteEntryForRange.java</span></div><h1>PaletteEntryForRange.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.photometricinterpreters.floatingpoint;
+
+import java.awt.Color;
+
+/**
+ * Provides a palette entry for colors associated with a range of values. The return value will be interpolated between the minimum and maximum value for this
+ * entry.
+ * &lt;p&gt;
+ * In keeping with the conventions of many Geographic Information Systems (GIS) and art applications, this instance &quot;covered&quot; values in the range v0 &amp;le; f &amp;lt;
+ * v1. Thus, a value that exactly matches the upper bound of the range is not considered &quot;covered&quot;.
+ */
+public class PaletteEntryForRange implements PaletteEntry {
+
+    private final float v0;
+    private final float v1;
+    private final float r0;
+    private final float r1;
+    private final float g0;
+    private final float g1;
+    private final float b0;
+    private final float b1;
+    private final float a0;
+    private final float a1;
+
+    /**
+     * Constructs a palette entry for the range of values v0 &amp;le; f &amp;lt; v1. A single color will be returned for all values in range
+     *
+     * @param v0    the lower bounds (inclusive) of the covered range of values
+     * @param v1    the upper bounds (non-inclusive) of the covered range of value
+     * @param color the color assigned to value v0
+     */
+<span class="nc" id="L48">    public PaletteEntryForRange(final float v0, final float v1, final Color color) {</span>
+<span class="nc" id="L49">        this.v0 = v0;</span>
+<span class="nc" id="L50">        this.v1 = v1;</span>
+<span class="nc" id="L51">        final float deltaV = v1 - v0;</span>
+        // check for range volation
+<span class="nc bnc" id="L53" title="All 4 branches missed.">        if (deltaV &lt;= 0 || Float.isNaN(deltaV)) {</span>
+<span class="nc" id="L54">            throw new IllegalArgumentException(&quot;Specified values must be v0&lt;v1&quot;);</span>
+        }
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (color == null) {</span>
+<span class="nc" id="L57">            throw new IllegalArgumentException(&quot;Null colors not allowed&quot;);</span>
+        }
+
+<span class="nc" id="L60">        final int argb0 = color.getRGB();</span>
+<span class="nc" id="L61">        a0 = argb0 &gt;&gt; 24 &amp; 0xff;</span>
+<span class="nc" id="L62">        r0 = argb0 &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L63">        g0 = argb0 &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L64">        b0 = argb0 &amp; 0xff;</span>
+
+<span class="nc" id="L66">        final int argb1 = color.getRGB();</span>
+<span class="nc" id="L67">        a1 = argb1 &gt;&gt; 24 &amp; 0xff;</span>
+<span class="nc" id="L68">        r1 = argb1 &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L69">        g1 = argb1 &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L70">        b1 = argb1 &amp; 0xff;</span>
+<span class="nc" id="L71">    }</span>
+
+    /**
+     * Constructs a palette entry for the range of values v0 &amp;le; f &amp;lt; v1. The return color value will be interpolated between the two specified colors.
+     *
+     * @param v0     the lower bounds (inclusive) of the covered range of values
+     * @param v1     the upper bounds (non-inclusive) of the covered range of value
+     * @param color0 the color assigned to value v0
+     * @param color1 the color assigned to value v1
+     */
+<span class="nc" id="L81">    public PaletteEntryForRange(final float v0, final float v1, final Color color0, final Color color1) {</span>
+<span class="nc" id="L82">        this.v0 = v0;</span>
+<span class="nc" id="L83">        this.v1 = v1;</span>
+<span class="nc" id="L84">        final float deltaV = v1 - v0;</span>
+        // check for range volation
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (deltaV &lt;= 0 || Float.isNaN(deltaV)) {</span>
+<span class="nc" id="L87">            throw new IllegalArgumentException(&quot;Specified values must be v0&lt;v1&quot;);</span>
+        }
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        if (color0 == null || color1 == null) {</span>
+<span class="nc" id="L90">            throw new IllegalArgumentException(&quot;Null colors not allowed&quot;);</span>
+        }
+<span class="nc" id="L92">        final int argb0 = color0.getRGB();</span>
+<span class="nc" id="L93">        a0 = argb0 &gt;&gt; 24 &amp; 0xff;</span>
+<span class="nc" id="L94">        r0 = argb0 &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L95">        g0 = argb0 &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L96">        b0 = argb0 &amp; 0xff;</span>
+
+<span class="nc" id="L98">        final int argb1 = color1.getRGB();</span>
+<span class="nc" id="L99">        a1 = argb1 &gt;&gt; 24 &amp; 0xff;</span>
+<span class="nc" id="L100">        r1 = argb1 &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L101">        g1 = argb1 &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L102">        b1 = argb1 &amp; 0xff;</span>
+<span class="nc" id="L103">    }</span>
+
+    @Override
+    public boolean coversSingleEntry() {
+<span class="nc" id="L107">        return false;</span>
+    }
+
+    @Override
+    public int getArgb(final float f) {
+<span class="nc bnc" id="L112" title="All 4 branches missed.">        if (v0 &lt;= f &amp;&amp; f &lt;= v1) {</span>
+<span class="nc" id="L113">            final float t = (f - v0) / (v1 - v0);</span>
+<span class="nc" id="L114">            final int a = (int) (t * (a1 - a0) + a0 + 0.5);</span>
+<span class="nc" id="L115">            final int r = (int) (t * (r1 - r0) + r0 + 0.5);</span>
+<span class="nc" id="L116">            final int g = (int) (t * (g1 - g0) + g0 + 0.5);</span>
+<span class="nc" id="L117">            final int b = (int) (t * (b1 - b0) + b0 + 0.5);</span>
+<span class="nc" id="L118">            return ((a &lt;&lt; 8 | r) &lt;&lt; 8 | g) &lt;&lt; 8 | b;</span>
+        }
+<span class="nc" id="L120">        return 0;</span>
+    }
+
+    @Override
+    public Color getColor(final float f) {
+<span class="nc bnc" id="L125" title="All 4 branches missed.">        if (v0 &lt;= f &amp;&amp; f &lt;= v1) {</span>
+<span class="nc" id="L126">            final float t = (f - v0) / (v1 - v0);</span>
+<span class="nc" id="L127">            final int a = (int) (t * (a1 - a0) + a0 + 0.5);</span>
+<span class="nc" id="L128">            final int r = (int) (t * (r1 - r0) + r0 + 0.5);</span>
+<span class="nc" id="L129">            final int g = (int) (t * (g1 - g0) + g0 + 0.5);</span>
+<span class="nc" id="L130">            final int b = (int) (t * (b1 - b0) + b0 + 0.5);</span>
+<span class="nc" id="L131">            return new Color(r, g, b, a);</span>
+        }
+<span class="nc" id="L133">        return null;</span>
+    }
+
+    @Override
+    public float getLowerBound() {
+<span class="nc" id="L138">        return v0;</span>
+    }
+
+    @Override
+    public float getUpperBound() {
+<span class="nc" id="L143">        return v1;</span>
+    }
+
+    @Override
+    public boolean isCovered(final float f) {
+<span class="nc bnc" id="L148" title="All 4 branches missed.">        return v0 &lt;= f &amp;&amp; f &lt; v1;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L153">        return &quot;PaletteEntry for range &quot; + v0 + &quot;, &quot; + v1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

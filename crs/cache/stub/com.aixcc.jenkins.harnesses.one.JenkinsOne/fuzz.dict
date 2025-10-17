@@ -1,0 +1,13 @@
+str_1="CALLS_REAL_METHODS"
+str_2="RETURNS_DEFAULTS"
+str_3="POST"
+str_4="RETURNS_SMART_NULLS"
+str_5="checksum"
+str_6="RETURNS_DEEP_STUBS"
+str_7=":"
+str_8="cmd"
+str_9="RETURNS_MOCKS"
+str_10=","
+str_11="value"
+str_12="RETURNS_SELF"
+#

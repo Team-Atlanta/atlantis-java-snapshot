@@ -1,0 +1,584 @@
+{
+    "sinks": {
+        "Server Side Request Forgery (SSRF)": [
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/communication/request/ODataRequestImpl.java",
+                "line": 395,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/lib/client-core/src/main/java/org/apache/olingo/client/core/communication/request/AbstractODataRequest.java",
+                "line": 397,
+                "column": 42
+            },
+            {
+                "path": "src/olingo/lib/client-core/src/main/java/org/apache/olingo/client/core/communication/request/v4/AsyncRequestWrapperImpl.java",
+                "line": 303,
+                "column": 33
+            }
+        ],
+        "Remote Code Execution": [
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/AbstractODataDeserializer.java",
+                "line": 140,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/AbstractODataDeserializer.java",
+                "line": 154,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/AbstractODataDeserializer.java",
+                "line": 181,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/AbstractODataDeserializer.java",
+                "line": 199,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/v3/ODataDeserializerImpl.java",
+                "line": 51,
+                "column": 51
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/v3/ODataDeserializerImpl.java",
+                "line": 60,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/v4/ODataDeserializerImpl.java",
+                "line": 60,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 413,
+                "column": 64
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 500,
+                "column": 63
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 595,
+                "column": 70
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V4Services.java",
+                "line": 741,
+                "column": 34
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V4Services.java",
+                "line": 840,
+                "column": 17
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V4Services.java",
+                "line": 1102,
+                "column": 34
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V4Services.java",
+                "line": 1144,
+                "column": 34
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/AbstractUtilities.java",
+                "line": 567,
+                "column": 67
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/AbstractUtilities.java",
+                "line": 623,
+                "column": 69
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/op/AbstractODataDeserializer.java",
+                "line": 114,
+                "column": 49
+            }
+        ],
+        "load arbitrary library": [
+            {
+                "path": "src/olingo/lib/server-api/src/main/java/org/apache/olingo/server/api/ODataServer.java",
+                "line": 32,
+                "column": 44
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/ODataGeospatialValue.java",
+                "line": 178,
+                "column": 79
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/ODataTimestamp.java",
+                "line": 56,
+                "column": 48
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/GeospatialJSONHandler.java",
+                "line": 220,
+                "column": 40
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/data/impl/GeospatialJSONHandler.java",
+                "line": 241,
+                "column": 57
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/format/ODataFormat.java",
+                "line": 72,
+                "column": 45
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/format/ODataFormat.java",
+                "line": 83,
+                "column": 68
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/format/ODataMediaFormat.java",
+                "line": 55,
+                "column": 45
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/format/ODataPubFormat.java",
+                "line": 72,
+                "column": 45
+            },
+            {
+                "path": "src/olingo/ODataJClient/engine/src/main/java/com/msopentech/odatajclient/engine/format/ODataValueFormat.java",
+                "line": 60,
+                "column": 45
+            },
+            {
+                "path": "src/olingo/ODataJClient/maven-plugin/src/main/java/com/msopentech/odatajclient/plugin/AbstractUtility.java",
+                "line": 270,
+                "column": 50
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/api/impl/EntityTypeInvocationHandler.java",
+                "line": 253,
+                "column": 69
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/EngineUtils.java",
+                "line": 190,
+                "column": 65
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testauthproxy/esigate/LinkRewriteRenderer.java",
+                "line": 54,
+                "column": 34
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 322,
+                "column": 96
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 389,
+                "column": 68
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 391,
+                "column": 69
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 399,
+                "column": 52
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 407,
+                "column": 52
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 498,
+                "column": 74
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 502,
+                "column": 73
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 507,
+                "column": 44
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/AbstractServices.java",
+                "line": 509,
+                "column": 74
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/utils/Commons.java",
+                "line": 118,
+                "column": 50
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/utils/Commons.java",
+                "line": 124,
+                "column": 65
+            },
+            {
+                "path": "src/olingo/ODataJClient/test-service/src/main/java/com/msopentech/odatajclient/testservice/utils/Commons.java",
+                "line": 124,
+                "column": 46
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 687,
+                "column": 23
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 685,
+                "column": 23
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 684,
+                "column": 73
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 684,
+                "column": 23
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 735,
+                "column": 46
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 743,
+                "column": 25
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 741,
+                "column": 44
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 849,
+                "column": 41
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 1016,
+                "column": 68
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 1030,
+                "column": 63
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 1039,
+                "column": 63
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 1154,
+                "column": 40
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/AbstractServices.java",
+                "line": 1233,
+                "column": 36
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V3ActionOverloading.java",
+                "line": 65,
+                "column": 26
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V3KeyAsSegment.java",
+                "line": 59,
+                "column": 26
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V3OpenType.java",
+                "line": 75,
+                "column": 26
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V4KeyAsSegment.java",
+                "line": 58,
+                "column": 26
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/V4OpenType.java",
+                "line": 71,
+                "column": 26
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/metadata/Metadata.java",
+                "line": 89,
+                "column": 60
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/metadata/Metadata.java",
+                "line": 139,
+                "column": 65
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/rproxy/LinkRewriteRenderer.java",
+                "line": 54,
+                "column": 30
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/AbstractUtilities.java",
+                "line": 762,
+                "column": 67
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/Commons.java",
+                "line": 192,
+                "column": 44
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/Commons.java",
+                "line": 198,
+                "column": 57
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/Commons.java",
+                "line": 198,
+                "column": 38
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/DataBinder.java",
+                "line": 275,
+                "column": 90
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/DataBinder.java",
+                "line": 275,
+                "column": 57
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/XMLEventReaderWrapper.java",
+                "line": 61,
+                "column": 61
+            },
+            {
+                "path": "src/olingo/fit/src/main/java/org/apache/olingo/fit/utils/XMLUtilities.java",
+                "line": 498,
+                "column": 82
+            },
+            {
+                "path": "src/olingo/lib/commons-api/src/main/java/org/apache/olingo/commons/api/data/ContextURL.java",
+                "line": 86,
+                "column": 78
+            },
+            {
+                "path": "src/olingo/lib/commons-api/src/main/java/org/apache/olingo/commons/api/edm/Target.java",
+                "line": 36,
+                "column": 56
+            },
+            {
+                "path": "src/olingo/lib/commons-api/src/main/java/org/apache/olingo/commons/api/edm/constants/ODataServiceVersion.java",
+                "line": 181,
+                "column": 60
+            },
+            {
+                "path": "src/olingo/lib/commons-api/src/main/java/org/apache/olingo/commons/api/format/ODataFormat.java",
+                "line": 76,
+                "column": 41
+            },
+            {
+                "path": "src/olingo/lib/commons-api/src/main/java/org/apache/olingo/commons/api/format/ODataMediaFormat.java",
+                "line": 55,
+                "column": 41
+            },
+            {
+                "path": "src/olingo/lib/commons-api/src/main/java/org/apache/olingo/commons/api/format/ODataPubFormat.java",
+                "line": 76,
+                "column": 41
+            },
+            {
+                "path": "src/olingo/lib/commons-api/src/main/java/org/apache/olingo/commons/api/format/ODataValueFormat.java",
+                "line": 60,
+                "column": 41
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/data/AbstractJsonDeserializer.java",
+                "line": 137,
+                "column": 57
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/data/AtomGeoValueDeserializer.java",
+                "line": 56,
+                "column": 73
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/data/JSONGeoValueDeserializer.java",
+                "line": 225,
+                "column": 110
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/AbstractEdmEnumType.java",
+                "line": 107,
+                "column": 49
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/AbstractEdmKeyPropertyRef.java",
+                "line": 59,
+                "column": 52
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/AbstractEdmNavigationProperty.java",
+                "line": 61,
+                "column": 46
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/EdmTypeInfo.java",
+                "line": 100,
+                "column": 36
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/primitivetype/AbstractGeospatialType.java",
+                "line": 156,
+                "column": 38
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/primitivetype/AbstractGeospatialType.java",
+                "line": 176,
+                "column": 42
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/primitivetype/AbstractGeospatialType.java",
+                "line": 206,
+                "column": 38
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/primitivetype/EdmDateTime.java",
+                "line": 57,
+                "column": 44
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/primitivetype/EdmDateTimeOffset.java",
+                "line": 70,
+                "column": 43
+            },
+            {
+                "path": "src/olingo/lib/commons-core/src/main/java/org/apache/olingo/commons/core/edm/primitivetype/EdmGuid.java",
+                "line": 51,
+                "column": 26
+            },
+            {
+                "path": "src/olingo/lib/server-core/src/main/java/org/apache/olingo/server/core/uri/parser/UriParseTreeVisitor.java",
+                "line": 1062,
+                "column": 41
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/api/impl/AbstractInvocationHandler.java",
+                "line": 88,
+                "column": 16
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/api/impl/AbstractInvocationHandler.java",
+                "line": 88,
+                "column": 90
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/api/impl/EntitySetInvocationHandler.java",
+                "line": 210,
+                "column": 44
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/api/impl/EntitySetInvocationHandler.java",
+                "line": 210,
+                "column": 71
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/ClassUtils.java",
+                "line": 65,
+                "column": 40
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/ClassUtils.java",
+                "line": 65,
+                "column": 69
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/EngineUtils.java",
+                "line": 108,
+                "column": 99
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/EngineUtils.java",
+                "line": 108,
+                "column": 113
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/EngineUtils.java",
+                "line": 191,
+                "column": 9
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/EngineUtils.java",
+                "line": 191,
+                "column": 78
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/EngineUtils.java",
+                "line": 256,
+                "column": 66
+            },
+            {
+                "path": "src/olingo/ODataJClient/proxy/src/main/java/com/msopentech/odatajclient/proxy/utils/EngineUtils.java",
+                "line": 256,
+                "column": 80
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/olingo/ODataJClient/maven-plugin/src/main/java/com/msopentech/odatajclient/plugin/AbstractMetadataMojo.java",
+                "line": 98,
+                "column": 37
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                "AAAAAQAAAGEAAAATamF6emVyLmV4YW1wbGUuY29tAA=="
+            ],
+            "code": "src/olingo-harnesses/olingo-harness-one/src/main/java/com/aixcc/olingo/harnesses/one/OlingoOne.java:\n 57       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n 58           new OlingoOne().fuzz(input);\n 59       }\n 61       private void fuzz(byte[] data) {\n 62           ByteBuffer buf = ByteBuffer.wrap(data);\n 63           int count = buf.getInt();\n 64           System.err.println(\"count:\" + count);\n 65   \n 66           if (count > 255)\n 67               return;\n 68   \n 69           for (int i = 0; i < count; i++) {\n 70               int picker = buf.getInt();\n 71               System.err.println(\"picker: \" + picker);\n 72   \n 73               try {\n 74                   switch (picker) {\n 75                       case 97: {\n 76                           int data_size = buf.getInt();\n 77                           byte[] inner_data = new byte[data_size];\n 78                           buf.get(inner_data);\n 79                           String whole = new String(inner_data);\n 80   \n 81                           String[] parts = whole.split(\"\\0\");\n 82   \n 83                           if (parts.length == 0) {\n 84                               return;\n 85                           }\n 86   \n 87                           final String url = \"http://www.google.com\";\n 88                           ODataClient client = ODataClientFactory.getV4();\n 89                           final URIBuilder uriBuilder = client.getURIBuilder(url);\n 90   \n 91                           final ODataEntitySetRequest<ODataEntitySet> oData = client.getRetrieveRequestFactory().getEntitySetRequest(uriBuilder.build());\n 92                           oData.setFormat(ODataPubFormat.JSON);\n 93   \n 94                           AsyncRequestFactoryImpl asyncRequestFactory = new AsyncRequestFactoryImpl(client);\n 95                           AsyncRequestWrapper<ODataResponse> wrappedRequest = asyncRequestFactory.getAsyncRequestWrapper(oData);\n 96                           AsyncRequestWrapperImpl wrappedRequestImpl = (AsyncRequestWrapperImpl)wrappedRequest;\n 97   \n 98                           final HttpResponse httpResponse = Mockito.mock(HttpResponse.class);\n 99                           StatusLine statusLine = Mockito.mock(StatusLine.class);\n100                           when(httpResponse.getStatusLine()).thenReturn(statusLine);\n101                           when(statusLine.getStatusCode()).thenReturn(202);\n102   \n103                           Header[] locationHeaders = new Header[] {\n104                                   new BasicHeader(\"Location\", \"https://\" + parts[0]),\n105                           };\n106                           Header[] retryAfterHeaders = new Header[] {\n107                               new BasicHeader(\"Retry-After\", \"3600\")\n108                           };\n109                           Header[] preferenceAppliedHeaders = new Header[] {\n110                               new BasicHeader(\"Preference-Applied\", new ODataPreferences(ODataServiceVersion.V40).respondAsync())\n111                           };\n112   \n113                           when(httpResponse.getHeaders(\"Location\")).thenReturn(locationHeaders);\n114                           when(httpResponse.getHeaders(\"Retry-After\")).thenReturn(retryAfterHeaders);\n115                           when(httpResponse.getHeaders(\"Preference-Applied\")).thenReturn(preferenceAppliedHeaders);\n116                           \n117                           AsyncResponseWrapperImpl wrappedResposeImpl = wrappedRequestImpl.new AsyncResponseWrapperImpl(httpResponse);\n118                           wrappedResposeImpl.isDone();\n119                       }\n120                   }\n121               } catch (Exception e) {\n122                   e.printStackTrace();\n123               }\n124           }\n125       }\n\nsrc/olingo/lib/client-core/src/main/java/org/apache/olingo/client/core/communication/request/v4/AsyncRequestWrapperImpl.java:\n167       @Override\n168       public boolean isDone() {\n169         if (response == null) {\n170           // check to the monitor URL\n171           final HttpResponse res = checkMonitor(location);\n172   \n173           if (res.getStatusLine().getStatusCode() == 202) {\n174             retrieveMonitorDetails(res);\n175           } else {\n176             response = instantiateResponse(res);\n177           }\n178         }\n179   \n180         return response != null;\n181       }\n289     protected final HttpResponse checkMonitor(final URI location) {\n290       if (location == null) {\n291         throw new AsyncRequestException(\"Invalid async request response. Missing monitor URL\");\n292       }\n293   \n294       final HttpUriRequest monitor = odataClient.getConfiguration().getHttpUriRequestFactory().\n295               createHttpUriRequest(HttpMethod.GET, location);\n296   \n297       return executeHttpRequest(httpClient, monitor);\n298     }\n300     protected final HttpResponse executeHttpRequest(final HttpClient client, final HttpUriRequest req) {\n301       final HttpResponse response;\n302       try {\n303         response = client.execute(req);\n304       } catch (IOException e) {\n305         throw new HttpClientException(e);\n306       } catch (RuntimeException e) {\n307         req.abort();\n308         throw new HttpClientException(e);\n309       }\n310   \n311       checkResponse(odataClient, response, odataRequest.getAccept());\n312   \n313       return response;\n314     }\n",
+            "cost": 0.415215,
+            "harness_id": "id_1",
+            "sanitizer": "Server Side Request Forgery (SSRF)",
+            "sink": "src/olingo/lib/client-core/src/main/java/org/apache/olingo/client/core/communication/request/v4/AsyncRequestWrapperImpl.java:303:33",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 1
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "id_1",
+            "blob": [
+                "AAAAAQAAAGEAAAATamF6emVyLmV4YW1wbGUuY29tAA=="
+            ]
+        }
+    ]
+}

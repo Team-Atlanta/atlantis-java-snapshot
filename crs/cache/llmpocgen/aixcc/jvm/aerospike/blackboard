@@ -1,0 +1,125 @@
+{
+    "sinks": {
+        "Server Side Request Forgery (SSRF)": [
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/async/NioConnection.java",
+                "line": 60,
+                "column": 26
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/cluster/Connection.java",
+                "line": 76,
+                "column": 20
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/cluster/Connection.java",
+                "line": 76,
+                "column": 29
+            }
+        ],
+        "Remote Code Execution": [
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/command/Buffer.java",
+                "line": 311,
+                "column": 12
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/util/Unpacker.java",
+                "line": 244,
+                "column": 24
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/AerospikeClient.java",
+                "line": 3767,
+                "column": 35
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/async/AsyncRead.java",
+                "line": 140,
+                "column": 30
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/command/ReadCommand.java",
+                "line": 220,
+                "column": 30
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/util/Util.java",
+                "line": 124,
+                "column": 33
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/util/Util.java",
+                "line": 135,
+                "column": 22
+            },
+            {
+                "path": "src/aerospike/test/src/com/aerospike/test/sync/basic/TestServerInfo.java",
+                "line": 69,
+                "column": 34
+            },
+            {
+                "path": "src/aerospike/test/src/com/aerospike/test/util/Args.java",
+                "line": 69,
+                "column": 36
+            },
+            {
+                "path": "src/aerospike/test/src/com/aerospike/test/util/Args.java",
+                "line": 141,
+                "column": 36
+            },
+            {
+                "path": "src/aerospike/test/src/com/aerospike/test/util/Args.java",
+                "line": 146,
+                "column": 34
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/async/NettyTlsContext.java",
+                "line": 79,
+                "column": 51
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/lua/LuaCache.java",
+                "line": 61,
+                "column": 46
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/metrics/MetricsWriter.java",
+                "line": 139,
+                "column": 27
+            },
+            {
+                "path": "src/aerospike/client/src/com/aerospike/client/util/Util.java",
+                "line": 78,
+                "column": 50
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/aerospike-harnesses/aerospike-harness-one/src/main/java/com/aixcc/aerospike/harnesses/one/AerospikeOne.java:\n58       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n59           try {\n60               new AerospikeOne().fuzz(data);\n61           } catch (FuzzerSecurityIssueLow | FuzzerSecurityIssueMedium | FuzzerSecurityIssueHigh\n62                   | FuzzerSecurityIssueCritical e) {\n63               throw e;\n64           } catch (Exception e) {\n65           }\n66       }\n68       public void fuzz(byte[] data) throws Throwable {\n69           server.setResponse(data);\n70   \n71           done = false;\n72           client.get(eventLoop, new RecordListener() {\n73               public void onSuccess(final Key key, final Record record) {\n74                   Object received = (record == null) ? null : record.getValue(bin.name);\n75                   done = true;\n76               }\n77   \n78               public void onFailure(AerospikeException e) {\n79                   done = true;\n80               }\n81           }, policy, key);\n82           while (!done)\n83               ;\n84       }\n\nsrc/aerospike/client/src/com/aerospike/client/AerospikeClient.java:\n1168   \tpublic final void get(EventLoop eventLoop, RecordListener listener, Policy policy, Key key)\n1169   \t\tthrows AerospikeException {\n1170   \t\tif (eventLoop == null) {\n1171   \t\t\teventLoop = cluster.eventLoops.next();\n1172   \t\t}\n1173   \n1174   \t\tif (policy == null) {\n1175   \t\t\tpolicy = readPolicyDefault;\n1176   \t\t}\n1177   \t\tAsyncRead command = new AsyncRead(cluster, listener, policy, key, null);\n1178   \t\teventLoop.execute(cluster, command);\n1179   \t}\n\nsrc/aerospike/client/src/com/aerospike/client/async/NioEventLoop.java:\n 70   \t@Override\n 71   \tpublic void execute(Cluster cluster, AsyncCommand command) {\n 72   \t\tnew NioCommand(this, cluster, command);\n 73   \t}\n\nsrc/aerospike/client/src/com/aerospike/client/async/NioCommand.java:\n  55   \tpublic NioCommand(NioEventLoop eventLoop, Cluster cluster, AsyncCommand command) {\n  56   \t\tthis.eventLoop = eventLoop;\n  57   \t\tthis.cluster = cluster;\n  58   \t\tthis.command = command;\n  59   \t\tthis.eventState = cluster.eventState[eventLoop.index];\n  60   \t\tthis.timeoutTask = new HashedWheelTimeout(this);\n  61   \t\tcommand.bufferQueue = eventLoop.bufferQueue;\n  62   \t\thasTotalTimeout = command.totalTimeout > 0;\n  63   \t\tlatencyType = cluster.metricsEnabled? command.getLatencyType() : LatencyType.NONE;\n  64   \n  65   \t\tif (eventLoop.thread == Thread.currentThread() && eventState.errors < 5) {\n  66   \t\t\t// We are already in event loop thread, so start processing.\n  67   \t\t\trun();\n  68   \t\t}\n  69   \t\telse {\n  70   \t\t\t// Send command through queue so it can be executed in event loop thread.\n  71   \t\t\tif (hasTotalTimeout) {\n  72   \t\t\t\ttotalDeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(command.totalTimeout);\n  73   \t\t\t}\n  74   \t\t\tstate = AsyncCommand.REGISTERED;\n  75   \t\t\teventLoop.execute(this);\n  76   \t\t}\n  77   \t}\n 125   \t@Override\n 126   \tpublic void run() {\n 127   \t\tif (eventState.closed) {\n 128   \t\t\tqueueError(new AerospikeException(\"Cluster has been closed\"));\n 129   \t\t\treturn;\n 130   \t\t}\n 131   \n 132   \t\tlong currentTime = 0;\n 133   \n 134   \t\tif (hasTotalTimeout) {\n 135   \t\t\tcurrentTime = System.nanoTime();\n 136   \n 137   \t\t\tif (state == AsyncCommand.REGISTERED) {\n 138   \t\t\t\t// Command was queued to event loop thread.\n 139   \t\t\t\tif (currentTime >= totalDeadline) {\n 140   \t\t\t\t\t// Command already timed out.\n 141   \t\t\t\t\tqueueError(new AerospikeException.Timeout(command.policy, true));\n 142   \t\t\t\t\treturn;\n 143   \t\t\t\t}\n 144   \t\t\t}\n 145   \t\t\telse {\n 146   \t\t\t\ttotalDeadline = currentTime + TimeUnit.MILLISECONDS.toNanos(command.totalTimeout);\n 147   \t\t\t}\n 148   \t\t}\n 149   \n 150   \t\tif (eventLoop.maxCommandsInProcess > 0) {\n 151   \t\t\t// Delay queue takes precedence over new commands.\n 152   \t\t\teventLoop.executeFromDelayQueue();\n 153   \n 154   \t\t\t// Handle new command.\n 155   \t\t\tif (eventLoop.pending >= eventLoop.maxCommandsInProcess) {\n 156   \t\t\t\t// Pending queue full. Append new command to delay queue.\n 157   \t\t\t\tif (eventLoop.maxCommandsInQueue > 0 && eventLoop.delayQueue.size() >= eventLoop.maxCommandsInQueue) {\n 158   \t\t\t\t\tqueueError(new AerospikeException.AsyncQueueFull());\n 159   \t\t\t\t\treturn;\n 160   \t\t\t\t}\n 161   \t\t\t\teventLoop.delayQueue.addLast(this);\n 162   \n 163   \t\t\t\tif (hasTotalTimeout) {\n 164   \t\t\t\t\teventLoop.timer.addTimeout(timeoutTask, totalDeadline);\n 165   \t\t\t\t}\n 166   \t\t\t\tstate = AsyncCommand.DELAY_QUEUE;\n 167   \t\t\t\treturn;\n 168   \t\t\t}\n 169   \t\t}\n 170   \n 171   \t\tlong deadline = totalDeadline;\n 172   \n 173   \t\tif (hasTotalTimeout) {\n 174   \t\t\tif (command.socketTimeout > 0) {\n 175   \t\t\t\tlong socketDeadline = currentTime + TimeUnit.MILLISECONDS.toNanos(command.socketTimeout);\n 176   \n 177   \t\t\t\tif (socketDeadline < totalDeadline) {\n 178   \t\t\t\t\tusingSocketTimeout = true;\n 179   \t\t\t\t\tdeadline = socketDeadline;\n 180   \t\t\t\t}\n 181   \t\t\t}\n 182   \t\t}\n 183   \t\telse if (command.socketTimeout > 0) {\n 184   \t\t\tusingSocketTimeout = true;\n 185   \t\t\tdeadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(command.socketTimeout);\n 186   \t\t}\n 187   \n 188   \t\teventState.pending++;\n 189   \t\teventLoop.pending++;\n 190   \t\texecuteCommand(deadline, TimeoutState.REGISTERED);\n 191   \t}\n 223   \tprotected final void executeCommand(long deadline, int tstate) {\n 224   \t\tstate = AsyncCommand.CONNECT;\n 225   \t\titeration++;\n 226   \n 227   \t\ttry {\n 228   \t\t\tnode = command.getNode(cluster);\n 229   \t\t\tnode.validateErrorCount();\n 230   \n 231   \t\t\tif (latencyType != LatencyType.NONE) {\n 232   \t\t\t\tbegin = System.nanoTime();\n 233   \t\t\t}\n 234   \n 235   \t\t\tbyteBuffer = eventLoop.getByteBuffer();\n 236   \t\t\tconn = (NioConnection)node.getAsyncConnection(eventLoop.index, byteBuffer);\n 237   \n 238   \t\t\tif (conn != null) {\n 239   \t\t\t\tsetTimeoutTask(deadline, tstate);\n 240   \t\t\t\tconn.attach(this);\n 241   \t\t\t\twriteCommand();\n 242   \t\t\t\treturn;\n 243   \t\t\t}\n 244   \n 245   \t\t\ttry {\n 246   \t\t\t\tif (command.policy.connectTimeout > 0) {\n 247   \t\t\t\t\ttimeoutState = new TimeoutState(deadline, tstate);\n 248   \t\t\t\t\tdeadline = timeoutState.start + TimeUnit.MILLISECONDS.toNanos(command.policy.connectTimeout);\n 249   \t\t\t\t\ttimeoutTask.cancel();\n 250   \t\t\t\t\teventLoop.timer.addTimeout(timeoutTask, deadline);\n 251   \t\t\t\t}\n 252   \t\t\t\telse {\n 253   \t\t\t\t\tsetTimeoutTask(deadline, tstate);\n 254   \t\t\t\t}\n 255   \t\t\t\tconn = new NioConnection(node.getAddress());\n 256   \t\t\t\tnode.connectionOpened(eventLoop.index);\n 257   \t\t\t}\n 258   \t\t\tcatch (Throwable e) {\n 259   \t\t\t\tnode.decrAsyncConnection(eventLoop.index);\n 260   \t\t\t\tthrow e;\n 261   \t\t\t}\n 262   \n 263   \t\t\tconn.registerConnect(eventLoop, this);\n 264   \t\t\teventState.errors = 0;\n 265   \t\t}\n 266   \t\tcatch (AerospikeException.Connection ac) {\n 267   \t\t\teventState.errors++;\n 268   \t\t\tonNetworkError(ac, true);\n 269   \t\t}\n 270   \t\tcatch (AerospikeException.Backoff ab) {\n 271   \t\t\teventState.errors++;\n 272   \t\t\tretry(ab, true);\n 273   \t\t}\n 274   \t\tcatch (AerospikeException ae) {\n 275   \t\t\t// Fail without retry on non-connection errors.\n 276   \t\t\teventState.errors++;\n 277   \t\t\tfail();\n 278   \t\t\tnotifyFailure(ae);\n 279   \t\t\teventLoop.tryDelayQueue();\n 280   \t\t}\n 281   \t\tcatch (IOException ioe) {\n 282   \t\t\teventState.errors++;\n 283   \t\t\tonNetworkError(new AerospikeException.Connection(ioe), true);\n 284   \t\t}\n 285   \t\tcatch (Throwable e) {\n 286   \t\t\t// Fail without retry on unknown errors.\n 287   \t\t\teventState.errors++;\n 288   \t\t\tfail();\n 289   \t\t\tnotifyFailure(new AerospikeException(e));\n 290   \t\t\teventLoop.tryDelayQueue();\n 291   \t\t}\n 292   \t}\n\nsrc/aerospike/client/src/com/aerospike/client/async/NioConnection.java:\n 40   \tpublic NioConnection(InetSocketAddress address) {\n 41   \t\ttry {\n 42   \t\t\tsocketChannel = SocketChannel.open();\n 43   \t\t}\n 44   \t\tcatch (Throwable e) {\n 45   \t\t\tthrow new AerospikeException.Connection(\"SocketChannel open error: \" + e.getMessage());\n 46   \t\t}\n 47   \n 48   \t\ttry {\n 49   \t\t\tsocketChannel.configureBlocking(false);\n 50   \t\t\tSocket socket = socketChannel.socket();\n 51   \t\t\tsocket.setTcpNoDelay(true);\n 52   \n 53   \t\t\t// These options are useful when the connection pool is poorly bounded or there are a large\n 54   \t\t\t// amount of network errors.  Since these conditions are not the normal use case and\n 55   \t\t\t// the options could theoretically result in latent data being sent to new commands, leave\n 56   \t\t\t// them out for now.\n 57   \t\t\t// socket.setReuseAddress(true);\n 58   \t\t\t// socket.setSoLinger(true, 0);\n 59   \n 60   \t\t\tsocketChannel.connect(address);\n 61   \t\t}\n 62   \t\tcatch (Throwable e) {\n 63   \t\t\tclose();\n 64   \t\t\tthrow new AerospikeException.Connection(\"SocketChannel init error: \" + e.getMessage());\n 65   \t\t}\n 66   \t}\n",
+            "cost": 0.077755,
+            "harness_id": "AerospikeOne",
+            "sanitizer": "Server Side Request Forgery (SSRF)",
+            "sink": "src/aerospike/client/src/com/aerospike/client/async/NioConnection.java:60:26",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 1
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "AerospikeOne",
+            "blob": [
+                ""
+            ]
+        }
+    ]
+}

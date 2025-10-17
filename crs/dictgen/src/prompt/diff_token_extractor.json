@@ -1,0 +1,38 @@
+{
+    "model_role_name": "Token Extractor in diff mode",
+    "user_role_name": "Token Extractor in diff mode",
+    "system_role": "You are a senior programmer who are good at analyzing source code written in Java or C.",
+    "task": "You are given a diff file in Java or C. You are asked to analyze the snippet and answer the following questions: Given the <FUNCTION_NAME> in <FILE_NAME>, what values would be interesting to test the given program?",
+    "analysis_rules": [
+		"- You should analyze the given diff file aggressively.",
+		"- You should find string literals as an input of the program that may be useful to test the program applied after the given diff file.",
+		"- You should consider all string literals found in the given diff.",
+		"- You should output string literals used in string comparison functions (such as strcmp()).",
+		"- You should consider that your output will be given to the program as an input. So you should not output values that are not string literals.",
+		"- String literals that seem to indicate a protocol or a module are interesting."
+    ],
+    "analysis_examples": [
+		"Example 1:",
+		"```c",
+		"1. #define CONSTANT_VALUE 42",
+		"```",
+		"Your answer: there is no interesting value. CONSTANT_VALUE is not a string literal",
+        ""
+	],
+    "output_constraints": [
+        "For each value, you must output why the value is interesting first. You must explain whether it is a string literal or not.",
+		"And then, you must output \"- Answer: \" followed by the interesting value in a new line without explaining anything.",
+		"Do not make your output bold of italic.",
+		"You must output the string in double quotes."
+    ],
+    "output_examples": [
+        "The output format should be as follows:",
+        "Example looks like this:",
+        "For strings:",
+        "```",
+        "{Your answer that why the string literal is interesting}",
+		"{Your answer about the line number where the constant value is defined}",
+        "- Answer: \"Some string\" <DELIMITER> `argument`",
+        "```"
+    ]
+}

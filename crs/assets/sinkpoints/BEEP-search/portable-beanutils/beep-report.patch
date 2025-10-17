@@ -1,0 +1,12 @@
+diff --git a/src/beanutils-harnesses/beanutils-harness-one/src/main/java/com/aixcc/beanutils/harnesses/one/BeanUtilsOne.java b/src/beanutils-harnesses/beanutils-harness-one/src/main/java/com/aixcc/beanutils/harnesses/one/BeanUtilsOne.java
+index 8e86c8e..edbe690 100644
+--- a/src/beanutils-harnesses/beanutils-harness-one/src/main/java/com/aixcc/beanutils/harnesses/one/BeanUtilsOne.java
++++ b/src/beanutils-harnesses/beanutils-harness-one/src/main/java/com/aixcc/beanutils/harnesses/one/BeanUtilsOne.java
+@@ -75,6 +75,7 @@ public class BeanUtilsOne {
+                          Class c = a.loadClass(parts[1]);
+                          Constructor con = c.getConstructor(a.loadClass(parts[2]));
+ 
++                         if("BeanUtilsOneCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point BeanUtilsOneCPVOne reached."));} catch (Throwable e) {}}
+                          File f = (File) con.newInstance(parts[3]);
+                          Scanner s = new Scanner(f);
+                          break;

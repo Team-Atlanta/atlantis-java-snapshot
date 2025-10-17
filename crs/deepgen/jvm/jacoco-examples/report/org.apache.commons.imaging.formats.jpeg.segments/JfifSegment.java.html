@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JfifSegment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.segments</a> &gt; <span class="el_source">JfifSegment.java</span></div><h1>JfifSegment.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.jpeg.segments;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.skipBytes;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+
+public class JfifSegment extends AbstractSegment {
+    public final int jfifMajorVersion;
+    public final int jfifMinorVersion;
+    public final int densityUnits;
+    public final int xDensity;
+    public final int yDensity;
+
+    public final int xThumbnail;
+    public final int yThumbnail;
+    public final int thumbnailSize;
+
+    public JfifSegment(final int marker, final byte[] segmentData) throws ImagingException, IOException {
+<span class="nc" id="L43">        this(marker, segmentData.length, new ByteArrayInputStream(segmentData));</span>
+<span class="nc" id="L44">    }</span>
+
+    public JfifSegment(final int marker, final int markerLength, final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L47">        super(marker, markerLength);</span>
+
+<span class="nc" id="L49">        final byte[] signature = readBytes(is, JpegConstants.JFIF0_SIGNATURE.size());</span>
+<span class="nc bnc" id="L50" title="All 4 branches missed.">        if (!JpegConstants.JFIF0_SIGNATURE.equals(signature) &amp;&amp; !JpegConstants.JFIF0_SIGNATURE_ALTERNATIVE.equals(signature)) {</span>
+<span class="nc" id="L51">            throw new ImagingException(&quot;Not a Valid JPEG File: missing JFIF string&quot;);</span>
+        }
+
+<span class="nc" id="L54">        jfifMajorVersion = readByte(&quot;jfifMajorVersion&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L55">        jfifMinorVersion = readByte(&quot;jfifMinorVersion&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L56">        densityUnits = readByte(&quot;densityUnits&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L57">        xDensity = read2Bytes(&quot;xDensity&quot;, is, &quot;Not a Valid JPEG File&quot;, getByteOrder());</span>
+<span class="nc" id="L58">        yDensity = read2Bytes(&quot;yDensity&quot;, is, &quot;Not a Valid JPEG File&quot;, getByteOrder());</span>
+
+<span class="nc" id="L60">        xThumbnail = readByte(&quot;xThumbnail&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L61">        yThumbnail = readByte(&quot;yThumbnail&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L62">        thumbnailSize = xThumbnail * yThumbnail;</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (thumbnailSize &gt; 0) {</span>
+<span class="nc" id="L64">            skipBytes(is, thumbnailSize, &quot;Not a Valid JPEG File: missing thumbnail&quot;);</span>
+
+        }
+<span class="nc" id="L67">    }</span>
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L71">        return &quot;JFIF (&quot; + getSegmentType() + &quot;)&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

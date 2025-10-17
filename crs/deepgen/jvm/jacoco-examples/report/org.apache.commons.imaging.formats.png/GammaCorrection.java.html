@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GammaCorrection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">GammaCorrection.java</span></div><h1>GammaCorrection.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class GammaCorrection {
+
+<span class="nc" id="L24">    private static final Logger LOGGER = Logger.getLogger(GammaCorrection.class.getName());</span>
+
+    private final int[] lookupTable;
+
+<span class="nc" id="L28">    public GammaCorrection(final double srcGamma, final double dstGamma) {</span>
+
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L31">            LOGGER.finest(&quot;srcGamma: &quot; + srcGamma);</span>
+<span class="nc" id="L32">            LOGGER.finest(&quot;dstGamma: &quot; + dstGamma);</span>
+        }
+
+<span class="nc" id="L35">        lookupTable = new int[256];</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        for (int i = 0; i &lt; 256; i++) {</span>
+<span class="nc" id="L37">            lookupTable[i] = correctSample(i, srcGamma, dstGamma);</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L39">                LOGGER.finest(&quot;lookupTable[&quot; + i + &quot;]: &quot; + lookupTable[i]);</span>
+            }
+        }
+<span class="nc" id="L42">    }</span>
+
+    public int correctArgb(final int pixel) {
+<span class="nc" id="L45">        final int alpha = 0xff000000 &amp; pixel;</span>
+<span class="nc" id="L46">        int red = pixel &gt;&gt; 16 &amp; 0xff;</span>
+<span class="nc" id="L47">        int green = pixel &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L48">        int blue = pixel &gt;&gt; 0 &amp; 0xff;</span>
+
+<span class="nc" id="L50">        red = correctSample(red);</span>
+<span class="nc" id="L51">        green = correctSample(green);</span>
+<span class="nc" id="L52">        blue = correctSample(blue);</span>
+
+<span class="nc" id="L54">        return alpha | (0xff &amp; red) &lt;&lt; 16 | (0xff &amp; green) &lt;&lt; 8 | (0xff &amp; blue) &lt;&lt; 0;</span>
+    }
+
+    public int correctSample(final int sample) {
+<span class="nc" id="L58">        return lookupTable[sample];</span>
+    }
+
+    private int correctSample(final int sample, final double srcGamma, final double dstGamma) {
+        // if (kUseAdobeGammaMethod &amp;&amp; val &lt;= 32)
+        // {
+        // double slope = Math.round(255.0d * Math.pow((32.0 / 255.0d),
+        // src_gamma / dst_gamma)) / 32.d;
+        // return (int) (sample * slope);
+        // }
+
+<span class="nc" id="L69">        return (int) Math.round(255.0d * Math.pow(sample / 255.0d, srcGamma / dstGamma));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

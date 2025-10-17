@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UncompressedDataReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.psd.datareaders</a> &gt; <span class="el_source">UncompressedDataReader.java</span></div><h1>UncompressedDataReader.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.psd.datareaders;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.imaging.formats.psd.PsdHeaderInfo;
+import org.apache.commons.imaging.formats.psd.PsdImageContents;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParser;
+import org.apache.commons.imaging.mylzw.BitsToByteInputStream;
+import org.apache.commons.imaging.mylzw.MyBitInputStream;
+
+public class UncompressedDataReader implements DataReader {
+
+    private final DataParser dataParser;
+
+<span class="nc" id="L37">    public UncompressedDataReader(final DataParser dataParser) {</span>
+<span class="nc" id="L38">        this.dataParser = dataParser;</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void readData(final InputStream is, final BufferedImage bi, final PsdImageContents imageContents, final BinaryFileParser bfp)
+            throws ImagingException, IOException {
+<span class="nc" id="L44">        final PsdHeaderInfo header = imageContents.header;</span>
+<span class="nc" id="L45">        final int width = header.columns;</span>
+<span class="nc" id="L46">        final int height = header.rows;</span>
+
+<span class="nc" id="L48">        final int channelCount = dataParser.getBasicChannelsCount();</span>
+<span class="nc" id="L49">        final int depth = header.depth;</span>
+<span class="nc" id="L50">        final MyBitInputStream mbis = new MyBitInputStream(is, ByteOrder.BIG_ENDIAN, false);</span>
+        // we want all samples to be bytes
+<span class="nc" id="L52">        try (BitsToByteInputStream bbis = new BitsToByteInputStream(mbis, 8)) {</span>
+<span class="nc" id="L53">            final int[][][] data = new int[Allocator.check(channelCount)][Allocator.check(height)][Allocator.check(width)];</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            for (int channel = 0; channel &lt; channelCount; channel++) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                    for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L57">                        final int b = bbis.readBits(depth);</span>
+
+<span class="nc" id="L59">                        data[channel][y][x] = (byte) b;</span>
+                    }
+                }
+            }
+
+<span class="nc" id="L64">            dataParser.parseData(data, bi, imageContents);</span>
+        }
+<span class="nc" id="L66">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaletteFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.palette</a> &gt; <span class="el_source">PaletteFactory.java</span></div><h1>PaletteFactory.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.palette;
+
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+
+/**
+ * Factory for creating palettes.
+ */
+<span class="nc" id="L36">public class PaletteFactory {</span>
+
+    private static final class DivisionCandidate {
+        // private final ColorSpaceSubset src;
+        private final ColorSpaceSubset dstA;
+        private final ColorSpaceSubset dstB;
+
+<span class="nc" id="L43">        DivisionCandidate(final ColorSpaceSubset dstA, final ColorSpaceSubset dstB) {</span>
+            // this.src = src;
+<span class="nc" id="L45">            this.dstA = dstA;</span>
+<span class="nc" id="L46">            this.dstB = dstB;</span>
+<span class="nc" id="L47">        }</span>
+    }
+
+<span class="nc" id="L50">    private static final Logger LOGGER = Logger.getLogger(PaletteFactory.class.getName());</span>
+
+    public static final int COMPONENTS = 3; // in bits
+
+    public int countTransparentColors(final BufferedImage src) {
+<span class="nc" id="L55">        final ColorModel cm = src.getColorModel();</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (!cm.hasAlpha()) {</span>
+<span class="nc" id="L57">            return 0;</span>
+        }
+
+<span class="nc" id="L60">        final int width = src.getWidth();</span>
+<span class="nc" id="L61">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L63">        int first = -1;</span>
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L67">                final int rgb = src.getRGB(x, y);</span>
+<span class="nc" id="L68">                final int alpha = 0xff &amp; rgb &gt;&gt; 24;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                if (alpha &lt; 0xff) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                    if (first &lt; 0) {</span>
+<span class="nc" id="L71">                        first = rgb;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">                    } else if (rgb != first) {</span>
+<span class="nc" id="L73">                        return 2; // more than one transparent color;</span>
+                    }
+                }
+            }
+        }
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (first &lt; 0) {</span>
+<span class="nc" id="L80">            return 0;</span>
+        }
+<span class="nc" id="L82">        return 1;</span>
+    }
+
+    public int countTrasparentColors(final int[] rgbs) {
+<span class="nc" id="L86">        int first = -1;</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        for (final int rgb : rgbs) {</span>
+<span class="nc" id="L89">            final int alpha = 0xff &amp; rgb &gt;&gt; 24;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (alpha &lt; 0xff) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                if (first &lt; 0) {</span>
+<span class="nc" id="L92">                    first = rgb;</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                } else if (rgb != first) {</span>
+<span class="nc" id="L94">                    return 2; // more than one transparent color;</span>
+                }
+            }
+        }
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (first &lt; 0) {</span>
+<span class="nc" id="L100">            return 0;</span>
+        }
+<span class="nc" id="L102">        return 1;</span>
+    }
+
+    private void divide(final List&lt;ColorSpaceSubset&gt; v, final int desiredCount, final int[] table, final int precision) {
+<span class="nc" id="L106">        final List&lt;ColorSpaceSubset&gt; ignore = new ArrayList&lt;&gt;();</span>
+
+        while (true) {
+<span class="nc" id="L109">            int maxArea = -1;</span>
+<span class="nc" id="L110">            ColorSpaceSubset maxSubset = null;</span>
+
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            for (final ColorSpaceSubset subset : v) {</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                if (ignore.contains(subset)) {</span>
+<span class="nc" id="L114">                    continue;</span>
+                }
+<span class="nc" id="L116">                final int area = subset.total;</span>
+
+<span class="nc bnc" id="L118" title="All 4 branches missed.">                if (maxSubset == null || area &gt; maxArea) {</span>
+<span class="nc" id="L119">                    maxSubset = subset;</span>
+<span class="nc" id="L120">                    maxArea = area;</span>
+                }
+<span class="nc" id="L122">            }</span>
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">            if (maxSubset == null) {</span>
+<span class="nc" id="L125">                return;</span>
+            }
+<span class="nc bnc" id="L127" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L128">                LOGGER.finest(&quot;\t&quot; + &quot;area: &quot; + maxArea);</span>
+            }
+
+<span class="nc" id="L131">            final DivisionCandidate dc = divideSubset2(table, maxSubset, precision);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (dc != null) {</span>
+<span class="nc" id="L133">                v.remove(maxSubset);</span>
+<span class="nc" id="L134">                v.add(dc.dstA);</span>
+<span class="nc" id="L135">                v.add(dc.dstB);</span>
+            } else {
+<span class="nc" id="L137">                ignore.add(maxSubset);</span>
+            }
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">            if (v.size() == desiredCount) {</span>
+<span class="nc" id="L141">                return;</span>
+            }
+<span class="nc" id="L143">        }</span>
+    }
+
+    private DivisionCandidate divideSubset2(final int[] table, final ColorSpaceSubset subset, final int precision) {
+<span class="nc" id="L147">        final List&lt;DivisionCandidate&gt; dcs = new ArrayList&lt;&gt;(divideSubset2(table, subset, 0, precision));</span>
+
+<span class="nc" id="L149">        dcs.addAll(divideSubset2(table, subset, 1, precision));</span>
+<span class="nc" id="L150">        dcs.addAll(divideSubset2(table, subset, 2, precision));</span>
+
+<span class="nc" id="L152">        DivisionCandidate bestV = null;</span>
+<span class="nc" id="L153">        double bestScore = Double.MAX_VALUE;</span>
+
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        for (final DivisionCandidate dc : dcs) {</span>
+<span class="nc" id="L156">            final ColorSpaceSubset first = dc.dstA;</span>
+<span class="nc" id="L157">            final ColorSpaceSubset second = dc.dstB;</span>
+<span class="nc" id="L158">            final int area1 = first.total;</span>
+<span class="nc" id="L159">            final int area2 = second.total;</span>
+
+<span class="nc" id="L161">            final int diff = Math.abs(area1 - area2);</span>
+<span class="nc" id="L162">            final double score = (double) diff / (double) Math.max(area1, area2);</span>
+
+<span class="nc bnc" id="L164" title="All 4 branches missed.">            if (bestV == null || score &lt; bestScore) {</span>
+<span class="nc" id="L165">                bestV = dc;</span>
+<span class="nc" id="L166">                bestScore = score;</span>
+            }
+
+<span class="nc" id="L169">        }</span>
+
+<span class="nc" id="L171">        return bestV;</span>
+    }
+
+    private List&lt;DivisionCandidate&gt; divideSubset2(final int[] table, final ColorSpaceSubset subset, final int component, final int precision) {
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L176">            subset.dump(&quot;trying (&quot; + component + &quot;): &quot;);</span>
+        }
+
+<span class="nc" id="L179">        final int total = subset.total;</span>
+
+<span class="nc" id="L181">        final int[] sliceMins = Arrays.copyOf(subset.mins, subset.mins.length);</span>
+<span class="nc" id="L182">        final int[] sliceMaxs = Arrays.copyOf(subset.maxs, subset.maxs.length);</span>
+
+<span class="nc" id="L184">        int sum1 = 0;</span>
+        int slice1;
+<span class="nc" id="L186">        int last = 0;</span>
+
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        for (slice1 = subset.mins[component]; slice1 != subset.maxs[component] + 1; slice1++) {</span>
+<span class="nc" id="L189">            sliceMins[component] = slice1;</span>
+<span class="nc" id="L190">            sliceMaxs[component] = slice1;</span>
+
+<span class="nc" id="L192">            last = getFrequencyTotal(table, sliceMins, sliceMaxs, precision);</span>
+
+<span class="nc" id="L194">            sum1 += last;</span>
+
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            if (sum1 &gt;= total / 2) {</span>
+<span class="nc" id="L197">                break;</span>
+            }
+        }
+
+<span class="nc" id="L201">        final int sum2 = sum1 - last;</span>
+<span class="nc" id="L202">        final int slice2 = slice1 - 1;</span>
+
+<span class="nc" id="L204">        final DivisionCandidate dc1 = finishDivision(subset, component, precision, sum1, slice1);</span>
+<span class="nc" id="L205">        final DivisionCandidate dc2 = finishDivision(subset, component, precision, sum2, slice2);</span>
+
+<span class="nc" id="L207">        final List&lt;DivisionCandidate&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (dc1 != null) {</span>
+<span class="nc" id="L210">            result.add(dc1);</span>
+        }
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (dc2 != null) {</span>
+<span class="nc" id="L213">            result.add(dc2);</span>
+        }
+
+<span class="nc" id="L216">        return result;</span>
+    }
+
+    private DivisionCandidate finishDivision(final ColorSpaceSubset subset, final int component, final int precision, final int sum, final int slice) {
+<span class="nc bnc" id="L220" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L221">            subset.dump(&quot;trying (&quot; + component + &quot;): &quot;);</span>
+        }
+
+<span class="nc" id="L224">        final int total = subset.total;</span>
+
+<span class="nc bnc" id="L226" title="All 4 branches missed.">        if (slice &lt; subset.mins[component] || slice &gt;= subset.maxs[component]) {</span>
+<span class="nc" id="L227">            return null;</span>
+        }
+
+<span class="nc bnc" id="L230" title="All 4 branches missed.">        if (sum &lt; 1 || sum &gt;= total) {</span>
+<span class="nc" id="L231">            return null;</span>
+        }
+
+<span class="nc" id="L234">        final int[] sliceMins = Arrays.copyOf(subset.mins, subset.mins.length);</span>
+<span class="nc" id="L235">        final int[] sliceMaxs = Arrays.copyOf(subset.maxs, subset.maxs.length);</span>
+
+<span class="nc" id="L237">        sliceMaxs[component] = slice;</span>
+<span class="nc" id="L238">        sliceMins[component] = slice + 1;</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L241">            LOGGER.finest(&quot;total: &quot; + total);</span>
+<span class="nc" id="L242">            LOGGER.finest(&quot;first total: &quot; + sum);</span>
+<span class="nc" id="L243">            LOGGER.finest(&quot;second total: &quot; + (total - sum));</span>
+            // System.out.println(&quot;start: &quot; + start);
+            // System.out.println(&quot;end: &quot; + end);
+<span class="nc" id="L246">            LOGGER.finest(&quot;slice: &quot; + slice);</span>
+
+        }
+
+<span class="nc" id="L250">        final ColorSpaceSubset first = new ColorSpaceSubset(sum, precision, subset.mins, sliceMaxs);</span>
+<span class="nc" id="L251">        final ColorSpaceSubset second = new ColorSpaceSubset(total - sum, precision, sliceMins, subset.maxs);</span>
+
+<span class="nc" id="L253">        return new DivisionCandidate(first, second);</span>
+
+    }
+
+    private int getFrequencyTotal(final int[] table, final int[] mins, final int[] maxs, final int precision) {
+<span class="nc" id="L258">        int sum = 0;</span>
+
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        for (int blue = mins[2]; blue &lt;= maxs[2]; blue++) {</span>
+<span class="nc" id="L261">            final int b = blue &lt;&lt; 2 * precision;</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            for (int green = mins[1]; green &lt;= maxs[1]; green++) {</span>
+<span class="nc" id="L263">                final int g = green &lt;&lt; 1 * precision;</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">                for (int red = mins[0]; red &lt;= maxs[0]; red++) {</span>
+<span class="nc" id="L265">                    final int index = b | g | red;</span>
+
+<span class="nc" id="L267">                    sum += table[index];</span>
+                }
+            }
+        }
+
+<span class="nc" id="L272">        return sum;</span>
+    }
+
+    public boolean hasTransparency(final BufferedImage src) {
+<span class="nc" id="L276">        return hasTransparency(src, 255);</span>
+    }
+
+    public boolean hasTransparency(final BufferedImage src, final int threshold) {
+<span class="nc" id="L280">        final int width = src.getWidth();</span>
+<span class="nc" id="L281">        final int height = src.getHeight();</span>
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        if (!src.getColorModel().hasAlpha()) {</span>
+<span class="nc" id="L284">            return false;</span>
+        }
+
+<span class="nc bnc" id="L287" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L289">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L290">                final int alpha = 0xff &amp; argb &gt;&gt; 24;</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                if (alpha &lt; threshold) {</span>
+<span class="nc" id="L292">                    return true;</span>
+                }
+            }
+        }
+<span class="nc" id="L296">        return false;</span>
+    }
+
+    public boolean isGrayscale(final BufferedImage src) {
+<span class="nc" id="L300">        final int width = src.getWidth();</span>
+<span class="nc" id="L301">        final int height = src.getHeight();</span>
+
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (ColorSpace.TYPE_GRAY == src.getColorModel().getColorSpace().getType()) {</span>
+<span class="nc" id="L304">            return true;</span>
+        }
+
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L309">                final int argb = src.getRGB(x, y);</span>
+
+<span class="nc" id="L311">                final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L312">                final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L313">                final int blue = 0xff &amp; argb &gt;&gt; 0;</span>
+
+<span class="nc bnc" id="L315" title="All 4 branches missed.">                if (red != green || red != blue) {</span>
+<span class="nc" id="L316">                    return false;</span>
+                }
+            }
+        }
+<span class="nc" id="L320">        return true;</span>
+    }
+
+    /**
+     * Builds an exact complete opaque palette containing all the colors in {@code src}, using an algorithm that is faster than
+     * {@linkplain #makeExactRgbPaletteSimple} for large images but uses 2 mebibytes of working memory. Treats all the colors as opaque.
+     *
+     * @param src the image whose palette to build
+     * @return the palette
+     */
+    public Palette makeExactRgbPaletteFancy(final BufferedImage src) {
+        // map what rgb values have been used
+
+<span class="nc" id="L333">        final byte[] rgbmap = Allocator.byteArray(256 * 256 * 32);</span>
+
+<span class="nc" id="L335">        final int width = src.getWidth();</span>
+<span class="nc" id="L336">        final int height = src.getHeight();</span>
+
+<span class="nc bnc" id="L338" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L340">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L341">                final int rggbb = 0x1fffff &amp; argb;</span>
+<span class="nc" id="L342">                final int highred = 0x7 &amp; argb &gt;&gt; 21;</span>
+<span class="nc" id="L343">                final int mask = 1 &lt;&lt; highred;</span>
+<span class="nc" id="L344">                rgbmap[rggbb] |= mask;</span>
+            }
+        }
+
+<span class="nc" id="L348">        int count = 0;</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        for (final byte element : rgbmap) {</span>
+<span class="nc" id="L350">            final int eight = 0xff &amp; element;</span>
+<span class="nc" id="L351">            count += Integer.bitCount(eight);</span>
+        }
+
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L355">            LOGGER.finest(&quot;Used colors: &quot; + count);</span>
+        }
+
+<span class="nc" id="L358">        final int[] colormap = Allocator.intArray(count);</span>
+<span class="nc" id="L359">        int mapsize = 0;</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        for (int i = 0; i &lt; rgbmap.length; i++) {</span>
+<span class="nc" id="L361">            final int eight = 0xff &amp; rgbmap[i];</span>
+<span class="nc" id="L362">            int mask = 0x80;</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">            for (int j = 0; j &lt; 8; j++) {</span>
+<span class="nc" id="L364">                final int bit = eight &amp; mask;</span>
+<span class="nc" id="L365">                mask &gt;&gt;&gt;= 1;</span>
+
+<span class="nc bnc" id="L367" title="All 2 branches missed.">                if (bit &gt; 0) {</span>
+<span class="nc" id="L368">                    final int rgb = i | 7 - j &lt;&lt; 21;</span>
+
+<span class="nc" id="L370">                    colormap[mapsize++] = rgb;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L375">        Arrays.sort(colormap);</span>
+<span class="nc" id="L376">        return new SimplePalette(colormap);</span>
+    }
+
+    /**
+     * Builds an exact complete opaque palette containing all the colors in {@code src}, and fails by returning {@code null} if there are more than {@code max}
+     * colors necessary to do this.
+     *
+     * @param src the image whose palette to build
+     * @param max the maximum number of colors the palette can contain
+     * @return the complete palette of {@code max} or less colors, or {@code null} if more than {@code max} colors are necessary
+     */
+    public SimplePalette makeExactRgbPaletteSimple(final BufferedImage src, final int max) {
+        // This is not efficient for large values of max, say, max &gt; 256;
+<span class="nc" id="L389">        final Set&lt;Integer&gt; rgbs = new HashSet&lt;&gt;();</span>
+
+<span class="nc" id="L391">        final int width = src.getWidth();</span>
+<span class="nc" id="L392">        final int height = src.getHeight();</span>
+
+<span class="nc bnc" id="L394" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L396">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L397">                final int rgb = 0xffffff &amp; argb;</span>
+
+<span class="nc bnc" id="L399" title="All 4 branches missed.">                if (rgbs.add(rgb) &amp;&amp; rgbs.size() &gt; max) {</span>
+<span class="nc" id="L400">                    return null;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L405">        final int[] result = Allocator.intArray(rgbs.size());</span>
+<span class="nc" id="L406">        int next = 0;</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">        for (final int rgb : rgbs) {</span>
+<span class="nc" id="L408">            result[next++] = rgb;</span>
+<span class="nc" id="L409">        }</span>
+<span class="nc" id="L410">        Arrays.sort(result);</span>
+
+<span class="nc" id="L412">        return new SimplePalette(result);</span>
+    }
+
+    /**
+     * Builds an inexact possibly translucent palette of at most {@code max} colors in {@code src} using the traditional Median Cut algorithm. Color bounding
+     * boxes are split along the longest axis, with each step splitting the box. All bits in each component are used. The Algorithm is slower and seems exact
+     * than {@linkplain #makeQuantizedRgbPalette(BufferedImage, int)}.
+     *
+     * @param src         the image whose palette to build
+     * @param transparent whether to consider the alpha values
+     * @param max         the maximum number of colors the palette can contain
+     * @return the palette of at most {@code max} colors
+     * @throws ImagingException if it fails to process the palette
+     */
+    public Palette makeQuantizedRgbaPalette(final BufferedImage src, final boolean transparent, final int max) throws ImagingException {
+<span class="nc bnc" id="L427" title="All 2 branches missed.">        return new MedianCutQuantizer(!transparent).process(src, max, new LongestAxisMedianCut());</span>
+    }
+
+    /**
+     * Builds an inexact opaque palette of at most {@code max} colors in {@code src} using a variation of the Median Cut algorithm. Accurate to 6 bits per
+     * component, and works by splitting the color bounding box most heavily populated by colors along the component which splits the colors in that box most
+     * evenly.
+     *
+     * @param src the image whose palette to build
+     * @param max the maximum number of colors the palette can contain
+     * @return the palette of at most {@code max} colors
+     */
+    public Palette makeQuantizedRgbPalette(final BufferedImage src, final int max) {
+<span class="nc" id="L440">        final int precision = 6; // in bits</span>
+
+<span class="nc" id="L442">        final int tableScale = precision * COMPONENTS;</span>
+<span class="nc" id="L443">        final int tableSize = 1 &lt;&lt; tableScale;</span>
+<span class="nc" id="L444">        final int[] table = Allocator.intArray(tableSize);</span>
+
+<span class="nc" id="L446">        final int width = src.getWidth();</span>
+<span class="nc" id="L447">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L449">        final List&lt;ColorSpaceSubset&gt; subsets = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L450">        final ColorSpaceSubset all = new ColorSpaceSubset(width * height, precision);</span>
+<span class="nc" id="L451">        subsets.add(all);</span>
+
+<span class="nc bnc" id="L453" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L454">            final int preTotal = getFrequencyTotal(table, all.mins, all.maxs, precision);</span>
+<span class="nc" id="L455">            LOGGER.finest(&quot;pre total: &quot; + preTotal);</span>
+        }
+
+        // step 1: count frequency of colors
+<span class="nc bnc" id="L459" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L461">                final int argb = src.getRGB(x, y);</span>
+
+<span class="nc" id="L463">                final int index = pixelToQuantizationTableIndex(argb, precision);</span>
+
+<span class="nc" id="L465">                table[index]++;</span>
+            }
+        }
+
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L470">            final int allTotal = getFrequencyTotal(table, all.mins, all.maxs, precision);</span>
+<span class="nc" id="L471">            LOGGER.finest(&quot;all total: &quot; + allTotal);</span>
+<span class="nc" id="L472">            LOGGER.finest(&quot;width * height: &quot; + width * height);</span>
+        }
+
+<span class="nc" id="L475">        divide(subsets, max, table, precision);</span>
+
+<span class="nc bnc" id="L477" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L478">            LOGGER.finest(&quot;subsets: &quot; + subsets.size());</span>
+<span class="nc" id="L479">            LOGGER.finest(&quot;width*height: &quot; + width * height);</span>
+        }
+
+<span class="nc bnc" id="L482" title="All 2 branches missed.">        for (int i = 0; i &lt; subsets.size(); i++) {</span>
+<span class="nc" id="L483">            final ColorSpaceSubset subset = subsets.get(i);</span>
+
+<span class="nc" id="L485">            subset.setAverageRgb(table);</span>
+
+<span class="nc bnc" id="L487" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L488">                subset.dump(i + &quot;: &quot;);</span>
+            }
+        }
+
+<span class="nc" id="L492">        subsets.sort(ColorSpaceSubset.RGB_COMPARATOR);</span>
+
+<span class="nc" id="L494">        return new QuantizedPalette(subsets, precision);</span>
+    }
+
+    private int pixelToQuantizationTableIndex(int argb, final int precision) {
+<span class="nc" id="L498">        int result = 0;</span>
+<span class="nc" id="L499">        final int precisionMask = (1 &lt;&lt; precision) - 1;</span>
+
+<span class="nc bnc" id="L501" title="All 2 branches missed.">        for (int i = 0; i &lt; COMPONENTS; i++) {</span>
+<span class="nc" id="L502">            int sample = argb &amp; 0xff;</span>
+<span class="nc" id="L503">            argb &gt;&gt;= 8;</span>
+
+<span class="nc" id="L505">            sample &gt;&gt;= 8 - precision;</span>
+<span class="nc" id="L506">            result = result &lt;&lt; precision | sample &amp; precisionMask;</span>
+        }
+
+<span class="nc" id="L509">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

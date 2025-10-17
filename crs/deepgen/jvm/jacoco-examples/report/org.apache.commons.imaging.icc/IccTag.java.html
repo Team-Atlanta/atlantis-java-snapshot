@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IccTag.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.icc</a> &gt; <span class="el_source">IccTag.java</span></div><h1>IccTag.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.icc;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.BinaryFunctions;
+
+public class IccTag {
+
+    static final int SHALLOW_SIZE = 40;
+<span class="nc" id="L35">    private static final Logger LOGGER = Logger.getLogger(IccTag.class.getName());</span>
+
+    public final int signature;
+    public final int offset;
+    public final int length;
+    public final IccTagType fIccTagType;
+    private byte[] data;
+    private IccTagDataType itdt;
+    private int dataTypeSignature;
+
+    // public final byte[] data;
+
+<span class="nc" id="L47">    public IccTag(final int signature, final int offset, final int length, final IccTagType fIccTagType) {</span>
+<span class="nc" id="L48">        this.signature = signature;</span>
+<span class="nc" id="L49">        this.offset = offset;</span>
+<span class="nc" id="L50">        this.length = length;</span>
+<span class="nc" id="L51">        this.fIccTagType = fIccTagType;</span>
+<span class="nc" id="L52">    }</span>
+
+    public void dump(final PrintWriter pw, final String prefix) throws ImagingException, IOException {
+<span class="nc" id="L55">        pw.println(prefix + &quot;tag signature: &quot; + Integer.toHexString(signature) + &quot; (&quot; + new String(new byte[] { (byte) (0xff &amp; signature &gt;&gt; 24),</span>
+                (byte) (0xff &amp; signature &gt;&gt; 16), (byte) (0xff &amp; signature &gt;&gt; 8), (byte) (0xff &amp; signature &gt;&gt; 0), }, StandardCharsets.US_ASCII) + &quot;)&quot;);
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (data == null) {</span>
+<span class="nc" id="L59">            pw.println(prefix + &quot;data: &quot; + Arrays.toString((byte[]) null));</span>
+        } else {
+<span class="nc" id="L61">            pw.println(prefix + &quot;data: &quot; + data.length);</span>
+
+<span class="nc" id="L63">            pw.println(prefix + &quot;data type signature: &quot; + Integer.toHexString(dataTypeSignature) + &quot; (&quot;</span>
+                    + new String(new byte[] { (byte) (0xff &amp; dataTypeSignature &gt;&gt; 24), (byte) (0xff &amp; dataTypeSignature &gt;&gt; 16),
+                            (byte) (0xff &amp; dataTypeSignature &gt;&gt; 8), (byte) (0xff &amp; dataTypeSignature &gt;&gt; 0), }, StandardCharsets.US_ASCII)
+                    + &quot;)&quot;);
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (itdt == null) {</span>
+<span class="nc" id="L69">                pw.println(prefix + &quot;IccTagType : &quot; + &quot;unknown&quot;);</span>
+            } else {
+<span class="nc" id="L71">                pw.println(prefix + &quot;IccTagType : &quot; + itdt.getName());</span>
+<span class="nc" id="L72">                itdt.dump(prefix, data);</span>
+            }
+
+        }
+
+<span class="nc" id="L77">        pw.println(&quot;&quot;);</span>
+<span class="nc" id="L78">        pw.flush();</span>
+
+<span class="nc" id="L80">    }</span>
+
+    public void dump(final String prefix) throws ImagingException, IOException {
+<span class="nc" id="L83">        try (StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L84">                PrintWriter pw = new PrintWriter(sw)) {</span>
+<span class="nc" id="L85">            dump(pw, prefix);</span>
+<span class="nc" id="L86">            pw.flush();</span>
+<span class="nc" id="L87">            sw.flush();</span>
+<span class="nc" id="L88">            LOGGER.fine(sw.toString());</span>
+        }
+<span class="nc" id="L90">    }</span>
+
+    private IccTagDataType getIccTagDataType(final int quad) {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        for (final IccTagDataType iccTagDataType : IccTagDataTypes.values()) {</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (iccTagDataType.getSignature() == quad) {</span>
+<span class="nc" id="L95">                return iccTagDataType;</span>
+            }
+        }
+
+<span class="nc" id="L99">        return null;</span>
+    }
+
+    public void setData(final byte[] bytes) throws IOException {
+<span class="nc" id="L103">        data = bytes;</span>
+
+<span class="nc" id="L105">        try (InputStream bis = new ByteArrayInputStream(bytes)) {</span>
+<span class="nc" id="L106">            dataTypeSignature = BinaryFunctions.read4Bytes(&quot;data type signature&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+
+<span class="nc" id="L108">            itdt = getIccTagDataType(dataTypeSignature);</span>
+            // if (itdt != null)
+            // {
+            // System.out.println(&quot;\t\t\t&quot; + &quot;itdt: &quot; + itdt.name);
+            // }
+        }
+<span class="nc" id="L114">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

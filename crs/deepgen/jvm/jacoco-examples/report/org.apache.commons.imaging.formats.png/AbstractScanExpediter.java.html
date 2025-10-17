@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractScanExpediter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">AbstractScanExpediter.java</span></div><h1>AbstractScanExpediter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkPlte;
+import org.apache.commons.imaging.formats.png.scanlinefilters.ScanlineFilter;
+import org.apache.commons.imaging.formats.png.scanlinefilters.ScanlineFilterAverage;
+import org.apache.commons.imaging.formats.png.scanlinefilters.ScanlineFilterNone;
+import org.apache.commons.imaging.formats.png.scanlinefilters.ScanlineFilterPaeth;
+import org.apache.commons.imaging.formats.png.scanlinefilters.ScanlineFilterSub;
+import org.apache.commons.imaging.formats.png.scanlinefilters.ScanlineFilterUp;
+import org.apache.commons.imaging.formats.png.transparencyfilters.AbstractTransparencyFilter;
+
+abstract class AbstractScanExpediter {
+
+    final int width;
+    final int height;
+    final InputStream is;
+    final BufferedImage bi;
+    final PngColorType pngColorType;
+    final int bitDepth;
+    final int bytesPerPixel;
+    final int bitsPerPixel;
+    final PngChunkPlte pngChunkPlte;
+    final GammaCorrection gammaCorrection;
+    final AbstractTransparencyFilter abstractTransparencyFilter;
+
+    AbstractScanExpediter(final int width, final int height, final InputStream is, final BufferedImage bi, final PngColorType pngColorType, final int bitDepth,
+            final int bitsPerPixel, final PngChunkPlte pngChunkPLTE, final GammaCorrection gammaCorrection,
+<span class="nc" id="L52">            final AbstractTransparencyFilter abstractTransparencyFilter) {</span>
+<span class="nc" id="L53">        this.width = width;</span>
+<span class="nc" id="L54">        this.height = height;</span>
+<span class="nc" id="L55">        this.is = is;</span>
+<span class="nc" id="L56">        this.bi = bi;</span>
+<span class="nc" id="L57">        this.pngColorType = pngColorType;</span>
+<span class="nc" id="L58">        this.bitDepth = bitDepth;</span>
+<span class="nc" id="L59">        this.bytesPerPixel = this.getBitsToBytesRoundingUp(bitsPerPixel);</span>
+<span class="nc" id="L60">        this.bitsPerPixel = bitsPerPixel;</span>
+<span class="nc" id="L61">        this.pngChunkPlte = pngChunkPLTE;</span>
+<span class="nc" id="L62">        this.gammaCorrection = gammaCorrection;</span>
+<span class="nc" id="L63">        this.abstractTransparencyFilter = abstractTransparencyFilter;</span>
+<span class="nc" id="L64">    }</span>
+
+    public abstract void drive() throws ImagingException, IOException;
+
+    final int getBitsToBytesRoundingUp(final int bits) {
+<span class="nc" id="L69">        return (bits + 7) / 8;</span>
+    }
+
+    byte[] getNextScanline(final InputStream is, final int length, final byte[] prev, final int bytesPerPixel) throws ImagingException, IOException {
+<span class="nc" id="L73">        final int filterType = is.read();</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (filterType &lt; 0) {</span>
+<span class="nc" id="L75">            throw new ImagingException(&quot;PNG: missing filter type&quot;);</span>
+        }
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (filterType &gt;= FilterType.values().length) {</span>
+<span class="nc" id="L78">            throw new ImagingException(&quot;PNG: unknown filterType: &quot; + filterType);</span>
+        }
+
+<span class="nc" id="L81">        final byte[] scanline = readBytes(&quot;scanline&quot;, is, length, &quot;PNG: missing image data&quot;);</span>
+
+<span class="nc" id="L83">        return unfilterScanline(FilterType.values()[filterType], scanline, prev, bytesPerPixel);</span>
+    }
+
+    final int getPixelArgb(final int alpha, final int red, final int green, final int blue) {
+<span class="nc" id="L87">        return (0xff &amp; alpha) &lt;&lt; 24 | (0xff &amp; red) &lt;&lt; 16 | (0xff &amp; green) &lt;&lt; 8 | (0xff &amp; blue) &lt;&lt; 0;</span>
+    }
+
+    final int getPixelRgb(final int red, final int green, final int blue) {
+<span class="nc" id="L91">        return getPixelArgb(0xff, red, green, blue);</span>
+    }
+
+    int getRgb(final BitParser bitParser, final int pixelIndexInScanline) throws ImagingException, IOException {
+
+<span class="nc bnc" id="L96" title="All 6 branches missed.">        switch (pngColorType) {</span>
+        case GREYSCALE: {
+            // 1,2,4,8,16 Each pixel is a grayscale sample.
+<span class="nc" id="L99">            int sample = bitParser.getSampleAsByte(pixelIndexInScanline, 0);</span>
+
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if (gammaCorrection != null) {</span>
+<span class="nc" id="L102">                sample = gammaCorrection.correctSample(sample);</span>
+            }
+
+<span class="nc" id="L105">            int rgb = getPixelRgb(sample, sample, sample);</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            if (abstractTransparencyFilter != null) {</span>
+<span class="nc" id="L108">                rgb = abstractTransparencyFilter.filter(rgb, sample);</span>
+            }
+
+<span class="nc" id="L111">            return rgb;</span>
+
+        }
+        case TRUE_COLOR: {
+            // 8,16 Each pixel is an R,G,B triple.
+<span class="nc" id="L116">            int red = bitParser.getSampleAsByte(pixelIndexInScanline, 0);</span>
+<span class="nc" id="L117">            int green = bitParser.getSampleAsByte(pixelIndexInScanline, 1);</span>
+<span class="nc" id="L118">            int blue = bitParser.getSampleAsByte(pixelIndexInScanline, 2);</span>
+
+<span class="nc" id="L120">            int rgb = getPixelRgb(red, green, blue);</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">            if (abstractTransparencyFilter != null) {</span>
+<span class="nc" id="L123">                rgb = abstractTransparencyFilter.filter(rgb, -1);</span>
+            }
+
+<span class="nc bnc" id="L126" title="All 2 branches missed.">            if (gammaCorrection != null) {</span>
+<span class="nc" id="L127">                final int alpha = (0xff000000 &amp; rgb) &gt;&gt; 24; // make sure to preserve</span>
+                // transparency
+<span class="nc" id="L129">                red = gammaCorrection.correctSample(red);</span>
+<span class="nc" id="L130">                green = gammaCorrection.correctSample(green);</span>
+<span class="nc" id="L131">                blue = gammaCorrection.correctSample(blue);</span>
+<span class="nc" id="L132">                rgb = getPixelArgb(alpha, red, green, blue);</span>
+            }
+
+<span class="nc" id="L135">            return rgb;</span>
+        }
+        //
+        case INDEXED_COLOR: {
+            // 1,2,4,8 Each pixel is a palette index;
+            // a PLTE chunk must appear.
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            if (pngChunkPlte == null) {</span>
+<span class="nc" id="L142">                throw new ImagingException(&quot;A PLTE chunk is required for an indexed color type.&quot;);</span>
+            }
+<span class="nc" id="L144">            final int index = bitParser.getSample(pixelIndexInScanline, 0);</span>
+
+<span class="nc" id="L146">            int rgb = pngChunkPlte.getRgb(index);</span>
+
+<span class="nc bnc" id="L148" title="All 2 branches missed.">            if (abstractTransparencyFilter != null) {</span>
+<span class="nc" id="L149">                rgb = abstractTransparencyFilter.filter(rgb, index);</span>
+            }
+
+<span class="nc" id="L152">            return rgb;</span>
+        }
+        case GREYSCALE_WITH_ALPHA: {
+            // 8,16 Each pixel is a grayscale sample,
+            // followed by an alpha sample.
+<span class="nc" id="L157">            int sample = bitParser.getSampleAsByte(pixelIndexInScanline, 0);</span>
+<span class="nc" id="L158">            final int alpha = bitParser.getSampleAsByte(pixelIndexInScanline, 1);</span>
+
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (gammaCorrection != null) {</span>
+<span class="nc" id="L161">                sample = gammaCorrection.correctSample(sample);</span>
+            }
+
+<span class="nc" id="L164">            return getPixelArgb(alpha, sample, sample, sample);</span>
+        }
+        case TRUE_COLOR_WITH_ALPHA: {
+            // 8,16 Each pixel is an R,G,B triple,
+<span class="nc" id="L168">            int red = bitParser.getSampleAsByte(pixelIndexInScanline, 0);</span>
+<span class="nc" id="L169">            int green = bitParser.getSampleAsByte(pixelIndexInScanline, 1);</span>
+<span class="nc" id="L170">            int blue = bitParser.getSampleAsByte(pixelIndexInScanline, 2);</span>
+<span class="nc" id="L171">            final int alpha = bitParser.getSampleAsByte(pixelIndexInScanline, 3);</span>
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">            if (gammaCorrection != null) {</span>
+<span class="nc" id="L174">                red = gammaCorrection.correctSample(red);</span>
+<span class="nc" id="L175">                green = gammaCorrection.correctSample(green);</span>
+<span class="nc" id="L176">                blue = gammaCorrection.correctSample(blue);</span>
+            }
+
+<span class="nc" id="L179">            return getPixelArgb(alpha, red, green, blue);</span>
+        }
+        default:
+<span class="nc" id="L182">            throw new ImagingException(&quot;PNG: unknown color type: &quot; + pngColorType);</span>
+        }
+    }
+
+    ScanlineFilter getScanlineFilter(final FilterType filterType, final int bytesPerPixel) {
+<span class="nc bnc" id="L187" title="All 6 branches missed.">        switch (filterType) {</span>
+        case NONE:
+<span class="nc" id="L189">            return new ScanlineFilterNone();</span>
+        case SUB:
+<span class="nc" id="L191">            return new ScanlineFilterSub(bytesPerPixel);</span>
+        case UP:
+<span class="nc" id="L193">            return new ScanlineFilterUp();</span>
+        case AVERAGE:
+<span class="nc" id="L195">            return new ScanlineFilterAverage(bytesPerPixel);</span>
+        case PAETH:
+<span class="nc" id="L197">            return new ScanlineFilterPaeth(bytesPerPixel);</span>
+        }
+
+<span class="nc" id="L200">        return null;</span>
+    }
+
+    byte[] unfilterScanline(final FilterType filterType, final byte[] src, final byte[] prev, final int bytesPerPixel) throws ImagingException, IOException {
+<span class="nc" id="L204">        final ScanlineFilter filter = getScanlineFilter(filterType, bytesPerPixel);</span>
+
+<span class="nc" id="L206">        final byte[] dst = Allocator.byteArray(src.length);</span>
+<span class="nc" id="L207">        filter.unfilter(src, dst, prev);</span>
+<span class="nc" id="L208">        return dst;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

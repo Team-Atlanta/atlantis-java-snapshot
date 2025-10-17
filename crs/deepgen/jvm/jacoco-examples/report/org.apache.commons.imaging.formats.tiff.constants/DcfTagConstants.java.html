@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DcfTagConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.constants</a> &gt; <span class="el_source">DcfTagConstants.java</span></div><h1>DcfTagConstants.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.constants;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShortOrLong;
+
+/**
+ * Design rule for Camera file system.
+ * &lt;p&gt;
+ * [BROKEN URL] http://www.exif.org/dcf.PDF
+ * &lt;/p&gt;
+ */
+public final class DcfTagConstants {
+
+<span class="fc" id="L36">    public static final TagInfoAscii EXIF_TAG_RELATED_IMAGE_FILE_FORMAT = new TagInfoAscii(&quot;RelatedImageFileFormat&quot;, 0x1000, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_INTEROP_IFD);
+
+<span class="fc" id="L39">    public static final TagInfoShortOrLong EXIF_TAG_RELATED_IMAGE_WIDTH = new TagInfoShortOrLong(&quot;RelatedImageWidth&quot;, 0x1001, 1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_INTEROP_IFD);
+
+<span class="fc" id="L42">    public static final TagInfoShortOrLong EXIF_TAG_RELATED_IMAGE_LENGTH = new TagInfoShortOrLong(&quot;RelatedImageLength&quot;, 0x1002, 1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_INTEROP_IFD);
+
+<span class="fc" id="L45">    public static final TagInfoShort EXIF_TAG_COLOR_SPACE = new TagInfoShort(&quot;ColorSpace&quot;, 0xa001, TiffDirectoryType.EXIF_DIRECTORY_EXIF_IFD);</span>
+    public static final int COLOR_SPACE_VALUE_SRGB = 1;
+    public static final int COLOR_SPACE_VALUE_ADOBE_RGB = 2;
+    public static final int COLOR_SPACE_VALUE_UNCALIBRATED = 65535;
+
+<span class="fc" id="L50">    public static final List&lt;TagInfo&gt; ALL_DCF_TAGS = Collections.unmodifiableList(</span>
+<span class="fc" id="L51">            Arrays.asList(EXIF_TAG_RELATED_IMAGE_FILE_FORMAT, EXIF_TAG_RELATED_IMAGE_WIDTH, EXIF_TAG_RELATED_IMAGE_LENGTH, EXIF_TAG_COLOR_SPACE));</span>
+
+    private DcfTagConstants() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

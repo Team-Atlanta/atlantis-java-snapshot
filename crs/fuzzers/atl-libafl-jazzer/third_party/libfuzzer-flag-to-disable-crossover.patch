@@ -1,0 +1,57 @@
+diff --git FuzzerDriver.cpp FuzzerDriver.cpp
+index 277bdbf52..7a73cae43 100644
+--- FuzzerDriver.cpp
++++ FuzzerDriver.cpp
+@@ -675,6 +675,8 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
+     return RunInMultipleProcesses(Args, Flags.workers, Flags.jobs);
+ 
+   FuzzingOptions Options;
++  Options.DisableCustomMutate = Flags.disable_custom_mutate;
++  Options.DisableCustomCrossover = Flags.disable_custom_crossover;
+   Options.Verbosity = Flags.verbosity;
+   Options.MaxLen = Flags.max_len;
+   Options.LenControl = Flags.len_control;
+diff --git FuzzerFlags.def FuzzerFlags.def
+index 11815349b..db3f35573 100644
+--- FuzzerFlags.def
++++ FuzzerFlags.def
+@@ -209,3 +209,6 @@ FUZZER_FLAG_STRING(collect_data_flow,
+ FUZZER_FLAG_INT(create_missing_dirs, 0, "Automatically attempt to create "
+      "directories for arguments that would normally expect them to already "
+      "exist (i.e. artifact_prefix, exact_artifact_path, features_dir, corpus)")
++
++FUZZER_FLAG_INT(disable_custom_mutate, 0, "Disable LLVMFuzzerCustomMutator")
++FUZZER_FLAG_INT(disable_custom_crossover, 0, "Disable LLVMFuzzerCustomCrossOver")
+diff --git FuzzerMutate.cpp FuzzerMutate.cpp
+index 9a8d73e4b..745298ac4 100644
+--- FuzzerMutate.cpp
++++ FuzzerMutate.cpp
+@@ -50,12 +50,12 @@ MutationDispatcher::MutationDispatcher(Random &Rand,
+     DefaultMutators.push_back(
+         {&MutationDispatcher::Mutate_AddWordFromTORC, "CMP"});
+ 
+-  if (EF->LLVMFuzzerCustomMutator)
++  if (EF->LLVMFuzzerCustomMutator && !Options.DisableCustomMutate)
+     Mutators.push_back({&MutationDispatcher::Mutate_Custom, "Custom"});
+   else
+     Mutators = DefaultMutators;
+ 
+-  if (EF->LLVMFuzzerCustomCrossOver)
++  if (EF->LLVMFuzzerCustomCrossOver && !Options.DisableCustomCrossover)
+     Mutators.push_back(
+         {&MutationDispatcher::Mutate_CustomCrossOver, "CustomCrossOver"});
+ }
+diff --git FuzzerOptions.h FuzzerOptions.h
+index 72e256106..730ce6dbe 100644
+--- FuzzerOptions.h
++++ FuzzerOptions.h
+@@ -86,6 +86,9 @@ struct FuzzingOptions {
+   bool HandleUsr1 = false;
+   bool HandleUsr2 = false;
+   bool HandleWinExcept = false;
++
++  bool DisableCustomMutate = false;
++  bool DisableCustomCrossover = false;
+ };
+ 
+ }  // namespace fuzzer

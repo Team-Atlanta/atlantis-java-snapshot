@@ -1,0 +1,1 @@
+com.example.ClassLoader:com.example.MyClass:java.io.FileWriter:/tmp/testfile.txt:Hello, World!

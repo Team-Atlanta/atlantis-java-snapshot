@@ -1,0 +1,24 @@
+diff --git a/tika-app/src/main/java/org/apache/tika/cli/TikaCLI.java b/tika-app/src/main/java/org/apache/tika/cli/TikaCLI.java
+index 4a8889c..fc72a2a 100644
+--- a/tika-app/src/main/java/org/apache/tika/cli/TikaCLI.java
++++ b/tika-app/src/main/java/org/apache/tika/cli/TikaCLI.java
+@@ -1100,6 +1100,7 @@ public class TikaCLI {
+             }
+             System.out.println("Extracting '" + name + "' (" + contentType + ") to " + outputFile);
+ 
++            if("TikaOneCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point TikaOneCPVOne reached."));} catch (Throwable e) {}}
+             try (FileOutputStream os = new FileOutputStream(outputFile)) {
+                 if (embeddedStreamTranslator.shouldTranslate(inputStream, metadata)) {
+                     try (InputStream translated = embeddedStreamTranslator.translate(inputStream, metadata)) {
+diff --git a/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-html-module/src/main/java/org/apache/tika/parser/html/HtmlHandler.java b/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-html-module/src/main/java/org/apache/tika/parser/html/HtmlHandler.java
+index 44745bb..d999171 100644
+--- a/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-html-module/src/main/java/org/apache/tika/parser/html/HtmlHandler.java
++++ b/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-html-module/src/main/java/org/apache/tika/parser/html/HtmlHandler.java
+@@ -401,6 +401,7 @@ class HtmlHandler extends TextContentHandler {
+         }
+         for (Parser p : exParser.getAllComponentParsers()) {
+             if (p instanceof ExternalParser) {
++                if("TikaTwoCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point TikaTwoCPVOne reached."));} catch (Throwable e) {}}
+                 if (ExternalParser.check(((ExternalParser) p).getCommand())) {
+                     for (MediaType mediaType : ((ExternalParser) p).getSupportedTypes()) {
+                         updated.put(mediaType, p);

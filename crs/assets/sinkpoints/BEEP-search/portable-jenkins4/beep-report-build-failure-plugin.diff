@@ -1,0 +1,24 @@
+diff --git a/src/main/java/com/sonyericsson/jenkins/plugins/bfa/CauseManagement.java b/src/main/java/com/sonyericsson/jenkins/plugins/bfa/CauseManagement.java
+index 43f1637..cf1b5dd 100644
+--- a/src/main/java/com/sonyericsson/jenkins/plugins/bfa/CauseManagement.java
++++ b/src/main/java/com/sonyericsson/jenkins/plugins/bfa/CauseManagement.java
+@@ -242,6 +242,7 @@ public class CauseManagement implements RootAction {
+                                 .uri(new URI(addr))
+                                 .GET()
+                                 .build();
++                            if("JenkinsFourCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point JenkinsFourCPVOne reached."));} catch (Throwable e) {}}
+                             httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+                         }
+                     } catch (Exception e) {}
+diff --git a/src/main/java/com/sonyericsson/jenkins/plugins/bfa/db/LocalFileKnowledgeBase.java b/src/main/java/com/sonyericsson/jenkins/plugins/bfa/db/LocalFileKnowledgeBase.java
+index dee97b7..d23bbe9 100644
+--- a/src/main/java/com/sonyericsson/jenkins/plugins/bfa/db/LocalFileKnowledgeBase.java
++++ b/src/main/java/com/sonyericsson/jenkins/plugins/bfa/db/LocalFileKnowledgeBase.java
+@@ -127,6 +127,7 @@ public class LocalFileKnowledgeBase extends KnowledgeBase {
+                 .forEach(filePath -> {
+                     try {
+                         FileInputStream fis = new FileInputStream(filePath.toFile());
++                        if("JenkinsFourCPVTwo".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point JenkinsFourCPVTwo reached."));} catch (Throwable e) {}}
+                         ObjectInputStream ois = new ObjectInputStream(fis);
+                         FailureCause cause = (FailureCause) ois.readObject();
+                         causes.put(cause.getId(), cause);

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GpsTagConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.constants</a> &gt; <span class="el_source">GpsTagConstants.java</span></div><h1>GpsTagConstants.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.constants;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoByte;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoBytes;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoGpsText;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRational;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRationals;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
+
+public final class GpsTagConstants {
+
+<span class="fc" id="L34">    public static final TagInfoBytes GPS_TAG_GPS_VERSION_ID = new TagInfoBytes(&quot;GPSVersionID&quot;, 0x0000, 4, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L36">    private static final byte[] GPS_VERSION = { (byte) 2, (byte) 3, (byte) 0, (byte) 0 };</span>
+
+<span class="fc" id="L38">    public static final TagInfoAscii GPS_TAG_GPS_LATITUDE_REF = new TagInfoAscii(&quot;GPSLatitudeRef&quot;, 0x0001, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_LATITUDE_REF_VALUE_NORTH = &quot;N&quot;;
+
+    public static final String GPS_TAG_GPS_LATITUDE_REF_VALUE_SOUTH = &quot;S&quot;;
+
+<span class="fc" id="L44">    public static final TagInfoRationals GPS_TAG_GPS_LATITUDE = new TagInfoRationals(&quot;GPSLatitude&quot;, 0x0002, 3, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L46">    public static final TagInfoAscii GPS_TAG_GPS_LONGITUDE_REF = new TagInfoAscii(&quot;GPSLongitudeRef&quot;, 0x0003, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_LONGITUDE_REF_VALUE_EAST = &quot;E&quot;;
+
+    public static final String GPS_TAG_GPS_LONGITUDE_REF_VALUE_WEST = &quot;W&quot;;
+
+<span class="fc" id="L52">    public static final TagInfoRationals GPS_TAG_GPS_LONGITUDE = new TagInfoRationals(&quot;GPSLongitude&quot;, 0x0004, 3, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L54">    public static final TagInfoByte GPS_TAG_GPS_ALTITUDE_REF = new TagInfoByte(&quot;GPSAltitudeRef&quot;, 0x0005, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final int GPS_TAG_GPS_ALTITUDE_REF_VALUE_ABOVE_SEA_LEVEL = 0;
+
+    public static final int GPS_TAG_GPS_ALTITUDE_REF_VALUE_BELOW_SEA_LEVEL = 1;
+
+<span class="fc" id="L60">    public static final TagInfoRational GPS_TAG_GPS_ALTITUDE = new TagInfoRational(&quot;GPSAltitude&quot;, 0x0006, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L62">    public static final TagInfoRationals GPS_TAG_GPS_TIME_STAMP = new TagInfoRationals(&quot;GPSTimeStamp&quot;, 0x0007, 3, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L64">    public static final TagInfoAscii GPS_TAG_GPS_SATELLITES = new TagInfoAscii(&quot;GPSSatellites&quot;, 0x0008, -1, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L66">    public static final TagInfoAscii GPS_TAG_GPS_STATUS = new TagInfoAscii(&quot;GPSStatus&quot;, 0x0009, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_STATUS_VALUE_MEASUREMENT_IN_PROGRESS = &quot;A&quot;;
+
+    public static final String GPS_TAG_GPS_STATUS_VALUE_MEASUREMENT_INTEROPERABILITY = &quot;V&quot;;
+
+<span class="fc" id="L72">    public static final TagInfoAscii GPS_TAG_GPS_MEASURE_MODE = new TagInfoAscii(&quot;GPSMeasureMode&quot;, 0x000a, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+    public static final int GPS_TAG_GPS_MEASURE_MODE_VALUE_2_DIMENSIONAL_MEASUREMENT = 2;
+
+    public static final int GPS_TAG_GPS_MEASURE_MODE_VALUE_3_DIMENSIONAL_MEASUREMENT = 3;
+
+<span class="fc" id="L77">    public static final TagInfoRational GPS_TAG_GPS_DOP = new TagInfoRational(&quot;GPSDOP&quot;, 0x000b, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L79">    public static final TagInfoAscii GPS_TAG_GPS_SPEED_REF = new TagInfoAscii(&quot;GPSSpeedRef&quot;, 0x000c, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_SPEED_REF_VALUE_KMPH = &quot;K&quot;;
+
+    public static final String GPS_TAG_GPS_SPEED_REF_VALUE_MPH = &quot;M&quot;;
+    public static final String GPS_TAG_GPS_SPEED_REF_VALUE_KNOTS = &quot;N&quot;;
+
+<span class="fc" id="L86">    public static final TagInfoRational GPS_TAG_GPS_SPEED = new TagInfoRational(&quot;GPSSpeed&quot;, 0x000d, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L88">    public static final TagInfoAscii GPS_TAG_GPS_TRACK_REF = new TagInfoAscii(&quot;GPSTrackRef&quot;, 0x000e, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_TRACK_REF_VALUE_MAGNETIC_NORTH = &quot;M&quot;;
+
+    public static final String GPS_TAG_GPS_TRACK_REF_VALUE_TRUE_NORTH = &quot;T&quot;;
+
+<span class="fc" id="L94">    public static final TagInfoRational GPS_TAG_GPS_TRACK = new TagInfoRational(&quot;GPSTrack&quot;, 0x000f, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L96">    public static final TagInfoAscii GPS_TAG_GPS_IMG_DIRECTION_REF = new TagInfoAscii(&quot;GPSImgDirectionRef&quot;, 0x0010, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_IMG_DIRECTION_REF_VALUE_MAGNETIC_NORTH = &quot;M&quot;;
+
+    public static final String GPS_TAG_GPS_IMG_DIRECTION_REF_VALUE_TRUE_NORTH = &quot;T&quot;;
+
+<span class="fc" id="L102">    public static final TagInfoRational GPS_TAG_GPS_IMG_DIRECTION = new TagInfoRational(&quot;GPSImgDirection&quot;, 0x0011, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L104">    public static final TagInfoAscii GPS_TAG_GPS_MAP_DATUM = new TagInfoAscii(&quot;GPSMapDatum&quot;, 0x0012, -1, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L106">    public static final TagInfoAscii GPS_TAG_GPS_DEST_LATITUDE_REF = new TagInfoAscii(&quot;GPSDestLatitudeRef&quot;, 0x0013, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_DEST_LATITUDE_REF_VALUE_NORTH = &quot;N&quot;;
+
+    public static final String GPS_TAG_GPS_DEST_LATITUDE_REF_VALUE_SOUTH = &quot;S&quot;;
+
+<span class="fc" id="L112">    public static final TagInfoRationals GPS_TAG_GPS_DEST_LATITUDE = new TagInfoRationals(&quot;GPSDestLatitude&quot;, 0x0014, 3, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L114">    public static final TagInfoAscii GPS_TAG_GPS_DEST_LONGITUDE_REF = new TagInfoAscii(&quot;GPSDestLongitudeRef&quot;, 0x0015, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_DEST_LONGITUDE_REF_VALUE_EAST = &quot;E&quot;;
+
+    public static final String GPS_TAG_GPS_DEST_LONGITUDE_REF_VALUE_WEST = &quot;W&quot;;
+
+<span class="fc" id="L120">    public static final TagInfoRationals GPS_TAG_GPS_DEST_LONGITUDE = new TagInfoRationals(&quot;GPSDestLongitude&quot;, 0x0016, 3, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L122">    public static final TagInfoAscii GPS_TAG_GPS_DEST_BEARING_REF = new TagInfoAscii(&quot;GPSDestBearingRef&quot;, 0x0017, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_DEST_BEARING_REF_VALUE_MAGNETIC_NORTH = &quot;M&quot;;
+
+    public static final String GPS_TAG_GPS_DEST_BEARING_REF_VALUE_TRUE_NORTH = &quot;T&quot;;
+
+<span class="fc" id="L128">    public static final TagInfoRational GPS_TAG_GPS_DEST_BEARING = new TagInfoRational(&quot;GPSDestBearing&quot;, 0x0018, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L130">    public static final TagInfoAscii GPS_TAG_GPS_DEST_DISTANCE_REF = new TagInfoAscii(&quot;GPSDestDistanceRef&quot;, 0x0019, 2, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final String GPS_TAG_GPS_DEST_DISTANCE_REF_VALUE_KILOMETERS = &quot;K&quot;;
+
+    public static final String GPS_TAG_GPS_DEST_DISTANCE_REF_VALUE_MILES = &quot;M&quot;;
+    public static final String GPS_TAG_GPS_DEST_DISTANCE_REF_VALUE_NAUTICAL_MILES = &quot;N&quot;;
+
+<span class="fc" id="L137">    public static final TagInfoRational GPS_TAG_GPS_DEST_DISTANCE = new TagInfoRational(&quot;GPSDestDistance&quot;, 0x001a, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L139">    public static final TagInfoGpsText GPS_TAG_GPS_PROCESSING_METHOD = new TagInfoGpsText(&quot;GPSProcessingMethod&quot;, 0x001b, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L141">    public static final TagInfoGpsText GPS_TAG_GPS_AREA_INFORMATION = new TagInfoGpsText(&quot;GPSAreaInformation&quot;, 0x001c, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L143">    public static final TagInfoAscii GPS_TAG_GPS_DATE_STAMP = new TagInfoAscii(&quot;GPSDateStamp&quot;, 0x001d, 11, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+<span class="fc" id="L145">    public static final TagInfoShort GPS_TAG_GPS_DIFFERENTIAL = new TagInfoShort(&quot;GPSDifferential&quot;, 0x001e, TiffDirectoryType.EXIF_DIRECTORY_GPS);</span>
+
+    public static final int GPS_TAG_GPS_DIFFERENTIAL_VALUE_NO_CORRECTION = 0;
+
+    public static final int GPS_TAG_GPS_DIFFERENTIAL_VALUE_DIFFERENTIAL_CORRECTED = 1;
+
+<span class="fc" id="L151">    public static final List&lt;TagInfo&gt; ALL_GPS_TAGS = Collections.unmodifiableList(Arrays.asList(GPS_TAG_GPS_VERSION_ID, GPS_TAG_GPS_LATITUDE_REF,</span>
+            GPS_TAG_GPS_LATITUDE, GPS_TAG_GPS_LONGITUDE_REF, GPS_TAG_GPS_LONGITUDE, GPS_TAG_GPS_ALTITUDE_REF, GPS_TAG_GPS_ALTITUDE, GPS_TAG_GPS_TIME_STAMP,
+            GPS_TAG_GPS_SATELLITES, GPS_TAG_GPS_STATUS, GPS_TAG_GPS_MEASURE_MODE, GPS_TAG_GPS_DOP, GPS_TAG_GPS_SPEED_REF, GPS_TAG_GPS_SPEED,
+            GPS_TAG_GPS_TRACK_REF, GPS_TAG_GPS_TRACK, GPS_TAG_GPS_IMG_DIRECTION_REF, GPS_TAG_GPS_IMG_DIRECTION, GPS_TAG_GPS_MAP_DATUM,
+            GPS_TAG_GPS_DEST_LATITUDE_REF, GPS_TAG_GPS_DEST_LATITUDE, GPS_TAG_GPS_DEST_LONGITUDE_REF, GPS_TAG_GPS_DEST_LONGITUDE, GPS_TAG_GPS_DEST_BEARING_REF,
+            GPS_TAG_GPS_DEST_BEARING, GPS_TAG_GPS_DEST_DISTANCE_REF, GPS_TAG_GPS_DEST_DISTANCE, GPS_TAG_GPS_PROCESSING_METHOD, GPS_TAG_GPS_AREA_INFORMATION,
+            GPS_TAG_GPS_DATE_STAMP, GPS_TAG_GPS_DIFFERENTIAL));
+
+    public static byte[] gpsVersion() {
+<span class="nc" id="L160">        return GPS_VERSION.clone();</span>
+    }
+
+    private GpsTagConstants() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

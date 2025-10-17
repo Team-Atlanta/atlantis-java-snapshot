@@ -1,0 +1,35 @@
+[submodule "crs/libs/libCRS"]
+	path = crs/libs/libCRS
+	url = git@github.com:Team-Atlanta/libCRS.git
+	branch = oss-fuzz
+[submodule "crs/fuzzers/aixcc-jazzer"]
+	path = crs/fuzzers/aixcc-jazzer
+	url = git@github.com:aixcc-finals/jazzer-aixcc.git
+[submodule "crs/libs/libLLM"]
+	path = crs/libs/libLLM
+	url = git@github.com:Team-Atlanta/libLLM.git
+[submodule "crs/libs/libFDP"]
+	path = crs/libs/libFDP
+	url = git@github.com:Team-Atlanta/libFDP.git
+[submodule "crs/joern/Joern"]
+	path = crs/joern/Joern
+	url = git@github.com:Team-Atlanta/NewJoern.git
+	branch = main
+[submodule "crs/llm-poc-gen"]
+	path = crs/llm-poc-gen
+	url = git@github.com:Team-Atlanta/llm-poc-gen.git
+[submodule "crs/libs/libDeepGen"]
+	path = crs/libs/libDeepGen
+	url = git@github.com:Team-Atlanta/libDeepGen.git
+[submodule "crs/libs/libAgents"]
+	path = crs/libs/libAgents
+	url = git@github.com:Team-Atlanta/libAgents.git
+[submodule "crs/libs/userspace-code-broswer"]
+	path = crs/libs/userspace-code-browser
+	url = git@github.com:Team-Atlanta/userspace-code-browser.git
+[submodule "crs/libs/anthropic-proxy"]
+	path = crs/libs/anthropic-proxy
+	url = git@github.com:Team-Atlanta/anthropic-proxy.git
+[submodule "crs/libs/claude-code-sdk-python"]
+	path = crs/libs/claude-code-sdk-python
+	url = git@github.com:Team-Atlanta/claude-code-sdk-python.git

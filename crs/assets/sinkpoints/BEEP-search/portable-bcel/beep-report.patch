@@ -1,0 +1,12 @@
+diff --git a/src/main/java/org/apache/bcel/verifier/statics/Pass2Verifier.java b/src/main/java/org/apache/bcel/verifier/statics/Pass2Verifier.java
+index 55cc5146..bc672a41 100644
+--- a/src/main/java/org/apache/bcel/verifier/statics/Pass2Verifier.java
++++ b/src/main/java/org/apache/bcel/verifier/statics/Pass2Verifier.java
+@@ -970,6 +970,7 @@ public final class Pass2Verifier extends PassVerifier implements Constants {
+ 
+             // Check the source file to make sure it doesn't have embedded nulls.
+             try {
++                if("BCELOneCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point BCELOneCPVOne reached."));} catch (Throwable e) {}}
+                 BufferedReader reader = new BufferedReader(new FileReader(sourceFileName));
+ 
+                 String line = reader.readLine();

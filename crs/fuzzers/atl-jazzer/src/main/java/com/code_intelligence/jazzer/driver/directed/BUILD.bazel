@@ -1,0 +1,136 @@
+java_library(
+    name = "control_flow_distance",
+    srcs = ["ControlFlowDistance.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__"],
+)
+
+java_library(
+    name = "target_specific_distances",
+    srcs = ["TargetSpecificDistances.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__"],
+    deps = [
+        ":control_flow_distance",
+        ":fuzz_target",
+    ],
+)
+
+java_library(
+    name = "class_specific_distances",
+    srcs = ["ClassSpecificDistances.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__"],
+    deps = [
+        ":control_flow_distance",
+        ":fuzz_target",
+        ":target_specific_distances",
+    ],
+)
+
+java_library(
+    name = "control_flow_distance_registry",
+    srcs = ["ControlFlowDistanceRegistry.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__"],
+    deps = [
+        ":class_specific_distances",
+        ":code_analyzer",
+        ":control_flow_distance",
+        ":fuzz_target",
+        ":log_label",
+        ":target_specific_distances",
+        "//src/main/java/com/code_intelligence/jazzer:soot_shaded_dependencies",
+        "//src/main/java/com/code_intelligence/jazzer/utils:log",
+        "@atlantis_static-analysis//jar",
+    ],
+)
+
+java_library(
+    name = "fuzz_input_distance_calculator",
+    srcs = ["FuzzInputDistanceCalculator.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver:__pkg__"],
+    deps = [
+        ":code_analyzer",
+        ":control_flow_distance",
+        ":control_flow_distance_registry",
+        ":fuzz_target",
+        ":log_label",
+        ":source_line_distance",
+        "//src/main/java/com/code_intelligence/jazzer/driver:opt",
+        "//src/main/java/com/code_intelligence/jazzer/instrumentor",
+        "//src/main/java/com/code_intelligence/jazzer/runtime:coverage_map",
+        "//src/main/java/com/code_intelligence/jazzer/utils:log",
+    ],
+)
+
+java_library(
+    name = "source_line_distance",
+    srcs = ["SourceLineDistance.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__"],
+)
+
+java_library(
+    name = "fuzz_target",
+    srcs = ["FuzzTarget.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__"],
+    deps = [
+        ":log_label",
+        ":priority",
+        "@atlantis_static-analysis//jar",
+        "@maven//:jakarta_json_bind_jakarta_json_bind_api",
+        "@maven//:org_eclipse_yasson",  # Implementation of JSON-B
+    ],
+)
+
+java_library(
+    name = "code_analyzer",
+    srcs = ["CodeAnalyzer.java"],
+    visibility = ["//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__"],
+    deps = [
+        "//src/main/java/com/code_intelligence/jazzer:soot_shaded_dependencies",
+        "//src/main/java/com/code_intelligence/jazzer/utils:log",
+        "@atlantis_static-analysis//jar",
+    ],
+)
+
+java_library(
+    name = "log_label",
+    srcs = ["LogLabel.java"],
+    visibility = [
+        "//src/main/java/com/code_intelligence/jazzer/driver:__pkg__",
+        "//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__",
+    ],
+)
+
+java_binary(
+    name = "CodeAnalyzer",
+    srcs = ["CodeAnalyzer.java"],
+    main_class = "com.code_intelligence.jazzer.driver.directed.CodeAnalyzer",
+    deps = [
+        "//src/main/java/com/code_intelligence/jazzer:soot_shaded_dependencies",
+        "@atlantis_static-analysis//jar",
+    ],
+)
+
+java_binary(
+    name = "ControlFlowDistanceRegistry",
+    srcs = ["ControlFlowDistanceRegistry.java"],
+    main_class = "com.code_intelligence.jazzer.driver.directed.ControlFlowDistanceRegistry",
+    deps = [
+        ":class_specific_distances",
+        ":code_analyzer",
+        ":control_flow_distance",
+        ":fuzz_target",
+        ":log_label",
+        ":target_specific_distances",
+        "//src/main/java/com/code_intelligence/jazzer:soot_shaded_dependencies",
+        "//src/main/java/com/code_intelligence/jazzer/utils:log",
+        "@atlantis_static-analysis//jar",
+    ],
+)
+
+java_library(
+    name = "priority",
+    srcs = ["Priority.java"],
+    visibility = [
+        "//src/main/java/com/code_intelligence/jazzer/driver:__pkg__",
+        "//src/main/java/com/code_intelligence/jazzer/driver/directed:__pkg__",
+    ],
+)

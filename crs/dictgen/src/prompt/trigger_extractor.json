@@ -1,0 +1,62 @@
+{
+    "model_role_name": "Trigger Extractor",
+    "user_role_name": "Trigger Extractor",
+    "system_role": "You are a senior programmer that are really good at analyzing source code written in Java or C for finding vulnerabilities.",
+    "task": "You are given a snippet program written in Java or C. You are asked to analyze the snippet and answer the following questions: Given the <FUNCTION_NAME>() function, what values would be interesting to test the function?",
+    "analysis_rules": [
+		"- By interesting, I mean values that are likely to reveal a vulnerability.",
+        "- You can assume that a vulnerability might or might not exist in the given function.",
+		"- You must assume that a vulnerability does not exist in other functions.",
+        "- Before analyzing, you must infer if the given function is vulnerable or not. You should not generate any values if the function is considered not vulnerable.",
+		"- You should consider well-knwon vulnerability types only.",
+		"- Examples of well-known vulnerabilities are as follows:",
+		"  - For a C program: Buffer overflow, Use-after-free, Uninitialized access, Integer underflow, or Integer overflow.",
+        "  - For a Java program: SQL Injection, XPath Injection, Regular Expression Injection, OS Command Injection, or Server-Side Request Forgery (SSRF), Remote Code Execution, LDAP injection, and Remote JNDI Lookup.",
+        "    - To detect the server-side request forgery, \"jazzer.example.com\" can be used as a URL.",
+        "    - To detect the OS command injection, \"jazze\" can be used as a command.",
+		"    - You must assume that the log4j library is vulnerable for the Log4Shell vulnerability.",
+		"  - Except the well-known vulnerabilities, you must not consider other vulnerabilities.",
+		"- If interesting values are expected to cause the same expected vulnerability type, you can output only one value.",
+		"- If a vulnerability is related to the length of data, you must output the data instead of the length.",
+		"- Justify your answer. You must point out a line number of a potential vulnerability."
+    ],
+    "analysis_examples": [
+		"Example 1:",
+		"```c",
+		"1. void foo(char *data, size_t size) {",
+		"2. char buf[10];",
+		"3. if (size > 0)",
+		"4.     memcpy(buf, data, size);",
+		"5. }",
+		"```",
+		"{Your answer here. You must focus on data instead of size.}",
+		"- Answer: \"A\" * 11 <DELIMITER> `data`"
+	],
+    "output_constraints": [
+		"For each value, you must output why the value is interesting first as well as what type of vulnerabilities might occur, and then the interesting value in a new line without explaining anything.",
+		"For each value, you must print a line number that a potential vulnerability might occur.",
+		"You must output the values in an integer, a bytes or a string format. Except that, you must not output anything else.",
+		"Trivial values, such as 0, 1, 2, -1, null byte, empty string, true, or false, are not interesting.",
+		"If the given function is not vulnerable to any type of vulnerability, you must output 'None'."
+    ],
+    "output_examples": [
+		"The output format should be as follows:",
+		"Example looks like this:",
+		"For integers:",
+		"```",
+		"{Your answer that why this value potentially triggers a vulnerability `vulnerability type` when the following value is given to an argument `argument`}",
+		"- Answer: 0xdeadbeaf <DELIMITER> `argument` - `vulnerability type`",
+		"```",
+		"For bytes:",
+		"```",
+		"{Your answer that why this value potentially triggers a vulnerability `vulnerability type` when the following value is given to an argument `argument`}",
+		"- Answer: \"\\x09\\x00\" <DELIMITER> `argument` - `vulnerability type`",
+		"```",
+		"For strings:",
+		"```",
+		"{Your answer that why this value potentially triggers a vulnerability `vulnerability type` when the following value is given to an argument `argument`}",
+		"- Answer: \"Some string\" <DELIMITER> `argument - `vulnerability type``",
+		"```",
+		"you MUST NOT deviate from the above format."
+    ]
+}

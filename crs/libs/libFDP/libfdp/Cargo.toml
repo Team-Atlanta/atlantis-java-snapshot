@@ -1,0 +1,25 @@
+[package]
+name = "libfdp"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+default = []
+debug = ["dep:fdp-reference"]
+
+[dependencies]
+byteorder = "1"
+bytes = "1"
+fdp-reference = { path = "../fdp-reference", optional = true }
+memchr = "2.7"
+pyo3 = { version = "0.24", features = ["extension-module", "abi3-py310"] }
+simd_cesu8 = "1.0"
+thiserror = "2.0"
+
+[dev-dependencies]
+fdp-reference = { path = "../fdp-reference" }
+itertools = "0.14"
+rand = "0.9"

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuantizedPalette.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.palette</a> &gt; <span class="el_source">QuantizedPalette.java</span></div><h1>QuantizedPalette.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.palette;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+
+public class QuantizedPalette implements Palette {
+
+    private final int precision;
+    private final List&lt;ColorSpaceSubset&gt; subsets;
+    private final ColorSpaceSubset[] straight;
+
+<span class="nc" id="L31">    public QuantizedPalette(final List&lt;ColorSpaceSubset&gt; subsets, final int precision) {</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        this.subsets = subsets == null ? Collections.emptyList() : Collections.unmodifiableList(subsets);</span>
+<span class="nc" id="L33">        this.precision = precision;</span>
+
+<span class="nc" id="L35">        straight = Allocator.array(1 &lt;&lt; precision * 3, ColorSpaceSubset[]::new, ColorSpaceSubset.SHALLOW_SIZE);</span>
+
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        for (int i = 0; i &lt; this.subsets.size(); i++) {</span>
+<span class="nc" id="L38">            final ColorSpaceSubset subset = this.subsets.get(i);</span>
+<span class="nc" id="L39">            subset.setIndex(i);</span>
+
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            for (int u = subset.mins[0]; u &lt;= subset.maxs[0]; u++) {</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">                for (int j = subset.mins[1]; j &lt;= subset.maxs[1]; j++) {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">                    for (int k = subset.mins[2]; k &lt;= subset.maxs[2]; k++) {</span>
+<span class="nc" id="L44">                        final int index = u &lt;&lt; precision * 2 | j &lt;&lt; precision * 1 | k &lt;&lt; precision * 0;</span>
+<span class="nc" id="L45">                        straight[index] = subset;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L50">    }</span>
+
+    @Override
+    public int getEntry(final int index) {
+<span class="nc" id="L54">        final ColorSpaceSubset subset = subsets.get(index);</span>
+<span class="nc" id="L55">        return subset.rgb;</span>
+    }
+
+    @Override
+    public int getPaletteIndex(final int rgb) throws ImagingException {
+<span class="nc" id="L60">        final int precisionMask = (1 &lt;&lt; precision) - 1;</span>
+
+<span class="nc" id="L62">        final int index = rgb &gt;&gt; 24 - 3 * precision &amp; precisionMask &lt;&lt; (precision &lt;&lt; 1) | rgb &gt;&gt; 16 - 2 * precision &amp; precisionMask &lt;&lt; precision</span>
+                | rgb &gt;&gt; 8 - precision &amp; precisionMask;
+
+<span class="nc" id="L65">        return straight[index].getIndex();</span>
+    }
+
+    @Override
+    public int length() {
+<span class="nc" id="L70">        return subsets.size();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

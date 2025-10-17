@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PamFileInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.pnm</a> &gt; <span class="el_source">PamFileInfo.java</span></div><h1>PamFileInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.imaging.formats.pnm;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+
+final class PamFileInfo extends AbstractFileInfo {
+<span class="nc" id="L29">    private final class ColorTupleReader extends TupleReader {</span>
+        @Override
+        public ImageInfo.ColorType getColorType() {
+<span class="nc" id="L32">            return ImageInfo.ColorType.RGB;</span>
+        }
+
+        @Override
+        public int getRgb(final InputStream is) throws IOException {
+<span class="nc" id="L37">            int red = readSample(is, bytesPerSample);</span>
+<span class="nc" id="L38">            int green = readSample(is, bytesPerSample);</span>
+<span class="nc" id="L39">            int blue = readSample(is, bytesPerSample);</span>
+
+<span class="nc" id="L41">            red = scaleSample(red, scale, maxval);</span>
+<span class="nc" id="L42">            green = scaleSample(green, scale, maxval);</span>
+<span class="nc" id="L43">            blue = scaleSample(blue, scale, maxval);</span>
+
+<span class="nc" id="L45">            int alpha = 0xff;</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            if (hasAlpha) {</span>
+<span class="nc" id="L47">                alpha = readSample(is, bytesPerSample);</span>
+<span class="nc" id="L48">                alpha = scaleSample(alpha, scale, maxval);</span>
+            }
+
+<span class="nc" id="L51">            return (0xff &amp; alpha) &lt;&lt; 24 | (0xff &amp; red) &lt;&lt; 16 | (0xff &amp; green) &lt;&lt; 8 | (0xff &amp; blue) &lt;&lt; 0;</span>
+        }
+    }
+
+    private final class GrayscaleTupleReader extends TupleReader {
+        private final ImageInfo.ColorType colorType;
+
+<span class="nc" id="L58">        GrayscaleTupleReader(final ImageInfo.ColorType colorType) {</span>
+<span class="nc" id="L59">            this.colorType = colorType;</span>
+<span class="nc" id="L60">        }</span>
+
+        @Override
+        public ImageInfo.ColorType getColorType() {
+<span class="nc" id="L64">            return colorType;</span>
+        }
+
+        @Override
+        public int getRgb(final InputStream is) throws IOException {
+<span class="nc" id="L69">            int sample = readSample(is, bytesPerSample);</span>
+<span class="nc" id="L70">            sample = scaleSample(sample, scale, maxval);</span>
+
+<span class="nc" id="L72">            int alpha = 0xff;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            if (hasAlpha) {</span>
+<span class="nc" id="L74">                alpha = readSample(is, bytesPerSample);</span>
+<span class="nc" id="L75">                alpha = scaleSample(alpha, scale, maxval);</span>
+            }
+
+<span class="nc" id="L78">            return (0xff &amp; alpha) &lt;&lt; 24 | (0xff &amp; sample) &lt;&lt; 16 | (0xff &amp; sample) &lt;&lt; 8 | (0xff &amp; sample) &lt;&lt; 0;</span>
+        }
+    }
+
+    private abstract static class TupleReader {
+        public abstract ImageInfo.ColorType getColorType();
+
+        public abstract int getRgb(InputStream is) throws IOException;
+    }
+
+    private final int depth;
+    private final int maxval;
+    private final float scale;
+
+    private final int bytesPerSample;
+
+    private final boolean hasAlpha;
+
+    private final TupleReader tupleReader;
+
+    PamFileInfo(final int width, final int height, final int depth, final int maxval, final String tupleType) throws ImagingException {
+<span class="nc" id="L99">        super(width, height, true);</span>
+<span class="nc" id="L100">        this.depth = depth;</span>
+<span class="nc" id="L101">        this.maxval = maxval;</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (maxval &lt;= 0) {</span>
+<span class="nc" id="L103">            throw new ImagingException(&quot;PAM maxVal &quot; + maxval + &quot; is out of range [1;65535]&quot;);</span>
+        }
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (maxval &lt;= 255) {</span>
+<span class="nc" id="L106">            scale = 255f;</span>
+<span class="nc" id="L107">            bytesPerSample = 1;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        } else if (maxval &lt;= 65535) {</span>
+<span class="nc" id="L109">            scale = 65535f;</span>
+<span class="nc" id="L110">            bytesPerSample = 2;</span>
+        } else {
+<span class="nc" id="L112">            throw new ImagingException(&quot;PAM maxVal &quot; + maxval + &quot; is out of range [1;65535]&quot;);</span>
+        }
+
+<span class="nc" id="L115">        hasAlpha = tupleType.endsWith(&quot;_ALPHA&quot;);</span>
+<span class="nc bnc" id="L116" title="All 4 branches missed.">        switch (tupleType) {</span>
+        case &quot;BLACKANDWHITE&quot;:
+        case &quot;BLACKANDWHITE_ALPHA&quot;:
+<span class="nc" id="L119">            tupleReader = new GrayscaleTupleReader(ImageInfo.ColorType.BW);</span>
+<span class="nc" id="L120">            break;</span>
+        case &quot;GRAYSCALE&quot;:
+        case &quot;GRAYSCALE_ALPHA&quot;:
+<span class="nc" id="L123">            tupleReader = new GrayscaleTupleReader(ImageInfo.ColorType.GRAYSCALE);</span>
+<span class="nc" id="L124">            break;</span>
+        case &quot;RGB&quot;:
+        case &quot;RGB_ALPHA&quot;:
+<span class="nc" id="L127">            tupleReader = new ColorTupleReader();</span>
+<span class="nc" id="L128">            break;</span>
+        default:
+<span class="nc" id="L130">            throw new ImagingException(&quot;Unknown PAM tupletype '&quot; + tupleType + &quot;'&quot;);</span>
+        }
+<span class="nc" id="L132">    }</span>
+
+    @Override
+    public int getBitDepth() {
+<span class="nc" id="L136">        return maxval;</span>
+    }
+
+    @Override
+    public ImageInfo.ColorType getColorType() {
+<span class="nc" id="L141">        return tupleReader.getColorType();</span>
+    }
+
+    @Override
+    public ImageFormat getImageType() {
+<span class="nc" id="L146">        return ImageFormats.PAM;</span>
+    }
+
+    @Override
+    public String getImageTypeDescription() {
+<span class="nc" id="L151">        return &quot;PAM: portable arbitrary map file format&quot;;</span>
+    }
+
+    @Override
+    public String getMimeType() {
+<span class="nc" id="L156">        return &quot;image/x-portable-arbitrary-map&quot;;</span>
+    }
+
+    @Override
+    public int getNumComponents() {
+<span class="nc" id="L161">        return depth;</span>
+    }
+
+    @Override
+    public int getRgb(final InputStream is) throws IOException {
+<span class="nc" id="L166">        return tupleReader.getRgb(is);</span>
+    }
+
+    @Override
+    public int getRgb(final WhiteSpaceReader wsr) throws IOException {
+<span class="nc" id="L171">        throw new UnsupportedOperationException(&quot;PAM files are only ever binary&quot;);</span>
+    }
+
+    @Override
+    public boolean hasAlpha() {
+<span class="nc" id="L176">        return hasAlpha;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

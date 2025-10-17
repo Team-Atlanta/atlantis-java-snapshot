@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PixelParserRgb.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.bmp</a> &gt; <span class="el_source">PixelParserRgb.java</span></div><h1>PixelParserRgb.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.bmp;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+
+import java.io.IOException;
+import java.nio.ByteOrder;
+
+import org.apache.commons.imaging.ImagingException;
+
+final class PixelParserRgb extends AbstractPixelParserSimple {
+    private int byteCount;
+    private int cachedBitCount;
+    private int cachedByte;
+
+    PixelParserRgb(final BmpHeaderInfo bhi, final byte[] colorTable, final byte[] imageData) {
+<span class="nc" id="L33">        super(bhi, colorTable, imageData);</span>
+
+<span class="nc" id="L35">    }</span>
+
+    @Override
+    public int getNextRgb() throws ImagingException, IOException {
+
+<span class="nc bnc" id="L40" title="All 6 branches missed.">        switch (bhi.bitsPerPixel) {</span>
+        case 1:
+        case 4: {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">            if (cachedBitCount &lt; bhi.bitsPerPixel) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">                if (cachedBitCount != 0) {</span>
+<span class="nc" id="L45">                    throw new ImagingException(&quot;Unexpected leftover bits: &quot; + cachedBitCount + &quot;/&quot; + bhi.bitsPerPixel);</span>
+                }
+
+<span class="nc" id="L48">                cachedBitCount += 8;</span>
+<span class="nc" id="L49">                cachedByte = 0xff &amp; imageData[byteCount];</span>
+<span class="nc" id="L50">                byteCount++;</span>
+            }
+<span class="nc" id="L52">            final int cacheMask = (1 &lt;&lt; bhi.bitsPerPixel) - 1;</span>
+<span class="nc" id="L53">            final int sample = cacheMask &amp; cachedByte &gt;&gt; 8 - bhi.bitsPerPixel;</span>
+<span class="nc" id="L54">            cachedByte = 0xff &amp; cachedByte &lt;&lt; bhi.bitsPerPixel;</span>
+<span class="nc" id="L55">            cachedBitCount -= bhi.bitsPerPixel;</span>
+<span class="nc" id="L56">            return getColorTableRgb(sample);</span>
+        }
+        case 8: {
+<span class="nc" id="L59">            final int sample = 0xff &amp; imageData[byteCount + 0];</span>
+<span class="nc" id="L60">            final int rgb = getColorTableRgb(sample);</span>
+<span class="nc" id="L61">            byteCount += 1;</span>
+<span class="nc" id="L62">            return rgb;</span>
+        }
+        case 16: {
+<span class="nc" id="L65">            final int data = read2Bytes(&quot;Pixel&quot;, is, &quot;BMP Image Data&quot;, ByteOrder.LITTLE_ENDIAN);</span>
+<span class="nc" id="L66">            final int blue = (0x1f &amp; data &gt;&gt; 0) &lt;&lt; 3;</span>
+<span class="nc" id="L67">            final int green = (0x1f &amp; data &gt;&gt; 5) &lt;&lt; 3;</span>
+<span class="nc" id="L68">            final int red = (0x1f &amp; data &gt;&gt; 10) &lt;&lt; 3;</span>
+<span class="nc" id="L69">            final int alpha = 0xff;</span>
+<span class="nc" id="L70">            final int rgb = alpha &lt;&lt; 24 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue &lt;&lt; 0;</span>
+<span class="nc" id="L71">            byteCount += 2;</span>
+<span class="nc" id="L72">            return rgb;</span>
+        }
+        case 24: {
+<span class="nc" id="L75">            final int blue = 0xff &amp; imageData[byteCount + 0];</span>
+<span class="nc" id="L76">            final int green = 0xff &amp; imageData[byteCount + 1];</span>
+<span class="nc" id="L77">            final int red = 0xff &amp; imageData[byteCount + 2];</span>
+<span class="nc" id="L78">            final int alpha = 0xff;</span>
+<span class="nc" id="L79">            final int rgb = alpha &lt;&lt; 24 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue &lt;&lt; 0;</span>
+<span class="nc" id="L80">            byteCount += 3;</span>
+<span class="nc" id="L81">            return rgb;</span>
+        }
+        case 32: {
+<span class="nc" id="L84">            final int blue = 0xff &amp; imageData[byteCount + 0];</span>
+<span class="nc" id="L85">            final int green = 0xff &amp; imageData[byteCount + 1];</span>
+<span class="nc" id="L86">            final int red = 0xff &amp; imageData[byteCount + 2];</span>
+<span class="nc" id="L87">            final int alpha = 0xff;</span>
+<span class="nc" id="L88">            final int rgb = alpha &lt;&lt; 24 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue &lt;&lt; 0;</span>
+<span class="nc" id="L89">            byteCount += 4;</span>
+<span class="nc" id="L90">            return rgb;</span>
+        }
+        default:
+            break;
+        }
+
+<span class="nc" id="L96">        throw new ImagingException(&quot;Unknown BitsPerPixel: &quot; + bhi.bitsPerPixel);</span>
+    }
+
+    @Override
+    public void newline() throws ImagingException, IOException {
+<span class="nc" id="L101">        cachedBitCount = 0;</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        while (byteCount % 4 != 0) {</span>
+<span class="nc" id="L104">            readByte(&quot;Pixel&quot;, is, &quot;BMP Image Data&quot;);</span>
+<span class="nc" id="L105">            byteCount++;</span>
+        }
+<span class="nc" id="L107">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

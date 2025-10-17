@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample Page</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+    <p>This is a sample HTML content for fuzz testing.</p>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PcxWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.pcx</a> &gt; <span class="el_source">PcxWriter.java</span></div><h1>PcxWriter.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+
+package org.apache.commons.imaging.formats.pcx;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
+
+import org.apache.commons.imaging.PixelDensity;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.palette.PaletteFactory;
+import org.apache.commons.imaging.palette.SimplePalette;
+
+final class PcxWriter {
+    private final int encoding;
+    private final int bitDepthWanted;
+    private final int planesWanted;
+    private final PixelDensity pixelDensity;
+    private final RleWriter rleWriter;
+
+<span class="nc" id="L36">    PcxWriter(PcxImagingParameters params) {</span>
+        // uncompressed PCX files are not even documented in ZSoft's spec,
+        // let alone supported by most image viewers
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (params == null) {</span>
+<span class="nc" id="L40">            params = new PcxImagingParameters();</span>
+        }
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        encoding = params.getCompression() == PcxConstants.PCX_COMPRESSION_UNCOMPRESSED ? PcxImageParser.PcxHeader.ENCODING_UNCOMPRESSED</span>
+<span class="nc" id="L43">                : PcxImageParser.PcxHeader.ENCODING_RLE;</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        rleWriter = new RleWriter(encoding != PcxImageParser.PcxHeader.ENCODING_UNCOMPRESSED);</span>
+<span class="nc" id="L45">        bitDepthWanted = params.getBitDepth();</span>
+<span class="nc" id="L46">        planesWanted = params.getPlanes();</span>
+<span class="nc" id="L47">        final PixelDensity pixelDensityParam = params.getPixelDensity();</span>
+        // DPI is mandatory, so we have to invent something
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        pixelDensity = pixelDensityParam != null ? pixelDensityParam : PixelDensity.createFromPixelsPerInch(72, 72);</span>
+<span class="nc" id="L50">    }</span>
+
+    public void writeImage(final BufferedImage src, final OutputStream os) throws IOException {
+<span class="nc" id="L53">        final PaletteFactory paletteFactory = new PaletteFactory();</span>
+<span class="nc" id="L54">        final SimplePalette palette = paletteFactory.makeExactRgbPaletteSimple(src, 256);</span>
+<span class="nc" id="L55">        final BinaryOutputStream bos = BinaryOutputStream.littleEndian(os);</span>
+        final int bitDepth;
+        final int planes;
+<span class="nc bnc" id="L58" title="All 6 branches missed.">        if (palette == null || bitDepthWanted == 24 || bitDepthWanted == 32) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            if (bitDepthWanted == 32) {</span>
+<span class="nc" id="L60">                bitDepth = 32;</span>
+<span class="nc" id="L61">                planes = 1;</span>
+            } else {
+<span class="nc" id="L63">                bitDepth = 8;</span>
+<span class="nc" id="L64">                planes = 3;</span>
+            }
+<span class="nc bnc" id="L66" title="All 4 branches missed.">        } else if (palette.length() &gt; 16 || bitDepthWanted == 8) {</span>
+<span class="nc" id="L67">            bitDepth = 8;</span>
+<span class="nc" id="L68">            planes = 1;</span>
+<span class="nc bnc" id="L69" title="All 4 branches missed.">        } else if (palette.length() &gt; 8 || bitDepthWanted == 4) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (planesWanted == 1) {</span>
+<span class="nc" id="L71">                bitDepth = 4;</span>
+<span class="nc" id="L72">                planes = 1;</span>
+            } else {
+<span class="nc" id="L74">                bitDepth = 1;</span>
+<span class="nc" id="L75">                planes = 4;</span>
+            }
+<span class="nc bnc" id="L77" title="All 4 branches missed.">        } else if (palette.length() &gt; 4 || bitDepthWanted == 3) {</span>
+<span class="nc" id="L78">            bitDepth = 1;</span>
+<span class="nc" id="L79">            planes = 3;</span>
+<span class="nc bnc" id="L80" title="All 4 branches missed.">        } else if (palette.length() &gt; 2 || bitDepthWanted == 2) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (planesWanted == 2) {</span>
+<span class="nc" id="L82">                bitDepth = 1;</span>
+<span class="nc" id="L83">                planes = 2;</span>
+            } else {
+<span class="nc" id="L85">                bitDepth = 2;</span>
+<span class="nc" id="L86">                planes = 1;</span>
+            }
+        } else {
+<span class="nc" id="L89">            boolean onlyBlackAndWhite = true;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (palette.length() &gt;= 1) {</span>
+<span class="nc" id="L91">                final int rgb = palette.getEntry(0);</span>
+<span class="nc bnc" id="L92" title="All 4 branches missed.">                if (rgb != 0 &amp;&amp; rgb != 0xffffff) {</span>
+<span class="nc" id="L93">                    onlyBlackAndWhite = false;</span>
+                }
+            }
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (palette.length() == 2) {</span>
+<span class="nc" id="L97">                final int rgb = palette.getEntry(1);</span>
+<span class="nc bnc" id="L98" title="All 4 branches missed.">                if (rgb != 0 &amp;&amp; rgb != 0xffffff) {</span>
+<span class="nc" id="L99">                    onlyBlackAndWhite = false;</span>
+                }
+            }
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (onlyBlackAndWhite) {</span>
+<span class="nc" id="L103">                bitDepth = 1;</span>
+<span class="nc" id="L104">                planes = 1;</span>
+            } else {
+<span class="nc" id="L106">                bitDepth = 1;</span>
+<span class="nc" id="L107">                planes = 2;</span>
+            }
+        }
+
+<span class="nc" id="L111">        int bytesPerLine = (bitDepth * src.getWidth() + 7) / 8;</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (bytesPerLine % 2 != 0) {</span>
+            // must be even:
+<span class="nc" id="L114">            bytesPerLine++;</span>
+        }
+
+<span class="nc" id="L117">        final byte[] palette16 = new byte[16 * 3];</span>
+        // TODO What's the right thing to do here for a null palette?
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        final int paletteLen = palette != null ? palette.length() : 0;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        for (int i = 0; i &lt; 16; i++) {</span>
+            int rgb;
+<span class="nc bnc" id="L122" title="All 2 branches missed.">            if (i &lt; paletteLen) {</span>
+<span class="nc" id="L123">                rgb = palette.getEntry(i);</span>
+            } else {
+<span class="nc" id="L125">                rgb = 0;</span>
+            }
+<span class="nc" id="L127">            palette16[3 * i + 0] = (byte) (0xff &amp; rgb &gt;&gt; 16);</span>
+<span class="nc" id="L128">            palette16[3 * i + 1] = (byte) (0xff &amp; rgb &gt;&gt; 8);</span>
+<span class="nc" id="L129">            palette16[3 * i + 2] = (byte) (0xff &amp; rgb);</span>
+        }
+
+        // PCX header
+<span class="nc" id="L133">        bos.write(10); // manufacturer</span>
+<span class="nc bnc" id="L134" title="All 4 branches missed.">        bos.write(bitDepth == 1 &amp;&amp; planes == 1 ? 3 : 5); // version. Some apps only open black and white PCX with version=3.</span>
+<span class="nc" id="L135">        bos.write(encoding); // encoding</span>
+<span class="nc" id="L136">        bos.write(bitDepth); // bits per pixel</span>
+<span class="nc" id="L137">        bos.write2Bytes(0); // xMin</span>
+<span class="nc" id="L138">        bos.write2Bytes(0); // yMin</span>
+<span class="nc" id="L139">        bos.write2Bytes(src.getWidth() - 1); // xMax</span>
+<span class="nc" id="L140">        bos.write2Bytes(src.getHeight() - 1); // yMax</span>
+<span class="nc" id="L141">        bos.write2Bytes((short) Math.round(pixelDensity.horizontalDensityInches())); // hDpi</span>
+<span class="nc" id="L142">        bos.write2Bytes((short) Math.round(pixelDensity.verticalDensityInches())); // vDpi</span>
+<span class="nc" id="L143">        bos.write(palette16); // 16 color palette</span>
+<span class="nc" id="L144">        bos.write(0); // reserved</span>
+<span class="nc" id="L145">        bos.write(planes); // planes</span>
+<span class="nc" id="L146">        bos.write2Bytes(bytesPerLine); // bytes per line</span>
+<span class="nc" id="L147">        bos.write2Bytes(1); // palette info</span>
+<span class="nc" id="L148">        bos.write2Bytes(0); // hScreenSize</span>
+<span class="nc" id="L149">        bos.write2Bytes(0); // vScreenSize</span>
+<span class="nc" id="L150">        bos.write(new byte[54]);</span>
+
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (bitDepth == 32) {</span>
+<span class="nc" id="L153">            writePixels32(src, bytesPerLine, bos);</span>
+        } else {
+<span class="nc" id="L155">            writePixels(src, bitDepth, planes, bytesPerLine, palette, bos);</span>
+        }
+
+<span class="nc bnc" id="L158" title="All 4 branches missed.">        if (bitDepth == 8 &amp;&amp; planes == 1) {</span>
+            // 256 color palette
+<span class="nc" id="L160">            bos.write(12);</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">            for (int i = 0; i &lt; 256; i++) {</span>
+                int rgb;
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                if (i &lt; palette.length()) {</span>
+<span class="nc" id="L164">                    rgb = palette.getEntry(i);</span>
+                } else {
+<span class="nc" id="L166">                    rgb = 0;</span>
+                }
+<span class="nc" id="L168">                bos.write(rgb &gt;&gt; 16 &amp; 0xff);</span>
+<span class="nc" id="L169">                bos.write(rgb &gt;&gt; 8 &amp; 0xff);</span>
+<span class="nc" id="L170">                bos.write(rgb &amp; 0xff);</span>
+            }
+        }
+<span class="nc" id="L173">    }</span>
+
+    private void writePixels(final BufferedImage src, final int bitDepth, final int planes, final int bytesPerLine, final SimplePalette palette,
+            final BinaryOutputStream bos) throws IOException {
+<span class="nc" id="L177">        final byte[] plane0 = Allocator.byteArray(bytesPerLine);</span>
+<span class="nc" id="L178">        final byte[] plane1 = Allocator.byteArray(bytesPerLine);</span>
+<span class="nc" id="L179">        final byte[] plane2 = Allocator.byteArray(bytesPerLine);</span>
+<span class="nc" id="L180">        final byte[] plane3 = Allocator.byteArray(bytesPerLine);</span>
+<span class="nc" id="L181">        final byte[][] allPlanes = { plane0, plane1, plane2, plane3 };</span>
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        for (int y = 0; y &lt; src.getHeight(); y++) {</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">            for (int i = 0; i &lt; planes; i++) {</span>
+<span class="nc" id="L185">                Arrays.fill(allPlanes[i], (byte) 0);</span>
+            }
+
+<span class="nc bnc" id="L188" title="All 4 branches missed.">            if (bitDepth == 1 &amp;&amp; planes == 1) {</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L190">                    final int rgb = 0xffffff &amp; src.getRGB(x, y);</span>
+                    int bit;
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                    if (rgb == 0x000000) {</span>
+<span class="nc" id="L193">                        bit = 0;</span>
+                    } else {
+<span class="nc" id="L195">                        bit = 1;</span>
+                    }
+<span class="nc" id="L197">                    plane0[x &gt;&gt;&gt; 3] |= bit &lt;&lt; 7 - (x &amp; 7);</span>
+                }
+<span class="nc bnc" id="L199" title="All 4 branches missed.">            } else if (bitDepth == 1 &amp;&amp; planes == 2) {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L201">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L202">                    final int index = palette.getPaletteIndex(0xffffff &amp; argb);</span>
+<span class="nc" id="L203">                    plane0[x &gt;&gt;&gt; 3] |= (index &amp; 1) &lt;&lt; 7 - (x &amp; 7);</span>
+<span class="nc" id="L204">                    plane1[x &gt;&gt;&gt; 3] |= (index &amp; 2) &gt;&gt; 1 &lt;&lt; 7 - (x &amp; 7);</span>
+                }
+<span class="nc bnc" id="L206" title="All 4 branches missed.">            } else if (bitDepth == 1 &amp;&amp; planes == 3) {</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L208">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L209">                    final int index = palette.getPaletteIndex(0xffffff &amp; argb);</span>
+<span class="nc" id="L210">                    plane0[x &gt;&gt;&gt; 3] |= (index &amp; 1) &lt;&lt; 7 - (x &amp; 7);</span>
+<span class="nc" id="L211">                    plane1[x &gt;&gt;&gt; 3] |= (index &amp; 2) &gt;&gt; 1 &lt;&lt; 7 - (x &amp; 7);</span>
+<span class="nc" id="L212">                    plane2[x &gt;&gt;&gt; 3] |= (index &amp; 4) &gt;&gt; 2 &lt;&lt; 7 - (x &amp; 7);</span>
+                }
+<span class="nc bnc" id="L214" title="All 4 branches missed.">            } else if (bitDepth == 1 &amp;&amp; planes == 4) {</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L216">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L217">                    final int index = palette.getPaletteIndex(0xffffff &amp; argb);</span>
+<span class="nc" id="L218">                    plane0[x &gt;&gt;&gt; 3] |= (index &amp; 1) &lt;&lt; 7 - (x &amp; 7);</span>
+<span class="nc" id="L219">                    plane1[x &gt;&gt;&gt; 3] |= (index &amp; 2) &gt;&gt; 1 &lt;&lt; 7 - (x &amp; 7);</span>
+<span class="nc" id="L220">                    plane2[x &gt;&gt;&gt; 3] |= (index &amp; 4) &gt;&gt; 2 &lt;&lt; 7 - (x &amp; 7);</span>
+<span class="nc" id="L221">                    plane3[x &gt;&gt;&gt; 3] |= (index &amp; 8) &gt;&gt; 3 &lt;&lt; 7 - (x &amp; 7);</span>
+                }
+<span class="nc bnc" id="L223" title="All 4 branches missed.">            } else if (bitDepth == 2 &amp;&amp; planes == 1) {</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L225">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L226">                    final int index = palette.getPaletteIndex(0xffffff &amp; argb);</span>
+<span class="nc" id="L227">                    plane0[x &gt;&gt;&gt; 2] |= index &lt;&lt; 2 * (3 - (x &amp; 3));</span>
+                }
+<span class="nc bnc" id="L229" title="All 4 branches missed.">            } else if (bitDepth == 4 &amp;&amp; planes == 1) {</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L231">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L232">                    final int index = palette.getPaletteIndex(0xffffff &amp; argb);</span>
+<span class="nc" id="L233">                    plane0[x &gt;&gt;&gt; 1] |= index &lt;&lt; 4 * (1 - (x &amp; 1));</span>
+                }
+<span class="nc bnc" id="L235" title="All 4 branches missed.">            } else if (bitDepth == 8 &amp;&amp; planes == 1) {</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L237">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L238">                    final int index = palette.getPaletteIndex(0xffffff &amp; argb);</span>
+<span class="nc" id="L239">                    plane0[x] = (byte) index;</span>
+                }
+<span class="nc bnc" id="L241" title="All 4 branches missed.">            } else if (bitDepth == 8 &amp;&amp; planes == 3) {</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L243">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L244">                    plane0[x] = (byte) (argb &gt;&gt;&gt; 16);</span>
+<span class="nc" id="L245">                    plane1[x] = (byte) (argb &gt;&gt;&gt; 8);</span>
+<span class="nc" id="L246">                    plane2[x] = (byte) argb;</span>
+                }
+            }
+
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            for (int i = 0; i &lt; planes; i++) {</span>
+<span class="nc" id="L251">                rleWriter.write(bos, allPlanes[i]);</span>
+            }
+        }
+<span class="nc" id="L254">        rleWriter.flush(bos);</span>
+<span class="nc" id="L255">    }</span>
+
+    private void writePixels32(final BufferedImage src, final int bytesPerLine, final BinaryOutputStream bos) throws IOException {
+
+<span class="nc" id="L259">        final int[] rgbs = Allocator.intArray(src.getWidth());</span>
+<span class="nc" id="L260">        final byte[] plane = Allocator.byteArray(4 * bytesPerLine);</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        for (int y = 0; y &lt; src.getHeight(); y++) {</span>
+<span class="nc" id="L262">            src.getRGB(0, y, src.getWidth(), 1, rgbs, 0, src.getWidth());</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            for (int x = 0; x &lt; rgbs.length; x++) {</span>
+<span class="nc" id="L264">                plane[4 * x + 0] = (byte) rgbs[x];</span>
+<span class="nc" id="L265">                plane[4 * x + 1] = (byte) (rgbs[x] &gt;&gt; 8);</span>
+<span class="nc" id="L266">                plane[4 * x + 2] = (byte) (rgbs[x] &gt;&gt; 16);</span>
+<span class="nc" id="L267">                plane[4 * x + 3] = 0;</span>
+            }
+<span class="nc" id="L269">            rleWriter.write(bos, plane);</span>
+        }
+<span class="nc" id="L271">        rleWriter.flush(bos);</span>
+<span class="nc" id="L272">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

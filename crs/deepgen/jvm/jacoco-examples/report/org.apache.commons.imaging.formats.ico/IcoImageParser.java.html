@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IcoImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.ico</a> &gt; <span class="el_source">IcoImageParser.java</span></div><h1>IcoImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.ico;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.ByteOrder;
+import java.util.List;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.PixelDensity;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.formats.bmp.BmpImageParser;
+import org.apache.commons.imaging.palette.PaletteFactory;
+import org.apache.commons.imaging.palette.SimplePalette;
+
+public class IcoImageParser extends AbstractImageParser&lt;IcoImagingParameters&gt; {
+    private static final class BitmapHeader {
+        public final int size;
+        public final int width;
+        public final int height;
+        public final int planes;
+        public final int bitCount;
+        public final int compression;
+        public final int sizeImage;
+        public final int xPelsPerMeter;
+        public final int yPelsPerMeter;
+        public final int colorsUsed;
+        public final int colorsImportant;
+
+        BitmapHeader(final int size, final int width, final int height, final int planes, final int bitCount, final int compression, final int sizeImage,
+<span class="nc" id="L65">                final int pelsPerMeter, final int pelsPerMeter2, final int colorsUsed, final int colorsImportant) {</span>
+<span class="nc" id="L66">            this.size = size;</span>
+<span class="nc" id="L67">            this.width = width;</span>
+<span class="nc" id="L68">            this.height = height;</span>
+<span class="nc" id="L69">            this.planes = planes;</span>
+<span class="nc" id="L70">            this.bitCount = bitCount;</span>
+<span class="nc" id="L71">            this.compression = compression;</span>
+<span class="nc" id="L72">            this.sizeImage = sizeImage;</span>
+<span class="nc" id="L73">            xPelsPerMeter = pelsPerMeter;</span>
+<span class="nc" id="L74">            yPelsPerMeter = pelsPerMeter2;</span>
+<span class="nc" id="L75">            this.colorsUsed = colorsUsed;</span>
+<span class="nc" id="L76">            this.colorsImportant = colorsImportant;</span>
+<span class="nc" id="L77">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L80">            pw.println(&quot;BitmapHeader&quot;);</span>
+
+<span class="nc" id="L82">            pw.println(&quot;Size: &quot; + size);</span>
+<span class="nc" id="L83">            pw.println(&quot;Width: &quot; + width);</span>
+<span class="nc" id="L84">            pw.println(&quot;Height: &quot; + height);</span>
+<span class="nc" id="L85">            pw.println(&quot;Planes: &quot; + planes);</span>
+<span class="nc" id="L86">            pw.println(&quot;BitCount: &quot; + bitCount);</span>
+<span class="nc" id="L87">            pw.println(&quot;Compression: &quot; + compression);</span>
+<span class="nc" id="L88">            pw.println(&quot;SizeImage: &quot; + sizeImage);</span>
+<span class="nc" id="L89">            pw.println(&quot;XPelsPerMeter: &quot; + xPelsPerMeter);</span>
+<span class="nc" id="L90">            pw.println(&quot;YPelsPerMeter: &quot; + yPelsPerMeter);</span>
+<span class="nc" id="L91">            pw.println(&quot;ColorsUsed: &quot; + colorsUsed);</span>
+<span class="nc" id="L92">            pw.println(&quot;ColorsImportant: &quot; + colorsImportant);</span>
+<span class="nc" id="L93">        }</span>
+    }
+
+    private static final class BitmapIconData extends IconData {
+        public final BitmapHeader header;
+        public final BufferedImage bufferedImage;
+
+        BitmapIconData(final IconInfo iconInfo, final BitmapHeader header, final BufferedImage bufferedImage) {
+<span class="nc" id="L101">            super(iconInfo);</span>
+<span class="nc" id="L102">            this.header = header;</span>
+<span class="nc" id="L103">            this.bufferedImage = bufferedImage;</span>
+<span class="nc" id="L104">        }</span>
+
+        @Override
+        protected void dumpSubclass(final PrintWriter pw) {
+<span class="nc" id="L108">            pw.println(&quot;BitmapIconData&quot;);</span>
+<span class="nc" id="L109">            header.dump(pw);</span>
+<span class="nc" id="L110">            pw.println();</span>
+<span class="nc" id="L111">        }</span>
+
+        @Override
+        public BufferedImage readBufferedImage() throws ImagingException {
+<span class="nc" id="L115">            return bufferedImage;</span>
+        }
+    }
+
+    private static final class FileHeader {
+        public final int reserved; // Reserved (2 bytes), always 0
+        public final int iconType; // IconType (2 bytes), if the image is an
+                                   // icon it?s 1, for cursors the value is 2.
+        public final int iconCount; // IconCount (2 bytes), number of icons in
+                                    // this file.
+
+<span class="nc" id="L126">        FileHeader(final int reserved, final int iconType, final int iconCount) {</span>
+<span class="nc" id="L127">            this.reserved = reserved;</span>
+<span class="nc" id="L128">            this.iconType = iconType;</span>
+<span class="nc" id="L129">            this.iconCount = iconCount;</span>
+<span class="nc" id="L130">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L133">            pw.println(&quot;FileHeader&quot;);</span>
+<span class="nc" id="L134">            pw.println(&quot;Reserved: &quot; + reserved);</span>
+<span class="nc" id="L135">            pw.println(&quot;IconType: &quot; + iconType);</span>
+<span class="nc" id="L136">            pw.println(&quot;IconCount: &quot; + iconCount);</span>
+<span class="nc" id="L137">            pw.println();</span>
+<span class="nc" id="L138">        }</span>
+    }
+
+    abstract static class IconData {
+        static final int SHALLOW_SIZE = 16;
+
+        public final IconInfo iconInfo;
+
+<span class="nc" id="L146">        IconData(final IconInfo iconInfo) {</span>
+<span class="nc" id="L147">            this.iconInfo = iconInfo;</span>
+<span class="nc" id="L148">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L151">            iconInfo.dump(pw);</span>
+<span class="nc" id="L152">            pw.println();</span>
+<span class="nc" id="L153">            dumpSubclass(pw);</span>
+<span class="nc" id="L154">        }</span>
+
+        protected abstract void dumpSubclass(PrintWriter pw);
+
+        public abstract BufferedImage readBufferedImage() throws ImagingException;
+    }
+
+    static class IconInfo {
+        static final int SHALLOW_SIZE = 32;
+        public final byte width;
+        public final byte height;
+        public final byte colorCount;
+        public final byte reserved;
+        public final int planes;
+        public final int bitCount;
+        public final int imageSize;
+        public final int imageOffset;
+
+        IconInfo(final byte width, final byte height, final byte colorCount, final byte reserved, final int planes, final int bitCount, final int imageSize,
+<span class="nc" id="L173">                final int imageOffset) {</span>
+<span class="nc" id="L174">            this.width = width;</span>
+<span class="nc" id="L175">            this.height = height;</span>
+<span class="nc" id="L176">            this.colorCount = colorCount;</span>
+<span class="nc" id="L177">            this.reserved = reserved;</span>
+<span class="nc" id="L178">            this.planes = planes;</span>
+<span class="nc" id="L179">            this.bitCount = bitCount;</span>
+<span class="nc" id="L180">            this.imageSize = imageSize;</span>
+<span class="nc" id="L181">            this.imageOffset = imageOffset;</span>
+<span class="nc" id="L182">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L185">            pw.println(&quot;IconInfo&quot;);</span>
+<span class="nc" id="L186">            pw.println(&quot;Width: &quot; + width);</span>
+<span class="nc" id="L187">            pw.println(&quot;Height: &quot; + height);</span>
+<span class="nc" id="L188">            pw.println(&quot;ColorCount: &quot; + colorCount);</span>
+<span class="nc" id="L189">            pw.println(&quot;Reserved: &quot; + reserved);</span>
+<span class="nc" id="L190">            pw.println(&quot;Planes: &quot; + planes);</span>
+<span class="nc" id="L191">            pw.println(&quot;BitCount: &quot; + bitCount);</span>
+<span class="nc" id="L192">            pw.println(&quot;ImageSize: &quot; + imageSize);</span>
+<span class="nc" id="L193">            pw.println(&quot;ImageOffset: &quot; + imageOffset);</span>
+<span class="nc" id="L194">        }</span>
+    }
+
+    private static final class ImageContents {
+        public final FileHeader fileHeader;
+        public final IconData[] iconDatas;
+
+<span class="nc" id="L201">        ImageContents(final FileHeader fileHeader, final IconData[] iconDatas) {</span>
+<span class="nc" id="L202">            this.fileHeader = fileHeader;</span>
+<span class="nc" id="L203">            this.iconDatas = iconDatas;</span>
+<span class="nc" id="L204">        }</span>
+    }
+
+    private static final class PngIconData extends IconData {
+        public final BufferedImage bufferedImage;
+
+        PngIconData(final IconInfo iconInfo, final BufferedImage bufferedImage) {
+<span class="nc" id="L211">            super(iconInfo);</span>
+<span class="nc" id="L212">            this.bufferedImage = bufferedImage;</span>
+<span class="nc" id="L213">        }</span>
+
+        @Override
+        protected void dumpSubclass(final PrintWriter pw) {
+<span class="nc" id="L217">            pw.println(&quot;PNGIconData&quot;);</span>
+<span class="nc" id="L218">            pw.println();</span>
+<span class="nc" id="L219">        }</span>
+
+        @Override
+        public BufferedImage readBufferedImage() {
+<span class="nc" id="L223">            return bufferedImage;</span>
+        }
+    }
+
+<span class="fc" id="L227">    private static final String DEFAULT_EXTENSION = ImageFormats.ICO.getDefaultExtension();</span>
+
+<span class="fc" id="L229">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.ICO.getExtensions();</span>
+
+    public IcoImageParser() {
+<span class="fc" id="L232">        super(ByteOrder.LITTLE_ENDIAN);</span>
+<span class="fc" id="L233">    }</span>
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L237">        final ImageContents contents = readImage(byteSource);</span>
+<span class="nc" id="L238">        contents.fileHeader.dump(pw);</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">        for (final IconData iconData : contents.iconDatas) {</span>
+<span class="nc" id="L240">            iconData.dump(pw);</span>
+        }
+<span class="nc" id="L242">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L247">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L252">        return new ImageFormat[] { ImageFormats.ICO, //</span>
+        };
+    }
+
+    @Override
+    public List&lt;BufferedImage&gt; getAllBufferedImages(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L258">        final ImageContents contents = readImage(byteSource);</span>
+
+<span class="nc" id="L260">        final FileHeader fileHeader = contents.fileHeader;</span>
+<span class="nc" id="L261">        final List&lt;BufferedImage&gt; result = Allocator.arrayList(fileHeader.iconCount);</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">        for (int i = 0; i &lt; fileHeader.iconCount; i++) {</span>
+<span class="nc" id="L263">            result.add(contents.iconDatas[i].readBufferedImage());</span>
+        }
+
+<span class="nc" id="L266">        return result;</span>
+    }
+
+    @Override
+    public final BufferedImage getBufferedImage(final ByteSource byteSource, final IcoImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L271">        final ImageContents contents = readImage(byteSource);</span>
+<span class="nc" id="L272">        final FileHeader fileHeader = contents.fileHeader;</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">        if (fileHeader.iconCount &gt; 0) {</span>
+<span class="nc" id="L274">            return contents.iconDatas[0].readBufferedImage();</span>
+        }
+<span class="nc" id="L276">        throw new ImagingException(&quot;No icons in ICO file&quot;);</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L281">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public IcoImagingParameters getDefaultParameters() {
+<span class="nc" id="L286">        return new IcoImagingParameters();</span>
+    }
+
+    // TODO should throw UOE
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final IcoImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L292">        return null;</span>
+    }
+
+    // TODO should throw UOE
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final IcoImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L298">        return null;</span>
+    }
+
+    // TODO should throw UOE
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final IcoImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L304">        return null;</span>
+    }
+
+    // TODO should throw UOE
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final IcoImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L310">        return null;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L315">        return &quot;ico-Custom&quot;;</span>
+    }
+
+    private IconData readBitmapIconData(final byte[] iconData, final IconInfo fIconInfo) throws ImagingException, IOException {
+<span class="nc" id="L319">        final ByteArrayInputStream is = new ByteArrayInputStream(iconData);</span>
+<span class="nc" id="L320">        final int size = read4Bytes(&quot;size&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // Size (4</span>
+        // bytes),
+        // size of
+        // this
+        // structure
+        // (always
+        // 40)
+<span class="nc" id="L327">        final int width = read4Bytes(&quot;width&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // Width (4</span>
+        // bytes),
+        // width of
+        // the
+        // image
+        // (same as
+        // iconinfo.width)
+<span class="nc" id="L334">        final int height = read4Bytes(&quot;height&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // Height</span>
+        // (4
+        // bytes),
+        // scanlines
+        // in the
+        // color
+        // map +
+        // transparent
+        // map
+        // (iconinfo.height
+        // * 2)
+<span class="nc" id="L345">        final int planes = read2Bytes(&quot;planes&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // Planes</span>
+        // (2
+        // bytes),
+        // always
+        // 1
+<span class="nc" id="L350">        final int bitCount = read2Bytes(&quot;bitCount&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // BitCount</span>
+        // (2
+        // bytes),
+        // 1,4,8,16,24,32
+        // (see
+        // iconinfo
+        // for
+        // details)
+<span class="nc" id="L358">        int compression = read4Bytes(&quot;compression&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // Compression</span>
+        // (4
+        // bytes),
+        // we
+        // don?t
+        // use
+        // this
+        // (0)
+<span class="nc" id="L366">        final int sizeImage = read4Bytes(&quot;sizeImage&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // SizeImage</span>
+        // (4
+        // bytes),
+        // we
+        // don?t
+        // use
+        // this
+        // (0)
+<span class="nc" id="L374">        final int xPelsPerMeter = read4Bytes(&quot;xPelsPerMeter&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // XPelsPerMeter (4 bytes), we don?t</span>
+        // use this (0)
+<span class="nc" id="L376">        final int yPelsPerMeter = read4Bytes(&quot;yPelsPerMeter&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // YPelsPerMeter (4 bytes), we don?t</span>
+        // use this (0)
+<span class="nc" id="L378">        final int colorsUsed = read4Bytes(&quot;colorsUsed&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // ColorsUsed</span>
+        // (4
+        // bytes),
+        // we
+        // don?t
+        // use
+        // this
+        // (0)
+<span class="nc" id="L386">        final int colorsImportant = read4Bytes(&quot;ColorsImportant&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder()); // ColorsImportant (4 bytes), we don?t</span>
+        // use this (0)
+<span class="nc" id="L388">        int redMask = 0;</span>
+<span class="nc" id="L389">        int greenMask = 0;</span>
+<span class="nc" id="L390">        int blueMask = 0;</span>
+<span class="nc" id="L391">        int alphaMask = 0;</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">        if (compression == 3) {</span>
+<span class="nc" id="L393">            redMask = read4Bytes(&quot;redMask&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+<span class="nc" id="L394">            greenMask = read4Bytes(&quot;greenMask&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+<span class="nc" id="L395">            blueMask = read4Bytes(&quot;blueMask&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+        }
+<span class="nc" id="L397">        final byte[] restOfFile = readBytes(&quot;RestOfFile&quot;, is, is.available());</span>
+
+<span class="nc bnc" id="L399" title="All 2 branches missed.">        if (size != 40) {</span>
+<span class="nc" id="L400">            throw new ImagingException(&quot;Not a Valid ICO File: Wrong bitmap header size &quot; + size);</span>
+        }
+<span class="nc bnc" id="L402" title="All 2 branches missed.">        if (planes != 1) {</span>
+<span class="nc" id="L403">            throw new ImagingException(&quot;Not a Valid ICO File: Planes can't be &quot; + planes);</span>
+        }
+
+<span class="nc bnc" id="L406" title="All 4 branches missed.">        if (compression == 0 &amp;&amp; bitCount == 32) {</span>
+            // 32 BPP RGB icons need an alpha channel, but BMP files don't have
+            // one unless BI_BITFIELDS is used...
+<span class="nc" id="L409">            compression = 3;</span>
+<span class="nc" id="L410">            redMask = 0x00ff0000;</span>
+<span class="nc" id="L411">            greenMask = 0x0000ff00;</span>
+<span class="nc" id="L412">            blueMask = 0x000000ff;</span>
+<span class="nc" id="L413">            alphaMask = 0xff000000;</span>
+        }
+
+<span class="nc" id="L416">        final BitmapHeader header = new BitmapHeader(size, width, height, planes, bitCount, compression, sizeImage, xPelsPerMeter, yPelsPerMeter, colorsUsed,</span>
+                colorsImportant);
+
+<span class="nc bnc" id="L419" title="All 4 branches missed.">        final int bitmapPixelsOffset = 14 + 56 + 4 * (colorsUsed == 0 &amp;&amp; bitCount &lt;= 8 ? 1 &lt;&lt; bitCount : colorsUsed);</span>
+<span class="nc" id="L420">        final int bitmapSize = 14 + 56 + restOfFile.length;</span>
+
+<span class="nc" id="L422">        final ByteArrayOutputStream baos = new ByteArrayOutputStream(Allocator.checkByteArray(bitmapSize));</span>
+<span class="nc" id="L423">        try (BinaryOutputStream bos = BinaryOutputStream.littleEndian(baos)) {</span>
+<span class="nc" id="L424">            bos.write('B');</span>
+<span class="nc" id="L425">            bos.write('M');</span>
+<span class="nc" id="L426">            bos.write4Bytes(bitmapSize);</span>
+<span class="nc" id="L427">            bos.write4Bytes(0);</span>
+<span class="nc" id="L428">            bos.write4Bytes(bitmapPixelsOffset);</span>
+
+<span class="nc" id="L430">            bos.write4Bytes(56);</span>
+<span class="nc" id="L431">            bos.write4Bytes(width);</span>
+<span class="nc" id="L432">            bos.write4Bytes(height / 2);</span>
+<span class="nc" id="L433">            bos.write2Bytes(planes);</span>
+<span class="nc" id="L434">            bos.write2Bytes(bitCount);</span>
+<span class="nc" id="L435">            bos.write4Bytes(compression);</span>
+<span class="nc" id="L436">            bos.write4Bytes(sizeImage);</span>
+<span class="nc" id="L437">            bos.write4Bytes(xPelsPerMeter);</span>
+<span class="nc" id="L438">            bos.write4Bytes(yPelsPerMeter);</span>
+<span class="nc" id="L439">            bos.write4Bytes(colorsUsed);</span>
+<span class="nc" id="L440">            bos.write4Bytes(colorsImportant);</span>
+<span class="nc" id="L441">            bos.write4Bytes(redMask);</span>
+<span class="nc" id="L442">            bos.write4Bytes(greenMask);</span>
+<span class="nc" id="L443">            bos.write4Bytes(blueMask);</span>
+<span class="nc" id="L444">            bos.write4Bytes(alphaMask);</span>
+<span class="nc" id="L445">            bos.write(restOfFile);</span>
+<span class="nc" id="L446">            bos.flush();</span>
+        }
+
+<span class="nc" id="L449">        final ByteArrayInputStream bmpInputStream = new ByteArrayInputStream(baos.toByteArray());</span>
+<span class="nc" id="L450">        final BufferedImage bmpImage = new BmpImageParser().getBufferedImage(bmpInputStream, null);</span>
+
+        // Transparency map is optional with 32 BPP icons, because they already
+        // have
+        // an alpha channel, and Windows only uses the transparency map when it
+        // has to
+        // display the icon on a &lt; 32 BPP screen. But it's still used instead of
+        // alpha
+        // if the image would be completely transparent with alpha...
+<span class="nc" id="L459">        int tScanlineSize = (width + 7) / 8;</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">        if (tScanlineSize % 4 != 0) {</span>
+<span class="nc" id="L461">            tScanlineSize += 4 - tScanlineSize % 4; // pad scanline to 4</span>
+                                                    // byte size.
+        }
+<span class="nc" id="L464">        final int colorMapSizeBytes = tScanlineSize * (height / 2);</span>
+<span class="nc" id="L465">        byte[] transparencyMap = null;</span>
+        try {
+<span class="nc" id="L467">            transparencyMap = readBytes(&quot;transparencyMap&quot;, bmpInputStream, colorMapSizeBytes, &quot;Not a Valid ICO File&quot;);</span>
+<span class="nc" id="L468">        } catch (final IOException ioEx) {</span>
+<span class="nc bnc" id="L469" title="All 2 branches missed.">            if (bitCount != 32) {</span>
+<span class="nc" id="L470">                throw ioEx;</span>
+            }
+<span class="nc" id="L472">        }</span>
+
+<span class="nc" id="L474">        boolean allAlphasZero = true;</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">        if (bitCount == 32) {</span>
+<span class="nc bnc" id="L476" title="All 4 branches missed.">            for (int y = 0; allAlphasZero &amp;&amp; y &lt; bmpImage.getHeight(); y++) {</span>
+<span class="nc bnc" id="L477" title="All 2 branches missed.">                for (int x = 0; x &lt; bmpImage.getWidth(); x++) {</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">                    if ((bmpImage.getRGB(x, y) &amp; 0xff000000) != 0) {</span>
+<span class="nc" id="L479">                        allAlphasZero = false;</span>
+<span class="nc" id="L480">                        break;</span>
+                    }
+                }
+            }
+        }
+        BufferedImage resultImage;
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (allAlphasZero) {</span>
+<span class="nc" id="L487">            resultImage = new BufferedImage(bmpImage.getWidth(), bmpImage.getHeight(), BufferedImage.TYPE_INT_ARGB);</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">            for (int y = 0; y &lt; resultImage.getHeight(); y++) {</span>
+<span class="nc bnc" id="L489" title="All 2 branches missed.">                for (int x = 0; x &lt; resultImage.getWidth(); x++) {</span>
+<span class="nc" id="L490">                    int alpha = 0xff;</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">                    if (transparencyMap != null) {</span>
+<span class="nc" id="L492">                        final int alphaByte = 0xff &amp; transparencyMap[tScanlineSize * (bmpImage.getHeight() - y - 1) + x / 8];</span>
+<span class="nc" id="L493">                        alpha = 0x01 &amp; alphaByte &gt;&gt; 7 - x % 8;</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">                        alpha = alpha == 0 ? 0xff : 0x00;</span>
+                    }
+<span class="nc" id="L496">                    resultImage.setRGB(x, y, alpha &lt;&lt; 24 | 0xffffff &amp; bmpImage.getRGB(x, y));</span>
+                }
+            }
+        } else {
+<span class="nc" id="L500">            resultImage = bmpImage;</span>
+        }
+<span class="nc" id="L502">        return new BitmapIconData(fIconInfo, header, resultImage);</span>
+    }
+
+    private FileHeader readFileHeader(final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L506">        final int reserved = read2Bytes(&quot;Reserved&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+<span class="nc" id="L507">        final int iconType = read2Bytes(&quot;IconType&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+<span class="nc" id="L508">        final int iconCount = read2Bytes(&quot;IconCount&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L510" title="All 2 branches missed.">        if (reserved != 0) {</span>
+<span class="nc" id="L511">            throw new ImagingException(&quot;Not a Valid ICO File: reserved is &quot; + reserved);</span>
+        }
+<span class="nc bnc" id="L513" title="All 4 branches missed.">        if (iconType != 1 &amp;&amp; iconType != 2) {</span>
+<span class="nc" id="L514">            throw new ImagingException(&quot;Not a Valid ICO File: icon type is &quot; + iconType);</span>
+        }
+
+<span class="nc" id="L517">        return new FileHeader(reserved, iconType, iconCount);</span>
+
+    }
+
+    private IconData readIconData(final byte[] iconData, final IconInfo fIconInfo) throws ImagingException, IOException {
+<span class="nc" id="L522">        final ImageFormat imageFormat = Imaging.guessFormat(iconData);</span>
+<span class="nc bnc" id="L523" title="All 2 branches missed.">        if (imageFormat.equals(ImageFormats.PNG)) {</span>
+<span class="nc" id="L524">            final BufferedImage bufferedImage = Imaging.getBufferedImage(iconData);</span>
+<span class="nc" id="L525">            return new PngIconData(fIconInfo, bufferedImage);</span>
+        }
+<span class="nc" id="L527">        return readBitmapIconData(iconData, fIconInfo);</span>
+    }
+
+    private IconInfo readIconInfo(final InputStream is) throws IOException {
+        // Width (1 byte), Width of Icon (1 to 255)
+<span class="nc" id="L532">        final byte width = readByte(&quot;Width&quot;, is, &quot;Not a Valid ICO File&quot;);</span>
+        // Height (1 byte), Height of Icon (1 to 255)
+<span class="nc" id="L534">        final byte height = readByte(&quot;Height&quot;, is, &quot;Not a Valid ICO File&quot;);</span>
+        // ColorCount (1 byte), Number of colors, either
+        // 0 for 24 bit or higher,
+        // 2 for monochrome or 16 for 16 color images.
+<span class="nc" id="L538">        final byte colorCount = readByte(&quot;ColorCount&quot;, is, &quot;Not a Valid ICO File&quot;);</span>
+        // Reserved (1 byte), Not used (always 0)
+<span class="nc" id="L540">        final byte reserved = readByte(&quot;Reserved&quot;, is, &quot;Not a Valid ICO File&quot;);</span>
+        // Planes (2 bytes), always 1
+<span class="nc" id="L542">        final int planes = read2Bytes(&quot;Planes&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+        // BitCount (2 bytes), number of bits per pixel (1 for monochrome,
+        // 4 for 16 colors, 8 for 256 colors, 24 for true colors,
+        // 32 for true colors + alpha channel)
+<span class="nc" id="L546">        final int bitCount = read2Bytes(&quot;BitCount&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+        // ImageSize (4 bytes), Length of resource in bytes
+<span class="nc" id="L548">        final int imageSize = read4Bytes(&quot;ImageSize&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+        // ImageOffset (4 bytes), start of the image in the file
+<span class="nc" id="L550">        final int imageOffset = read4Bytes(&quot;ImageOffset&quot;, is, &quot;Not a Valid ICO File&quot;, getByteOrder());</span>
+
+<span class="nc" id="L552">        return new IconInfo(width, height, colorCount, reserved, planes, bitCount, imageSize, imageOffset);</span>
+    }
+
+    private ImageContents readImage(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L556">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L557">            final FileHeader fileHeader = readFileHeader(is);</span>
+
+<span class="nc" id="L559">            final IconInfo[] fIconInfos = Allocator.array(fileHeader.iconCount, IconInfo[]::new, IconInfo.SHALLOW_SIZE);</span>
+<span class="nc bnc" id="L560" title="All 2 branches missed.">            for (int i = 0; i &lt; fileHeader.iconCount; i++) {</span>
+<span class="nc" id="L561">                fIconInfos[i] = readIconInfo(is);</span>
+            }
+
+<span class="nc" id="L564">            final IconData[] fIconDatas = Allocator.array(fileHeader.iconCount, IconData[]::new, IconData.SHALLOW_SIZE);</span>
+<span class="nc bnc" id="L565" title="All 2 branches missed.">            for (int i = 0; i &lt; fileHeader.iconCount; i++) {</span>
+<span class="nc" id="L566">                final byte[] iconData = byteSource.getByteArray(fIconInfos[i].imageOffset, fIconInfos[i].imageSize);</span>
+<span class="nc" id="L567">                fIconDatas[i] = readIconData(iconData, fIconInfos[i]);</span>
+            }
+
+<span class="nc" id="L570">            return new ImageContents(fileHeader, fIconDatas);</span>
+        }
+    }
+
+    // public boolean extractImages(ByteSource byteSource, File dst_dir,
+    // String dst_root, ImageParser encoder) throws ImageReadException,
+    // IOException, ImageWriteException
+    // {
+    // ImageContents contents = readImage(byteSource);
+    //
+    // FileHeader fileHeader = contents.fileHeader;
+    // for (int i = 0; i &lt; fileHeader.iconCount; i++)
+    // {
+    // IconData iconData = contents.iconDatas[i];
+    //
+    // BufferedImage image = readBufferedImage(iconData);
+    //
+    // int size = Math.max(iconData.iconInfo.Width,
+    // iconData.iconInfo.Height);
+    // File file = new File(dst_dir, dst_root + &quot;_&quot; + size + &quot;_&quot;
+    // + iconData.iconInfo.BitCount
+    // + encoder.getDefaultExtension());
+    // encoder.writeImage(image, new FileOutputStream(file), null);
+    // }
+    //
+    // return true;
+    // }
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, IcoImagingParameters params) throws ImagingException, IOException {
+<span class="nc bnc" id="L600" title="All 2 branches missed.">        if (params == null) {</span>
+<span class="nc" id="L601">            params = new IcoImagingParameters();</span>
+        }
+<span class="nc" id="L603">        final PixelDensity pixelDensity = params.getPixelDensity();</span>
+
+<span class="nc" id="L605">        final PaletteFactory paletteFactory = new PaletteFactory();</span>
+<span class="nc" id="L606">        final SimplePalette palette = paletteFactory.makeExactRgbPaletteSimple(src, 256);</span>
+        final int bitCount;
+        // If we can't obtain an exact rgb palette, we set the bit count to either 24 or 32
+        // so there is a relation between having a palette and the bit count.
+<span class="nc bnc" id="L610" title="All 2 branches missed.">        if (palette == null) {</span>
+<span class="nc" id="L611">            final boolean hasTransparency = paletteFactory.hasTransparency(src);</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">            if (hasTransparency) {</span>
+<span class="nc" id="L613">                bitCount = 32;</span>
+            } else {
+<span class="nc" id="L615">                bitCount = 24;</span>
+            }
+<span class="nc bnc" id="L617" title="All 2 branches missed.">        } else if (palette.length() &lt;= 2) {</span>
+<span class="nc" id="L618">            bitCount = 1;</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">        } else if (palette.length() &lt;= 16) {</span>
+<span class="nc" id="L620">            bitCount = 4;</span>
+        } else {
+<span class="nc" id="L622">            bitCount = 8;</span>
+        }
+
+<span class="nc" id="L625">        try (BinaryOutputStream bos = BinaryOutputStream.littleEndian(os)) {</span>
+
+<span class="nc" id="L627">            int scanlineSize = (bitCount * src.getWidth() + 7) / 8;</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">            if (scanlineSize % 4 != 0) {</span>
+<span class="nc" id="L629">                scanlineSize += 4 - scanlineSize % 4; // pad scanline to 4 byte</span>
+                                                      // size.
+            }
+<span class="nc" id="L632">            int tScanlineSize = (src.getWidth() + 7) / 8;</span>
+<span class="nc bnc" id="L633" title="All 2 branches missed.">            if (tScanlineSize % 4 != 0) {</span>
+<span class="nc" id="L634">                tScanlineSize += 4 - tScanlineSize % 4; // pad scanline to 4</span>
+                                                        // byte size.
+            }
+<span class="nc bnc" id="L637" title="All 2 branches missed.">            final int imageSize = 40 + 4 * (bitCount &lt;= 8 ? 1 &lt;&lt; bitCount : 0) + src.getHeight() * scanlineSize + src.getHeight() * tScanlineSize;</span>
+
+            // ICONDIR
+<span class="nc" id="L640">            bos.write2Bytes(0); // reserved</span>
+<span class="nc" id="L641">            bos.write2Bytes(1); // 1=ICO, 2=CUR</span>
+<span class="nc" id="L642">            bos.write2Bytes(1); // count</span>
+
+            // ICONDIRENTRY
+<span class="nc" id="L645">            int iconDirEntryWidth = src.getWidth();</span>
+<span class="nc" id="L646">            int iconDirEntryHeight = src.getHeight();</span>
+<span class="nc bnc" id="L647" title="All 4 branches missed.">            if (iconDirEntryWidth &gt; 255 || iconDirEntryHeight &gt; 255) {</span>
+<span class="nc" id="L648">                iconDirEntryWidth = 0;</span>
+<span class="nc" id="L649">                iconDirEntryHeight = 0;</span>
+            }
+<span class="nc" id="L651">            bos.write(iconDirEntryWidth);</span>
+<span class="nc" id="L652">            bos.write(iconDirEntryHeight);</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">            bos.write(bitCount &gt;= 8 ? 0 : 1 &lt;&lt; bitCount);</span>
+<span class="nc" id="L654">            bos.write(0); // reserved</span>
+<span class="nc" id="L655">            bos.write2Bytes(1); // color planes</span>
+<span class="nc" id="L656">            bos.write2Bytes(bitCount);</span>
+<span class="nc" id="L657">            bos.write4Bytes(imageSize);</span>
+<span class="nc" id="L658">            bos.write4Bytes(22); // image offset</span>
+
+            // BITMAPINFOHEADER
+<span class="nc" id="L661">            bos.write4Bytes(40); // size</span>
+<span class="nc" id="L662">            bos.write4Bytes(src.getWidth());</span>
+<span class="nc" id="L663">            bos.write4Bytes(2 * src.getHeight());</span>
+<span class="nc" id="L664">            bos.write2Bytes(1); // planes</span>
+<span class="nc" id="L665">            bos.write2Bytes(bitCount);</span>
+<span class="nc" id="L666">            bos.write4Bytes(0); // compression</span>
+<span class="nc" id="L667">            bos.write4Bytes(0); // image size</span>
+<span class="nc bnc" id="L668" title="All 2 branches missed.">            bos.write4Bytes(pixelDensity == null ? 0 : (int) Math.round(pixelDensity.horizontalDensityMetres())); // x</span>
+                                                                                                                  // pixels
+                                                                                                                  // per
+                                                                                                                  // meter
+<span class="nc bnc" id="L672" title="All 2 branches missed.">            bos.write4Bytes(pixelDensity == null ? 0 : (int) Math.round(pixelDensity.horizontalDensityMetres())); // y</span>
+                                                                                                                  // pixels
+                                                                                                                  // per
+                                                                                                                  // meter
+<span class="nc" id="L676">            bos.write4Bytes(0); // colors used, 0 = (1 &lt;&lt; bitCount) (ignored)</span>
+<span class="nc" id="L677">            bos.write4Bytes(0); // colors important</span>
+
+<span class="nc bnc" id="L679" title="All 2 branches missed.">            if (palette != null) {</span>
+<span class="nc bnc" id="L680" title="All 2 branches missed.">                for (int i = 0; i &lt; 1 &lt;&lt; bitCount; i++) {</span>
+<span class="nc bnc" id="L681" title="All 2 branches missed.">                    if (i &lt; palette.length()) {</span>
+<span class="nc" id="L682">                        final int argb = palette.getEntry(i);</span>
+<span class="nc" id="L683">                        bos.write3Bytes(argb);</span>
+<span class="nc" id="L684">                        bos.write(0);</span>
+<span class="nc" id="L685">                    } else {</span>
+<span class="nc" id="L686">                        bos.write4Bytes(0);</span>
+                    }
+                }
+            }
+
+<span class="nc" id="L691">            int bitCache = 0;</span>
+<span class="nc" id="L692">            int bitsInCache = 0;</span>
+<span class="nc" id="L693">            final int rowPadding = scanlineSize - (bitCount * src.getWidth() + 7) / 8;</span>
+<span class="nc bnc" id="L694" title="All 2 branches missed.">            for (int y = src.getHeight() - 1; y &gt;= 0; y--) {</span>
+<span class="nc bnc" id="L695" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L696">                    final int argb = src.getRGB(x, y);</span>
+                    // Remember there is a relation between having a rgb palette and the bit count, see above comment
+<span class="nc bnc" id="L698" title="All 2 branches missed.">                    if (palette == null) {</span>
+<span class="nc bnc" id="L699" title="All 2 branches missed.">                        if (bitCount == 24) {</span>
+<span class="nc" id="L700">                            bos.write3Bytes(argb);</span>
+<span class="nc bnc" id="L701" title="All 2 branches missed.">                        } else if (bitCount == 32) {</span>
+<span class="nc" id="L702">                            bos.write4Bytes(argb);</span>
+                        }
+<span class="nc bnc" id="L704" title="All 2 branches missed.">                    } else if (bitCount &lt; 8) {</span>
+<span class="nc" id="L705">                        final int rgb = 0xffffff &amp; argb;</span>
+<span class="nc" id="L706">                        final int index = palette.getPaletteIndex(rgb);</span>
+<span class="nc" id="L707">                        bitCache &lt;&lt;= bitCount;</span>
+<span class="nc" id="L708">                        bitCache |= index;</span>
+<span class="nc" id="L709">                        bitsInCache += bitCount;</span>
+<span class="nc bnc" id="L710" title="All 2 branches missed.">                        if (bitsInCache &gt;= 8) {</span>
+<span class="nc" id="L711">                            bos.write(0xff &amp; bitCache);</span>
+<span class="nc" id="L712">                            bitCache = 0;</span>
+<span class="nc" id="L713">                            bitsInCache = 0;</span>
+                        }
+<span class="nc bnc" id="L715" title="All 2 branches missed.">                    } else if (bitCount == 8) {</span>
+<span class="nc" id="L716">                        final int rgb = 0xffffff &amp; argb;</span>
+<span class="nc" id="L717">                        final int index = palette.getPaletteIndex(rgb);</span>
+<span class="nc" id="L718">                        bos.write(0xff &amp; index);</span>
+                    }
+                }
+
+<span class="nc bnc" id="L722" title="All 2 branches missed.">                if (bitsInCache &gt; 0) {</span>
+<span class="nc" id="L723">                    bitCache &lt;&lt;= 8 - bitsInCache;</span>
+<span class="nc" id="L724">                    bos.write(0xff &amp; bitCache);</span>
+<span class="nc" id="L725">                    bitCache = 0;</span>
+<span class="nc" id="L726">                    bitsInCache = 0;</span>
+                }
+
+<span class="nc bnc" id="L729" title="All 2 branches missed.">                for (int x = 0; x &lt; rowPadding; x++) {</span>
+<span class="nc" id="L730">                    bos.write(0);</span>
+                }
+            }
+
+<span class="nc" id="L734">            final int tRowPadding = tScanlineSize - (src.getWidth() + 7) / 8;</span>
+<span class="nc bnc" id="L735" title="All 2 branches missed.">            for (int y = src.getHeight() - 1; y &gt;= 0; y--) {</span>
+<span class="nc bnc" id="L736" title="All 2 branches missed.">                for (int x = 0; x &lt; src.getWidth(); x++) {</span>
+<span class="nc" id="L737">                    final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L738">                    final int alpha = 0xff &amp; argb &gt;&gt; 24;</span>
+<span class="nc" id="L739">                    bitCache &lt;&lt;= 1;</span>
+<span class="nc bnc" id="L740" title="All 2 branches missed.">                    if (alpha == 0) {</span>
+<span class="nc" id="L741">                        bitCache |= 1;</span>
+                    }
+<span class="nc" id="L743">                    bitsInCache++;</span>
+<span class="nc bnc" id="L744" title="All 2 branches missed.">                    if (bitsInCache &gt;= 8) {</span>
+<span class="nc" id="L745">                        bos.write(0xff &amp; bitCache);</span>
+<span class="nc" id="L746">                        bitCache = 0;</span>
+<span class="nc" id="L747">                        bitsInCache = 0;</span>
+                    }
+                }
+
+<span class="nc bnc" id="L751" title="All 2 branches missed.">                if (bitsInCache &gt; 0) {</span>
+<span class="nc" id="L752">                    bitCache &lt;&lt;= 8 - bitsInCache;</span>
+<span class="nc" id="L753">                    bos.write(0xff &amp; bitCache);</span>
+<span class="nc" id="L754">                    bitCache = 0;</span>
+<span class="nc" id="L755">                    bitsInCache = 0;</span>
+                }
+
+<span class="nc bnc" id="L758" title="All 2 branches missed.">                for (int x = 0; x &lt; tRowPadding; x++) {</span>
+<span class="nc" id="L759">                    bos.write(0);</span>
+                }
+            }
+        }
+<span class="nc" id="L763">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

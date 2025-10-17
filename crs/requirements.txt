@@ -1,0 +1,13 @@
+PyYAML==6.0.2
+coloredlogs==15.0.1
+aiofiles==24.1.0
+psutil==7.0.0
+pydantic==2.11.7
+pydantic-core==2.33.2
+ijson==3.3.0
+watchdog==6.0.0
+javalang==0.13.0
+six==1.17.0
+redis==5.2.1
+kubernetes_asyncio==32.3.2
+atomics==1.0.3

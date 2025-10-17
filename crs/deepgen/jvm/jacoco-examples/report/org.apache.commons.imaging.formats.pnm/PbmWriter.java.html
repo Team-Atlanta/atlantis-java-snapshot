@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PbmWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.pnm</a> &gt; <span class="el_source">PbmWriter.java</span></div><h1>PbmWriter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.pnm;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.imaging.ImagingException;
+
+final class PbmWriter implements PnmWriter {
+
+    private final boolean rawBits;
+
+<span class="nc" id="L30">    PbmWriter(final boolean rawBits) {</span>
+<span class="nc" id="L31">        this.rawBits = rawBits;</span>
+<span class="nc" id="L32">    }</span>
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final PnmImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L36">        os.write(PnmConstants.PNM_PREFIX_BYTE);</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        os.write(rawBits ? PnmConstants.PBM_RAW_CODE : PnmConstants.PBM_TEXT_CODE);</span>
+<span class="nc" id="L38">        os.write(PnmConstants.PNM_SEPARATOR);</span>
+
+<span class="nc" id="L40">        final int width = src.getWidth();</span>
+<span class="nc" id="L41">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L43">        os.write(Integer.toString(width).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L44">        os.write(PnmConstants.PNM_SEPARATOR);</span>
+
+<span class="nc" id="L46">        os.write(Integer.toString(height).getBytes(StandardCharsets.US_ASCII));</span>
+<span class="nc" id="L47">        os.write(PnmConstants.PNM_NEWLINE);</span>
+
+<span class="nc" id="L49">        int bitcache = 0;</span>
+<span class="nc" id="L50">        int bitsInCache = 0;</span>
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L54">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L55">                final int red = 0xff &amp; argb &gt;&gt; 16;</span>
+<span class="nc" id="L56">                final int green = 0xff &amp; argb &gt;&gt; 8;</span>
+<span class="nc" id="L57">                final int blue = 0xff &amp; argb &gt;&gt; 0;</span>
+<span class="nc" id="L58">                int sample = (red + green + blue) / 3;</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                if (sample &gt; 127) {</span>
+<span class="nc" id="L60">                    sample = 0;</span>
+                } else {
+<span class="nc" id="L62">                    sample = 1;</span>
+                }
+
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                if (rawBits) {</span>
+<span class="nc" id="L66">                    bitcache = bitcache &lt;&lt; 1 | 0x1 &amp; sample;</span>
+<span class="nc" id="L67">                    bitsInCache++;</span>
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                    if (bitsInCache &gt;= 8) {</span>
+<span class="nc" id="L70">                        os.write((byte) bitcache);</span>
+<span class="nc" id="L71">                        bitcache = 0;</span>
+<span class="nc" id="L72">                        bitsInCache = 0;</span>
+                    }
+                } else {
+<span class="nc" id="L75">                    os.write(Integer.toString(sample).getBytes(StandardCharsets.US_ASCII)); // max</span>
+                    // component
+                    // value
+<span class="nc" id="L78">                    os.write(PnmConstants.PNM_SEPARATOR);</span>
+                }
+            }
+
+<span class="nc bnc" id="L82" title="All 4 branches missed.">            if (rawBits &amp;&amp; bitsInCache &gt; 0) {</span>
+<span class="nc" id="L83">                bitcache = bitcache &lt;&lt; 8 - bitsInCache;</span>
+<span class="nc" id="L84">                os.write((byte) bitcache);</span>
+<span class="nc" id="L85">                bitcache = 0;</span>
+<span class="nc" id="L86">                bitsInCache = 0;</span>
+            }
+        }
+<span class="nc" id="L89">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

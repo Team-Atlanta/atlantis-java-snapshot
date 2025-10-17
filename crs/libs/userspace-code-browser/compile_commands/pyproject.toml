@@ -1,0 +1,10 @@
+[project]
+name = "code_browser_expander"
+version = "0.1.0"
+dependencies = [
+    "PyYAML>=6.0.2",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

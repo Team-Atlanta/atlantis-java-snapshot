@@ -1,0 +1,39 @@
+import importlib
+import inspect
+from pathlib import Path
+
+# Get the current directory
+current_dir = Path(__file__).parent
+
+# Dynamically import all modules in the current directory
+for file in current_dir.glob("*.py"):
+    if file.name != "__init__.py":
+        module_name = file.stem
+        module = importlib.import_module(f".{module_name}", package="libAgents.tools")
+
+        # Get all classes and functions from the module
+        for name, obj in inspect.getmembers(module):
+            if inspect.isclass(obj) or inspect.isfunction(obj):
+                # Add the class or function to the current module's namespace
+                globals()[name] = obj
+
+# Also import from subdirectories that have __init__.py files
+for subdir in current_dir.iterdir():
+    if subdir.is_dir() and (subdir / "__init__.py").exists():
+        module_name = subdir.name
+        try:
+            module = importlib.import_module(
+                f".{module_name}", package="libAgents.tools"
+            )
+
+            # Get all classes and functions from the submodule
+            for name, obj in inspect.getmembers(module):
+                if inspect.isclass(obj) or inspect.isfunction(obj):
+                    # Add the class or function to the current module's namespace
+                    globals()[name] = obj
+        except ImportError:
+            # Skip subdirectories that can't be imported
+            pass
+
+# Get all classes and functions that were added to the namespace
+__all__ = [name for name, obj in globals().items()]

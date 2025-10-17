@@ -1,0 +1,5 @@
+<root>
+<folder path="/path/to/data/1"/>
+<folder path="/another/path/to/data/2"/>
+<file path="/yet/another/file.txt"/>
+</root>

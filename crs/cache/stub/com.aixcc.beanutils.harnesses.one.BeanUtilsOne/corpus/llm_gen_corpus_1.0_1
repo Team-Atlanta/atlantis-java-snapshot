@@ -1,0 +1,1 @@
+myClassLoader:com.example.MyClass:java.lang.String:/path/to/file:Hello, World!

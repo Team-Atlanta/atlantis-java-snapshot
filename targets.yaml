@@ -1,0 +1,529 @@
+cps:
+  aixcc/jvm/activemq: {}
+  aixcc/jvm/activemq-var: {}
+  aixcc/jvm/batik: {}
+  aixcc/jvm/bcel: {}
+  aixcc/jvm/beanutils: {}
+  aixcc/jvm/cron-utils: {}
+  aixcc/jvm/cxf: {}
+  aixcc/jvm/feign: {}
+  aixcc/jvm/fuzzy: {}
+  aixcc/jvm/geonetwork: {}
+  aixcc/jvm/htmlunit: {}
+  aixcc/jvm/imaging: {}
+  aixcc/jvm/jackson-databind: {}
+  aixcc/jvm/jenkins: {}
+  aixcc/jvm/kylin: {}
+  aixcc/jvm/jakarta-mail-api: {}
+  aixcc/jvm/netty: {}
+  aixcc/jvm/olingo: {}
+  aixcc/jvm/oripa: {}
+  aixcc/jvm/pac4j: {}
+  aixcc/jvm/r2-apache-commons-compress: {}
+  aixcc/jvm/rdf4j: {}
+  aixcc/jvm/tika: {}
+  aixcc/jvm/widoco: {}
+  aixcc/jvm/r1-zookeeper: {}
+  aixcc/jvm/r2-zookeeper: {}
+  aixcc/jvm/r3-tika-delta-01: {}
+  aixcc/jvm/r3-tika-delta-02: {}
+  aixcc/jvm/r3-tika-delta-03: {}
+  aixcc/jvm/r3-tika-delta-04: {}
+  aixcc/jvm/r3-tika-delta-05: {}
+  aixcc/jvm/r3-tika: {}
+  aixcc/jvm/r3_5-jackson-databind: {}
+  aixcc/jvm/shiro: {}
+  aixcc/jvm/struts: {}
+  aixcc/jvm/xstream: {}
+  aixcc/jvm/ztzip: {}
+
+oss:
+  angus-mail:
+    src_path: /src/angus-mail
+    default: true
+  antlr3-java:
+    src_path: /src/antlr3
+    default: true
+  antlr4-java:
+    src_path: /src/antlr4
+    default: true
+  apache-commons-bcel:
+    src_path: /src/commons-bcel
+    default: true
+  apache-commons-cli:
+    src_path: /src/commons-cli
+    default: true
+  apache-commons-codec:
+    src_path: /src/commons-codec
+    default: true
+  apache-commons-collections:
+    src_path: /src/commons-collections
+    default: true
+  apache-commons-compress:
+    src_path: /src/commons-compress
+    default: false
+  apache-commons-configuration:
+    src_path: /src/commons-configuration
+    default: true
+  apache-commons-csv:
+    src_path: /src/apache-commons-csv
+    default: true
+  apache-commons-imaging:
+    src_path: /src/commons-imaging
+    default: false
+  apache-commons-io:
+    src_path: /src/commons-io
+    default: true
+  apache-commons-jxpath:
+    src_path: /src/commons-jxpath
+    default: true
+  apache-commons-net:
+    src_path: /src/commons-net
+    default: true
+  apache-commons-text:
+    src_path: /src/project-parent/apache-commons-text
+    default: false
+  apache-commons-validator:
+    src_path: /src/commons-validator
+    default: true
+  apache-felix-dev:
+    src_path: /src/apache-felix-dev
+    default: true
+  apache-poi:
+    src_path: /src/poi
+    default: true
+  args4j:
+    src_path: /src/args4j
+    default: true
+  aspectj:
+    src_path: /src/org.aspectj
+    default: true
+  brotli-java:
+    src_path: /src/brotli-java
+    default: true
+  calcite-avatica:
+    src_path: /src/calcite-avatica
+    default: true
+  cbor-java:
+    src_path: /src/cbor-java
+    default: true
+  cglib:
+    src_path: /src/cglib
+    default: true
+  checker-framework:
+    src_path: /src/checker-framework
+    default: true
+  checkstyle:
+    src_path: /src/checkstyle
+    default: true
+  cron-utils:
+    src_path: /src/cron-utils
+    default: true
+  curvesapi:
+    src_path: /src/curvesapi
+    default: true
+  docker-client:
+    src_path: /src/docker-client
+    default: true
+  dom4j:
+    src_path: /src/dom4j
+    default: true
+  dropwizard:
+    src_path: /src/dropwizard
+    default: true
+  evo-inflector:
+    src_path: /src/evo-inflector
+    default: true
+  exp4j:
+    src_path: /src/exp4j
+    default: true
+  fastcsv:
+    src_path: /src/fastcsv
+    default: true
+  fastjson2:
+    src_path: /src/fastjson2
+    default: true
+  fuzzywuzzy:
+    src_path: /src/fuzzywuzzy
+    default: true
+  g-oauth-java-client:
+    src_path: /src/google-oauth-java-client
+    default: true
+  graphql-java:
+    src_path: /src/graphql-java
+    default: true
+  gson:
+    src_path: /src/gson
+    default: true
+  guice:
+    src_path: /src/guice
+    default: true
+  hamcrest:
+    src_path: /src/hamcrest
+    default: true
+  hikaricp:
+    src_path: /src/hikaricp
+    default: true
+  hsqldb:
+    src_path: /src/hsqldb-svn
+    default: true
+  httpcomponents-client:
+    src_path: /src/httpcomponents-client
+    default: true
+  jackson-core:
+    src_path: /src/jackson-core
+    default: false
+  jackson-databind:
+    src_path: /src/jackson-databind
+    default: true
+  jackson-dataformat-xml:
+    src_path: /src/jackson-dataformat-xml
+    default: true
+  jackson-dataformats-binary:
+    src_path: /src/jackson-dataformats-binary
+    default: true
+  jackson-dataformats-text:
+    src_path: /src/jackson-dataformats-text
+    default: true
+  jackson-datatype-joda:
+    src_path: /src/jackson-datatype-joda
+    default: true
+  jackson-datatypes-collections:
+    src_path: /src/jackson-datatypes-collections
+    default: true
+  jackson-modules-java8:
+    src_path: /src/jackson-modules-java8
+    default: true
+  jakarta-mail-api:
+    src_path: /src/jakarta-mail
+    default: true
+  janino:
+    src_path: /src/janino
+    default: true
+  jansi:
+    src_path: /src/jansi
+    default: true
+  java-diff-utils:
+    src_path: /src/java-diff-utils
+    default: true
+  java-uuid-generator:
+    src_path: /src/java-uuid-generator
+    default: true
+  java-xmlbuilder:
+    src_path: /src/java-xmlbuilder
+    default: true
+  javacpp:
+    src_path: /src/javacpp
+    default: true
+  javaparser:
+    src_path: /src/javaparser
+    default: true
+  javapoet:
+    src_path: /src/javapoet
+    default: true
+  jaxb:
+    src_path: /src/jaxb-ri
+    default: true
+  jdom:
+    src_path: /src/jdom
+    default: true
+  jedis:
+    src_path: /src/jedis
+    default: true
+  jettison:
+    src_path: /src/jettison
+    default: true
+  jflex:
+    src_path: /src/jflex
+    default: true
+  jimfs:
+    src_path: /src/jimfs
+    default: true
+  jmh:
+    src_path: /src/jmh
+    default: true
+  joda-time:
+    src_path: /src/joda-time
+    default: true
+  jolt:
+    src_path: /src/jolt
+    default: true
+  joni:
+    src_path: /src/joni
+    default: true
+  jopt-simple:
+    src_path: /src/jopt-simple
+    default: true
+  jsemver:
+    src_path: /src/jsemver
+    default: true
+  json-java:
+    src_path: /src/json-java
+    default: true
+  json-sanitizer:
+    src_path: /src/json-sanitizer
+    default: true
+  json-simple:
+    src_path: /src/project-parent/json-simple
+    default: false
+  json-smart-v2:
+    src_path: /src/json-smart
+    default: true
+  jsonp-api:
+    src_path: /src/jsonp-api
+    default: true
+  jsonpath:
+    src_path: /src/JsonPath
+    default: true
+  jsoup:
+    src_path: /src/jsoup
+    default: true
+  jts:
+    src_path: /src/jts
+    default: true
+  jul-to-slf4j:
+    src_path: /src/slf4j
+    default: true
+  junrar:
+    src_path: /src/junrar
+    default: true
+  kie-soup:
+    src_path: /src/kie-soup
+    default: true
+  kryo:
+    src_path: /src/kryo
+    default: true
+  log4j2:
+    src_path: /src/log4j2
+    default: false
+  mariadb-connector-j:
+    src_path: /src/mariadb-connector-j
+    default: true
+  metadata-extractor:
+    src_path: /src/metadata-extractor
+    default: true
+  ohc:
+    src_path: /src/ohc
+    default: true
+  open-json:
+    src_path: /src/open-json
+    default: true
+  osgi:
+    src_path: /src/osgi
+    default: true
+  plexus-utils:
+    src_path: /src/plexus-utils
+    default: true
+  quartz:
+    src_path: /src/quartz
+    default: true
+  rdf4j:
+    src_path: /src/rdf4j
+    default: true
+  reflections:
+    src_path: /src/reflections
+    default: true
+  rhino:
+    src_path: /src/rhino
+    default: true
+  rome:
+    src_path: /src/rome
+    default: true
+  rxjava:
+    src_path: /src/RxJava
+    default: true
+  sigstore-java:
+    src_path: /src/sigstore-java
+    default: true
+  slf4j-api:
+    src_path: /src/slf4j
+    default: true
+  snakeyaml:
+    src_path: /src/snakeyaml
+    default: true
+  snappy-java:
+    src_path: /src/snappy-java
+    default: true
+  spatial4j:
+    src_path: /src/spatial4j
+    default: true
+  spring-cloud-commons:
+    src_path: /src/spring-cloud-commons
+    default: true
+  spring-cloud-config:
+    src_path: /src/spring-cloud-config
+    default: true
+  spring-cloud-netflix:
+    src_path: /src/spring-cloud-netflix
+    default: true
+  spring-cloud-stream:
+    src_path: /src/spring-cloud-stream
+    default: true
+  spring-retry:
+    src_path: /src/spring-retry
+    default: true
+  sqlite-jdbc:
+    src_path: /src/sqlite-jdbc
+    default: true
+  stringtemplate4:
+    src_path: /src/stringtemplate4
+    default: true
+  threetenbp:
+    src_path: /src/threetenbp
+    default: true
+  twelve-monkeys:
+    src_path: /src/TwelveMonkeys
+    default: true
+  twitter4j:
+    src_path: /src/Twitter4J
+    default: true
+  undertow:
+    src_path: /src/undertow
+    default: true
+  xerces:
+    src_path: /src/xerces
+    default: true
+  xmlpull:
+    src_path: /src/xmlpull
+    default: true
+  xmlunit:
+    src_path: /src/xmlunit
+    default: true
+  xstream:
+    src_path: /src/xstream
+    default: true
+  xz-java:
+    src_path: /src/xz-java
+    default: true
+  zip4j:
+    src_path: /src/zip4j
+    default: true
+  zookeeper:
+    src_path: /src/zookeeper
+    default: true
+  zxing:
+    src_path: /src/zxing
+    default: true
+  ##################
+  # Disabled due to failed to build (need manually fix 1 by 1, lol...)
+  ##################
+  #apache-commons-fileupload:
+  #  src_path: /src/project-parent/apache-commons-fileupload
+  #  default: false
+  #apache-commons-lang:
+  #  src_path: /src/commons-lang
+  #  default: true
+  #apache-commons-logging:
+  #  src_path: /src/commons-logging
+  #  default: true
+  #archaius-core:
+  #  src_path: /src/archaius/archaius-core
+  #  default: true
+  #avro:
+  #  src_path: /src/project-parent/avro
+  #  default: false
+  #gwt:
+  #  src_path: /src/project-parent/gwt
+  #  default: false
+  #jersey:
+  #  src_path: /src/jersey
+  #  default: true
+  #jetty:
+  #  src_path: /src/project-parent/jetty
+  #  default: false
+  #jsqlparser:
+  #  src_path: /src/project-parent/jsqlparser
+  #  default: false
+  #jxls:
+  #  src_path: /src/jxls
+  #  default: true
+  #logback:
+  #  src_path: /src/logback
+  #  default: true
+  #mvel:
+  #  src_path: /src/project-parent/mvel
+  #  default: true
+  #opencsv:
+  #  src_path: /src/project-parent/opencsv
+  #  default: false
+  #presto:
+  #  src_path: /src/project-parent/presto
+  #  default: false
+  #retrofit:
+  #  src_path: /src/retrofit
+  #  default: true
+  #servo-core:
+  #  src_path: /src/servo/servo-core
+  #  default: true
+  #spring-framework:
+  #  src_path: /src/spring-framework
+  #  default: true
+  #woodstox:
+  #  src_path: /src/woodstox
+  #  default: true
+  ##################
+  # Disabled due to custom entry point
+  ##################
+  #apache-cxf:
+  #  src_path: /src/project-parent/cxf
+  #  default: false
+  #async-http-client:
+  #  src_path: /src/project-parent/async-http-client
+  #  default: false
+  #calcite:
+  #  src_path: /src/project-parent/calcite
+  #  default: false
+  #g-auth-library-java:
+  #  src_path: /src/project-parent/google-auth-library-java
+  #  default: false
+  #g-http-java-client:
+  #  src_path: /src/project-parent/google-http-java-client
+  #  default: false
+  #hadoop:
+  #  src_path: /src/project-parent/hadoop
+  #  default: false
+  #hive:
+  #  src_path: /src/project-parent/hive
+  #  default: false
+  #itext7:
+  #  src_path: /src/project-parent/itext7
+  #  default: false
+  #java-example:
+  #  src_path: /src
+  #  default: false
+  #jose4j:
+  #  src_path: /src/project-parent/jose4j
+  #  default: false
+  #json-flattener:
+  #  src_path: /src/project-parent/json-flattener
+  #  default: false
+  #micronaut:
+  #  src_path: /src/micronaut-core
+  #  default: false
+  #opencensus-java:
+  #  src_path: /src/project-parent/opencensus-java
+  #  default: false
+  #pdfbox:
+  #  src_path: /src/project-parent/pdfbox
+  #  default: false
+  #qdox:
+  #  src_path: /src/project-parent/qdox
+  #  default: false
+  #tablesaw:
+  #  src_path: /src/project-parent/tablesaw
+  #  default: false
+  #univocity-parsers:
+  #  src_path: /src/project-parent/univocity-parsers
+  #  default: false
+  #yamlbeans:
+  #  src_path: /src/project-parent/yamlbeans
+  #  default: false
+  #zt-zip:
+  #  src_path: /src/project-parent/zt-zip
+  #  default: false
+  ##################
+  # Disabled corner cases
+  ##################
+  #bazel-rules-fuzzing-test-java:
+  #  src_path: /src/rules_fuzzing/
+  #  default: true

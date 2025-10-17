@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PngChunkIccp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png.chunks</a> &gt; <span class="el_source">PngChunkIccp.java</span></div><h1>PngChunkIccp.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png.chunks;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.InflaterInputStream;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.io.IOUtils;
+
+/**
+ * The PNG iCCP chunk. If &quot;present, the image samples conform to the color space represented by the embedded ICC profile as defined by the International Color
+ * Consortium&quot;.
+ *
+ * @see &lt;a href=&quot;http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html&quot;&gt;PNG Specification&lt;/a&gt;
+ */
+public class PngChunkIccp extends PngChunk {
+
+    /*
+     * Logger.
+     */
+<span class="nc" id="L43">    private static final Logger LOGGER = Logger.getLogger(PngChunkIccp.class.getName());</span>
+
+    /**
+     * ICC profile name.
+     */
+    private final String profileName;
+
+    /**
+     * Compression method.
+     */
+    private final int compressionMethod;
+
+    /**
+     * Compressed profile data.
+     */
+    private final byte[] compressedProfile;
+
+    /**
+     * Uncompressed profile data.
+     */
+    private final byte[] uncompressedProfile;
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param length    chunk length
+     * @param chunkType chunk type
+     * @param crc       CRC computed over the chunk type and chunk data (but not the length)
+     * @param bytes     chunk data bytes
+     * @throws ImagingException when no profile name is present
+     * @throws IOException      when an error happens while reading the profile data
+     */
+    public PngChunkIccp(final int length, final int chunkType, final int crc, final byte[] bytes) throws ImagingException, IOException {
+<span class="nc" id="L76">        super(length, chunkType, crc, bytes);</span>
+
+<span class="nc" id="L78">        final int index = BinaryFunctions.findNull(bytes, &quot;PngChunkIccp: No Profile Name&quot;);</span>
+<span class="nc" id="L79">        final byte[] nameBytes = Arrays.copyOf(bytes, index);</span>
+<span class="nc" id="L80">        profileName = new String(nameBytes, StandardCharsets.ISO_8859_1);</span>
+
+<span class="nc" id="L82">        compressionMethod = bytes[index + 1];</span>
+
+<span class="nc" id="L84">        final int compressedProfileLength = bytes.length - (index + 1 + 1);</span>
+<span class="nc" id="L85">        compressedProfile = Allocator.byteArray(compressedProfileLength);</span>
+<span class="nc" id="L86">        System.arraycopy(bytes, index + 1 + 1, compressedProfile, 0, compressedProfileLength);</span>
+
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L89">            LOGGER.finest(&quot;ProfileName: &quot; + profileName);</span>
+<span class="nc" id="L90">            LOGGER.finest(&quot;ProfileName.length(): &quot; + profileName.length());</span>
+<span class="nc" id="L91">            LOGGER.finest(&quot;CompressionMethod: &quot; + compressionMethod);</span>
+<span class="nc" id="L92">            LOGGER.finest(&quot;CompressedProfileLength: &quot; + compressedProfileLength);</span>
+<span class="nc" id="L93">            LOGGER.finest(&quot;bytes.length: &quot; + bytes.length);</span>
+        }
+
+<span class="nc" id="L96">        uncompressedProfile = IOUtils.toByteArray(new InflaterInputStream(new ByteArrayInputStream(compressedProfile)));</span>
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L99">            LOGGER.finest(&quot;UncompressedProfile: &quot; + bytes.length);</span>
+        }
+<span class="nc" id="L101">    }</span>
+
+    public byte[] getCompressedProfile() {
+<span class="nc" id="L104">        return compressedProfile.clone();</span>
+    }
+
+    public int getCompressionMethod() {
+<span class="nc" id="L108">        return compressionMethod;</span>
+    }
+
+    public String getProfileName() {
+<span class="nc" id="L112">        return profileName;</span>
+    }
+
+    /**
+     * Gets a copy of the uncompressed profile data.
+     *
+     * @return the uncompressed profile data
+     */
+    public byte[] getUncompressedProfile() {
+<span class="nc" id="L121">        return uncompressedProfile.clone();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

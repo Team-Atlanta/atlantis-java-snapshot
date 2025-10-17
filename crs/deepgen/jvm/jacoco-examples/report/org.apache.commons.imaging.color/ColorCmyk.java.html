@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColorCmyk.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.color</a> &gt; <span class="el_source">ColorCmyk.java</span></div><h1>ColorCmyk.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.color;
+
+/**
+ * Represents a color in the CMYK color space.
+ *
+ * &lt;p&gt;
+ * Contains the constant values for black, white, red, green, blue, cyan, magenta, and yellow.
+ * &lt;/p&gt;
+ *
+ * @see &lt;a href=&quot;https://en.wikipedia.org/wiki/CMYK_color_model&quot;&gt;https://en.wikipedia.org/wiki/CMYK_color_model&lt;/a&gt;
+ * @since 1.0-alpha1
+ */
+public final class ColorCmyk {
+
+    /**
+     * A constant for color cyan. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    100
+     *     magenta: 0
+     *     yellow:  0
+     *     key:     0
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L41">    public static final ColorCmyk CYAN = new ColorCmyk(100, 0, 0, 0);</span>
+
+    /**
+     * A constant for color magenta. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    0
+     *     magenta: 100
+     *     yellow:  0
+     *     key:     0
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L53">    public static final ColorCmyk MAGENTA = new ColorCmyk(0, 100, 0, 0);</span>
+
+    /**
+     * A constant for color yellow. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    0
+     *     magenta: 0
+     *     yellow:  100
+     *     key:     0
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L65">    public static final ColorCmyk YELLOW = new ColorCmyk(0, 0, 100, 0);</span>
+
+    /**
+     * A constant for color black. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    0
+     *     magenta: 0
+     *     yellow:  0
+     *     key:     100
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L77">    public static final ColorCmyk BLACK = new ColorCmyk(0, 0, 0, 100);</span>
+
+    /**
+     * A constant for color white. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    0
+     *     magenta: 0
+     *     yellow:  0
+     *     key:     0
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L89">    public static final ColorCmyk WHITE = new ColorCmyk(0, 0, 0, 0);</span>
+
+    /**
+     * A constant for color red. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    0
+     *     magenta: 100
+     *     yellow:  100
+     *     key:     0
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L101">    public static final ColorCmyk RED = new ColorCmyk(0, 100, 100, 0);</span>
+
+    /**
+     * A constant for color green. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    100
+     *     magenta: 0
+     *     yellow:  100
+     *     key:     0
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L113">    public static final ColorCmyk GREEN = new ColorCmyk(100, 0, 100, 0);</span>
+
+    /**
+     * A constant for color blue. Color components are:
+     *
+     * &lt;pre&gt;
+     *     cyan:    100
+     *     magenta: 100
+     *     yellow:  0
+     *     key:     0
+     * &lt;/pre&gt;
+     */
+<span class="nc" id="L125">    public static final ColorCmyk BLUE = new ColorCmyk(100, 100, 0, 0);</span>
+
+    public final double c;
+    public final double m;
+    public final double y;
+    public final double k;
+
+<span class="nc" id="L132">    public ColorCmyk(final double c, final double m, final double y, final double k) {</span>
+<span class="nc" id="L133">        this.c = c;</span>
+<span class="nc" id="L134">        this.m = m;</span>
+<span class="nc" id="L135">        this.y = y;</span>
+<span class="nc" id="L136">        this.k = k;</span>
+<span class="nc" id="L137">    }</span>
+
+    @Override
+    public boolean equals(final Object o) {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (this == o) {</span>
+<span class="nc" id="L142">            return true;</span>
+        }
+<span class="nc bnc" id="L144" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass()) {</span>
+<span class="nc" id="L145">            return false;</span>
+        }
+
+<span class="nc" id="L148">        final ColorCmyk colorCmyk = (ColorCmyk) o;</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if (Double.compare(colorCmyk.c, c) != 0) {</span>
+<span class="nc" id="L150">            return false;</span>
+        }
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (Double.compare(colorCmyk.k, k) != 0) {</span>
+<span class="nc" id="L153">            return false;</span>
+        }
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (Double.compare(colorCmyk.m, m) != 0) {</span>
+<span class="nc" id="L156">            return false;</span>
+        }
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (Double.compare(colorCmyk.y, y) != 0) {</span>
+<span class="nc" id="L159">            return false;</span>
+        }
+
+<span class="nc" id="L162">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+<span class="nc" id="L169">        temp = Double.doubleToLongBits(c);</span>
+<span class="nc" id="L170">        result = (int) (temp ^ temp &gt;&gt;&gt; 32);</span>
+<span class="nc" id="L171">        temp = Double.doubleToLongBits(m);</span>
+<span class="nc" id="L172">        result = 31 * result + (int) (temp ^ temp &gt;&gt;&gt; 32);</span>
+<span class="nc" id="L173">        temp = Double.doubleToLongBits(y);</span>
+<span class="nc" id="L174">        result = 31 * result + (int) (temp ^ temp &gt;&gt;&gt; 32);</span>
+<span class="nc" id="L175">        temp = Double.doubleToLongBits(k);</span>
+<span class="nc" id="L176">        return 31 * result + (int) (temp ^ temp &gt;&gt;&gt; 32);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L181">        return &quot;{C: &quot; + c + &quot;, M: &quot; + m + &quot;, Y: &quot; + y + &quot;, K: &quot; + k + &quot;}&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MicrosoftHdPhotoTagConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.constants</a> &gt; <span class="el_source">MicrosoftHdPhotoTagConstants.java</span></div><h1>MicrosoftHdPhotoTagConstants.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.constants;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.common.BinaryConstant;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoByte;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoBytes;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoFloat;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoUndefineds;
+
+/**
+ * Microsoft's HDP/WDP file format.
+ */
+public final class MicrosoftHdPhotoTagConstants {
+
+    /*
+     * The byte order for this GUID field is as follows: Data1 (int), Data2 (short), Data3 (short) are little-endian, Data4 (char[8]) is endian-independent.
+     */
+<span class="fc" id="L39">    public static final TagInfoBytes EXIF_TAG_PIXEL_FORMAT = new TagInfoBytes(&quot;PixelFormat&quot;, 0xbc01, 16, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+<span class="fc" id="L40">    public static final BinaryConstant PIXEL_FORMAT_VALUE_BLACK_AND_WHITE = createMicrosoftHdPhotoGuidEndingWith((byte) 0x05);</span>
+<span class="fc" id="L41">    public static final BinaryConstant PIXEL_FORMAT_VALUE_8_BIT_GRAY = createMicrosoftHdPhotoGuidEndingWith((byte) 0x08);</span>
+<span class="fc" id="L42">    public static final BinaryConstant PIXEL_FORMAT_VALUE_16_BIT_BGR555 = createMicrosoftHdPhotoGuidEndingWith((byte) 0x9);</span>
+<span class="fc" id="L43">    public static final BinaryConstant PIXEL_FORMAT_VALUE_16_BIT_BGR565 = createMicrosoftHdPhotoGuidEndingWith((byte) 0xa);</span>
+<span class="fc" id="L44">    public static final BinaryConstant PIXEL_FORMAT_VALUE_16_BIT_GRAY = createMicrosoftHdPhotoGuidEndingWith((byte) 0xb);</span>
+<span class="fc" id="L45">    public static final BinaryConstant PIXEL_FORMAT_VALUE_24_BIT_BGR = createMicrosoftHdPhotoGuidEndingWith((byte) 0xc);</span>
+<span class="fc" id="L46">    public static final BinaryConstant PIXEL_FORMAT_VALUE_24_BIT_RGB = createMicrosoftHdPhotoGuidEndingWith((byte) 0xd);</span>
+<span class="fc" id="L47">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_BGR = createMicrosoftHdPhotoGuidEndingWith((byte) 0xe);</span>
+<span class="fc" id="L48">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_BGRA = createMicrosoftHdPhotoGuidEndingWith((byte) 0xf);</span>
+<span class="fc" id="L49">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_PBGRA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x10);</span>
+<span class="fc" id="L50">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_GRAY_FLOAT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x11);</span>
+<span class="fc" id="L51">    public static final BinaryConstant PIXEL_FORMAT_VALUE_48_BIT_RGB_FIXED_POINT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x12);</span>
+<span class="fc" id="L52">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_BGR101010 = createMicrosoftHdPhotoGuidEndingWith((byte) 0x13);</span>
+<span class="fc" id="L53">    public static final BinaryConstant PIXEL_FORMAT_VALUE_48_BIT_RGB = createMicrosoftHdPhotoGuidEndingWith((byte) 0x15);</span>
+<span class="fc" id="L54">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_RGBA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x16);</span>
+<span class="fc" id="L55">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_PRGBA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x17);</span>
+<span class="fc" id="L56">    public static final BinaryConstant PIXEL_FORMAT_VALUE_96_BIT_RGB_FIXED_POINT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x18);</span>
+<span class="fc" id="L57">    public static final BinaryConstant PIXEL_FORMAT_VALUE_128_BIT_RGBA_FLOAT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x19);</span>
+<span class="fc" id="L58">    public static final BinaryConstant PIXEL_FORMAT_VALUE_128_BIT_PRGBA_FLOAT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x1a);</span>
+<span class="fc" id="L59">    public static final BinaryConstant PIXEL_FORMAT_VALUE_128_BIT_RGB_FLOAT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x1b);</span>
+<span class="fc" id="L60">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_CMYK = createMicrosoftHdPhotoGuidEndingWith((byte) 0x1c);</span>
+<span class="fc" id="L61">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_RGBA_FIXED_POINT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x1d);</span>
+<span class="fc" id="L62">    public static final BinaryConstant PIXEL_FORMAT_VALUE_128_BIT_RGBA_FIXED_POINT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x1e);</span>
+<span class="fc" id="L63">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_CMYK = createMicrosoftHdPhotoGuidEndingWith((byte) 0x1f);</span>
+<span class="fc" id="L64">    public static final BinaryConstant PIXEL_FORMAT_VALUE_24_BIT_3_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x20);</span>
+<span class="fc" id="L65">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_4_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x21);</span>
+<span class="fc" id="L66">    public static final BinaryConstant PIXEL_FORMAT_VALUE_40_BIT_5_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x22);</span>
+<span class="fc" id="L67">    public static final BinaryConstant PIXEL_FORMAT_VALUE_48_BIT_6_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x23);</span>
+<span class="fc" id="L68">    public static final BinaryConstant PIXEL_FORMAT_VALUE_56_BIT_7_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x24);</span>
+<span class="fc" id="L69">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_8_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x25);</span>
+<span class="fc" id="L70">    public static final BinaryConstant PIXEL_FORMAT_VALUE_48_BIT_3_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x26);</span>
+<span class="fc" id="L71">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_4_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x27);</span>
+<span class="fc" id="L72">    public static final BinaryConstant PIXEL_FORMAT_VALUE_80_BIT_5_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x28);</span>
+<span class="fc" id="L73">    public static final BinaryConstant PIXEL_FORMAT_VALUE_96_BIT_6_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x29);</span>
+<span class="fc" id="L74">    public static final BinaryConstant PIXEL_FORMAT_VALUE_112_BIT_7_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x2a);</span>
+<span class="fc" id="L75">    public static final BinaryConstant PIXEL_FORMAT_VALUE_128_BIT_8_CHANNELS = createMicrosoftHdPhotoGuidEndingWith((byte) 0x2b);</span>
+<span class="fc" id="L76">    public static final BinaryConstant PIXEL_FORMAT_VALUE_40_BIT_CMYK_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x2c);</span>
+<span class="fc" id="L77">    public static final BinaryConstant PIXEL_FORMAT_VALUE_80_BIT_CMYK_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x2d);</span>
+<span class="fc" id="L78">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_3_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x2e);</span>
+<span class="fc" id="L79">    public static final BinaryConstant PIXEL_FORMAT_VALUE_40_BIT_4_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x2f);</span>
+<span class="fc" id="L80">    public static final BinaryConstant PIXEL_FORMAT_VALUE_48_BIT_5_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x30);</span>
+<span class="fc" id="L81">    public static final BinaryConstant PIXEL_FORMAT_VALUE_56_BIT_6_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x31);</span>
+<span class="fc" id="L82">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_7_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x32);</span>
+<span class="fc" id="L83">    public static final BinaryConstant PIXEL_FORMAT_VALUE_72_BIT_8_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x33);</span>
+<span class="fc" id="L84">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_3_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x34);</span>
+<span class="fc" id="L85">    public static final BinaryConstant PIXEL_FORMAT_VALUE_80_BIT_4_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x35);</span>
+<span class="fc" id="L86">    public static final BinaryConstant PIXEL_FORMAT_VALUE_96_BIT_5_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x36);</span>
+<span class="fc" id="L87">    public static final BinaryConstant PIXEL_FORMAT_VALUE_112_BIT_6_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x37);</span>
+<span class="fc" id="L88">    public static final BinaryConstant PIXEL_FORMAT_VALUE_128_BIT_7_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x38);</span>
+<span class="fc" id="L89">    public static final BinaryConstant PIXEL_FORMAT_VALUE_144_BIT_8_CHANNELS_ALPHA = createMicrosoftHdPhotoGuidEndingWith((byte) 0x39);</span>
+<span class="fc" id="L90">    public static final BinaryConstant PIXEL_FORMAT_VALUE_64_BIT_RGBA_HALF = createMicrosoftHdPhotoGuidEndingWith((byte) 0x3a);</span>
+<span class="fc" id="L91">    public static final BinaryConstant PIXEL_FORMAT_VALUE_48_BIT_RGB_HALF = createMicrosoftHdPhotoGuidEndingWith((byte) 0x3b);</span>
+<span class="fc" id="L92">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_RGBE = createMicrosoftHdPhotoGuidEndingWith((byte) 0x3d);</span>
+<span class="fc" id="L93">    public static final BinaryConstant PIXEL_FORMAT_VALUE_16_BIT_GRAY_HALF = createMicrosoftHdPhotoGuidEndingWith((byte) 0x3e);</span>
+<span class="fc" id="L94">    public static final BinaryConstant PIXEL_FORMAT_VALUE_32_BIT_GRAY_FIXED_POINT = createMicrosoftHdPhotoGuidEndingWith((byte) 0x3f);</span>
+
+<span class="fc" id="L96">    public static final TagInfoLong EXIF_TAG_TRANSFORMATION = new TagInfoLong(&quot;Transformation&quot;, 0xbc02, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+    public static final int TRANSFORMATION_VALUE_HORIZONTAL_NORMAL = 0;
+    public static final int TRANSFORMATION_VALUE_MIRROR_VERTICAL = 1;
+    public static final int TRANSFORMATION_VALUE_MIRROR_HORIZONTAL = 2;
+    public static final int TRANSFORMATION_VALUE_ROTATE_180 = 3;
+    public static final int TRANSFORMATION_VALUE_ROTATE_90_CW = 4;
+    public static final int TRANSFORMATION_VALUE_MIRROR_HORIZONTAL_AND_ROTATE_90_CW = 5;
+    public static final int TRANSFORMATION_VALUE_MIRROR_HORIZONTAL_AND_ROTATE_270_CW = 6;
+    public static final int TRANSFORMATION_VALUE_ROTATE_270_CW = 7;
+
+<span class="fc" id="L106">    public static final TagInfoLong EXIF_TAG_UNCOMPRESSED = new TagInfoLong(&quot;Uncompressed&quot;, 0xbc03, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+    public static final int UNCOMPRESSED_VALUE_NO = 0;
+    public static final int UNCOMPRESSED_VALUE_YES = 1;
+
+<span class="fc" id="L110">    public static final TagInfoLong EXIF_TAG_IMAGE_TYPE = new TagInfoLong(&quot;ImageType&quot;, 0xbc04, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L112">    public static final TagInfoLong EXIF_TAG_IMAGE_WIDTH = new TagInfoLong(&quot;ImageWidth&quot;, 0xbc80, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L114">    public static final TagInfoLong EXIF_TAG_IMAGE_HEIGHT = new TagInfoLong(&quot;ImageHeight&quot;, 0xbc81, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L116">    public static final TagInfoFloat EXIF_TAG_WIDTH_RESOLUTION = new TagInfoFloat(&quot;WidthResolution&quot;, 0xbc82, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L118">    public static final TagInfoFloat EXIF_TAG_HEIGHT_RESOLUTION = new TagInfoFloat(&quot;HeightResolution&quot;, 0xbc83, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+    // FIXME: might be an offset?
+<span class="fc" id="L121">    public static final TagInfoLong EXIF_TAG_IMAGE_OFFSET = new TagInfoLong(&quot;ImageOffset&quot;, 0xbcc0, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L123">    public static final TagInfoLong EXIF_TAG_IMAGE_BYTE_COUNT = new TagInfoLong(&quot;ImageByteCount&quot;, 0xbcc1, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+    // FIXME: might be an offset?
+<span class="fc" id="L126">    public static final TagInfoLong EXIF_TAG_ALPHA_OFFSET = new TagInfoLong(&quot;AlphaOffset&quot;, 0xbcc2, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L128">    public static final TagInfoLong EXIF_TAG_ALPHA_BYTE_COUNT = new TagInfoLong(&quot;AlphaByteCount&quot;, 0xbcc3, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L130">    public static final TagInfoByte EXIF_TAG_IMAGE_DATA_DISCARD = new TagInfoByte(&quot;ImageDataDiscard&quot;, 0xbcc4, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+    public static final int IMAGE_DATA_DISCARD_VALUE_FULL_RESOLUTION = 0;
+    public static final int IMAGE_DATA_DISCARD_VALUE_FLEXBITS_DISCARDED = 1;
+    public static final int IMAGE_DATA_DISCARD_VALUE_HIGH_PASS_FREQUENCY_DATA_DISCARDED = 2;
+    public static final int IMAGE_DATA_DISCARD_VALUE_HIGHPASS_AND_LOW_PASS_FREQUENCY_DATA_DISCARDED = 3;
+
+<span class="fc" id="L136">    public static final TagInfoByte EXIF_TAG_ALPHA_DATA_DISCARD = new TagInfoByte(&quot;AlphaDataDiscard&quot;, 0xbcc5, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+    public static final int ALPHA_DATA_DISCARD_VALUE_FULL_RESOLUTION = 0;
+    public static final int ALPHA_DATA_DISCARD_VALUE_FLEXBITS_DISCARDED = 1;
+    public static final int ALPHA_DATA_DISCARD_VALUE_HIGH_PASS_FREQUENCY_DATA_DISCARDED = 2;
+    public static final int ALPHA_DATA_DISCARD_VALUE_HIGHPASS_AND_LOW_PASS_FREQUENCY_DATA_DISCARDED = 3;
+
+<span class="fc" id="L142">    public static final TagInfoUndefineds EXIF_TAG_PADDING = new TagInfoUndefineds(&quot;Padding&quot;, 0xea1c, -1, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L144">    public static final List&lt;TagInfo&gt; ALL_MICROSOFT_HD_PHOTO_TAGS = Collections</span>
+<span class="fc" id="L145">            .unmodifiableList(Arrays.asList(EXIF_TAG_PIXEL_FORMAT, EXIF_TAG_TRANSFORMATION, EXIF_TAG_UNCOMPRESSED, EXIF_TAG_IMAGE_TYPE, EXIF_TAG_IMAGE_WIDTH,</span>
+                    EXIF_TAG_IMAGE_HEIGHT, EXIF_TAG_WIDTH_RESOLUTION, EXIF_TAG_HEIGHT_RESOLUTION, EXIF_TAG_IMAGE_OFFSET, EXIF_TAG_IMAGE_BYTE_COUNT,
+                    EXIF_TAG_ALPHA_OFFSET, EXIF_TAG_ALPHA_BYTE_COUNT, EXIF_TAG_IMAGE_DATA_DISCARD, EXIF_TAG_ALPHA_DATA_DISCARD, EXIF_TAG_PADDING));
+
+    private static BinaryConstant createMicrosoftHdPhotoGuidEndingWith(final byte end) {
+<span class="fc" id="L150">        return new BinaryConstant(new byte[] { (byte) 0x24, (byte) 0xC3, (byte) 0xDD, (byte) 0x6F, (byte) 0x03, (byte) 0x4E, (byte) 0xFE, (byte) 0x4B,</span>
+                (byte) 0xB1, (byte) 0x85, (byte) 0x3D, (byte) 0x77, (byte) 0x76, (byte) 0x8D, (byte) 0xC9, end });
+    }
+
+    private MicrosoftHdPhotoTagConstants() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

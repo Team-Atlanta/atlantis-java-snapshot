@@ -1,0 +1,12 @@
+diff --git a/src/main/java/com/fasterxml/jackson/databind/deser/std/StdValueInstantiator.java b/src/main/java/com/fasterxml/jackson/databind/deser/std/StdValueInstantiator.java
+index 5ce7bcd..7571488 100644
+--- a/src/main/java/com/fasterxml/jackson/databind/deser/std/StdValueInstantiator.java
++++ b/src/main/java/com/fasterxml/jackson/databind/deser/std/StdValueInstantiator.java
+@@ -323,6 +323,7 @@ public class StdValueInstantiator
+             return _createFromStringFallbacks(ctxt, value);
+         }
+         try {
++            if("JacksonDatabindOneCPVOne".equals(System.getenv("JAZZER_SINK_MODE"))) {try {Class.forName("com.code_intelligence.jazzer.api.Jazzer").getMethod("reportFindingFromHook", Throwable.class).invoke(null, new Throwable("BEEP BEEP, sink point JacksonDatabindOneCPVOne reached."));} catch (Throwable e) {}}
+             return _fromStringCreator.call1(value);
+         } catch (Throwable t) {
+             return ctxt.handleInstantiationProblem(_fromStringCreator.getDeclaringClass(),

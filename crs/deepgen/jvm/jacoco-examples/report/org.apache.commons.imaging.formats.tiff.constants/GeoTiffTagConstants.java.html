@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeoTiffTagConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.constants</a> &gt; <span class="el_source">GeoTiffTagConstants.java</span></div><h1>GeoTiffTagConstants.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.constants;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoDoubles;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShorts;
+
+/**
+ * Geo Tiff.
+ * &lt;p&gt;
+ * [BROKEN URL] http://www.remotesensing.org/geotiff/spec/contents.html
+ * &lt;/p&gt;
+ */
+public final class GeoTiffTagConstants {
+
+<span class="fc" id="L36">    public static final TagInfoDoubles EXIF_TAG_MODEL_PIXEL_SCALE_TAG = new TagInfoDoubles(&quot;ModelPixelScaleTag&quot;, 0x830e, 3,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L39">    public static final TagInfoDoubles EXIF_TAG_INTERGRAPH_MATRIX_TAG = new TagInfoDoubles(&quot;IntergraphMatrixTag&quot;, 0x8480, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L42">    public static final TagInfoDoubles EXIF_TAG_MODEL_TIEPOINT_TAG = new TagInfoDoubles(&quot;ModelTiepointTag&quot;, 0x8482, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L45">    public static final TagInfoDoubles EXIF_TAG_MODEL_TRANSFORMATION_TAG = new TagInfoDoubles(&quot;ModelTransformationTag&quot;, 0x85d8, 16,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L48">    public static final TagInfoShorts EXIF_TAG_GEO_KEY_DIRECTORY_TAG = new TagInfoShorts(&quot;GeoKeyDirectoryTag&quot;, 0x87af, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L51">    public static final TagInfoDoubles EXIF_TAG_GEO_DOUBLE_PARAMS_TAG = new TagInfoDoubles(&quot;GeoDoubleParamsTag&quot;, 0x87b0, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L54">    public static final TagInfoAscii EXIF_TAG_GEO_ASCII_PARAMS_TAG = new TagInfoAscii(&quot;GeoAsciiParamsTag&quot;, 0x87b1, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L57">    public static final List&lt;TagInfo&gt; ALL_GEO_TIFF_TAGS = Collections</span>
+<span class="fc" id="L58">            .unmodifiableList(Arrays.asList(EXIF_TAG_MODEL_PIXEL_SCALE_TAG, EXIF_TAG_INTERGRAPH_MATRIX_TAG, EXIF_TAG_MODEL_TIEPOINT_TAG,</span>
+                    EXIF_TAG_MODEL_TRANSFORMATION_TAG, EXIF_TAG_GEO_KEY_DIRECTORY_TAG, EXIF_TAG_GEO_DOUBLE_PARAMS_TAG, EXIF_TAG_GEO_ASCII_PARAMS_TAG));
+
+    private GeoTiffTagConstants() {
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

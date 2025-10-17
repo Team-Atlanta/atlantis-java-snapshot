@@ -1,0 +1,39 @@
+{
+    "sinks": {
+        "OS Command Injection": [
+            {
+                "path": "src/imaging/src/main/java/org/apache/commons/imaging/formats/png/chunks/PngChunkZtxt.java",
+                "line": 54,
+                "column": 21
+            }
+        ],
+        "XPath Injection": [
+            {
+                "path": "src/imaging/src/main/java/org/apache/commons/imaging/formats/jpeg/segments/PatSegment.java",
+                "line": 93,
+                "column": 50
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/imaging/src/main/java/org/apache/commons/imaging/common/BasicCParser.java",
+                "line": 342,
+                "column": 43
+            },
+            {
+                "path": "src/imaging/src/main/java/org/apache/commons/imaging/formats/gif/ApplicationExtension.java",
+                "line": 34,
+                "column": 49
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/imaging/src/main/java/org/apache/commons/imaging/Imaging.java",
+                "line": 888,
+                "column": 58
+            }
+        ]
+    },
+    "tasks": [],
+    "result": []
+}

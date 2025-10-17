@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IcnsDecoder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.icns</a> &gt; <span class="el_source">IcnsDecoder.java</span></div><h1>IcnsDecoder.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.icns;
+
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.Imaging;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.ImageBuilder;
+import org.apache.commons.imaging.formats.icns.IcnsImageParser.IcnsElement;
+
+final class IcnsDecoder {
+<span class="nc" id="L29">    private static final int[] PALETTE_4BPP = { 0xffffffff, 0xfffcf305, 0xffff6402, 0xffdd0806, 0xfff20884, 0xff4600a5, 0xff0000d4, 0xff02abea, 0xff1fb714,</span>
+            0xff006411, 0xff562c05, 0xff90713a, 0xffc0c0c0, 0xff808080, 0xff404040, 0xff000000 };
+
+<span class="nc" id="L32">    private static final int[] PALETTE_8BPP = { 0xFFFFFFFF, 0xFFFFFFCC, 0xFFFFFF99, 0xFFFFFF66, 0xFFFFFF33, 0xFFFFFF00, 0xFFFFCCFF, 0xFFFFCCCC, 0xFFFFCC99,</span>
+            0xFFFFCC66, 0xFFFFCC33, 0xFFFFCC00, 0xFFFF99FF, 0xFFFF99CC, 0xFFFF9999, 0xFFFF9966, 0xFFFF9933, 0xFFFF9900, 0xFFFF66FF, 0xFFFF66CC, 0xFFFF6699,
+            0xFFFF6666, 0xFFFF6633, 0xFFFF6600, 0xFFFF33FF, 0xFFFF33CC, 0xFFFF3399, 0xFFFF3366, 0xFFFF3333, 0xFFFF3300, 0xFFFF00FF, 0xFFFF00CC, 0xFFFF0099,
+            0xFFFF0066, 0xFFFF0033, 0xFFFF0000, 0xFFCCFFFF, 0xFFCCFFCC, 0xFFCCFF99, 0xFFCCFF66, 0xFFCCFF33, 0xFFCCFF00, 0xFFCCCCFF, 0xFFCCCCCC, 0xFFCCCC99,
+            0xFFCCCC66, 0xFFCCCC33, 0xFFCCCC00, 0xFFCC99FF, 0xFFCC99CC, 0xFFCC9999, 0xFFCC9966, 0xFFCC9933, 0xFFCC9900, 0xFFCC66FF, 0xFFCC66CC, 0xFFCC6699,
+            0xFFCC6666, 0xFFCC6633, 0xFFCC6600, 0xFFCC33FF, 0xFFCC33CC, 0xFFCC3399, 0xFFCC3366, 0xFFCC3333, 0xFFCC3300, 0xFFCC00FF, 0xFFCC00CC, 0xFFCC0099,
+            0xFFCC0066, 0xFFCC0033, 0xFFCC0000, 0xFF99FFFF, 0xFF99FFCC, 0xFF99FF99, 0xFF99FF66, 0xFF99FF33, 0xFF99FF00, 0xFF99CCFF, 0xFF99CCCC, 0xFF99CC99,
+            0xFF99CC66, 0xFF99CC33, 0xFF99CC00, 0xFF9999FF, 0xFF9999CC, 0xFF999999, 0xFF999966, 0xFF999933, 0xFF999900, 0xFF9966FF, 0xFF9966CC, 0xFF996699,
+            0xFF996666, 0xFF996633, 0xFF996600, 0xFF9933FF, 0xFF9933CC, 0xFF993399, 0xFF993366, 0xFF993333, 0xFF993300, 0xFF9900FF, 0xFF9900CC, 0xFF990099,
+            0xFF990066, 0xFF990033, 0xFF990000, 0xFF66FFFF, 0xFF66FFCC, 0xFF66FF99, 0xFF66FF66, 0xFF66FF33, 0xFF66FF00, 0xFF66CCFF, 0xFF66CCCC, 0xFF66CC99,
+            0xFF66CC66, 0xFF66CC33, 0xFF66CC00, 0xFF6699FF, 0xFF6699CC, 0xFF669999, 0xFF669966, 0xFF669933, 0xFF669900, 0xFF6666FF, 0xFF6666CC, 0xFF666699,
+            0xFF666666, 0xFF666633, 0xFF666600, 0xFF6633FF, 0xFF6633CC, 0xFF663399, 0xFF663366, 0xFF663333, 0xFF663300, 0xFF6600FF, 0xFF6600CC, 0xFF660099,
+            0xFF660066, 0xFF660033, 0xFF660000, 0xFF33FFFF, 0xFF33FFCC, 0xFF33FF99, 0xFF33FF66, 0xFF33FF33, 0xFF33FF00, 0xFF33CCFF, 0xFF33CCCC, 0xFF33CC99,
+            0xFF33CC66, 0xFF33CC33, 0xFF33CC00, 0xFF3399FF, 0xFF3399CC, 0xFF339999, 0xFF339966, 0xFF339933, 0xFF339900, 0xFF3366FF, 0xFF3366CC, 0xFF336699,
+            0xFF336666, 0xFF336633, 0xFF336600, 0xFF3333FF, 0xFF3333CC, 0xFF333399, 0xFF333366, 0xFF333333, 0xFF333300, 0xFF3300FF, 0xFF3300CC, 0xFF330099,
+            0xFF330066, 0xFF330033, 0xFF330000, 0xFF00FFFF, 0xFF00FFCC, 0xFF00FF99, 0xFF00FF66, 0xFF00FF33, 0xFF00FF00, 0xFF00CCFF, 0xFF00CCCC, 0xFF00CC99,
+            0xFF00CC66, 0xFF00CC33, 0xFF00CC00, 0xFF0099FF, 0xFF0099CC, 0xFF009999, 0xFF009966, 0xFF009933, 0xFF009900, 0xFF0066FF, 0xFF0066CC, 0xFF006699,
+            0xFF006666, 0xFF006633, 0xFF006600, 0xFF0033FF, 0xFF0033CC, 0xFF003399, 0xFF003366, 0xFF003333, 0xFF003300, 0xFF0000FF, 0xFF0000CC, 0xFF000099,
+            0xFF000066, 0xFF000033, 0xFFEE0000, 0xFFDD0000, 0xFFBB0000, 0xFFAA0000, 0xFF880000, 0xFF770000, 0xFF550000, 0xFF440000, 0xFF220000, 0xFF110000,
+            0xFF00EE00, 0xFF00DD00, 0xFF00BB00, 0xFF00AA00, 0xFF008800, 0xFF007700, 0xFF005500, 0xFF004400, 0xFF002200, 0xFF001100, 0xFF0000EE, 0xFF0000DD,
+            0xFF0000BB, 0xFF0000AA, 0xFF000088, 0xFF000077, 0xFF000055, 0xFF000044, 0xFF000022, 0xFF000011, 0xFFEEEEEE, 0xFFDDDDDD, 0xFFBBBBBB, 0xFFAAAAAA,
+            0xFF888888, 0xFF777777, 0xFF555555, 0xFF444444, 0xFF222222, 0xFF111111, 0xFF000000 };
+
+    private static void apply1BPPMask(final byte[] maskData, final ImageBuilder image) throws ImagingException {
+<span class="nc" id="L56">        int position = 0;</span>
+<span class="nc" id="L57">        int bitsLeft = 0;</span>
+<span class="nc" id="L58">        int value = 0;</span>
+
+        // 1 bit icon types have image data followed by mask data in the same
+        // entry
+<span class="nc" id="L62">        final int totalBytes = (image.getWidth() * image.getHeight() + 7) / 8;</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (maskData.length &lt; 2 * totalBytes) {</span>
+<span class="nc" id="L64">            throw new ImagingException(&quot;1 BPP mask underrun parsing ICNS file&quot;);</span>
+        }
+<span class="nc" id="L66">        position = totalBytes;</span>
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        for (int y = 0; y &lt; image.getHeight(); y++) {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            for (int x = 0; x &lt; image.getWidth(); x++) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">                if (bitsLeft == 0) {</span>
+<span class="nc" id="L71">                    value = 0xff &amp; maskData[position++];</span>
+<span class="nc" id="L72">                    bitsLeft = 8;</span>
+                }
+                int alpha;
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                if ((value &amp; 0x80) != 0) {</span>
+<span class="nc" id="L76">                    alpha = 0xff;</span>
+                } else {
+<span class="nc" id="L78">                    alpha = 0x00;</span>
+                }
+<span class="nc" id="L80">                value &lt;&lt;= 1;</span>
+<span class="nc" id="L81">                bitsLeft--;</span>
+<span class="nc" id="L82">                image.setRgb(x, y, alpha &lt;&lt; 24 | 0xffffff &amp; image.getRgb(x, y));</span>
+            }
+        }
+<span class="nc" id="L85">    }</span>
+
+    private static void apply8BPPMask(final byte[] maskData, final ImageBuilder image) {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        for (int y = 0; y &lt; image.getHeight(); y++) {</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            for (int x = 0; x &lt; image.getWidth(); x++) {</span>
+<span class="nc" id="L90">                final int alpha = 0xff &amp; maskData[y * image.getWidth() + x];</span>
+<span class="nc" id="L91">                image.setRgb(x, y, alpha &lt;&lt; 24 | 0xffffff &amp; image.getRgb(x, y));</span>
+            }
+        }
+<span class="nc" id="L94">    }</span>
+
+    private static void decode1BPPImage(final IcnsType imageType, final byte[] imageData, final ImageBuilder image) {
+<span class="nc" id="L97">        int position = 0;</span>
+<span class="nc" id="L98">        int bitsLeft = 0;</span>
+<span class="nc" id="L99">        int value = 0;</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        for (int y = 0; y &lt; imageType.getHeight(); y++) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            for (int x = 0; x &lt; imageType.getWidth(); x++) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                if (bitsLeft == 0) {</span>
+<span class="nc" id="L103">                    value = 0xff &amp; imageData[position++];</span>
+<span class="nc" id="L104">                    bitsLeft = 8;</span>
+                }
+                int argb;
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                if ((value &amp; 0x80) != 0) {</span>
+<span class="nc" id="L108">                    argb = 0xff000000;</span>
+                } else {
+<span class="nc" id="L110">                    argb = 0xffffffff;</span>
+                }
+<span class="nc" id="L112">                value &lt;&lt;= 1;</span>
+<span class="nc" id="L113">                bitsLeft--;</span>
+<span class="nc" id="L114">                image.setRgb(x, y, argb);</span>
+            }
+        }
+<span class="nc" id="L117">    }</span>
+
+    private static void decode32BPPImage(final IcnsType imageType, final byte[] imageData, final ImageBuilder image) {
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        for (int y = 0; y &lt; imageType.getHeight(); y++) {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">            for (int x = 0; x &lt; imageType.getWidth(); x++) {</span>
+<span class="nc" id="L122">                final int argb = 0xff000000 /* the &quot;alpha&quot; is ignored */</span>
+<span class="nc" id="L123">                        | (0xff &amp; imageData[4 * (y * imageType.getWidth() + x) + 1]) &lt;&lt; 16 | (0xff &amp; imageData[4 * (y * imageType.getWidth() + x) + 2]) &lt;&lt; 8</span>
+<span class="nc" id="L124">                        | 0xff &amp; imageData[4 * (y * imageType.getWidth() + x) + 3];</span>
+<span class="nc" id="L125">                image.setRgb(x, y, argb);</span>
+            }
+        }
+<span class="nc" id="L128">    }</span>
+
+    private static void decode4BPPImage(final IcnsType imageType, final byte[] imageData, final ImageBuilder image) {
+<span class="nc" id="L131">        int i = 0;</span>
+<span class="nc" id="L132">        boolean visited = false;</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        for (int y = 0; y &lt; imageType.getHeight(); y++) {</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            for (int x = 0; x &lt; imageType.getWidth(); x++) {</span>
+                int index;
+<span class="nc bnc" id="L136" title="All 2 branches missed.">                if (!visited) {</span>
+<span class="nc" id="L137">                    index = 0xf &amp; imageData[i] &gt;&gt; 4;</span>
+                } else {
+<span class="nc" id="L139">                    index = 0xf &amp; imageData[i++];</span>
+                }
+<span class="nc bnc" id="L141" title="All 2 branches missed.">                visited = !visited;</span>
+<span class="nc" id="L142">                image.setRgb(x, y, PALETTE_4BPP[index]);</span>
+            }
+        }
+<span class="nc" id="L145">    }</span>
+
+    private static void decode8BPPImage(final IcnsType imageType, final byte[] imageData, final ImageBuilder image) {
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        for (int y = 0; y &lt; imageType.getHeight(); y++) {</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            for (int x = 0; x &lt; imageType.getWidth(); x++) {</span>
+<span class="nc" id="L150">                final int index = 0xff &amp; imageData[y * imageType.getWidth() + x];</span>
+<span class="nc" id="L151">                image.setRgb(x, y, PALETTE_8BPP[index]);</span>
+            }
+        }
+<span class="nc" id="L154">    }</span>
+
+    public static List&lt;BufferedImage&gt; decodeAllImages(final IcnsImageParser.IcnsElement[] icnsElements) throws ImagingException {
+<span class="nc" id="L157">        final List&lt;BufferedImage&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        for (int i = 0; i &lt; icnsElements.length; i++) {</span>
+<span class="nc" id="L159">            final BufferedImage image = decodeImage(icnsElements, i);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (image != null) {</span>
+<span class="nc" id="L161">                result.add(image);</span>
+            }
+        }
+<span class="nc" id="L164">        return result;</span>
+    }
+
+    public static BufferedImage decodeImage(final IcnsImageParser.IcnsElement[] icnsElements, final int index) throws ImagingException {
+<span class="nc" id="L168">        final IcnsImageParser.IcnsElement imageElement = icnsElements[index];</span>
+<span class="nc" id="L169">        final IcnsType imageType = IcnsType.findImageType(imageElement.type);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (imageType == null) {</span>
+<span class="nc" id="L171">            return null;</span>
+        }
+
+        // PNG or JPEG 2000
+<span class="nc bnc" id="L175" title="All 22 branches missed.">        if (imageType == IcnsType.ICNS_16x16_32BIT_ARGB_IMAGE || imageType == IcnsType.ICNS_32x32_32BIT_ARGB_IMAGE</span>
+                || imageType == IcnsType.ICNS_64x64_32BIT_ARGB_IMAGE || imageType == IcnsType.ICNS_128x128_32BIT_ARGB_IMAGE
+                || imageType == IcnsType.ICNS_256x256_32BIT_ARGB_IMAGE || imageType == IcnsType.ICNS_512x512_32BIT_ARGB_IMAGE
+                || imageType == IcnsType.ICNS_1024x1024_32BIT_ARGB_IMAGE || imageType == IcnsType.ICNS_32x32_2x_32BIT_ARGB_IMAGE
+                || imageType == IcnsType.ICNS_64x64_2x_32BIT_ARGB_IMAGE || imageType == IcnsType.ICNS_256x256_2x_32BIT_ARGB_IMAGE
+                || imageType == IcnsType.ICNS_512x512_2x_32BIT_ARGB_IMAGE) {
+<span class="nc" id="L181">            BufferedImage image = null;</span>
+            try {
+<span class="nc" id="L183">                image = Imaging.getBufferedImage(imageElement.data);</span>
+<span class="nc" id="L184">            } catch (final Exception ex) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                if (imageType.getWidth() &lt;= 32) {</span>
+                    try {
+<span class="nc" id="L187">                        image = decodeImageImpl(imageType, imageElement, icnsElements);</span>
+<span class="nc" id="L188">                    } catch (final Exception ignored) {</span>
+                        // ignored
+<span class="nc" id="L190">                    }</span>
+                }
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                if (image == null) {</span>
+<span class="nc" id="L193">                    image = new BufferedImage(imageType.getWidth(), imageType.getHeight(), BufferedImage.TYPE_INT_ARGB);</span>
+                }
+<span class="nc" id="L195">            }</span>
+<span class="nc" id="L196">            return image;</span>
+        }
+
+<span class="nc" id="L199">        return decodeImageImpl(imageType, imageElement, icnsElements);</span>
+    }
+
+    private static BufferedImage decodeImageImpl(final IcnsType imageType, final IcnsElement imageElement, final IcnsElement[] icnsElements)
+            throws ImagingException {
+<span class="nc" id="L204">        final int expectedSize = (imageType.getWidth() * imageType.getHeight() * imageType.getBitsPerPixel() + 7) / 8;</span>
+        byte[] imageData;
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (imageElement.data.length &lt; expectedSize) {</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            if (imageType.getBitsPerPixel() != 32) {</span>
+<span class="nc" id="L208">                throw new ImagingException(&quot;Short image data but not a 32 bit compressed type&quot;);</span>
+            }
+<span class="nc" id="L210">            imageData = Rle24Compression.decompress(imageType.getWidth(), imageType.getHeight(), imageElement.data);</span>
+        } else {
+<span class="nc" id="L212">            imageData = imageElement.data;</span>
+        }
+
+<span class="nc" id="L215">        final ImageBuilder imageBuilder = new ImageBuilder(imageType.getWidth(), imageType.getHeight(), true);</span>
+<span class="nc bnc" id="L216" title="All 5 branches missed.">        switch (imageType.getBitsPerPixel()) {</span>
+        case 1:
+<span class="nc" id="L218">            decode1BPPImage(imageType, imageData, imageBuilder);</span>
+<span class="nc" id="L219">            break;</span>
+        case 4:
+<span class="nc" id="L221">            decode4BPPImage(imageType, imageData, imageBuilder);</span>
+<span class="nc" id="L222">            break;</span>
+        case 8:
+<span class="nc" id="L224">            decode8BPPImage(imageType, imageData, imageBuilder);</span>
+<span class="nc" id="L225">            break;</span>
+        case 32:
+<span class="nc" id="L227">            decode32BPPImage(imageType, imageData, imageBuilder);</span>
+<span class="nc" id="L228">            break;</span>
+        default:
+<span class="nc" id="L230">            throw new ImagingException(&quot;Unsupported bit depth &quot; + imageType.getBitsPerPixel());</span>
+        }
+
+        IcnsType maskType;
+<span class="nc" id="L234">        IcnsElement maskElement = null;</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (imageType.hasMask()) {</span>
+<span class="nc" id="L236">            maskType = imageType;</span>
+<span class="nc" id="L237">            maskElement = imageElement;</span>
+        } else {
+<span class="nc" id="L239">            maskType = IcnsType.find8BPPMaskType(imageType);</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">            if (maskType != null) {</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                for (final IcnsElement icnsElement : icnsElements) {</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                    if (icnsElement.type == maskType.getType()) {</span>
+<span class="nc" id="L243">                        maskElement = icnsElement;</span>
+<span class="nc" id="L244">                        break;</span>
+                    }
+                }
+            }
+<span class="nc bnc" id="L248" title="All 2 branches missed.">            if (maskElement == null) {</span>
+<span class="nc" id="L249">                maskType = IcnsType.find1BPPMaskType(imageType);</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                if (maskType != null) {</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                    for (final IcnsElement icnsElement : icnsElements) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                        if (icnsElement.type == maskType.getType()) {</span>
+<span class="nc" id="L253">                            maskElement = icnsElement;</span>
+<span class="nc" id="L254">                            break;</span>
+                        }
+                    }
+                }
+            }
+        }
+
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (maskElement != null) {</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            if (maskType.getBitsPerPixel() == 1) {</span>
+<span class="nc" id="L263">                apply1BPPMask(maskElement.data, imageBuilder);</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            } else if (maskType.getBitsPerPixel() == 8) {</span>
+<span class="nc" id="L265">                apply8BPPMask(maskElement.data, imageBuilder);</span>
+            } else {
+<span class="nc" id="L267">                throw new ImagingException(&quot;Unsupported mask bit depth &quot; + maskType.getBitsPerPixel());</span>
+            }
+        }
+
+<span class="nc" id="L271">        return imageBuilder.getBufferedImage();</span>
+    }
+
+    private IcnsDecoder() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

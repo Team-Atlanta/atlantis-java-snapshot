@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JpegInputStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.decoder</a> &gt; <span class="el_source">JpegInputStream.java</span></div><h1>JpegInputStream.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+
+package org.apache.commons.imaging.formats.jpeg.decoder;
+
+import java.util.Arrays;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+
+final class JpegInputStream {
+    static final int SHALLOW_SIZE = 32;
+    // Figure F.18, F.2.2.5, page 111 of ITU-T T.81
+    private final int[] interval;
+    // next position in the array to read
+    private int nextPos;
+    private int cnt;
+    private int b;
+
+<span class="nc" id="L32">    JpegInputStream(final int[] interval) {</span>
+<span class="nc" id="L33">        this.interval = Arrays.copyOf(interval, interval.length);</span>
+<span class="nc" id="L34">        this.nextPos = 0;</span>
+<span class="nc" id="L35">    }</span>
+
+    /**
+     * Returns {@code true} as long there are unread fields available, else {@code false}
+     *
+     * @return {@code true} as long there are unread fields available, else {@code false}
+     */
+    public boolean hasNext() {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        return nextPos &lt; this.interval.length;</span>
+    }
+
+    public int nextBit() throws ImagingException {
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (cnt == 0) {</span>
+<span class="nc" id="L48">            b = read();</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">            if (b &lt; 0) {</span>
+<span class="nc" id="L50">                throw new ImagingException(&quot;Premature End of File&quot;);</span>
+            }
+<span class="nc" id="L52">            cnt = 8;</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            if (b == 0xff) {</span>
+<span class="nc" id="L54">                final int b2 = read();</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                if (b2 &lt; 0) {</span>
+<span class="nc" id="L56">                    throw new ImagingException(&quot;Premature End of File&quot;);</span>
+                }
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                if (b2 != 0) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                    if (b2 == (0xff &amp; JpegConstants.DNL_MARKER)) {</span>
+<span class="nc" id="L60">                        throw new ImagingException(&quot;DNL not yet supported&quot;);</span>
+                    }
+<span class="nc" id="L62">                    throw new ImagingException(&quot;Invalid marker found &quot; + &quot;in entropy data: 0xFF &quot; + Integer.toHexString(b2));</span>
+                }
+            }
+        }
+<span class="nc" id="L66">        final int bit = b &gt;&gt; 7 &amp; 0x1;</span>
+<span class="nc" id="L67">        cnt--;</span>
+<span class="nc" id="L68">        b &lt;&lt;= 1;</span>
+<span class="nc" id="L69">        return bit;</span>
+    }
+
+    /**
+     * Returns the value from current field (as {@code InputStream.read()} would do) and set the position of the pointer to the next field to read.
+     *
+     * @return the value from current field (as {@code InputStream.read()} would do).
+     * @throws IllegalStateException if the stream hasn't any other value.
+     */
+    int read() {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (!hasNext()) {</span>
+<span class="nc" id="L80">            throw new IllegalStateException(&quot;This stream hasn't any other value, all values were already read.&quot;);</span>
+        }
+<span class="nc" id="L82">        final int value = this.interval[nextPos];</span>
+<span class="nc" id="L83">        this.nextPos++;</span>
+<span class="nc" id="L84">        return value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

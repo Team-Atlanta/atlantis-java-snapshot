@@ -1,0 +1,34 @@
+name: "[atl-jazzer] Team Atlanta Jazzer Testing"
+
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    branches: [ "**" ]
+    paths:
+      - crs/fuzzers/atl-jazzer/**
+
+jobs:
+  atl-jazzer-build-n-test:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        ssh-key: ${{ secrets.SSHKEY_GT_NOSGX_RSA }}
+        submodules: 'recursive'
+        lfs: false
+
+    - name: Build atl-jazzer testing docker image
+      run: |
+        docker build \
+          -t atl-jazzer-test:latest \
+          -f misc/Dockerfile.atl-jazzer \
+          .
+
+        docker run \
+          --rm \
+          -w /app/crs-cp-java/fuzzers/atl-jazzer \
+          -u builder:builder \
+          atl-jazzer-test:latest \
+          bash -c "bazel test --test_output=all //..."

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhysicalScale.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">PhysicalScale.java</span></div><h1>PhysicalScale.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+/**
+ * Used to specify physical scale when reading or storing image information.
+ */
+public final class PhysicalScale {
+    private static final int METER_UNITS = 1;
+    private static final int RADIAN_UNITS = 2;
+<span class="nc" id="L25">    public static final PhysicalScale UNDEFINED = createFromMeters(-1.0, -1.0);</span>
+
+    public static PhysicalScale createFromMeters(final double x, final double y) {
+<span class="nc" id="L28">        return new PhysicalScale(METER_UNITS, x, y);</span>
+    }
+
+    public static PhysicalScale createFromRadians(final double x, final double y) {
+<span class="nc" id="L32">        return new PhysicalScale(RADIAN_UNITS, x, y);</span>
+    }
+
+    private final int units;
+
+    private final double horizontalUnitsPerPixel;
+
+    private final double verticalUnitsPerPixel;
+
+<span class="nc" id="L41">    private PhysicalScale(final int units, final double horizontalUnitsPerPixel, final double verticalUnitsPerPixel) {</span>
+<span class="nc" id="L42">        this.units = units;</span>
+<span class="nc" id="L43">        this.horizontalUnitsPerPixel = horizontalUnitsPerPixel;</span>
+<span class="nc" id="L44">        this.verticalUnitsPerPixel = verticalUnitsPerPixel;</span>
+<span class="nc" id="L45">    }</span>
+
+    public double getHorizontalUnitsPerPixel() {
+<span class="nc" id="L48">        return horizontalUnitsPerPixel;</span>
+    }
+
+    public double getVerticalUnitsPerPixel() {
+<span class="nc" id="L52">        return verticalUnitsPerPixel;</span>
+    }
+
+    public boolean isInMeters() {
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        return METER_UNITS == units;</span>
+    }
+
+    public boolean isInRadians() {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        return RADIAN_UNITS == units;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,24 @@
+{
+    "model_role_name": "Parsable String Extractor",
+    "user_role_name": "Parsable String Extractor",
+    "system_role": "You are a senior programmer that are really good at analyzing source code written in Java or C for finding vulnerabilities.",
+    "task": "You are given a snippet program written in Java or C. You are asked to analyze the snippet and answer the following questions: Given the <FUNCTION_NAME>() function which is presumably a parsing function, could you generate a string that would be accepted by the function? If yes, provide an example string. If no, explain why the function is not a parsing function.",
+    "analysis_rules": [
+		"- By parsing function, we mean a function that takes a string as input, and does something if the string is valid according to a certain rule or grammar.",
+		"- It would be good if you could generate a complex string",
+		"- Make sure that the generated string is valid and would be accepted by the function"
+	],
+    "analysis_examples": [],
+    "output_constraints": [
+        "In the first line of your output, you should write the reason why you think the string would be accepted by the function or why the function is not a parsing function.",
+        "In the second line of your output, you should write the output the string of or NO after \"- Answer:.\""
+    ],
+    "output_examples": [
+        "Output example 1:",
+        "{Your answer why you think a string would be accepted by the function}",
+        "- Answer: \"Hello, World!\"",
+        "Output example 2:",
+        "{Your answer why you think the function is not a parsing function}",
+        "- Answer: NO"
+    ]
+}

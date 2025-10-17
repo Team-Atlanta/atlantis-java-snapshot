@@ -1,0 +1,55 @@
+diff --git a/examples/any_harness_engine_client.py b/examples/any_harness_engine_client.py
+index 2ba2eaf..98235f1 100755
+--- a/examples/any_harness_engine_client.py
++++ b/examples/any_harness_engine_client.py
+@@ -157,7 +157,7 @@ async def main():
+                 script_id = script.sha256
+                 script_seed_counts[script_id] = script_seed_counts.get(script_id, 0) + len(seed_ids)
+                 if script_seed_counts[script_id] - last_seed_counts.get(script_id, 0) >= 3000:
+-                    logger.info(f"ZeroMQSubmit Script {script_id} generated {script_seed_counts[script_id]} seeds.")
++                    # logger.info(f"ZeroMQSubmit Script {script_id} generated {script_seed_counts[script_id]} seeds.")
+                     last_seed_counts[script_id] = script_seed_counts[script_id]
+ 
+     # Create a task to add the main task after a delay
+diff --git a/libDeepGen/developers/team.py b/libDeepGen/developers/team.py
+index e2811c4..21a3ec8 100755
+--- a/libDeepGen/developers/team.py
++++ b/libDeepGen/developers/team.py
+@@ -57,9 +57,13 @@ class DeveloperTeam:
+                     logger.info(f"[{processor_id}][{task.cp_name}] Attempt {attempts_used+1}/{task.dev_attempts} by {developer.__class__.__name__}, cost: {cost_used:.2f}/{task.dev_cost}")
+ 
+                     try:
+-                        script_content, token_cost = await developer.async_gen(task)
+-                        attempts_used += 1
++                        # script_content, token_cost = await developer.async_gen(task)
++                        with open("/home/hanqing/aixcc/libDeepGen/examples/data/rdf4j_seed_generator.txt", "r") as f:
++                            script_content = f.read()
++                        token_cost = 0.0
+                         cost_used += token_cost
++                        attempts_used += 1
++                        # cost_used += token_cost
+                         
+                         if not script_content:
+                             logger.warning(f"Developer {developer.__class__.__name__} returned empty script with cost {token_cost} for task {task.cp_name}")
+diff --git a/libDeepGen/submit.py b/libDeepGen/submit.py
+index 5a7042d..3d5595c 100755
+--- a/libDeepGen/submit.py
++++ b/libDeepGen/submit.py
+@@ -278,7 +278,7 @@ class ZeroMQSubmit(SubmitBase):
+         self.act_queue = asyncio.Queue()  # for internal use
+ 
+         self.deep_check = False  # whether to check the seed content
+-        #self.deep_check = True  # whether to check the seed content
++        self.deep_check = True  # whether to check the seed content
+ 
+         # content check purpose
+         if self.deep_check:
+@@ -307,7 +307,7 @@ class ZeroMQSubmit(SubmitBase):
+                     return
+                     
+                 sha256 = hashlib.sha256(seed_data).hexdigest()
+-                #logger.info(f"CHECK {msg_id}, {bundle.shm_name}, {seed_id}, {sha256}")
++                # logger.info(f"CHECK {msg_id}, {bundle.shm_name}, {seed_id}, {sha256}")
+                 logger.info(f"CHECK {sha256}")
+             except Exception as e:
+                 logger.error(f"Error processing seed {seed_id} from {bundle.shm_name}: {e}")

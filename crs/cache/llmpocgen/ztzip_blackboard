@@ -1,0 +1,241 @@
+{
+    "sinks": {
+        "load arbitrary library": [
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java",
+                "line": 13,
+                "column": 28
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 1210,
+                "column": 38
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java",
+                "line": 34,
+                "column": 14
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java",
+                "line": 34,
+                "column": 28
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/FileSource.java",
+                "line": 54,
+                "column": 58
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 1337,
+                "column": 68
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 1531,
+                "column": 34
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 1590,
+                "column": 79
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 1848,
+                "column": 86
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 1963,
+                "column": 59
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 2131,
+                "column": 63
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 2270,
+                "column": 79
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 2568,
+                "column": 101
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 2633,
+                "column": 101
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+                "line": 2781,
+                "column": 95
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/Zips.java",
+                "line": 357,
+                "column": 95
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtils.java",
+                "line": 34,
+                "column": 46
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtils.java",
+                "line": 54,
+                "column": 70
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtilsV2_2.java",
+                "line": 145,
+                "column": 32
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtilsV2_2.java",
+                "line": 211,
+                "column": 33
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtilsV2_2.java",
+                "line": 259,
+                "column": 36
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtilsV2_2.java",
+                "line": 260,
+                "column": 36
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtilsV2_2.java",
+                "line": 427,
+                "column": 33
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtilsV2_2.java",
+                "line": 428,
+                "column": 34
+            },
+            {
+                "path": "src/ztzip/src/main/java/org/zeroturnaround/zip/transform/FileZipEntryTransformer.java",
+                "line": 64,
+                "column": 70
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/ztzip-harnesses/ztzip-harness-one/src/main/java/com/aixcc/ztzip/harnesses/one/ZTZIPOne.java:\n34       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n35           new ZTZIPOne().fuzz(input);\n36       }\n38       private void fuzz(byte[] data) {\n39           if (data == null) {\n40               return;\n41           }\n42   \n43           ByteBuffer buf = ByteBuffer.wrap(data);\n44           int count = buf.getInt();\n45   \n46           if (count > 255)\n47               return;\n48   \n49           for (int i = 0; i < count; i++) {\n50               int picker = buf.getInt();\n51               try {\n52                   switch (picker) {\n53                       case 16: {\n54                            int data_size = buf.remaining();\n55                            byte[] inner_data = new byte[data_size];\n56                            buf.get(inner_data);\n57   \n58                            InputStream is = new ByteArrayInputStream(inner_data);\n59                            ZipUtil.unpack(is, new File(\"/tmp\"));\n60                            break;\n61                       }\n62   \n63                       default:\n64                           throw new Exception(\"unsupported method picker\");\n65                   }\n66               } catch (Exception e) {\n67                   continue; // eat it\n68               }\n69           }\n70       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:\n 704     public static void iterate(InputStream is, ZipEntryCallback action, Charset charset) {\n 705       try {\n 706         ZipInputStream in = null;\n 707         try {\n 708           in = newCloseShieldZipInputStream(is, charset);\n 709           ZipEntry entry;\n 710           while ((entry = in.getNextEntry()) != null) {\n 711             try {\n 712               action.process(in, entry);\n 713             }\n 714             catch (IOException ze) {\n 715               throw new ZipException(\"Failed to process zip entry '\" + entry.getName() + \" with action \" + action, ze);\n 716             }\n 717             catch (ZipBreakException ex) {\n 718               break;\n 719             }\n 720           }\n 721         }\n 722         finally {\n 723           if (in != null) {\n 724             in.close();\n 725           }\n 726         }\n 727       }\n 728       catch (IOException e) {\n 729         throw ZipExceptionUtil.rethrow(e);\n 730       }\n 731     }\n1044     public static void unpack(InputStream is, File outputDir) {\n1045       unpack(is, outputDir, IdentityNameMapper.INSTANCE, null);\n1046     }\n1094     public static void unpack(InputStream is, File outputDir, NameMapper mapper, Charset charset) {\n1095       log.debug(\"Extracting {} into '{}'.\", is, outputDir);\n1096       iterate(is, new Unpacker(outputDir, mapper), charset);\n1097     }\n1195       public void process(InputStream in, ZipEntry zipEntry) throws IOException {\n1196         String name = mapper.map(zipEntry.getName());\n1197         if (name != null) {\n1198           /**\n1199            * We assume that EVERY backslash will denote a directory\n1200            * separator. Also such broken archives don't have entries that\n1201            * are just directories. Everything is a file. See the example\n1202            *\n1203            * Archive: backSlashTest.zip\n1204            * testing: testDirectory\\testfileInTestDirectory.txt OK\n1205            * testing: testDirectory\\testSubdirectory\\testFileInTestSubdirectory.txt OK\n1206            * No errors detected in compressed data of backSlashTest.zip.\n1207            */\n1208           if (name.indexOf('\\\\') != -1) {\n1209             File parentDirectory = outputDir;\n1210             String[] dirs = name.split(\"\\\\\\\\\");\n1211   \n1212             // lets create all the directories and the last entry is the file as EVERY entry is a file\n1213             for (int i = 0; i < dirs.length - 1; i++) {\n1214               File file = new File(parentDirectory, dirs[i]);\n1215               if (!file.exists()) {\n1216                 FileUtils.forceMkdir(file);\n1217               }\n1218               parentDirectory = file;\n1219             }\n1220             File destFile = new File(parentDirectory, dirs[dirs.length - 1]);\n1221             FileUtils.copy(in, destFile);\n1222           }\n1223           // it could be that there are just top level files that the unpacker is used for\n1224           else {\n1225             File destFile = new File(outputDir, name);\n1226             FileUtils.copy(in, destFile);\n1227           }\n1228         }\n1229       }\n",
+            "cost": 0.052559999999999996,
+            "harness_id": "id_1",
+            "sanitizer": "Regular Expression Injection",
+            "sink": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:1210:38",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 1
+        },
+        {
+            "blob": [
+                "AAAAAQAAABBQSwMEFAAAAAgAnaYrWqkwxf4JAAAABwAAAA8AAAAiIiJqYXoiKyJ6ZXIiIiJLzs8rSc0rAQBQSwECFAMUAAAACACdpitaqTDF/gkAAAAHAAAADwAAAAAAAAAAAAAAgAEAAAAAIiIiamF6IisiemVyIiIiUEsFBgAAAAABAAEAPQAAADYAAAAAAA=="
+            ],
+            "code": "src/ztzip-harnesses/ztzip-harness-one/src/main/java/com/aixcc/ztzip/harnesses/one/ZTZIPOne.java:\n16       public static void main(String[] args) throws Exception {\n17           byte[] input;\n18           if (args.length == 2) {\n19               input = readInput(Path.of(args[0]), args[1]);\n20           } else {\n21               input = getDummyInput();\n22           }\n23           fuzzerTestOneInput(input);\n24       }\n34       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n35           new ZTZIPOne().fuzz(input);\n36       }\n38       private void fuzz(byte[] data) {\n39           if (data == null) {\n40               return;\n41           }\n42   \n43           ByteBuffer buf = ByteBuffer.wrap(data);\n44           int count = buf.getInt();\n45   \n46           if (count > 255)\n47               return;\n48   \n49           for (int i = 0; i < count; i++) {\n50               int picker = buf.getInt();\n51               try {\n52                   switch (picker) {\n53                       case 16: {\n54                            int data_size = buf.remaining();\n55                            byte[] inner_data = new byte[data_size];\n56                            buf.get(inner_data);\n57   \n58                            InputStream is = new ByteArrayInputStream(inner_data);\n59                            ZipUtil.unpack(is, new File(\"/tmp\"));\n60                            break;\n61                       }\n62   \n63                       default:\n64                           throw new Exception(\"unsupported method picker\");\n65                   }\n66               } catch (Exception e) {\n67                   continue; // eat it\n68               }\n69           }\n70       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:\n 704     public static void iterate(InputStream is, ZipEntryCallback action, Charset charset) {\n 705       try {\n 706         ZipInputStream in = null;\n 707         try {\n 708           in = newCloseShieldZipInputStream(is, charset);\n 709           ZipEntry entry;\n 710           while ((entry = in.getNextEntry()) != null) {\n 711             try {\n 712               action.process(in, entry);\n 713             }\n 714             catch (IOException ze) {\n 715               throw new ZipException(\"Failed to process zip entry '\" + entry.getName() + \" with action \" + action, ze);\n 716             }\n 717             catch (ZipBreakException ex) {\n 718               break;\n 719             }\n 720           }\n 721         }\n 722         finally {\n 723           if (in != null) {\n 724             in.close();\n 725           }\n 726         }\n 727       }\n 728       catch (IOException e) {\n 729         throw ZipExceptionUtil.rethrow(e);\n 730       }\n 731     }\n1044     public static void unpack(InputStream is, File outputDir) {\n1045       unpack(is, outputDir, IdentityNameMapper.INSTANCE, null);\n1046     }\n1094     public static void unpack(InputStream is, File outputDir, NameMapper mapper, Charset charset) {\n1095       log.debug(\"Extracting {} into '{}'.\", is, outputDir);\n1096       iterate(is, new Unpacker(outputDir, mapper), charset);\n1097     }\n1149       public void process(InputStream in, ZipEntry zipEntry) throws IOException {\n1150         String name = mapper.map(zipEntry.getName());\n1151         if (name != null) {\n1152           File file = new File(outputDir, name);\n1153           if (zipEntry.isDirectory()) {\n1154             FileUtils.forceMkdir(file);\n1155           }\n1156           else {\n1157             FileUtils.forceMkdir(file.getParentFile());\n1158   \n1159             if (log.isDebugEnabled() && file.exists()) {\n1160               log.debug(\"Overwriting file '{}'.\", zipEntry.getName());\n1161             }\n1162   \n1163             FileUtils.copy(in, file);\n1164           }\n1165   \n1166           ZTFilePermissions permissions = ZipEntryUtil.getZTFilePermissions(zipEntry);\n1167           if (permissions != null) {\n1168             ZTFilePermissionsUtil.getDefaultStategy().setPermissions(file, permissions);\n1169           }\n1170         }\n1171       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/Java6FileApiPermissionsStrategy.java:\n48     public void setPermissions(File file, ZTFilePermissions permissions) {\n49       setExecutable(file, permissions.isOwnerCanExecute(), !permissions.isGroupCanExecute() && !permissions.isOthersCanExecute());\n50       setWritable(file, permissions.isOwnerCanWrite(), !permissions.isGroupCanWrite() && !permissions.isOthersCanWrite());\n51       setReadable(file, permissions.isOwnerCanRead(), !permissions.isGroupCanRead() && !permissions.isOthersCanRead());\n52     }\n54     private boolean setExecutable(File file, boolean executable, boolean ownerOnly) {\n55       return (Boolean) ZTZipReflectionUtil.invoke(setExecutableMethod, file, executable, ownerOnly);\n56     }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java:\n32     static Object invoke(Method method, Object obj, Object... args) throws ZipException {\n33       try {\n34         return method.invoke(obj, args);\n35       }\n36       catch (IllegalAccessException e) {\n37         throw new ZipException(e);\n38       }\n39       catch (InvocationTargetException e) {\n40         throw new ZipException(e);\n41       }\n42       catch (IllegalArgumentException e) {\n43         throw new ZipException(e);\n44       }\n45     }\n",
+            "cost": 0.45387500000000014,
+            "harness_id": "id_1",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java:34:14",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 2
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/ztzip-harnesses/ztzip-harness-one/src/main/java/com/aixcc/ztzip/harnesses/one/ZTZIPOne.java:\n34       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n35           new ZTZIPOne().fuzz(input);\n36       }\n38       private void fuzz(byte[] data) {\n39           if (data == null) {\n40               return;\n41           }\n42   \n43           ByteBuffer buf = ByteBuffer.wrap(data);\n44           int count = buf.getInt();\n45   \n46           if (count > 255)\n47               return;\n48   \n49           for (int i = 0; i < count; i++) {\n50               int picker = buf.getInt();\n51               try {\n52                   switch (picker) {\n53                       case 16: {\n54                            int data_size = buf.remaining();\n55                            byte[] inner_data = new byte[data_size];\n56                            buf.get(inner_data);\n57   \n58                            InputStream is = new ByteArrayInputStream(inner_data);\n59                            ZipUtil.unpack(is, new File(\"/tmp\"));\n60                            break;\n61                       }\n62   \n63                       default:\n64                           throw new Exception(\"unsupported method picker\");\n65                   }\n66               } catch (Exception e) {\n67                   continue; // eat it\n68               }\n69           }\n70       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:\n 704     public static void iterate(InputStream is, ZipEntryCallback action, Charset charset) {\n 705       try {\n 706         ZipInputStream in = null;\n 707         try {\n 708           in = newCloseShieldZipInputStream(is, charset);\n 709           ZipEntry entry;\n 710           while ((entry = in.getNextEntry()) != null) {\n 711             try {\n 712               action.process(in, entry);\n 713             }\n 714             catch (IOException ze) {\n 715               throw new ZipException(\"Failed to process zip entry '\" + entry.getName() + \" with action \" + action, ze);\n 716             }\n 717             catch (ZipBreakException ex) {\n 718               break;\n 719             }\n 720           }\n 721         }\n 722         finally {\n 723           if (in != null) {\n 724             in.close();\n 725           }\n 726         }\n 727       }\n 728       catch (IOException e) {\n 729         throw ZipExceptionUtil.rethrow(e);\n 730       }\n 731     }\n1044     public static void unpack(InputStream is, File outputDir) {\n1045       unpack(is, outputDir, IdentityNameMapper.INSTANCE, null);\n1046     }\n1094     public static void unpack(InputStream is, File outputDir, NameMapper mapper, Charset charset) {\n1095       log.debug(\"Extracting {} into '{}'.\", is, outputDir);\n1096       iterate(is, new Unpacker(outputDir, mapper), charset);\n1097     }\n1149       public void process(InputStream in, ZipEntry zipEntry) throws IOException {\n1150         String name = mapper.map(zipEntry.getName());\n1151         if (name != null) {\n1152           File file = new File(outputDir, name);\n1153           if (zipEntry.isDirectory()) {\n1154             FileUtils.forceMkdir(file);\n1155           }\n1156           else {\n1157             FileUtils.forceMkdir(file.getParentFile());\n1158   \n1159             if (log.isDebugEnabled() && file.exists()) {\n1160               log.debug(\"Overwriting file '{}'.\", zipEntry.getName());\n1161             }\n1162   \n1163             FileUtils.copy(in, file);\n1164           }\n1165   \n1166           ZTFilePermissions permissions = ZipEntryUtil.getZTFilePermissions(zipEntry);\n1167           if (permissions != null) {\n1168             ZTFilePermissionsUtil.getDefaultStategy().setPermissions(file, permissions);\n1169           }\n1170         }\n1171       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/Java6FileApiPermissionsStrategy.java:\n48     public void setPermissions(File file, ZTFilePermissions permissions) {\n49       setExecutable(file, permissions.isOwnerCanExecute(), !permissions.isGroupCanExecute() && !permissions.isOthersCanExecute());\n50       setWritable(file, permissions.isOwnerCanWrite(), !permissions.isGroupCanWrite() && !permissions.isOthersCanWrite());\n51       setReadable(file, permissions.isOwnerCanRead(), !permissions.isGroupCanRead() && !permissions.isOthersCanRead());\n52     }\n54     private boolean setExecutable(File file, boolean executable, boolean ownerOnly) {\n55       return (Boolean) ZTZipReflectionUtil.invoke(setExecutableMethod, file, executable, ownerOnly);\n56     }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java:\n32     static Object invoke(Method method, Object obj, Object... args) throws ZipException {\n33       try {\n34         return method.invoke(obj, args);\n35       }\n36       catch (IllegalAccessException e) {\n37         throw new ZipException(e);\n38       }\n39       catch (InvocationTargetException e) {\n40         throw new ZipException(e);\n41       }\n42       catch (IllegalArgumentException e) {\n43         throw new ZipException(e);\n44       }\n45     }\n",
+            "cost": 0.060230000000000006,
+            "harness_id": "id_1",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java:34:28",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 3
+        },
+        {
+            "blob": [
+                "AAAAAQAAABBQSwMEFAAAAAgAxaYrWu1avjERAAAADwAAAB8AAAAuLi8uLi8uLi8uLi8uLi9qYXp6ZXItdHJhdmVyc2FsS60oyMnPLFFIzs8rSc0rAQBQSwECFAMUAAAACADFpita7Vq+MREAAAAPAAAAHwAAAAAAAAAAAAAAgAEAAAAALi4vLi4vLi4vLi4vLi4vamF6emVyLXRyYXZlcnNhbFBLBQYAAAAAAQABAE0AAABOAAAAAAA="
+            ],
+            "code": "src/ztzip-harnesses/ztzip-harness-one/src/main/java/com/aixcc/ztzip/harnesses/one/ZTZIPOne.java:\n16       public static void main(String[] args) throws Exception {\n17           byte[] input;\n18           if (args.length == 2) {\n19               input = readInput(Path.of(args[0]), args[1]);\n20           } else {\n21               input = getDummyInput();\n22           }\n23           fuzzerTestOneInput(input);\n24       }\n34       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n35           new ZTZIPOne().fuzz(input);\n36       }\n38       private void fuzz(byte[] data) {\n39           if (data == null) {\n40               return;\n41           }\n42   \n43           ByteBuffer buf = ByteBuffer.wrap(data);\n44           int count = buf.getInt();\n45   \n46           if (count > 255)\n47               return;\n48   \n49           for (int i = 0; i < count; i++) {\n50               int picker = buf.getInt();\n51               try {\n52                   switch (picker) {\n53                       case 16: {\n54                            int data_size = buf.remaining();\n55                            byte[] inner_data = new byte[data_size];\n56                            buf.get(inner_data);\n57   \n58                            InputStream is = new ByteArrayInputStream(inner_data);\n59                            ZipUtil.unpack(is, new File(\"/tmp\"));\n60                            break;\n61                       }\n62   \n63                       default:\n64                           throw new Exception(\"unsupported method picker\");\n65                   }\n66               } catch (Exception e) {\n67                   continue; // eat it\n68               }\n69           }\n70       }\n72       public static byte[] readInput(Path corpusDir, String seedId) throws IOException {\n73           // Open file to read the content\n74           Path seedPath = corpusDir.resolve(seedId);\n75           return java.nio.file.Files.readAllBytes(seedPath);\n76       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:\n 449       public void process(InputStream in, ZipEntry zipEntry) throws IOException {\n 450         FileUtils.copy(in, file);\n 451       }\n 704     public static void iterate(InputStream is, ZipEntryCallback action, Charset charset) {\n 705       try {\n 706         ZipInputStream in = null;\n 707         try {\n 708           in = newCloseShieldZipInputStream(is, charset);\n 709           ZipEntry entry;\n 710           while ((entry = in.getNextEntry()) != null) {\n 711             try {\n 712               action.process(in, entry);\n 713             }\n 714             catch (IOException ze) {\n 715               throw new ZipException(\"Failed to process zip entry '\" + entry.getName() + \" with action \" + action, ze);\n 716             }\n 717             catch (ZipBreakException ex) {\n 718               break;\n 719             }\n 720           }\n 721         }\n 722         finally {\n 723           if (in != null) {\n 724             in.close();\n 725           }\n 726         }\n 727       }\n 728       catch (IOException e) {\n 729         throw ZipExceptionUtil.rethrow(e);\n 730       }\n 731     }\n1044     public static void unpack(InputStream is, File outputDir) {\n1045       unpack(is, outputDir, IdentityNameMapper.INSTANCE, null);\n1046     }\n1094     public static void unpack(InputStream is, File outputDir, NameMapper mapper, Charset charset) {\n1095       log.debug(\"Extracting {} into '{}'.\", is, outputDir);\n1096       iterate(is, new Unpacker(outputDir, mapper), charset);\n1097     }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtils.java:\n53     public static void copy(InputStream in, File file) throws IOException {\n54       OutputStream out = new BufferedOutputStream(new FileOutputStream(file));\n55       try {\n56         IOUtils.copy(in, out);\n57       }\n58       finally {\n59         IOUtils.closeQuietly(out);\n60       }\n61     }\n",
+            "cost": 0.4074,
+            "harness_id": "id_1",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/ztzip/src/main/java/org/zeroturnaround/zip/commons/FileUtils.java:54:70",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 4
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/ztzip-harnesses/ztzip-harness-one/src/main/java/com/aixcc/ztzip/harnesses/one/ZTZIPOne.java:\n34       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n35           new ZTZIPOne().fuzz(input);\n36       }\n38       private void fuzz(byte[] data) {\n39           if (data == null) {\n40               return;\n41           }\n42   \n43           ByteBuffer buf = ByteBuffer.wrap(data);\n44           int count = buf.getInt();\n45   \n46           if (count > 255)\n47               return;\n48   \n49           for (int i = 0; i < count; i++) {\n50               int picker = buf.getInt();\n51               try {\n52                   switch (picker) {\n53                       case 16: {\n54                            int data_size = buf.remaining();\n55                            byte[] inner_data = new byte[data_size];\n56                            buf.get(inner_data);\n57   \n58                            InputStream is = new ByteArrayInputStream(inner_data);\n59                            ZipUtil.unpack(is, new File(\"/tmp\"));\n60                            break;\n61                       }\n62   \n63                       default:\n64                           throw new Exception(\"unsupported method picker\");\n65                   }\n66               } catch (Exception e) {\n67                   continue; // eat it\n68               }\n69           }\n70       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:\n 704     public static void iterate(InputStream is, ZipEntryCallback action, Charset charset) {\n 705       try {\n 706         ZipInputStream in = null;\n 707         try {\n 708           in = newCloseShieldZipInputStream(is, charset);\n 709           ZipEntry entry;\n 710           while ((entry = in.getNextEntry()) != null) {\n 711             try {\n 712               action.process(in, entry);\n 713             }\n 714             catch (IOException ze) {\n 715               throw new ZipException(\"Failed to process zip entry '\" + entry.getName() + \" with action \" + action, ze);\n 716             }\n 717             catch (ZipBreakException ex) {\n 718               break;\n 719             }\n 720           }\n 721         }\n 722         finally {\n 723           if (in != null) {\n 724             in.close();\n 725           }\n 726         }\n 727       }\n 728       catch (IOException e) {\n 729         throw ZipExceptionUtil.rethrow(e);\n 730       }\n 731     }\n1044     public static void unpack(InputStream is, File outputDir) {\n1045       unpack(is, outputDir, IdentityNameMapper.INSTANCE, null);\n1046     }\n1094     public static void unpack(InputStream is, File outputDir, NameMapper mapper, Charset charset) {\n1095       log.debug(\"Extracting {} into '{}'.\", is, outputDir);\n1096       iterate(is, new Unpacker(outputDir, mapper), charset);\n1097     }\n2572             public void process(InputStream in, ZipEntry zipEntry) throws IOException {\n2573               if (names.add(zipEntry.getName())) {\n2574                 ZipEntrySource entry = (ZipEntrySource) entryByPath.remove(zipEntry.getName());\n2575                 if (entry != null) {\n2576                   addEntry(entry, out);\n2577                 }\n2578                 else {\n2579                   ZipEntryUtil.copyEntry(zipEntry, in, out);\n2580                 }\n2581               }\n2582               else if (log.isDebugEnabled()) {\n2583                 log.debug(\"Duplicate entry: {}\", zipEntry.getName());\n2584               }\n2585             }\n2930     private static void addEntry(ZipEntrySource entry, ZipOutputStream out) throws IOException {\n2931       out.putNextEntry(entry.getEntry());\n2932       InputStream in = entry.getInputStream();\n2933       if (in != null) {\n2934         try {\n2935           IOUtils.copy(in, out);\n2936         }\n2937         finally {\n2938           IOUtils.closeQuietly(in);\n2939         }\n2940       }\n2941       out.closeEntry();\n2942     }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/FileSource.java:\n49     public InputStream getInputStream() throws IOException {\n50       if (file.isDirectory()) {\n51         return null;\n52       }\n53       else {\n54         return new BufferedInputStream(new FileInputStream(file));\n55       }\n56     }\n",
+            "cost": 0.060700000000000004,
+            "harness_id": "id_1",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/ztzip/src/main/java/org/zeroturnaround/zip/FileSource.java:54:58",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 5
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/ztzip-harnesses/ztzip-harness-one/src/main/java/com/aixcc/ztzip/harnesses/one/ZTZIPOne.java:\n34       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n35           new ZTZIPOne().fuzz(input);\n36       }\n38       private void fuzz(byte[] data) {\n39           if (data == null) {\n40               return;\n41           }\n42   \n43           ByteBuffer buf = ByteBuffer.wrap(data);\n44           int count = buf.getInt();\n45   \n46           if (count > 255)\n47               return;\n48   \n49           for (int i = 0; i < count; i++) {\n50               int picker = buf.getInt();\n51               try {\n52                   switch (picker) {\n53                       case 16: {\n54                            int data_size = buf.remaining();\n55                            byte[] inner_data = new byte[data_size];\n56                            buf.get(inner_data);\n57   \n58                            InputStream is = new ByteArrayInputStream(inner_data);\n59                            ZipUtil.unpack(is, new File(\"/tmp\"));\n60                            break;\n61                       }\n62   \n63                       default:\n64                           throw new Exception(\"unsupported method picker\");\n65                   }\n66               } catch (Exception e) {\n67                   continue; // eat it\n68               }\n69           }\n70       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:\n 704     public static void iterate(InputStream is, ZipEntryCallback action, Charset charset) {\n 705       try {\n 706         ZipInputStream in = null;\n 707         try {\n 708           in = newCloseShieldZipInputStream(is, charset);\n 709           ZipEntry entry;\n 710           while ((entry = in.getNextEntry()) != null) {\n 711             try {\n 712               action.process(in, entry);\n 713             }\n 714             catch (IOException ze) {\n 715               throw new ZipException(\"Failed to process zip entry '\" + entry.getName() + \" with action \" + action, ze);\n 716             }\n 717             catch (ZipBreakException ex) {\n 718               break;\n 719             }\n 720           }\n 721         }\n 722         finally {\n 723           if (in != null) {\n 724             in.close();\n 725           }\n 726         }\n 727       }\n 728       catch (IOException e) {\n 729         throw ZipExceptionUtil.rethrow(e);\n 730       }\n 731     }\n1044     public static void unpack(InputStream is, File outputDir) {\n1045       unpack(is, outputDir, IdentityNameMapper.INSTANCE, null);\n1046     }\n1094     public static void unpack(InputStream is, File outputDir, NameMapper mapper, Charset charset) {\n1095       log.debug(\"Extracting {} into '{}'.\", is, outputDir);\n1096       iterate(is, new Unpacker(outputDir, mapper), charset);\n1097     }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/Zips.java:\n645       public void process(InputStream in, ZipEntry zipEntry) throws IOException {\n646         String entryName = zipEntry.getName();\n647   \n648         if (visitedNames.contains(entryName)) {\n649           return;\n650         }\n651         visitedNames.add(entryName);\n652   \n653         ZipEntryTransformer transformer = (ZipEntryTransformer) entryByPath.remove(entryName);\n654         if (transformer == null) { // no transformer\n655           ZipEntryUtil.copyEntry(zipEntry, in, out, preserveTimestapms);\n656         }\n657         else { // still transfom entry\n658           transformer.transform(in, zipEntry, out);\n659         }\n660       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/transform/FileZipEntryTransformer.java:\n46     public void transform(InputStream in, ZipEntry zipEntry, ZipOutputStream out) throws IOException {\n47       File inFile = null;\n48       File outFile = null;\n49       try {\n50         inFile = File.createTempFile(\"zip\", null);\n51         outFile = File.createTempFile(\"zip\", null);\n52         copy(in, inFile);\n53         transform(zipEntry, inFile, outFile);\n54         FileSource source = new FileSource(zipEntry.getName(), outFile);\n55         ZipEntrySourceZipEntryTransformer.addEntry(source, out);\n56       }\n57       finally {\n58         FileUtils.deleteQuietly(inFile);\n59         FileUtils.deleteQuietly(outFile);\n60       }\n61     }\n63     private static void copy(InputStream in, File file) throws IOException {\n64       OutputStream out = new BufferedOutputStream(new FileOutputStream(file));\n65       try {\n66         IOUtils.copy(in, out);\n67       }\n68       finally {\n69         IOUtils.closeQuietly(out);\n70       }\n71     }\n",
+            "cost": 0.057755,
+            "harness_id": "id_1",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/ztzip/src/main/java/org/zeroturnaround/zip/transform/FileZipEntryTransformer.java:64:70",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 6
+        },
+        {
+            "blob": [
+                "AQAAABAAAABQSwMEFAAAAAgA+6YrWl6sUQQPAAAADQAAAA0AAABqYXorInplciIudHh0SynNza1USM7PK0nNKwEAUEsBAhQDFAAAAAgA+6YrWl6sUQQPAAAADQAAAA0AAAAAAAAAAAAAAIABAAAAAGpheisiemVyIi50eHRQSwUGAAAAAAEAAQA7AAAAOgAAAAAA"
+            ],
+            "code": "src/ztzip-harnesses/ztzip-harness-one/src/main/java/com/aixcc/ztzip/harnesses/one/ZTZIPOne.java:\n16       public static void main(String[] args) throws Exception {\n17           byte[] input;\n18           if (args.length == 2) {\n19               input = readInput(Path.of(args[0]), args[1]);\n20           } else {\n21               input = getDummyInput();\n22           }\n23           fuzzerTestOneInput(input);\n24       }\n34       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n35           new ZTZIPOne().fuzz(input);\n36       }\n38       private void fuzz(byte[] data) {\n39           if (data == null) {\n40               return;\n41           }\n42   \n43           ByteBuffer buf = ByteBuffer.wrap(data);\n44           int count = buf.getInt();\n45   \n46           if (count > 255)\n47               return;\n48   \n49           for (int i = 0; i < count; i++) {\n50               int picker = buf.getInt();\n51               try {\n52                   switch (picker) {\n53                       case 16: {\n54                            int data_size = buf.remaining();\n55                            byte[] inner_data = new byte[data_size];\n56                            buf.get(inner_data);\n57   \n58                            InputStream is = new ByteArrayInputStream(inner_data);\n59                            ZipUtil.unpack(is, new File(\"/tmp\"));\n60                            break;\n61                       }\n62   \n63                       default:\n64                           throw new Exception(\"unsupported method picker\");\n65                   }\n66               } catch (Exception e) {\n67                   continue; // eat it\n68               }\n69           }\n70       }\n72       public static byte[] readInput(Path corpusDir, String seedId) throws IOException {\n73           // Open file to read the content\n74           Path seedPath = corpusDir.resolve(seedId);\n75           return java.nio.file.Files.readAllBytes(seedPath);\n76       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZipUtil.java:\n 704     public static void iterate(InputStream is, ZipEntryCallback action, Charset charset) {\n 705       try {\n 706         ZipInputStream in = null;\n 707         try {\n 708           in = newCloseShieldZipInputStream(is, charset);\n 709           ZipEntry entry;\n 710           while ((entry = in.getNextEntry()) != null) {\n 711             try {\n 712               action.process(in, entry);\n 713             }\n 714             catch (IOException ze) {\n 715               throw new ZipException(\"Failed to process zip entry '\" + entry.getName() + \" with action \" + action, ze);\n 716             }\n 717             catch (ZipBreakException ex) {\n 718               break;\n 719             }\n 720           }\n 721         }\n 722         finally {\n 723           if (in != null) {\n 724             in.close();\n 725           }\n 726         }\n 727       }\n 728       catch (IOException e) {\n 729         throw ZipExceptionUtil.rethrow(e);\n 730       }\n 731     }\n1044     public static void unpack(InputStream is, File outputDir) {\n1045       unpack(is, outputDir, IdentityNameMapper.INSTANCE, null);\n1046     }\n1094     public static void unpack(InputStream is, File outputDir, NameMapper mapper, Charset charset) {\n1095       log.debug(\"Extracting {} into '{}'.\", is, outputDir);\n1096       iterate(is, new Unpacker(outputDir, mapper), charset);\n1097     }\n1149       public void process(InputStream in, ZipEntry zipEntry) throws IOException {\n1150         String name = mapper.map(zipEntry.getName());\n1151         if (name != null) {\n1152           File file = new File(outputDir, name);\n1153           if (zipEntry.isDirectory()) {\n1154             FileUtils.forceMkdir(file);\n1155           }\n1156           else {\n1157             FileUtils.forceMkdir(file.getParentFile());\n1158   \n1159             if (log.isDebugEnabled() && file.exists()) {\n1160               log.debug(\"Overwriting file '{}'.\", zipEntry.getName());\n1161             }\n1162   \n1163             FileUtils.copy(in, file);\n1164           }\n1165   \n1166           ZTFilePermissions permissions = ZipEntryUtil.getZTFilePermissions(zipEntry);\n1167           if (permissions != null) {\n1168             ZTFilePermissionsUtil.getDefaultStategy().setPermissions(file, permissions);\n1169           }\n1170         }\n1171       }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/Java6FileApiPermissionsStrategy.java:\n48     public void setPermissions(File file, ZTFilePermissions permissions) {\n49       setExecutable(file, permissions.isOwnerCanExecute(), !permissions.isGroupCanExecute() && !permissions.isOthersCanExecute());\n50       setWritable(file, permissions.isOwnerCanWrite(), !permissions.isGroupCanWrite() && !permissions.isOthersCanWrite());\n51       setReadable(file, permissions.isOwnerCanRead(), !permissions.isGroupCanRead() && !permissions.isOthersCanRead());\n52     }\n54     private boolean setExecutable(File file, boolean executable, boolean ownerOnly) {\n55       return (Boolean) ZTZipReflectionUtil.invoke(setExecutableMethod, file, executable, ownerOnly);\n56     }\n\nsrc/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java:\n32     static Object invoke(Method method, Object obj, Object... args) throws ZipException {\n33       try {\n34         return method.invoke(obj, args);\n35       }\n36       catch (IllegalAccessException e) {\n37         throw new ZipException(e);\n38       }\n39       catch (InvocationTargetException e) {\n40         throw new ZipException(e);\n41       }\n42       catch (IllegalArgumentException e) {\n43         throw new ZipException(e);\n44       }\n45     }\n",
+            "cost": 0.44723,
+            "harness_id": "id_1",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/ztzip/src/main/java/org/zeroturnaround/zip/ZTZipReflectionUtil.java:34:14",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 7
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "id_1",
+            "blob": [
+                "",
+                "AAAAAQAAABBQSwMEFAAAAAgAnaYrWqkwxf4JAAAABwAAAA8AAAAiIiJqYXoiKyJ6ZXIiIiJLzs8rSc0rAQBQSwECFAMUAAAACACdpitaqTDF/gkAAAAHAAAADwAAAAAAAAAAAAAAgAEAAAAAIiIiamF6IisiemVyIiIiUEsFBgAAAAABAAEAPQAAADYAAAAAAA==",
+                "AAAAAQAAABBQSwMEFAAAAAgAxaYrWu1avjERAAAADwAAAB8AAAAuLi8uLi8uLi8uLi8uLi9qYXp6ZXItdHJhdmVyc2FsS60oyMnPLFFIzs8rSc0rAQBQSwECFAMUAAAACADFpita7Vq+MREAAAAPAAAAHwAAAAAAAAAAAAAAgAEAAAAALi4vLi4vLi4vLi4vLi4vamF6emVyLXRyYXZlcnNhbFBLBQYAAAAAAQABAE0AAABOAAAAAAA=",
+                "AQAAABAAAABQSwMEFAAAAAgA+6YrWl6sUQQPAAAADQAAAA0AAABqYXorInplciIudHh0SynNza1USM7PK0nNKwEAUEsBAhQDFAAAAAgA+6YrWl6sUQQPAAAADQAAAA0AAAAAAAAAAAAAAIABAAAAAGpheisiemVyIi50eHRQSwUGAAAAAAEAAQA7AAAAOgAAAAAA"
+            ]
+        }
+    ]
+}

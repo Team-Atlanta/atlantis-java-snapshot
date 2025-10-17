@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Jazzer wrapper."""
+
+import os
+import sys
+from typing import NoReturn
+
+
+def die(msg: str, code: int = 1) -> NoReturn:
+    print(msg, file=sys.stderr)
+    sys.exit(code)
+
+
+def main() -> None:
+    jazzer_dir = os.environ.get("JAZZER_DIR")
+    if not jazzer_dir:
+        die(
+            "JAZZER_DIR is not set. Please set it to the directory containing the jazzer binary."
+        )
+    jazzer_bin = os.path.join(jazzer_dir, "jazzer")
+    if not (os.path.isfile(jazzer_bin) and os.access(jazzer_bin, os.X_OK)):
+        die(
+            "The jazzer binary does not exist or is not executable in the specified JAZZER_DIR."
+        )
+
+    atl_mock_dir = os.environ.get("ATL_MOCK_JAZZER_DIR")
+    adjust_cp = (atl_mock_dir is None) or (jazzer_dir != atl_mock_dir)
+
+    new_argv = [jazzer_bin]
+    if adjust_cp:
+        suffix = f":{jazzer_dir}/jazzer_api_deploy.jar:{jazzer_dir}/jazzer_junit.jar"
+        for arg in sys.argv[1:]:
+            if arg.startswith("--cp="):
+                new_argv.append(arg + suffix)
+            else:
+                new_argv.append(arg)
+    else:
+        new_argv.extend(sys.argv[1:])
+
+    os.execv(jazzer_bin, new_argv)
+
+
+if __name__ == "__main__":
+    main()

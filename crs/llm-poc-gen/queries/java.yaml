@@ -1,0 +1,224 @@
+fuzzer_entry: "fuzzerTestOneInput"
+
+
+breakpoint: "Breakpoint hit:"
+
+
+fuzzer_entries: |
+  List({harnesses})
+    .flatMap(x => cpg.method.filenameExact(x._1).nameExact(x._2).id)
+
+
+callee_tree: |
+  def is_super_class(child: String, parent: String): Boolean = {{
+    val visited: mutable.Set[String] = mutable.Set()
+    var next = Set(child)
+    while (next.size > 0) {{
+      visited ++= next
+      if (visited.contains(parent)) return true
+      next = next.flatMap(
+        x => cpg.typeDecl.fullNameExact(x).inheritsFromTypeFullName.l).toSet -- visited
+    }}
+    return false
+  }}
+  def to_regex_safe(input: String): String = {{
+    input
+      .replace("(", "\\(")
+      .replace(")", "\\)")
+      .replace("$", "\\$")
+      .replace("[", "\\[")
+      .replace("]", "\\]")
+  }}
+  def abstract_method(c: Call): List[Method] = {{
+    val abstract_methods: List[Method] = c.callee
+      .filter(x => x.code.startsWith("abstract ") || x.code.contains(" abstract "))
+      .l
+    if (abstract_methods.size == 0)
+      return List()
+    def types(name: String): List[TypeDecl] = {{
+      val types: mutable.Set[String] = mutable.Set(name)
+      var prevSize: Int = 0
+      while (prevSize != types.size) {{
+        prevSize = types.size
+        types ++= cpg.typeDecl.filter(_.inheritsFromTypeFullName.toSet.intersect(types).nonEmpty).fullName.l
+      }}
+      types.flatMap(x => cpg.typeDecl.fullName(to_regex_safe(x)).l).l
+    }}
+    abstract_methods
+      .map(x => (x.fullName, x.parameter.where(_.orderGt(0)).l.zipWithIndex
+        .filter(_._1.code.startsWith("T ")).map(_._2)))
+      .map(x =>
+        x._1.substring(0, x._1.indexOf("(")+1) +
+        x._1.substring(x._1.indexOf("(")+1, x._1.lastIndexOf(")"))
+          .split(",")
+          .zipWithIndex.
+          collect{{
+            case (a, b) if x._2.contains(b) => ".*"
+            case (a, b) => a
+          }}.mkString(",") +
+        x._1.substring(x._1.lastIndexOf(")"))
+      )
+      .map(to_regex_safe)
+      .map{{x =>
+        val y = x.substring(0, x.indexOf(":")-1).lastIndexOf(".")
+        (x.substring(0, y), ".*" + x.substring(y+1))
+      }}
+      .flatMap(x => (types(x._1).map(_.id).flatMap(cpg.typeDecl.id(_)).method.where(_.fullName(x._2))))
+      .l
+  }}
+  def guess_child(call: Call): List[Method] = {{
+    val e = call.argument(0).collect{{case x: Identifier => x}}.l
+    val s = e.dominatedBy
+      .collect{{case x: Call => x}}
+      .where(_.nameExact("<operator>.assignment"))
+      .argument(2)
+        .collect{{case x: Call => x}}
+        .where(_.nameExact("<operator>.alloc"))
+        .filter(x => is_super_class(x.typeFullName, e.typeFullName.headOption.getOrElse("")))
+        .l
+    val r1 = e.reachableBy(s).l
+    val r2 = r1.flatMap{{x =>
+      try {{
+        val idx0 = call.methodFullName.indexOf(":")
+        val idx1 = call.methodFullName.substring(0, idx0).lastIndexOf(".")
+        cpg.method.fullNameExact(x.typeFullName + call.methodFullName.substring(idx1)).l
+      }} catch {{
+        case e: Exception => List()
+      }}
+    }}
+    r2.size match {{
+      case 0 => call.callee.l
+      case _ => r2
+    }}
+  }}
+  def getCalleeTree(method: Method, visited: mutable.Set[Long], maxDepth: Int = 13): List[Map[String, Any]] = {{
+    def getCallee(method: Method): List[Method] = {{
+      // Basically, this can easily done using method.callee.l.
+      // But we can add some other approaches to get call edges heuristically.
+      def base(): List[Method] = {{
+        val c1 = method.call.whereNot(_.name("^<operator>.*")).l
+        val c2 = c1.filter(x => cpg.method.fullNameExact(x.methodFullName).code("^(abstract .*)|(.* abstract .*)").size > 0)
+        val c3 = c1.filterNot(c2.contains)
+        c3.callee.l ++ c2.flatMap(guess_child) ++ c3.flatMap(abstract_method)
+      }}
+      def method_as_argument(): List[Method] = {{
+        method.call.argument.where(_.isMethodRef)
+          .map(_.asInstanceOf[MethodRef].methodFullName)
+          .map(m => cpg.method.where(_.fullNameExact(m)).l)
+          .l
+          .flatten
+      }}
+      def from_ancestors(): List[Method] = {{
+        def getMethodFromAncestor(t: TypeDecl, name: String, v_ancestors: mutable.Set[Long]): List[Method] = {{
+          if (v_ancestors.contains(t.id)) {{
+              return List()
+          }}
+          v_ancestors += t.id
+          val parents = t.inheritsFromTypeFullName
+            .map(name => cpg.typeDecl.where(_.fullNameExact(name)))
+            .flatten
+            .l
+          if (parents.size == 0) {{
+            return List()
+          }}
+          val methods = parents.map(_.method.where(_.fullName(".*" + name + "$"))).flatten.l
+          if (methods.size >= 1) {{
+            return methods
+          }}
+          parents.map(getMethodFromAncestor(_, name, v_ancestors)).flatten
+        }}
+        method.callee.where(_.isExternal).where(_.fullName("^([^:]+\\\\.[^:]+):([^:]+\\\\(.*\\\\))$"))
+          .map{{m =>
+            val position = m.fullName.substring(0, m.fullName.indexOf(":")).lastIndexOf(".")
+            val typeDeclName = m.fullName.substring(0, position)
+            // NOTE: We should add more escape for special characters in joern regex.
+            // Please add whenever you find special characters here.
+            val methodName = to_regex_safe(m.fullName.substring(position+1))
+            cpg.typeDecl.where(_.fullNameExact(typeDeclName))
+              .map(t => getMethodFromAncestor(t, methodName, mutable.Set[Long]()))
+          }}
+          .flatten
+          .flatten
+          .l
+      }}
+      (base() ++ method_as_argument() ++ from_ancestors())
+        .filterNot(_.isExternal)
+        .distinctBy(_.fullName)
+    }}
+    val queue = mutable.Queue[(Method, Int)]((method, 1))
+    val result = mutable.ListBuffer[Map[String, Any]]()
+    while (queue.nonEmpty) {{
+      val (currentMethod, depth) = queue.dequeue()
+      if (!visited.contains(currentMethod.id) && depth <= maxDepth) {{
+        visited += currentMethod.id
+        val callees = getCallee(currentMethod)
+          .filterNot {{ x => x.filename.contains("/src/test/") }}
+          .map(_.id)
+        val nodeData = Map(
+          "id" -> currentMethod.id,
+          "callees" -> callees
+        )
+        result += nodeData
+        queue ++= callees.flatMap(callee =>
+          cpg.method.id(callee).l.map(m => (m, depth + 1))
+        )
+      }}
+    }}
+    result.toList
+  }}
+  val ids: Set[Long] = try {{
+    implicit val formats: Formats = DefaultFormats
+    val root = parse(Source.fromFile("{path}").getLines().mkString)
+    val nodes = (root \ "nodes")
+    nodes match {{
+      case JArray(nodeList) =>
+        nodeList.flatMap {{ node =>
+          (node \ "id").extractOpt[Long]
+        }}.toSet
+      case _ =>
+        Set.empty[Long]
+    }}
+  }} catch {{
+    case e: Exception => Set.empty[Long]
+  }}
+  val targets = Set({targets})
+  val visited = (ids -- targets).to(mutable.Set)
+  targets
+    .flatMap(x => cpg.method.id(x).l)
+    .flatMap(x => getCalleeTree(x, visited, {call_depth})).l
+
+
+sink_from_sarif: |
+  val nodes = cpg.method
+  .where(_.filename(".*{uri}"))
+  .where(_.lineNumberLte({start_line}))
+  .where(_.lineNumberEndGte({start_line}))
+  .cfgNode
+  .filter(_.lineNumber.contains({start_line}))
+  if ({start_column} != -1) {{
+    query = query.filter(_.columnNumber.contains({start_column}))
+  }}
+  val result = query.headOption.map(_.id).toList
+sta: |
+  def entry = cpg.method.where(_.typeDecl.filenameExact("{harness}")).where(_.nameExact("fuzzerTestOneInput"))
+  def src = entry.parameter
+  def sink = cpg.ids({sink_ids})
+      .collect{{case x: CfgNode => x}}
+  val paths = sink.reachableByFlows(src).l
+  paths.map(_.elements.collect{{case x: CfgNode => x}})
+      .groupBy(_.lastOption.id.headOption)
+      .collect{{case (Some(a), b) => (a, b)}}
+      .view.mapValues(_
+          .map(_.filterNot(x => x.isInstanceOf[MethodParameterIn] || x.isInstanceOf[MethodParameterOut])
+          .map(x => (x.method.filename, x.method.fullName, x.lineNumber, x.columnNumber.getOrElse(-1)))
+          .collect{{case (a, b, Some(c), d) => Map("filename" -> a, "fullName" -> b, "linNumber" -> c, "columnNumber" -> d)}}))
+      .toMap
+cg: |
+  def srcs = cpg.method.where(_.typeDecl.filenameExact("{harness}")).where(_.nameExact("fuzzerTestOneInput")).id
+  def dsts = cpg.ids({sink_ids})
+      .collect{{case x: CfgNode => x}}
+      .groupBy(_.method.id).view.mapValues(_.map(_.id))
+  Map(
+      "srcs" -> srcs.l,
+      "dst_table" -> dsts.toMap
+  )

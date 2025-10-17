@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>T4AndT6Compression.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.itu_t4</a> &gt; <span class="el_source">T4AndT6Compression.java</span></div><h1>T4AndT6Compression.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.itu_t4;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.formats.tiff.itu_t4.T4_T6_Tables.Entry;
+
+public final class T4AndT6Compression {
+<span class="nc" id="L27">    private static final HuffmanTree&lt;Integer&gt; WHITE_RUN_LENGTHS = new HuffmanTree&lt;&gt;();</span>
+<span class="nc" id="L28">    private static final HuffmanTree&lt;Integer&gt; BLACK_RUN_LENGTHS = new HuffmanTree&lt;&gt;();</span>
+<span class="nc" id="L29">    private static final HuffmanTree&lt;Entry&gt; CONTROL_CODES = new HuffmanTree&lt;&gt;();</span>
+
+    public static final int WHITE = 0;
+    public static final int BLACK = 1;
+
+    static {
+        try {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">            for (final Entry entry : T4_T6_Tables.WHITE_TERMINATING_CODES) {</span>
+<span class="nc" id="L37">                WHITE_RUN_LENGTHS.insert(entry.bitString, entry.value);</span>
+            }
+<span class="nc bnc" id="L39" title="All 2 branches missed.">            for (final Entry entry : T4_T6_Tables.WHITE_MAKE_UP_CODES) {</span>
+<span class="nc" id="L40">                WHITE_RUN_LENGTHS.insert(entry.bitString, entry.value);</span>
+            }
+<span class="nc bnc" id="L42" title="All 2 branches missed.">            for (final Entry entry : T4_T6_Tables.BLACK_TERMINATING_CODES) {</span>
+<span class="nc" id="L43">                BLACK_RUN_LENGTHS.insert(entry.bitString, entry.value);</span>
+            }
+<span class="nc bnc" id="L45" title="All 2 branches missed.">            for (final Entry entry : T4_T6_Tables.BLACK_MAKE_UP_CODES) {</span>
+<span class="nc" id="L46">                BLACK_RUN_LENGTHS.insert(entry.bitString, entry.value);</span>
+            }
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            for (final Entry entry : T4_T6_Tables.ADDITIONAL_MAKE_UP_CODES) {</span>
+<span class="nc" id="L49">                WHITE_RUN_LENGTHS.insert(entry.bitString, entry.value);</span>
+<span class="nc" id="L50">                BLACK_RUN_LENGTHS.insert(entry.bitString, entry.value);</span>
+            }
+<span class="nc" id="L52">            CONTROL_CODES.insert(T4_T6_Tables.EOL.bitString, T4_T6_Tables.EOL);</span>
+<span class="nc" id="L53">            CONTROL_CODES.insert(T4_T6_Tables.EOL13.bitString, T4_T6_Tables.EOL13);</span>
+<span class="nc" id="L54">            CONTROL_CODES.insert(T4_T6_Tables.EOL14.bitString, T4_T6_Tables.EOL14);</span>
+<span class="nc" id="L55">            CONTROL_CODES.insert(T4_T6_Tables.EOL15.bitString, T4_T6_Tables.EOL15);</span>
+<span class="nc" id="L56">            CONTROL_CODES.insert(T4_T6_Tables.EOL16.bitString, T4_T6_Tables.EOL16);</span>
+<span class="nc" id="L57">            CONTROL_CODES.insert(T4_T6_Tables.EOL17.bitString, T4_T6_Tables.EOL17);</span>
+<span class="nc" id="L58">            CONTROL_CODES.insert(T4_T6_Tables.EOL18.bitString, T4_T6_Tables.EOL18);</span>
+<span class="nc" id="L59">            CONTROL_CODES.insert(T4_T6_Tables.EOL19.bitString, T4_T6_Tables.EOL19);</span>
+<span class="nc" id="L60">            CONTROL_CODES.insert(T4_T6_Tables.P.bitString, T4_T6_Tables.P);</span>
+<span class="nc" id="L61">            CONTROL_CODES.insert(T4_T6_Tables.H.bitString, T4_T6_Tables.H);</span>
+<span class="nc" id="L62">            CONTROL_CODES.insert(T4_T6_Tables.V0.bitString, T4_T6_Tables.V0);</span>
+<span class="nc" id="L63">            CONTROL_CODES.insert(T4_T6_Tables.VL1.bitString, T4_T6_Tables.VL1);</span>
+<span class="nc" id="L64">            CONTROL_CODES.insert(T4_T6_Tables.VL2.bitString, T4_T6_Tables.VL2);</span>
+<span class="nc" id="L65">            CONTROL_CODES.insert(T4_T6_Tables.VL3.bitString, T4_T6_Tables.VL3);</span>
+<span class="nc" id="L66">            CONTROL_CODES.insert(T4_T6_Tables.VR1.bitString, T4_T6_Tables.VR1);</span>
+<span class="nc" id="L67">            CONTROL_CODES.insert(T4_T6_Tables.VR2.bitString, T4_T6_Tables.VR2);</span>
+<span class="nc" id="L68">            CONTROL_CODES.insert(T4_T6_Tables.VR3.bitString, T4_T6_Tables.VR3);</span>
+<span class="nc" id="L69">        } catch (final ImagingException cannotHappen) {</span>
+<span class="nc" id="L70">            throw new IllegalStateException(cannotHappen);</span>
+<span class="nc" id="L71">        }</span>
+<span class="nc" id="L72">    }</span>
+
+    private static int changingElementAt(final int[] line, final int position) {
+<span class="nc bnc" id="L75" title="All 4 branches missed.">        if (position &lt; 0 || position &gt;= line.length) {</span>
+<span class="nc" id="L76">            return WHITE;</span>
+        }
+<span class="nc" id="L78">        return line[position];</span>
+    }
+
+    private static void compress1DLine(final BitInputStreamFlexible inputStream, final BitArrayOutputStream outputStream, final int[] referenceLine,
+            final int width) throws ImagingException {
+<span class="nc" id="L83">        int color = WHITE;</span>
+<span class="nc" id="L84">        int runLength = 0;</span>
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        for (int x = 0; x &lt; width; x++) {</span>
+            try {
+<span class="nc" id="L88">                final int nextColor = inputStream.readBits(1);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                if (referenceLine != null) {</span>
+<span class="nc" id="L90">                    referenceLine[x] = nextColor;</span>
+                }
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                if (color == nextColor) {</span>
+<span class="nc" id="L93">                    ++runLength;</span>
+                } else {
+<span class="nc" id="L95">                    writeRunLength(outputStream, runLength, color);</span>
+<span class="nc" id="L96">                    color = nextColor;</span>
+<span class="nc" id="L97">                    runLength = 1;</span>
+                }
+<span class="nc" id="L99">            } catch (final IOException ioException) {</span>
+<span class="nc" id="L100">                throw new ImagingException(&quot;Error reading image to compress&quot;, ioException);</span>
+<span class="nc" id="L101">            }</span>
+        }
+
+<span class="nc" id="L104">        writeRunLength(outputStream, runLength, color);</span>
+<span class="nc" id="L105">    }</span>
+
+    /**
+     * Compressed with the &quot;Modified Huffman&quot; encoding of section 10 in the TIFF6 specification. No EOLs, no RTC, rows are padded to end on a byte boundary.
+     *
+     * @param uncompressed uncompressed byte data
+     * @param width        image width
+     * @param height       image height
+     * @return the compressed data
+     * @throws ImagingException if it fails to write the compressed data
+     */
+    public static byte[] compressModifiedHuffman(final byte[] uncompressed, final int width, final int height) throws ImagingException {
+<span class="nc" id="L117">        final BitInputStreamFlexible inputStream = new BitInputStreamFlexible(new ByteArrayInputStream(uncompressed));</span>
+<span class="nc" id="L118">        try (BitArrayOutputStream outputStream = new BitArrayOutputStream()) {</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc" id="L120">                compress1DLine(inputStream, outputStream, null, width);</span>
+<span class="nc" id="L121">                inputStream.flushCache();</span>
+<span class="nc" id="L122">                outputStream.flush();</span>
+            }
+<span class="nc" id="L124">            return outputStream.toByteArray();</span>
+        }
+    }
+
+    private static int compressT(final int a0, final int a1, final int b1, final BitArrayOutputStream outputStream, final int codingA0Color,
+            final int[] codingLine) {
+<span class="nc" id="L130">        final int a1b1 = a1 - b1;</span>
+<span class="nc bnc" id="L131" title="All 4 branches missed.">        if (-3 &lt;= a1b1 &amp;&amp; a1b1 &lt;= 3) {</span>
+            T4_T6_Tables.Entry entry;
+<span class="nc bnc" id="L133" title="All 7 branches missed.">            switch (a1b1) {</span>
+            case -3:
+<span class="nc" id="L135">                entry = T4_T6_Tables.VL3;</span>
+<span class="nc" id="L136">                break;</span>
+            case -2:
+<span class="nc" id="L138">                entry = T4_T6_Tables.VL2;</span>
+<span class="nc" id="L139">                break;</span>
+            case -1:
+<span class="nc" id="L141">                entry = T4_T6_Tables.VL1;</span>
+<span class="nc" id="L142">                break;</span>
+            case 0:
+<span class="nc" id="L144">                entry = T4_T6_Tables.V0;</span>
+<span class="nc" id="L145">                break;</span>
+            case 1:
+<span class="nc" id="L147">                entry = T4_T6_Tables.VR1;</span>
+<span class="nc" id="L148">                break;</span>
+            case 2:
+<span class="nc" id="L150">                entry = T4_T6_Tables.VR2;</span>
+<span class="nc" id="L151">                break;</span>
+            default:
+<span class="nc" id="L153">                entry = T4_T6_Tables.VR3;</span>
+                break;
+            }
+<span class="nc" id="L156">            entry.writeBits(outputStream);</span>
+<span class="nc" id="L157">            return a1;</span>
+        }
+<span class="nc" id="L159">        final int a2 = nextChangingElement(codingLine, 1 - codingA0Color, a1 + 1);</span>
+<span class="nc" id="L160">        final int a0a1 = a1 - a0;</span>
+<span class="nc" id="L161">        final int a1a2 = a2 - a1;</span>
+<span class="nc" id="L162">        T4_T6_Tables.H.writeBits(outputStream);</span>
+<span class="nc" id="L163">        writeRunLength(outputStream, a0a1, codingA0Color);</span>
+<span class="nc" id="L164">        writeRunLength(outputStream, a1a2, 1 - codingA0Color);</span>
+<span class="nc" id="L165">        return a2;</span>
+    }
+
+    public static byte[] compressT4_1D(final byte[] uncompressed, final int width, final int height, final boolean hasFill) throws ImagingException {
+<span class="nc" id="L169">        final BitInputStreamFlexible inputStream = new BitInputStreamFlexible(new ByteArrayInputStream(uncompressed));</span>
+<span class="nc" id="L170">        try (BitArrayOutputStream outputStream = new BitArrayOutputStream()) {</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">            if (hasFill) {</span>
+<span class="nc" id="L172">                T4_T6_Tables.EOL16.writeBits(outputStream);</span>
+            } else {
+<span class="nc" id="L174">                T4_T6_Tables.EOL.writeBits(outputStream);</span>
+            }
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc" id="L178">                compress1DLine(inputStream, outputStream, null, width);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                if (hasFill) {</span>
+<span class="nc" id="L180">                    int bitsAvailable = outputStream.getBitsAvailableInCurrentByte();</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">                    if (bitsAvailable &lt; 4) {</span>
+<span class="nc" id="L182">                        outputStream.flush();</span>
+<span class="nc" id="L183">                        bitsAvailable = 8;</span>
+                    }
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                    for (; bitsAvailable &gt; 4; bitsAvailable--) {</span>
+<span class="nc" id="L186">                        outputStream.writeBit(0);</span>
+                    }
+                }
+<span class="nc" id="L189">                T4_T6_Tables.EOL.writeBits(outputStream);</span>
+<span class="nc" id="L190">                inputStream.flushCache();</span>
+            }
+
+<span class="nc" id="L193">            return outputStream.toByteArray();</span>
+        }
+    }
+
+    public static byte[] compressT4_2D(final byte[] uncompressed, final int width, final int height, final boolean hasFill, final int parameterK)
+            throws ImagingException {
+<span class="nc" id="L199">        final BitInputStreamFlexible inputStream = new BitInputStreamFlexible(new ByteArrayInputStream(uncompressed));</span>
+<span class="nc" id="L200">        final BitArrayOutputStream outputStream = new BitArrayOutputStream();</span>
+<span class="nc" id="L201">        int[] referenceLine = Allocator.intArray(width);</span>
+<span class="nc" id="L202">        int[] codingLine = Allocator.intArray(width);</span>
+<span class="nc" id="L203">        int kCounter = 0;</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        if (hasFill) {</span>
+<span class="nc" id="L205">            T4_T6_Tables.EOL16.writeBits(outputStream);</span>
+        } else {
+<span class="nc" id="L207">            T4_T6_Tables.EOL.writeBits(outputStream);</span>
+        }
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">            if (kCounter &gt; 0) {</span>
+                // 2D
+<span class="nc" id="L213">                outputStream.writeBit(0);</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">                for (int i = 0; i &lt; width; i++) {</span>
+                    try {
+<span class="nc" id="L216">                        codingLine[i] = inputStream.readBits(1);</span>
+<span class="nc" id="L217">                    } catch (final IOException ioException) {</span>
+<span class="nc" id="L218">                        throw new ImagingException(&quot;Error reading image to compress&quot;, ioException);</span>
+<span class="nc" id="L219">                    }</span>
+                }
+<span class="nc" id="L221">                int codingA0Color = WHITE;</span>
+<span class="nc" id="L222">                int referenceA0Color = WHITE;</span>
+<span class="nc" id="L223">                int a1 = nextChangingElement(codingLine, codingA0Color, 0);</span>
+<span class="nc" id="L224">                int b1 = nextChangingElement(referenceLine, referenceA0Color, 0);</span>
+<span class="nc" id="L225">                int b2 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">                for (int a0 = 0; a0 &lt; width;) {</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                    if (b2 &lt; a1) {</span>
+<span class="nc" id="L228">                        T4_T6_Tables.P.writeBits(outputStream);</span>
+<span class="nc" id="L229">                        a0 = b2;</span>
+                    } else {
+<span class="nc" id="L231">                        a0 = compressT(a0, a1, b1, outputStream, codingA0Color, codingLine);</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">                        if (a0 == a1) {</span>
+<span class="nc" id="L233">                            codingA0Color = 1 - codingA0Color;</span>
+                        }
+                    }
+<span class="nc" id="L236">                    referenceA0Color = changingElementAt(referenceLine, a0);</span>
+<span class="nc" id="L237">                    a1 = nextChangingElement(codingLine, codingA0Color, a0 + 1);</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">                    if (codingA0Color == referenceA0Color) {</span>
+<span class="nc" id="L239">                        b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+                    } else {
+<span class="nc" id="L241">                        b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+<span class="nc" id="L242">                        b1 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+                    }
+<span class="nc" id="L244">                    b2 = nextChangingElement(referenceLine, 1 - codingA0Color, b1 + 1);</span>
+                }
+<span class="nc" id="L246">                final int[] swap = referenceLine;</span>
+<span class="nc" id="L247">                referenceLine = codingLine;</span>
+<span class="nc" id="L248">                codingLine = swap;</span>
+<span class="nc" id="L249">            } else {</span>
+                // 1D
+<span class="nc" id="L251">                outputStream.writeBit(1);</span>
+<span class="nc" id="L252">                compress1DLine(inputStream, outputStream, referenceLine, width);</span>
+            }
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (hasFill) {</span>
+<span class="nc" id="L255">                int bitsAvailable = outputStream.getBitsAvailableInCurrentByte();</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                if (bitsAvailable &lt; 4) {</span>
+<span class="nc" id="L257">                    outputStream.flush();</span>
+<span class="nc" id="L258">                    bitsAvailable = 8;</span>
+                }
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                for (; bitsAvailable &gt; 4; bitsAvailable--) {</span>
+<span class="nc" id="L261">                    outputStream.writeBit(0);</span>
+                }
+            }
+<span class="nc" id="L264">            T4_T6_Tables.EOL.writeBits(outputStream);</span>
+<span class="nc" id="L265">            kCounter++;</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">            if (kCounter == parameterK) {</span>
+<span class="nc" id="L267">                kCounter = 0;</span>
+            }
+<span class="nc" id="L269">            inputStream.flushCache();</span>
+        }
+
+<span class="nc" id="L272">        return outputStream.toByteArray();</span>
+    }
+
+    public static byte[] compressT6(final byte[] uncompressed, final int width, final int height) throws ImagingException {
+<span class="nc" id="L276">        try (ByteArrayInputStream bais = new ByteArrayInputStream(uncompressed);</span>
+<span class="nc" id="L277">                BitInputStreamFlexible inputStream = new BitInputStreamFlexible(bais)) {</span>
+<span class="nc" id="L278">            final BitArrayOutputStream outputStream = new BitArrayOutputStream();</span>
+<span class="nc" id="L279">            int[] referenceLine = Allocator.intArray(width);</span>
+<span class="nc" id="L280">            int[] codingLine = Allocator.intArray(width);</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">            for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                for (int i = 0; i &lt; width; i++) {</span>
+                    try {
+<span class="nc" id="L284">                        codingLine[i] = inputStream.readBits(1);</span>
+<span class="nc" id="L285">                    } catch (final IOException e) {</span>
+<span class="nc" id="L286">                        throw new ImagingException(&quot;Error reading image to compress&quot;, e);</span>
+<span class="nc" id="L287">                    }</span>
+                }
+<span class="nc" id="L289">                int codingA0Color = WHITE;</span>
+<span class="nc" id="L290">                int referenceA0Color = WHITE;</span>
+<span class="nc" id="L291">                int a1 = nextChangingElement(codingLine, codingA0Color, 0);</span>
+<span class="nc" id="L292">                int b1 = nextChangingElement(referenceLine, referenceA0Color, 0);</span>
+<span class="nc" id="L293">                int b2 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                for (int a0 = 0; a0 &lt; width;) {</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                    if (b2 &lt; a1) {</span>
+<span class="nc" id="L296">                        T4_T6_Tables.P.writeBits(outputStream);</span>
+<span class="nc" id="L297">                        a0 = b2;</span>
+                    } else {
+<span class="nc" id="L299">                        a0 = compressT(a0, a1, b1, outputStream, codingA0Color, codingLine);</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                        if (a0 == a1) {</span>
+<span class="nc" id="L301">                            codingA0Color = 1 - codingA0Color;</span>
+                        }
+                    }
+<span class="nc" id="L304">                    referenceA0Color = changingElementAt(referenceLine, a0);</span>
+<span class="nc" id="L305">                    a1 = nextChangingElement(codingLine, codingA0Color, a0 + 1);</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">                    if (codingA0Color == referenceA0Color) {</span>
+<span class="nc" id="L307">                        b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+                    } else {
+<span class="nc" id="L309">                        b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+<span class="nc" id="L310">                        b1 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+                    }
+<span class="nc" id="L312">                    b2 = nextChangingElement(referenceLine, 1 - codingA0Color, b1 + 1);</span>
+                }
+<span class="nc" id="L314">                final int[] swap = referenceLine;</span>
+<span class="nc" id="L315">                referenceLine = codingLine;</span>
+<span class="nc" id="L316">                codingLine = swap;</span>
+<span class="nc" id="L317">                inputStream.flushCache();</span>
+            }
+            // EOFB
+<span class="nc" id="L320">            T4_T6_Tables.EOL.writeBits(outputStream);</span>
+<span class="nc" id="L321">            T4_T6_Tables.EOL.writeBits(outputStream);</span>
+<span class="nc" id="L322">            return outputStream.toByteArray();</span>
+<span class="nc" id="L323">        } catch (final IOException ioException) {</span>
+<span class="nc" id="L324">            throw new ImagingException(&quot;I/O error&quot;, ioException);</span>
+        }
+    }
+
+    /**
+     * Decompresses the &quot;Modified Huffman&quot; encoding of section 10 in the TIFF6 specification. No EOLs, no RTC, rows are padded to end on a byte boundary.
+     *
+     * @param compressed compressed byte data
+     * @param width      image width
+     * @param height     image height
+     * @return the compressed data
+     * @throws ImagingException if it fails to read the compressed data
+     */
+    public static byte[] decompressModifiedHuffman(final byte[] compressed, final int width, final int height) throws ImagingException {
+<span class="nc" id="L338">        try (ByteArrayInputStream baos = new ByteArrayInputStream(compressed);</span>
+<span class="nc" id="L339">                BitInputStreamFlexible inputStream = new BitInputStreamFlexible(baos);</span>
+<span class="nc" id="L340">                BitArrayOutputStream outputStream = new BitArrayOutputStream()) {</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">            for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc" id="L342">                int color = WHITE;</span>
+                int rowLength;
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                for (rowLength = 0; rowLength &lt; width;) {</span>
+<span class="nc" id="L345">                    final int runLength = readTotalRunLength(inputStream, color);</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">                    for (int i = 0; i &lt; runLength; i++) {</span>
+<span class="nc" id="L347">                        outputStream.writeBit(color);</span>
+                    }
+<span class="nc" id="L349">                    color = 1 - color;</span>
+<span class="nc" id="L350">                    rowLength += runLength;</span>
+<span class="nc" id="L351">                }</span>
+
+<span class="nc bnc" id="L353" title="All 2 branches missed.">                if (rowLength == width) {</span>
+<span class="nc" id="L354">                    inputStream.flushCache();</span>
+<span class="nc" id="L355">                    outputStream.flush();</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">                } else if (rowLength &gt; width) {</span>
+<span class="nc" id="L357">                    throw new ImagingException(&quot;Unrecoverable row length error in image row &quot; + y);</span>
+                }
+            }
+<span class="nc" id="L360">            return outputStream.toByteArray();</span>
+<span class="nc" id="L361">        } catch (final IOException ioException) {</span>
+<span class="nc" id="L362">            throw new ImagingException(&quot;Error reading image to decompress&quot;, ioException);</span>
+        }
+    }
+
+    /**
+     * Decompresses T.4 1D encoded data. EOL at the beginning and after each row, can be preceded by fill bits to fit on a byte boundary, no RTC.
+     *
+     * @param compressed compressed byte data
+     * @param width      image width
+     * @param height     image height
+     * @param hasFill    used to check the end of line
+     * @return the decompressed data
+     * @throws ImagingException if it fails to read the compressed data
+     */
+    public static byte[] decompressT4_1D(final byte[] compressed, final int width, final int height, final boolean hasFill) throws ImagingException {
+<span class="nc" id="L377">        final BitInputStreamFlexible inputStream = new BitInputStreamFlexible(new ByteArrayInputStream(compressed));</span>
+<span class="nc" id="L378">        try (BitArrayOutputStream outputStream = new BitArrayOutputStream()) {</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">            for (int y = 0; y &lt; height; y++) {</span>
+                int rowLength;
+                try {
+<span class="nc" id="L382">                    final T4_T6_Tables.Entry entry = CONTROL_CODES.decode(inputStream);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">                    if (!isEol(entry, hasFill)) {</span>
+<span class="nc" id="L384">                        throw new ImagingException(&quot;Expected EOL not found&quot;);</span>
+                    }
+<span class="nc" id="L386">                    int color = WHITE;</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">                    for (rowLength = 0; rowLength &lt; width;) {</span>
+<span class="nc" id="L388">                        final int runLength = readTotalRunLength(inputStream, color);</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                        for (int i = 0; i &lt; runLength; i++) {</span>
+<span class="nc" id="L390">                            outputStream.writeBit(color);</span>
+                        }
+<span class="nc" id="L392">                        color = 1 - color;</span>
+<span class="nc" id="L393">                        rowLength += runLength;</span>
+<span class="nc" id="L394">                    }</span>
+<span class="nc" id="L395">                } catch (final ImagingException huffmanException) {</span>
+<span class="nc" id="L396">                    throw new ImagingException(&quot;Decompression error&quot;, huffmanException);</span>
+<span class="nc" id="L397">                }</span>
+
+<span class="nc bnc" id="L399" title="All 2 branches missed.">                if (rowLength == width) {</span>
+<span class="nc" id="L400">                    outputStream.flush();</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">                } else if (rowLength &gt; width) {</span>
+<span class="nc" id="L402">                    throw new ImagingException(&quot;Unrecoverable row length error in image row &quot; + y);</span>
+                }
+            }
+<span class="nc" id="L405">            return outputStream.toByteArray();</span>
+        }
+    }
+
+    /**
+     * Decompressed T.4 2D encoded data. EOL at the beginning and after each row, can be preceded by fill bits to fit on a byte boundary, and is succeeded by a
+     * tag bit determining whether the next line is encoded using 1D or 2D. No RTC.
+     *
+     * @param compressed compressed byte data
+     * @param width      image width
+     * @param height     image height
+     * @param hasFill    used to check the end of line
+     * @return the decompressed data
+     * @throws ImagingException if it fails to read the compressed data
+     */
+    public static byte[] decompressT4_2D(final byte[] compressed, final int width, final int height, final boolean hasFill) throws ImagingException {
+<span class="nc" id="L421">        final BitInputStreamFlexible inputStream = new BitInputStreamFlexible(new ByteArrayInputStream(compressed));</span>
+<span class="nc" id="L422">        try (BitArrayOutputStream outputStream = new BitArrayOutputStream()) {</span>
+<span class="nc" id="L423">            final int[] referenceLine = Allocator.intArray(width);</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">            for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc" id="L425">                int rowLength = 0;</span>
+                try {
+<span class="nc" id="L427">                    T4_T6_Tables.Entry entry = CONTROL_CODES.decode(inputStream);</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">                    if (!isEol(entry, hasFill)) {</span>
+<span class="nc" id="L429">                        throw new ImagingException(&quot;Expected EOL not found&quot;);</span>
+                    }
+<span class="nc" id="L431">                    final int tagBit = inputStream.readBits(1);</span>
+<span class="nc bnc" id="L432" title="All 2 branches missed.">                    if (tagBit == 0) {</span>
+                        // 2D
+<span class="nc" id="L434">                        int codingA0Color = WHITE;</span>
+<span class="nc" id="L435">                        int referenceA0Color = WHITE;</span>
+<span class="nc" id="L436">                        int b1 = nextChangingElement(referenceLine, referenceA0Color, 0);</span>
+<span class="nc" id="L437">                        int b2 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">                        for (int a0 = 0; a0 &lt; width;) {</span>
+                            int a1;
+                            int a2;
+<span class="nc" id="L441">                            entry = CONTROL_CODES.decode(inputStream);</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">                            if (entry == T4_T6_Tables.P) {</span>
+<span class="nc" id="L443">                                fillRange(outputStream, referenceLine, a0, b2, codingA0Color);</span>
+<span class="nc" id="L444">                                a0 = b2;</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">                            } else if (entry == T4_T6_Tables.H) {</span>
+<span class="nc" id="L446">                                final int a0a1 = readTotalRunLength(inputStream, codingA0Color);</span>
+<span class="nc" id="L447">                                a1 = a0 + a0a1;</span>
+<span class="nc" id="L448">                                fillRange(outputStream, referenceLine, a0, a1, codingA0Color);</span>
+<span class="nc" id="L449">                                final int a1a2 = readTotalRunLength(inputStream, 1 - codingA0Color);</span>
+<span class="nc" id="L450">                                a2 = a1 + a1a2;</span>
+<span class="nc" id="L451">                                fillRange(outputStream, referenceLine, a1, a2, 1 - codingA0Color);</span>
+<span class="nc" id="L452">                                a0 = a2;</span>
+<span class="nc" id="L453">                            } else {</span>
+                                int a1b1;
+<span class="nc bnc" id="L455" title="All 2 branches missed.">                                if (entry == T4_T6_Tables.V0) {</span>
+<span class="nc" id="L456">                                    a1b1 = 0;</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">                                } else if (entry == T4_T6_Tables.VL1) {</span>
+<span class="nc" id="L458">                                    a1b1 = -1;</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">                                } else if (entry == T4_T6_Tables.VL2) {</span>
+<span class="nc" id="L460">                                    a1b1 = -2;</span>
+<span class="nc bnc" id="L461" title="All 2 branches missed.">                                } else if (entry == T4_T6_Tables.VL3) {</span>
+<span class="nc" id="L462">                                    a1b1 = -3;</span>
+<span class="nc bnc" id="L463" title="All 2 branches missed.">                                } else if (entry == T4_T6_Tables.VR1) {</span>
+<span class="nc" id="L464">                                    a1b1 = 1;</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">                                } else if (entry == T4_T6_Tables.VR2) {</span>
+<span class="nc" id="L466">                                    a1b1 = 2;</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">                                } else if (entry == T4_T6_Tables.VR3) {</span>
+<span class="nc" id="L468">                                    a1b1 = 3;</span>
+                                } else {
+<span class="nc" id="L470">                                    throw new ImagingException(&quot;Invalid/unknown T.4 control code &quot; + entry.bitString);</span>
+                                }
+<span class="nc" id="L472">                                a1 = b1 + a1b1;</span>
+<span class="nc" id="L473">                                fillRange(outputStream, referenceLine, a0, a1, codingA0Color);</span>
+<span class="nc" id="L474">                                a0 = a1;</span>
+<span class="nc" id="L475">                                codingA0Color = 1 - codingA0Color;</span>
+                            }
+<span class="nc" id="L477">                            referenceA0Color = changingElementAt(referenceLine, a0);</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">                            if (codingA0Color == referenceA0Color) {</span>
+<span class="nc" id="L479">                                b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+                            } else {
+<span class="nc" id="L481">                                b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+<span class="nc" id="L482">                                b1 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+                            }
+<span class="nc" id="L484">                            b2 = nextChangingElement(referenceLine, 1 - codingA0Color, b1 + 1);</span>
+<span class="nc" id="L485">                            rowLength = a0;</span>
+                        }
+<span class="nc" id="L487">                    } else {</span>
+                        // 1D
+<span class="nc" id="L489">                        int color = WHITE;</span>
+<span class="nc bnc" id="L490" title="All 2 branches missed.">                        for (rowLength = 0; rowLength &lt; width;) {</span>
+<span class="nc" id="L491">                            final int runLength = readTotalRunLength(inputStream, color);</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">                            for (int i = 0; i &lt; runLength; i++) {</span>
+<span class="nc" id="L493">                                outputStream.writeBit(color);</span>
+<span class="nc" id="L494">                                referenceLine[rowLength + i] = color;</span>
+                            }
+<span class="nc" id="L496">                            color = 1 - color;</span>
+<span class="nc" id="L497">                            rowLength += runLength;</span>
+<span class="nc" id="L498">                        }</span>
+                    }
+<span class="nc" id="L500">                } catch (final IOException e) {</span>
+<span class="nc" id="L501">                    throw new ImagingException(&quot;Decompression error&quot;, e);</span>
+<span class="nc" id="L502">                }</span>
+
+<span class="nc bnc" id="L504" title="All 2 branches missed.">                if (rowLength == width) {</span>
+<span class="nc" id="L505">                    outputStream.flush();</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">                } else if (rowLength &gt; width) {</span>
+<span class="nc" id="L507">                    throw new ImagingException(&quot;Unrecoverable row length error in image row &quot; + y);</span>
+                }
+            }
+
+<span class="nc" id="L511">            return outputStream.toByteArray();</span>
+        }
+    }
+
+    /**
+     * Decompress T.6 encoded data. No EOLs, except for 2 consecutive ones at the end (the EOFB, end of fax block). No RTC. No fill bits anywhere. All data is
+     * 2D encoded.
+     *
+     * @param compressed compressed byte data
+     * @param width      image width
+     * @param height     image height
+     * @return the decompressed data
+     * @throws ImagingException if it fails to read the compressed data
+     */
+    public static byte[] decompressT6(final byte[] compressed, final int width, final int height) throws ImagingException {
+<span class="nc" id="L526">        try (BitInputStreamFlexible inputStream = new BitInputStreamFlexible(new ByteArrayInputStream(compressed));</span>
+<span class="nc" id="L527">                BitArrayOutputStream outputStream = new BitArrayOutputStream()) {</span>
+<span class="nc" id="L528">            final int[] referenceLine = Allocator.intArray(width);</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">            for (int y = 0; y &lt; height; y++) {</span>
+<span class="nc" id="L530">                int rowLength = 0;</span>
+<span class="nc" id="L531">                int codingA0Color = WHITE;</span>
+<span class="nc" id="L532">                int referenceA0Color = WHITE;</span>
+<span class="nc" id="L533">                int b1 = nextChangingElement(referenceLine, referenceA0Color, 0);</span>
+<span class="nc" id="L534">                int b2 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">                for (int a0 = 0; a0 &lt; width;) {</span>
+                    int a1;
+                    int a2;
+<span class="nc" id="L538">                    final T4_T6_Tables.Entry entry = CONTROL_CODES.decode(inputStream);</span>
+<span class="nc bnc" id="L539" title="All 2 branches missed.">                    if (entry == T4_T6_Tables.P) {</span>
+<span class="nc" id="L540">                        fillRange(outputStream, referenceLine, a0, b2, codingA0Color);</span>
+<span class="nc" id="L541">                        a0 = b2;</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">                    } else if (entry == T4_T6_Tables.H) {</span>
+<span class="nc" id="L543">                        final int a0a1 = readTotalRunLength(inputStream, codingA0Color);</span>
+<span class="nc" id="L544">                        a1 = a0 + a0a1;</span>
+<span class="nc" id="L545">                        fillRange(outputStream, referenceLine, a0, a1, codingA0Color);</span>
+<span class="nc" id="L546">                        final int a1a2 = readTotalRunLength(inputStream, 1 - codingA0Color);</span>
+<span class="nc" id="L547">                        a2 = a1 + a1a2;</span>
+<span class="nc" id="L548">                        fillRange(outputStream, referenceLine, a1, a2, 1 - codingA0Color);</span>
+<span class="nc" id="L549">                        a0 = a2;</span>
+<span class="nc" id="L550">                    } else {</span>
+                        int a1b1;
+<span class="nc bnc" id="L552" title="All 2 branches missed.">                        if (entry == T4_T6_Tables.V0) {</span>
+<span class="nc" id="L553">                            a1b1 = 0;</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">                        } else if (entry == T4_T6_Tables.VL1) {</span>
+<span class="nc" id="L555">                            a1b1 = -1;</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">                        } else if (entry == T4_T6_Tables.VL2) {</span>
+<span class="nc" id="L557">                            a1b1 = -2;</span>
+<span class="nc bnc" id="L558" title="All 2 branches missed.">                        } else if (entry == T4_T6_Tables.VL3) {</span>
+<span class="nc" id="L559">                            a1b1 = -3;</span>
+<span class="nc bnc" id="L560" title="All 2 branches missed.">                        } else if (entry == T4_T6_Tables.VR1) {</span>
+<span class="nc" id="L561">                            a1b1 = 1;</span>
+<span class="nc bnc" id="L562" title="All 2 branches missed.">                        } else if (entry == T4_T6_Tables.VR2) {</span>
+<span class="nc" id="L563">                            a1b1 = 2;</span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">                        } else if (entry == T4_T6_Tables.VR3) {</span>
+<span class="nc" id="L565">                            a1b1 = 3;</span>
+                        } else {
+<span class="nc" id="L567">                            throw new ImagingException(&quot;Invalid/unknown T.6 control code &quot; + entry.bitString);</span>
+                        }
+<span class="nc" id="L569">                        a1 = b1 + a1b1;</span>
+<span class="nc" id="L570">                        fillRange(outputStream, referenceLine, a0, a1, codingA0Color);</span>
+<span class="nc" id="L571">                        a0 = a1;</span>
+<span class="nc" id="L572">                        codingA0Color = 1 - codingA0Color;</span>
+                    }
+<span class="nc" id="L574">                    referenceA0Color = changingElementAt(referenceLine, a0);</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">                    if (codingA0Color == referenceA0Color) {</span>
+<span class="nc" id="L576">                        b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+                    } else {
+<span class="nc" id="L578">                        b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);</span>
+<span class="nc" id="L579">                        b1 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);</span>
+                    }
+<span class="nc" id="L581">                    b2 = nextChangingElement(referenceLine, 1 - codingA0Color, b1 + 1);</span>
+<span class="nc" id="L582">                    rowLength = a0;</span>
+<span class="nc" id="L583">                }</span>
+<span class="nc bnc" id="L584" title="All 2 branches missed.">                if (rowLength == width) {</span>
+<span class="nc" id="L585">                    outputStream.flush();</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">                } else if (rowLength &gt; width) {</span>
+<span class="nc" id="L587">                    throw new ImagingException(&quot;Unrecoverable row length error in image row &quot; + y);</span>
+                }
+            }
+<span class="nc" id="L590">            return outputStream.toByteArray();</span>
+<span class="nc" id="L591">        } catch (final IOException e) {</span>
+<span class="nc bnc" id="L592" title="All 2 branches missed.">            if (e instanceof ImagingException) {</span>
+<span class="nc" id="L593">                throw (ImagingException) e;</span>
+            }
+            // IOException cannot happen because the close() methods in use here do not throw
+<span class="nc" id="L596">            throw new ImagingException(&quot;Closing stream&quot;, e);</span>
+        }
+    }
+
+    private static void fillRange(final BitArrayOutputStream outputStream, final int[] referenceRow, final int a0, final int end, final int color) {
+<span class="nc bnc" id="L601" title="All 2 branches missed.">        for (int i = a0; i &lt; end; i++) {</span>
+<span class="nc" id="L602">            referenceRow[i] = color;</span>
+<span class="nc" id="L603">            outputStream.writeBit(color);</span>
+        }
+<span class="nc" id="L605">    }</span>
+
+    private static boolean isEol(final T4_T6_Tables.Entry entry, final boolean hasFill) {
+<span class="nc bnc" id="L608" title="All 2 branches missed.">        if (entry == T4_T6_Tables.EOL) {</span>
+<span class="nc" id="L609">            return true;</span>
+        }
+<span class="nc bnc" id="L611" title="All 2 branches missed.">        if (hasFill) {</span>
+<span class="nc bnc" id="L612" title="All 14 branches missed.">            return entry == T4_T6_Tables.EOL13 || entry == T4_T6_Tables.EOL14 || entry == T4_T6_Tables.EOL15 || entry == T4_T6_Tables.EOL16</span>
+                    || entry == T4_T6_Tables.EOL17 || entry == T4_T6_Tables.EOL18 || entry == T4_T6_Tables.EOL19;
+        }
+<span class="nc" id="L615">        return false;</span>
+    }
+
+    private static T4_T6_Tables.Entry lowerBound(final T4_T6_Tables.Entry[] entries, final int value) {
+<span class="nc" id="L619">        int first = 0;</span>
+<span class="nc" id="L620">        int last = entries.length - 1;</span>
+        do {
+<span class="nc" id="L622">            final int middle = first + last &gt;&gt;&gt; 1;</span>
+<span class="nc bnc" id="L623" title="All 6 branches missed.">            if (entries[middle].value &lt;= value &amp;&amp; (middle + 1 &gt;= entries.length || value &lt; entries[middle + 1].value)) {</span>
+<span class="nc" id="L624">                return entries[middle];</span>
+            }
+<span class="nc bnc" id="L626" title="All 2 branches missed.">            if (entries[middle].value &gt; value) {</span>
+<span class="nc" id="L627">                last = middle - 1;</span>
+            } else {
+<span class="nc" id="L629">                first = middle + 1;</span>
+            }
+<span class="nc bnc" id="L631" title="All 2 branches missed.">        } while (first &lt; last);</span>
+
+<span class="nc" id="L633">        return entries[first];</span>
+    }
+
+    private static int nextChangingElement(final int[] line, final int currentColour, final int start) {
+        int position;
+<span class="nc bnc" id="L638" title="All 4 branches missed.">        for (position = start; position &lt; line.length &amp;&amp; line[position] == currentColour; position++) {</span>
+            // noop
+        }
+
+<span class="nc" id="L642">        return Math.min(position, line.length);</span>
+    }
+
+    private static int readTotalRunLength(final BitInputStreamFlexible bitStream, final int color) throws ImagingException {
+<span class="nc" id="L646">        int totalLength = 0;</span>
+        Integer runLength;
+        do {
+<span class="nc bnc" id="L649" title="All 2 branches missed.">            if (color == WHITE) {</span>
+<span class="nc" id="L650">                runLength = WHITE_RUN_LENGTHS.decode(bitStream);</span>
+            } else {
+<span class="nc" id="L652">                runLength = BLACK_RUN_LENGTHS.decode(bitStream);</span>
+            }
+<span class="nc" id="L654">            totalLength += runLength;</span>
+<span class="nc bnc" id="L655" title="All 2 branches missed.">        } while (runLength &gt; 63);</span>
+<span class="nc" id="L656">        return totalLength;</span>
+    }
+
+    private static void writeRunLength(final BitArrayOutputStream bitStream, int runLength, final int color) {
+        final T4_T6_Tables.Entry[] makeUpCodes;
+        final T4_T6_Tables.Entry[] terminatingCodes;
+<span class="nc bnc" id="L662" title="All 2 branches missed.">        if (color == WHITE) {</span>
+<span class="nc" id="L663">            makeUpCodes = T4_T6_Tables.WHITE_MAKE_UP_CODES;</span>
+<span class="nc" id="L664">            terminatingCodes = T4_T6_Tables.WHITE_TERMINATING_CODES;</span>
+        } else {
+<span class="nc" id="L666">            makeUpCodes = T4_T6_Tables.BLACK_MAKE_UP_CODES;</span>
+<span class="nc" id="L667">            terminatingCodes = T4_T6_Tables.BLACK_TERMINATING_CODES;</span>
+        }
+<span class="nc bnc" id="L669" title="All 2 branches missed.">        while (runLength &gt;= 1792) {</span>
+<span class="nc" id="L670">            final T4_T6_Tables.Entry entry = lowerBound(T4_T6_Tables.ADDITIONAL_MAKE_UP_CODES, runLength);</span>
+<span class="nc" id="L671">            entry.writeBits(bitStream);</span>
+<span class="nc" id="L672">            runLength -= entry.value;</span>
+<span class="nc" id="L673">        }</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">        while (runLength &gt;= 64) {</span>
+<span class="nc" id="L675">            final T4_T6_Tables.Entry entry = lowerBound(makeUpCodes, runLength);</span>
+<span class="nc" id="L676">            entry.writeBits(bitStream);</span>
+<span class="nc" id="L677">            runLength -= entry.value;</span>
+<span class="nc" id="L678">        }</span>
+<span class="nc" id="L679">        final T4_T6_Tables.Entry terminatingEntry = terminatingCodes[runLength];</span>
+<span class="nc" id="L680">        terminatingEntry.writeBits(bitStream);</span>
+<span class="nc" id="L681">    }</span>
+
+    private T4AndT6Compression() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

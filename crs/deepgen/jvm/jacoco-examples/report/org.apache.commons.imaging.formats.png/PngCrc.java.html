@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PngCrc.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">PngCrc.java</span></div><h1>PngCrc.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+// should just use ints, not longs
+<span class="nc" id="L20">final class PngCrc {</span>
+
+    /* Table of CRCs of all 8-bit messages. */
+<span class="nc" id="L23">    private final long[] crcTable = new long[256];</span>
+
+    /* Flag: has the table been computed? Initially false. */
+    private boolean crcTableComputed;
+
+    public long continuePartialCrc(final long oldCrc, final byte[] buf, final int len) {
+<span class="nc" id="L29">        return updateCrc(oldCrc, buf);</span>
+    }
+
+    /*
+     * Update a running CRC with the bytes buf[0..len-1]--the CRC should be initialized to all 1's, and the transmitted value is the 1's complement of the final
+     * running CRC (see the crc() routine below)).
+     */
+
+    /* Gets the CRC of the bytes buf[0..len-1]. */
+    public int crc(final byte[] buf, final int len) {
+<span class="nc" id="L39">        return (int) (updateCrc(0xffffffffL, buf) ^ 0xffffffffL);</span>
+    }
+
+    public long finishPartialCrc(final long oldCrc) {
+<span class="nc" id="L43">        return oldCrc ^ 0xffffffffL;</span>
+    }
+
+    /* Make the table for a fast CRC. */
+    private void makeCrcTable() {
+        long c;
+        int n;
+        int k;
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        for (n = 0; n &lt; 256; n++) {</span>
+<span class="nc" id="L53">            c = n;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            for (k = 0; k &lt; 8; k++) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                if ((c &amp; 1) != 0) {</span>
+<span class="nc" id="L56">                    c = 0xedb88320L ^ c &gt;&gt; 1;</span>
+                } else {
+<span class="nc" id="L58">                    c = c &gt;&gt; 1;</span>
+                }
+            }
+<span class="nc" id="L61">            crcTable[n] = c;</span>
+        }
+<span class="nc" id="L63">        crcTableComputed = true;</span>
+<span class="nc" id="L64">    }</span>
+
+    public long startPartialCrc(final byte[] buf, final int len) {
+<span class="nc" id="L67">        return updateCrc(0xffffffffL, buf);</span>
+    }
+
+    private long updateCrc(final long crc, final byte[] buf) {
+<span class="nc" id="L71">        long c = crc;</span>
+        int n;
+
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (!crcTableComputed) {</span>
+<span class="nc" id="L75">            makeCrcTable();</span>
+        }
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (n = 0; n &lt; buf.length; n++) {</span>
+            // Debug.debug(&quot;crc[&quot; + n + &quot;]&quot;, c + &quot; (&quot; + Long.toHexString(c) +
+            // &quot;)&quot;);
+
+<span class="nc" id="L81">            c = crcTable[(int) ((c ^ buf[n]) &amp; 0xff)] ^ c &gt;&gt; 8;</span>
+        }
+<span class="nc" id="L83">        return c;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

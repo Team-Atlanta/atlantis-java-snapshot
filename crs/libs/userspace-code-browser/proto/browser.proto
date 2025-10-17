@@ -1,0 +1,58 @@
+syntax = "proto3";
+package codebrowser;
+
+service CodeBrowser {
+    rpc CodeQuery (CodeRequest) returns (CodeResponse);
+    rpc Build (BuildRequest) returns (BuildResponse);
+}
+
+enum CodeDefinitionType {
+    FUNCTION = 0;
+    STRUCT = 1;
+    ENUM = 2;
+    UNION = 3;
+    TYPEDEF = 4;
+    PREPROC = 5;
+}
+
+message CodeDefinition {
+    string name = 1;
+    string definition = 2;
+    string filename = 3;
+    repeated string references = 4;
+    CodeDefinitionType def_type = 5;
+}
+
+enum QueryKind {
+    QUERY_FUNCTION = 0;
+    QUERY_XREF = 1;
+    QUERY_STRUCT = 2;
+    QUERY_ENUM = 3;
+    QUERY_UNION = 4;
+    QUERY_TYPEDEF = 5;
+    QUERY_ANY_TYPE = 6;
+}
+
+message CodeRequest {
+    string name = 1;
+    QueryKind kind = 2;
+    bool relative = 3;
+    optional string project = 4;
+}
+
+message CodeResponse {
+    string error = 1;
+    repeated CodeDefinition definitions = 2;
+}
+
+message BuildRequest {
+    string project = 1;
+    bool force = 2;
+    // Path from shared-crs-fs
+    string tarball = 3;
+}
+
+// when build finishes
+message BuildResponse {
+    string error = 1;
+}

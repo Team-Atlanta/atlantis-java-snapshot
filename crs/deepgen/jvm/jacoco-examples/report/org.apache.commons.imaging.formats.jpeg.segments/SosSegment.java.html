@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SosSegment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.segments</a> &gt; <span class="el_source">SosSegment.java</span></div><h1>SosSegment.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.jpeg.segments;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.common.Allocator;
+
+public class SosSegment extends AbstractSegment {
+
+    public static class Component {
+        static final int SHALLOW_SIZE = 24;
+        public final int scanComponentSelector;
+        public final int dcCodingTableSelector;
+        public final int acCodingTableSelector;
+
+<span class="fc" id="L37">        public Component(final int scanComponentSelector, final int dcCodingTableSelector, final int acCodingTableSelector) {</span>
+<span class="fc" id="L38">            this.scanComponentSelector = scanComponentSelector;</span>
+<span class="fc" id="L39">            this.dcCodingTableSelector = dcCodingTableSelector;</span>
+<span class="fc" id="L40">            this.acCodingTableSelector = acCodingTableSelector;</span>
+<span class="fc" id="L41">        }</span>
+    }
+
+<span class="fc" id="L44">    private static final Logger LOGGER = Logger.getLogger(SosSegment.class.getName());</span>
+    public final int numberOfComponents;
+    private final Component[] components;
+    public final int startOfSpectralSelection;
+    public final int endOfSpectralSelection;
+    public final int successiveApproximationBitHigh;
+
+    public final int successiveApproximationBitLow;
+
+    public SosSegment(final int marker, final byte[] segmentData) throws IOException {
+<span class="fc" id="L54">        this(marker, segmentData.length, new ByteArrayInputStream(segmentData));</span>
+<span class="fc" id="L55">    }</span>
+
+    public SosSegment(final int marker, final int markerLength, final InputStream is) throws IOException {
+<span class="fc" id="L58">        super(marker, markerLength);</span>
+
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L61">            LOGGER.finest(&quot;SosSegment markerLength: &quot; + markerLength);</span>
+        }
+
+        // Debug.debug(&quot;SOS&quot;, marker_length);
+
+<span class="fc" id="L66">        numberOfComponents = readByte(&quot;numberOfComponents&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+        // Debug.debug(&quot;number_of_components_in_scan&quot;,
+        // numberOfComponents);
+
+<span class="fc" id="L70">        components = Allocator.array(numberOfComponents, Component[]::new, Component.SHALLOW_SIZE);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        for (int i = 0; i &lt; numberOfComponents; i++) {</span>
+<span class="fc" id="L72">            final int scanComponentSelector = readByte(&quot;scanComponentSelector&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+            // Debug.debug(&quot;scanComponentSelector&quot;, scanComponentSelector);
+
+<span class="fc" id="L75">            final int acDcEntropyCodingTableSelector = readByte(&quot;acDcEntropyCodingTableSelector&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+            // Debug.debug(&quot;ac_dc_entrooy_coding_table_selector&quot;,
+            // acDcEntropyCodingTableSelector);
+
+<span class="fc" id="L79">            final int dcCodingTableSelector = acDcEntropyCodingTableSelector &gt;&gt; 4 &amp; 0xf;</span>
+<span class="fc" id="L80">            final int acCodingTableSelector = acDcEntropyCodingTableSelector &amp; 0xf;</span>
+<span class="fc" id="L81">            components[i] = new Component(scanComponentSelector, dcCodingTableSelector, acCodingTableSelector);</span>
+        }
+
+<span class="fc" id="L84">        startOfSpectralSelection = readByte(&quot;startOfSpectralSelection&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+        // Debug.debug(&quot;start_of_spectral_selection&quot;, startOfSpectralSelection);
+<span class="fc" id="L86">        endOfSpectralSelection = readByte(&quot;endOfSpectralSelection&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+        // Debug.debug(&quot;end_of_spectral_selection&quot;, endOfSpectralSelection);
+<span class="fc" id="L88">        final int successiveApproximationBitPosition = readByte(&quot;successiveApproximationBitPosition&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+        // Debug.debug(&quot;successive_approximation_bit_position&quot;,
+        // successive_approximation_bit_position);
+<span class="fc" id="L91">        successiveApproximationBitHigh = successiveApproximationBitPosition &gt;&gt; 4 &amp; 0xf;</span>
+<span class="fc" id="L92">        successiveApproximationBitLow = successiveApproximationBitPosition &amp; 0xf;</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * Returns a copy of all the components.
+     *
+     * @return all the components
+     */
+    public Component[] getComponents() {
+<span class="nc" id="L101">        return components.clone();</span>
+    }
+
+    /**
+     * Gets a component at the specified index.
+     *
+     * @param index the component index
+     * @return the component
+     */
+    public Component getComponents(final int index) {
+<span class="nc" id="L111">        return components[index];</span>
+    }
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L116">        return &quot;SOS (&quot; + getSegmentType() + &quot;)&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

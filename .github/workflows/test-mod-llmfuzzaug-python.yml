@@ -1,0 +1,29 @@
+name: "[llmfuzzaug] Python CI"
+
+on:
+  push:
+    paths:
+      - crs/jazzer-llm-augmented/**
+  pull_request:
+    paths:
+      - crs/jazzer-llm-augmented/**
+  workflow_dispatch:
+
+jobs:
+  llmfuzzaug-python-ci:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Dependencies
+        working-directory: crs/jazzer-llm-augmented/
+        run: |
+          git config --global url."https://${{ secrets.LIBLLM_TOKEN }}@github".insteadOf https://github
+          pip install -r requirements-dev.txt
+      - name: Test
+        working-directory: crs/jazzer-llm-augmented/
+        run: python -m pytest

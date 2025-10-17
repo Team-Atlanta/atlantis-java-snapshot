@@ -1,0 +1,841 @@
+{
+  "$defs": {
+    "AIxCCJazzerParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "keep_seed": {
+          "description": "**Mandatory**, true/false to keep the seed file.",
+          "title": "Keep Seed",
+          "type": "boolean"
+        },
+        "len_control": {
+          "default": 0,
+          "description": "**Optional**, libfuzzer -len_control param. Default: 0.",
+          "title": "Len Control",
+          "type": "integer"
+        },
+        "max_len": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1048576,
+          "description": "**Optional**, libfuzzer -max_len param. If unset, will be 1048576 (1M).",
+          "title": "Max Len"
+        },
+        "mem_size": {
+          "default": 4096,
+          "description": "**Optional**, memory size in MB. Default value is 4096, require >= 2048.",
+          "title": "Mem Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "keep_seed"
+      ],
+      "title": "AIxCCJazzerParams",
+      "type": "object"
+    },
+    "AtlDirectedJazzerParams": {
+      "properties": {
+        "beepseed_search": {
+          "default": false,
+          "description": "**Optional**, true/false to enable/disable beepseed search.",
+          "title": "Beepseed Search",
+          "type": "boolean"
+        },
+        "deepgen_consumer": {
+          "description": "**Mandatory**, true/false to enable/disable consuming seeds from deepgen module.",
+          "title": "Deepgen Consumer",
+          "type": "boolean"
+        },
+        "directed_time": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "**Optional**, directed fuzzing directed phase time in seconds (positive integer). Default value is None.",
+          "title": "Directed Time"
+        },
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "exploration_time": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "**Optional**, directed fuzzing exploration phase time in seconds (positive integer). Default value is None.",
+          "title": "Exploration Time"
+        },
+        "keep_seed": {
+          "description": "**Mandatory**, true/false to keep the seed file.",
+          "title": "Keep Seed",
+          "type": "boolean"
+        },
+        "len_control": {
+          "default": 0,
+          "description": "**Optional**, libfuzzer -len_control param. Default: 0.",
+          "title": "Len Control",
+          "type": "integer"
+        },
+        "max_len": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1048576,
+          "description": "**Optional**, libfuzzer -max_len param. If unset, will be 1048576 (1M).",
+          "title": "Max Len"
+        },
+        "mem_size": {
+          "default": 4096,
+          "description": "**Optional**, memory size in MB. Default value is 4096, require >= 2048.",
+          "title": "Mem Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "keep_seed",
+        "deepgen_consumer"
+      ],
+      "title": "AtlDirectedJazzerParams",
+      "type": "object"
+    },
+    "AtlJazzerParams": {
+      "properties": {
+        "beepseed_search": {
+          "default": false,
+          "description": "**Optional**, true/false to enable/disable beepseed search.",
+          "title": "Beepseed Search",
+          "type": "boolean"
+        },
+        "deepgen_consumer": {
+          "description": "**Mandatory**, true/false to enable/disable consuming seeds from deepgen module.",
+          "title": "Deepgen Consumer",
+          "type": "boolean"
+        },
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "keep_seed": {
+          "description": "**Mandatory**, true/false to keep the seed file.",
+          "title": "Keep Seed",
+          "type": "boolean"
+        },
+        "len_control": {
+          "default": 0,
+          "description": "**Optional**, libfuzzer -len_control param. Default: 0.",
+          "title": "Len Control",
+          "type": "integer"
+        },
+        "max_len": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1048576,
+          "description": "**Optional**, libfuzzer -max_len param. If unset, will be 1048576 (1M).",
+          "title": "Max Len"
+        },
+        "mem_size": {
+          "default": 4096,
+          "description": "**Optional**, memory size in MB. Default value is 4096, require >= 2048.",
+          "title": "Mem Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "keep_seed",
+        "deepgen_consumer"
+      ],
+      "title": "AtlJazzerParams",
+      "type": "object"
+    },
+    "AtlLibAFLJazzerParams": {
+      "properties": {
+        "beepseed_search": {
+          "default": false,
+          "description": "**Optional**, true/false to enable/disable beepseed search.",
+          "title": "Beepseed Search",
+          "type": "boolean"
+        },
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "keep_seed": {
+          "description": "**Mandatory**, true/false to keep the seed file.",
+          "title": "Keep Seed",
+          "type": "boolean"
+        },
+        "len_control": {
+          "default": 0,
+          "description": "**Optional**, libfuzzer -len_control param. Default: 0.",
+          "title": "Len Control",
+          "type": "integer"
+        },
+        "max_len": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1048576,
+          "description": "**Optional**, libfuzzer -max_len param. If unset, will be 1048576 (1M).",
+          "title": "Max Len"
+        },
+        "mem_size": {
+          "default": 4096,
+          "description": "**Optional**, memory size in MB. Default value is 4096, require >= 2048.",
+          "title": "Mem Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "keep_seed"
+      ],
+      "title": "AtlLibAFLJazzerParams",
+      "type": "object"
+    },
+    "CPUAllocatorParams": {
+      "properties": {
+        "cpubaseno": {
+          "default": 0,
+          "description": "**Optional**, a non-negative integer with default value 0, the base index to start allocating CPU cores.",
+          "title": "Cpubaseno",
+          "type": "integer"
+        },
+        "jazzer_cpu_ratio": {
+          "default": 0.8,
+          "description": "**Optional**, a float in [0, 1] with default value 0.8, the ratio of CPU cores allocated to Jazzer modules, will be override by `jazzer_ncpu` if specified.",
+          "title": "Jazzer Cpu Ratio",
+          "type": "number"
+        },
+        "jazzer_ncpu": {
+          "default": 0,
+          "description": "**Optional**, a non-negative integer with default value 0 which means use the `jazzer_cpu_ratio`. It exactly specifies the number of CPU cores allocated to Jazzer modules.",
+          "title": "Jazzer Ncpu",
+          "type": "integer"
+        },
+        "maxncpu": {
+          "default": 0,
+          "description": "**Optional**, a non-negative integer with default value 0 specifying the maximum number of CPU cores to allocate. If `maxncpu == 0 or maxncpu > os.cpu_count`, it will be `os.cpu_count`.",
+          "title": "Maxncpu",
+          "type": "integer"
+        },
+        "skipped_mods": {
+          "default": [],
+          "description": "**Optional**, a list of module names to skip, default is an empty list. The skipped modules will share all CPU cores. `cpuallocator` module is always skipped.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Skipped Mods",
+          "type": "array"
+        },
+        "ttl_core_ids": {
+          "default": [],
+          "description": "**Optional**, total list of CPU core ids used for this CRS instance. If specified, `cpubaseno` and `maxncpu` will be override. This eaze the evaluation.",
+          "items": {
+            "type": "integer"
+          },
+          "title": "Ttl Core Ids",
+          "type": "array"
+        }
+      },
+      "title": "CPUAllocatorParams",
+      "type": "object"
+    },
+    "CodeQLParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable or disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "CodeQLParams",
+      "type": "object"
+    },
+    "ConcolicExecutorParams": {
+      "properties": {
+        "debug": {
+          "default": false,
+          "description": "Enable debugging mode. When enabled, writes requests to debug_dir.",
+          "title": "Debug",
+          "type": "boolean"
+        },
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "exec_timeout": {
+          "default": 1200,
+          "description": "Timeout for one round execution of the target harness in concolic engine (in seconds).",
+          "title": "Exec Timeout",
+          "type": "integer"
+        },
+        "generators": {
+          "description": "**Mandatory**, list of concolic request generators to use. Valid values: 'dummy-seed', 'local_dir', 'new-cov-seed', 'beepseed'.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Generators",
+          "type": "array"
+        },
+        "max_mem": {
+          "default": 16384,
+          "description": "Maximum memory for the concolic server (in MB).",
+          "title": "Max Mem",
+          "type": "integer"
+        },
+        "max_xms": {
+          "default": 8192,
+          "description": "Maximum heap size for the concolic server (in MB).",
+          "title": "Max Xms",
+          "type": "integer"
+        },
+        "num_instance": {
+          "default": 1,
+          "description": "Number of instances concolic server maintains per harness.",
+          "title": "Num Instance",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "generators"
+      ],
+      "title": "ConcolicExecutorParams",
+      "type": "object"
+    },
+    "CrashManagerParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "CrashManagerParams",
+      "type": "object"
+    },
+    "DeepGenParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "models": {
+          "default": "claude-3-7-sonnet-20250219:1,gpt-4o:1",
+          "description": "Comma-separated list of generation models with weights. Format: 'model1:weight1,model2:weight2,...'",
+          "title": "Models",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "DeepGenParams",
+      "type": "object"
+    },
+    "DictgenParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable or disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "gen_models": {
+          "default": "gpt-4o:10,claude-3-5-sonnet:10",
+          "description": "**Optional**, comma-separated list of generation models with weights. Format: 'model1:weight1,model2:weight2,...'. Supported models: gpt-4o, o1, gemini-1.5, claude-3-5-sonnet, claude-3-5-opus, claude-3-5-haiku. Example: 'gpt-4o:10,claude-3-5-sonnet:10,o1:5'",
+          "title": "Gen Models",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "DictgenParams",
+      "type": "object"
+    },
+    "DiffSchedulerParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "max_sched_time": {
+          "default": 10800,
+          "description": "**Optional**, maximum time in seconds to wait before forcing scheduling. Default is 10800 seconds (3h).",
+          "title": "Max Sched Time",
+          "type": "integer"
+        },
+        "min_sched_time": {
+          "default": 3600,
+          "description": "**Optional**, minimum time in seconds to wait before scheduling. Default is 3600 seconds (1h).",
+          "title": "Min Sched Time",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "DiffSchedulerParams",
+      "type": "object"
+    },
+    "ExpKitParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "exp_time": {
+          "default": 300,
+          "description": "**Optional**, timeout in seconds for each beepseed exploitation. Default is 300 seconds.",
+          "title": "Exp Time",
+          "type": "integer"
+        },
+        "gen_models": {
+          "description": "**Mandatory**, comma-separated list of generation models. Format: 'model1:weight1,model2:weight2,...'. Example: 'o1-preview:10,claude-3-7-sonnet-20250219:20,none:5'",
+          "title": "Gen Models",
+          "type": "string"
+        },
+        "x_models": {
+          "description": "**Mandatory**, comma-separated list of extraction models. Format: 'model1:weight1,model2:weight2,...'. Example: 'gpt-4o:10,o3-mini:20,none:5'",
+          "title": "X Models",
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "gen_models",
+        "x_models"
+      ],
+      "title": "ExpKitParams",
+      "type": "object"
+    },
+    "LLMFuzzAugmentorParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "stuck_detection": {
+          "description": "**Mandatory**, time in seconds to detect stuck harness.",
+          "title": "Stuck Detection",
+          "type": "integer"
+        },
+        "verbose": {
+          "default": false,
+          "description": "**Optional**, true/false to enable/disable verbose mode.",
+          "title": "Verbose",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled",
+        "stuck_detection"
+      ],
+      "title": "LLMFuzzAugmentorParams",
+      "type": "object"
+    },
+    "LLMPOCGeneratorParams": {
+      "properties": {
+        "diff_max_len": {
+          "default": 65536,
+          "description": "Maximum length for diff content processing, must be between 16K and 512K.",
+          "title": "Diff Max Len",
+          "type": "integer"
+        },
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "mode": {
+          "description": "**Mandatory**, mode of `llmpocgen` module, one of 'crs' or 'static', static mode is for testing purpose.",
+          "enum": [
+            "crs",
+            "static"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "worker_num": {
+          "default": 2,
+          "description": "Number of worker processes to use for parallel processing.",
+          "title": "Worker Num",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "mode"
+      ],
+      "title": "LLMPOCGeneratorParams",
+      "type": "object"
+    },
+    "ModuleParams": {
+      "properties": {
+        "aixccjazzer": {
+          "$ref": "#/$defs/AIxCCJazzerParams",
+          "description": "AIxCCJazzer module parameters."
+        },
+        "atldirectedjazzer": {
+          "$ref": "#/$defs/AtlDirectedJazzerParams",
+          "description": "AtlDirectedJazzer module parameters."
+        },
+        "atljazzer": {
+          "$ref": "#/$defs/AtlJazzerParams",
+          "description": "AtlJazzer module parameters."
+        },
+        "atllibafljazzer": {
+          "$ref": "#/$defs/AtlLibAFLJazzerParams",
+          "description": "AtlLibAFLJazzer module parameters."
+        },
+        "codeql": {
+          "$ref": "#/$defs/CodeQLParams",
+          "description": "CodeQL module parameters."
+        },
+        "concolic": {
+          "$ref": "#/$defs/ConcolicExecutorParams",
+          "description": "ConcolicExecutor module parameters."
+        },
+        "cpuallocator": {
+          "$ref": "#/$defs/CPUAllocatorParams",
+          "description": "CPUAllocator module parameters."
+        },
+        "crashmanager": {
+          "$ref": "#/$defs/CrashManagerParams",
+          "description": "CrashManager module parameters."
+        },
+        "deepgen": {
+          "$ref": "#/$defs/DeepGenParams",
+          "description": "DeepGen module parameters."
+        },
+        "dictgen": {
+          "$ref": "#/$defs/DictgenParams",
+          "description": "Dictgen module parameters."
+        },
+        "diff_scheduler": {
+          "$ref": "#/$defs/DiffSchedulerParams",
+          "description": "DiffScheduler module parameters."
+        },
+        "expkit": {
+          "$ref": "#/$defs/ExpKitParams",
+          "description": "ExpKit module parameters."
+        },
+        "llmfuzzaug": {
+          "$ref": "#/$defs/LLMFuzzAugmentorParams",
+          "description": "LLMFuzzAugmentor module parameters."
+        },
+        "llmpocgen": {
+          "$ref": "#/$defs/LLMPOCGeneratorParams",
+          "description": "LLMPOCGenerator module parameters."
+        },
+        "sariflistener": {
+          "$ref": "#/$defs/SARIFListenerParams",
+          "description": "SARIFListener module parameters."
+        },
+        "seedmerger": {
+          "$ref": "#/$defs/SeedMergerParams",
+          "description": "SeedMerger module parameters."
+        },
+        "seedsharer": {
+          "$ref": "#/$defs/SeedSharerParams",
+          "description": "SeedSharer module parameters."
+        },
+        "sinkmanager": {
+          "$ref": "#/$defs/SinkManagerParams",
+          "description": "SinkManager module parameters."
+        },
+        "staticanalysis": {
+          "$ref": "#/$defs/StaticAnalysisParams",
+          "description": "StaticAnalysis module parameters."
+        }
+      },
+      "required": [
+        "cpuallocator",
+        "seedsharer",
+        "crashmanager",
+        "aixccjazzer",
+        "atljazzer",
+        "atldirectedjazzer",
+        "atllibafljazzer",
+        "seedmerger",
+        "llmpocgen",
+        "llmfuzzaug",
+        "concolic",
+        "codeql",
+        "dictgen",
+        "diff_scheduler",
+        "staticanalysis",
+        "sariflistener",
+        "sinkmanager",
+        "deepgen",
+        "expkit"
+      ],
+      "title": "ModuleParams",
+      "type": "object"
+    },
+    "SARIFListenerParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "SARIFListenerParams",
+      "type": "object"
+    },
+    "SeedMergerParams": {
+      "properties": {
+        "beepseed_search": {
+          "default": true,
+          "title": "Beepseed Search",
+          "type": "boolean"
+        },
+        "deepgen_consumer": {
+          "default": false,
+          "title": "Deepgen Consumer",
+          "type": "boolean"
+        },
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "keep_seed": {
+          "description": "**Mandatory**, true/false to keep the seed file.",
+          "title": "Keep Seed",
+          "type": "boolean"
+        },
+        "len_control": {
+          "default": 0,
+          "description": "**Optional**, libfuzzer -len_control param. Default: 0.",
+          "title": "Len Control",
+          "type": "integer"
+        },
+        "max_len": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1048576,
+          "description": "**Optional**, libfuzzer -max_len param. If unset, will be 1048576 (1M).",
+          "title": "Max Len"
+        },
+        "mem_size": {
+          "default": 4096,
+          "description": "**Optional**, memory size in MB. Default value is 4096, require >= 2048.",
+          "title": "Mem Size",
+          "type": "integer"
+        },
+        "set_cover_merge": {
+          "default": false,
+          "description": "**Optional**, true/false to enable/disable set_cover_merge.",
+          "title": "Set Cover Merge",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled",
+        "keep_seed"
+      ],
+      "title": "SeedMergerParams",
+      "type": "object"
+    },
+    "SeedSharerParams": {
+      "properties": {
+        "N_latest_seed": {
+          "default": 5,
+          "description": "**Optional**, latest N seed sync among all Jazzer modules. Default is 5.",
+          "title": "N Latest Seed",
+          "type": "integer"
+        },
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "sync_period": {
+          "description": "**Mandatory**, seed sync period in seconds among all Jazzer modules.",
+          "title": "Sync Period",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "sync_period"
+      ],
+      "title": "SeedSharerParams",
+      "type": "object"
+    },
+    "SinkManagerParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "SinkManagerParams",
+      "type": "object"
+    },
+    "StaticAnalysisParams": {
+      "properties": {
+        "enabled": {
+          "description": "**Mandatory**, true/false to enable/disable this module.",
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "mock": {
+          "default": false,
+          "description": "**Optional**, whether to use mock static analysis. Default is False.",
+          "title": "Mock",
+          "type": "boolean"
+        },
+        "mock_static_ana_result_dir": {
+          "default": "/eva/static-analysis/results",
+          "description": "**Optional**, path to a mock static analysis result dir. Set when using the 'mock' analysis.",
+          "title": "Mock Static Ana Result Dir",
+          "type": "string"
+        },
+        "static_ana_phases": {
+          "default": [
+            "cha-0"
+          ],
+          "description": "**Optional**, list of analysis phases to run in order. Valid values: 'cha-[0-2]' (CHA cg algo with cg level 0, 1, or 2), 'rta-[0-2]' (RTA cg algo with cg level 0, 1, or 2). Default is ['cha-0'].",
+          "items": {
+            "type": "string"
+          },
+          "title": "Static Ana Phases",
+          "type": "array"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "title": "StaticAnalysisParams",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "e2e_check": {
+      "default": false,
+      "description": "**Optional**, if set, enable e2e check (per 10m) for JavaCRS. Default is False.",
+      "title": "E2E Check",
+      "type": "boolean"
+    },
+    "modules": {
+      "$ref": "#/$defs/ModuleParams",
+      "description": "Module parameters."
+    },
+    "sync_log": {
+      "default": false,
+      "description": "**Optional**, if set, enable sync log to NFS right after e2e. Default is False.",
+      "title": "Sync Log",
+      "type": "boolean"
+    },
+    "target_harnesses": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "**Optional**, if set, only the harness in target list will be ran in this CRS. By default is None, allowing any harness.",
+      "title": "Target Harnesses"
+    },
+    "ttl_fuzz_time": {
+      "description": "**Mandatory**, a positive integer for JavaCRS execution time in seconds.",
+      "title": "Ttl Fuzz Time",
+      "type": "integer"
+    },
+    "verbose": {
+      "default": false,
+      "description": "**Optional**, verbose log mode. Default is False.",
+      "title": "Verbose",
+      "type": "boolean"
+    },
+    "workdir": {
+      "default": null,
+      "description": "**Optional**, JavaCRS working directory. If not set, it will be `${CRS_WORKDIR:-/crs-workdir}/worker-${NODE_IDX}` in bash semantics.",
+      "title": "Workdir",
+      "type": "string"
+    }
+  },
+  "required": [
+    "ttl_fuzz_time",
+    "modules"
+  ],
+  "title": "JavaCRSParams",
+  "type": "object"
+}

@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+"""
+Fuzzing Test Generator for RDF4J
+
+This script generates high-quality fuzzing test cases for the RDF4J project,
+specifically targeting the Rdf4jOne fuzzing harness.
+"""
+
+import os
+import struct
+import random
+from libDeepGen import libGenerator
+
+# Ensure output directory exists
+OUTPUT_DIR = "fuzz_seeds"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+def gen_one_seed() -> bytes:
+    """
+    Generate a single fuzzing seed for the RDF4J harness.
+    
+    The Rdf4jOne harness expects input with the following structure:
+    - 4 bytes: picker (int) - determines which functionality to test
+    - 4 bytes: count (int) - number of iterations (limited to 255)
+    - remaining bytes: payload data for the selected test
+    
+    Returns:
+        bytes: A complete fuzzing test case
+    """
+    # Select a test case (3=ZIP extraction, 5=RDFXMLParser, 6=TriXParser)
+    picker = random.choice([3, 5, 6])
+    
+    # Set a reasonable count value (1-10)
+    count = random.randint(1, 10)
+    
+    # Generate appropriate payload based on the picker value
+    if picker == 3:
+        # For ZIP extraction, we need filenames that might trigger path traversal
+        payload = gen_zip_filename_payload()
+    elif picker == 5:
+        # For RDFXMLParser, generate XML content
+        payload = gen_rdfxml_payload()
+    elif picker == 6:
+        # For TriXParser, generate TriX content
+        payload = gen_trix_payload()
+    
+    # Construct the complete test case
+    return struct.pack("<ii", picker, count) + payload
+
+def gen_zip_filename_payload() -> bytes:
+    """Generate payloads targeting ZIP filename handling"""
+    # Create potentially problematic filenames for ZIP entries
+    patterns = [
+        # Path traversal attempts
+        "../../../etc/passwd",
+        "..\\..\\..\\Windows\\System32\\config\\SAM",
+        # Long paths
+        "a" * random.randint(100, 1000),
+        # Special characters
+        "file:with:colon.txt",
+        "file\\with\\backslash.txt",
+        # Unicode characters
+        "ファイル名.txt",
+        "файл.txt",
+        # Null bytes
+        "file\0hidden.txt",
+        # Control characters
+        "file\r\nname.txt",
+    ]
+    
+    return random.choice(patterns).encode('utf-8', errors='replace')
+
+def gen_rdfxml_payload() -> bytes:
+    """Generate RDF/XML content for testing the RDFXMLParser"""
+    # Use the XML generator from libGenerator
+    try:
+        # First attempt to use the library's generator
+        return libGenerator.xml_gen()
+    except (AttributeError, Exception):
+        # Fallback to custom generation if the library doesn't have xml_gen
+        templates = [
+            # Basic valid RDF/XML
+            b"""<?xml version="1.0"?>
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                     xmlns:dc="http://purl.org/dc/elements/1.1/">
+              <rdf:Description rdf:about="http://example.org/resource">
+                <dc:title>Test Title</dc:title>
+                <dc:creator>Test Creator</dc:creator>
+              </rdf:Description>
+            </rdf:RDF>""",
+            
+            # Malformed XML
+            b"""<?xml version="1.0"?>
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description>
+                <title>Incomplete element
+            </rdf:RDF>""",
+            
+            # XML with large nesting
+            b"""<?xml version="1.0"?>
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description>
+                <a><b><c><d><e><f><g><h><i><j><k>Deep nesting</k></j></i></h></g></f></e></d></c></b></a>
+              </rdf:Description>
+            </rdf:RDF>""",
+            
+            # XML with entity expansion
+            b"""<?xml version="1.0"?>
+            <!DOCTYPE test [
+              <!ENTITY a "a">
+              <!ENTITY a1 "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;">
+              <!ENTITY a2 "&a1;&a1;&a1;&a1;&a1;&a1;&a1;&a1;&a1;&a1;">
+            ]>
+            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="http://example.org/resource">
+                <value>&a2;</value>
+              </rdf:Description>
+            </rdf:RDF>"""
+        ]
+        return random.choice(templates)
+
+def gen_trix_payload() -> bytes:
+    """Generate TriX content for testing the TriXParser"""
+    try:
+        # First attempt to use the library's generator
+        return libGenerator.xml_gen()  # TriX is XML-based
+    except (AttributeError, Exception):
+        # Fallback to custom generation
+        templates = [
+            # Basic valid TriX
+            b"""<?xml version="1.0"?>
+            <TriX xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+              <graph>
+                <uri>http://example.org/graph</uri>
+                <triple>
+                  <uri>http://example.org/subject</uri>
+                  <uri>http://example.org/predicate</uri>
+                  <plainLiteral>Object value</plainLiteral>
+                </triple>
+              </graph>
+            </TriX>""",
+            
+            # Malformed TriX
+            b"""<?xml version="1.0"?>
+            <TriX xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+              <graph>
+                <triple>
+                  <uri>http://example.org/subject</uri>
+                  <plainLiteral>Missing predicate</plainLiteral>
+                </triple>
+              </graph>
+            </TriX>""",
+            
+            # TriX with multiple graphs
+            b"""<?xml version="1.0"?>
+            <TriX xmlns="http://www.w3.org/2004/03/trix/trix-1/">
+              <graph>
+                <uri>http://example.org/graph1</uri>
+                <triple>
+                  <uri>http://example.org/subject1</uri>
+                  <uri>http://example.org/predicate1</uri>
+                  <plainLiteral>Value 1</plainLiteral>
+                </triple>
+              </graph>
+              <graph>
+                <uri>http://example.org/graph2</uri>
+                <triple>
+                  <uri>http://example.org/subject2</uri>
+                  <uri>http://example.org/predicate2</uri>
+                  <plainLiteral>Value 2</plainLiteral>
+                </triple>
+              </graph>
+            </TriX>"""
+        ]
+        return random.choice(templates)
+
+def generate_seed_files(num_seeds=100):
+    """
+    Generate multiple seed files for fuzzing.
+    
+    Args:
+        num_seeds: Number of seed files to generate
+    """
+    for i in range(num_seeds):
+        seed_data = gen_one_seed()
+        filename = f"{OUTPUT_DIR}/seed_{i:04d}.bin"
+        with open(filename, "wb") as f:
+            f.write(seed_data)
+    
+    print(f"Generated {num_seeds} seed files in '{OUTPUT_DIR}' directory")
+
+if __name__ == "__main__":
+    # Generate a set of seed files
+    generate_seed_files(100)

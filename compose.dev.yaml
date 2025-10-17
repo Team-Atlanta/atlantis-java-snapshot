@@ -1,0 +1,179 @@
+networks:
+  internet: {}
+  crs-internal:
+    internal: true
+
+x-crs-java-shared-envs: &crs-java-shared-envs
+  AIXCC_LITELLM_HOSTNAME: https://cyclonus.gtisc.gatech.edu:41414
+  LITELLM_URL: https://cyclonus.gtisc.gatech.edu:41414
+  LITELLM_KEY: ${LITELLM_KEY}
+  CRS_TARGET: ${CRS_TARGET}
+
+x-eva-crs-java-shared-envs: &eva-crs-java-shared-envs
+  AIXCC_LITELLM_HOSTNAME: https://cyclonus.gtisc.gatech.edu:41414
+  LITELLM_URL: https://cyclonus.gtisc.gatech.edu:41414
+  LITELLM_KEY: ${LITELLM_KEY}
+  JAZZER_KEEP_FULL_DETAIL: "on"
+
+x-crs-java-volumes: &crs-java-volumes
+  - type: bind
+    source: ${PWD}/cp_root
+    target: /cp_root
+  - type: bind
+    source: ${PWD}/crs-workdir
+    target: /crs-workdir
+
+x-dev-crs-java-volumes: &dev-crs-java-volumes
+  - type: bind
+    source: ${PWD}/cp_root
+    target: /cp_root
+  - type: bind
+    source: ${PWD}/crs
+    target: /app/crs-cp-java
+  - type: bind
+    source: ${PWD}/crs-workdir
+    target: /crs-workdir
+
+x-eva-crs-java-volumes: &eva-crs-java-volumes
+  - type: bind
+    source: ${EVA_HOST_CP_ROOT:-}
+    target: /cp_root
+  - type: bind
+    source: ${EVA_HOST_CRS_WORKDIR:-}
+    target: /crs-workdir
+
+services:
+  # Redis for competition mode
+  competition-redis:
+    networks:
+      - crs-internal
+    profiles:
+      - competition
+    image: redis:7.4-alpine
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /crs-java-cpmeta-db/competition/db && redis-server --dir /crs-java-cpmeta-db/competition/db --port 9505"]
+    # Not exposing to host, only used within internal network
+    # Uncomment the following line for debugging if needed
+    # ports:
+    #   - "9505:9505"
+
+  # Redis for dev mode
+  dev-redis:
+    networks:
+      - crs-internal
+    profiles:
+      - development
+    image: redis:7.4-alpine
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /crs-java-cpmeta-db/competition/db && redis-server --dir /crs-java-cpmeta-db/competition/db --port 9505"]
+    # Not exposing to host, only used within internal network
+    # Uncomment the following line for debugging if needed
+    # ports:
+    #   - "9506:9505"
+
+  # Redis for eva mode
+  eva-redis:
+    networks:
+      - crs-internal
+    profiles:
+      - evaluation
+    image: redis:7.4-alpine
+    entrypoint: ["/bin/sh", "-c", "mkdir -p /crs-java-cpmeta-db/competition/db && redis-server --dir /crs-java-cpmeta-db/competition/db --port 9505"]
+    # Not exposing to host, only used within internal network
+    # Uncomment the following line for debugging if needed
+    # ports:
+    #   - "9507:9505"
+
+  crs-java-runner:
+    networks:
+      - crs-internal
+      - internet
+    profiles:
+      - competition
+    image: crs-java
+    restart: on-failure
+    privileged: true
+    shm_size: '128gb'
+    cgroup: host
+    build:
+      context: crs
+      dockerfile: Dockerfile.crs
+    command: ["bash", "dev-run.sh"]
+    volumes:
+      *crs-java-volumes
+    environment:
+      <<: *crs-java-shared-envs
+      CPMETA_REDIS_URL: redis://competition-redis:9505
+      CRS_JAVA_TEST: ${CRS_JAVA_TEST:-}
+      CRS_JAVA_TEST_DEBUG : ${CRS_JAVA_TEST_DEBUG:-}
+      CRS_HARNESS: ${CRS_HARNESS:-}
+      CRS_TTL_TIME: ${CRS_TTL_TIME:-}
+      CRS_JAVA_TEST_ENV_ROLE: leader
+      CRS_JAVA_POD_NAME: local-run-pod
+      CRS_JAVA_POD_NAMESPACE: local-run-ns
+      CRS_JAVA_COV_REPRO: ${CRS_JAVA_COV_REPRO:-}
+      CRS_JAVA_COV_REPRO_PARA: ${CRS_JAVA_COV_REPRO_PARA:-}
+    depends_on:
+      - competition-redis
+
+  dev-crs-java-runner:
+    networks:
+      - crs-internal
+      - internet
+    profiles:
+      - development
+    image: crs-java
+    restart: on-failure
+    privileged: true
+    shm_size: '128gb'
+    cgroup: host
+    build:
+      context: crs
+      dockerfile: Dockerfile.crs
+    command: ["bash", "-c", "sleep infinity"]
+    environment:
+      <<: *crs-java-shared-envs
+      DEV: "1"
+      CPMETA_REDIS_URL: redis://dev-redis:9505
+      CRS_HARNESS: ${CRS_HARNESS:-}
+      CRS_TTL_TIME: ${CRS_TTL_TIME:-}
+      CRS_JAVA_TEST: ${CRS_JAVA_TEST:-}
+      CRS_JAVA_TEST_ENV_ROLE: leader
+      CRS_JAVA_POD_NAME: local-dev-pod
+      CRS_JAVA_POD_NAMESPACE: local-dev-ns
+      CRS_JAVA_COV_REPRO: ${CRS_JAVA_COV_REPRO:-}
+      CRS_JAVA_COV_REPRO_PARA: ${CRS_JAVA_COV_REPRO_PARA:-}
+    volumes:
+      *dev-crs-java-volumes
+    depends_on:
+      - dev-redis
+
+  eva-crs-java-runner:
+    networks:
+      - crs-internal
+      - internet
+    profiles:
+      - evaluation
+    image: ${EVA_JAVACRS_IMG:-}
+    restart: on-failure
+    privileged: true
+    shm_size: '128gb'
+    cgroup: host
+    build:
+      context: crs
+      dockerfile: Dockerfile.crs
+    command: ["bash", "-c", "sleep infinity"]
+    environment:
+      <<: *eva-crs-java-shared-envs
+      EVA: "1"
+      CPMETA_REDIS_URL: redis://eva-redis:9505
+      CRS_HARNESS: ${CRS_HARNESS:-}
+      CRS_TTL_TIME: ${CRS_TTL_TIME:-}
+      CRS_JAVA_TEST: ${CRS_JAVA_TEST:-}
+      CRS_JAVA_TEST_ENV_ROLE: leader
+      CRS_JAVA_POD_NAME: local-eva-pod
+      CRS_JAVA_POD_NAMESPACE: local-eva-ns
+      CRS_JAVA_COV_REPRO: ${CRS_JAVA_COV_REPRO:-}
+      CRS_JAVA_COV_REPRO_PARA: ${CRS_JAVA_COV_REPRO_PARA:-}
+    volumes:
+      *eva-crs-java-volumes
+    depends_on:
+      - eva-redis

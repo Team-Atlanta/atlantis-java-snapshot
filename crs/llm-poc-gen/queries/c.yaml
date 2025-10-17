@@ -1,0 +1,618 @@
+fuzzer_entry: "LLVMFuzzerTestOneInput"
+
+
+breakpoint: "hit Breakpoint"
+
+
+fuzzer_entries: |
+  def shallowestMatchingFilename(uri: String): Option[String] = {{
+    val cleanedUri = uri.stripPrefix("/")
+    val uriParts = cleanedUri.split("/")
+    cpg.method
+      .filename
+      .l
+      .filter {{ path =>
+        val pathParts = path.split("/")
+        pathParts.length >= uriParts.length &&
+        pathParts.takeRight(uriParts.length).mkString("/") == uri
+      }}
+      .sortBy(_.split("/").length)
+      .headOption
+  }}
+  List({harnesses})
+    .flatMap {{ case (filename, methodName) =>
+      shallowestMatchingFilename(filename).map(matchedFilename => (matchedFilename, methodName))
+    }}
+    .flatMap {{ case (matchedFilename, methodName) =>
+      cpg.method.filenameExact(matchedFilename).nameExact(methodName).id.l
+    }}
+
+callee_tree: |
+  import scala.util.Try
+  import scala.collection.mutable
+  import java.util.regex.Pattern
+  def getCalleeTree(method: Method, visited: mutable.Set[Long], maxDepth: Int = 13): List[Map[String, Any]] = {{
+    val pointerCache = mutable.Map.empty[(String, String), List[Map[String, List[String]]]]
+    def resolvePointerType(originalType: String, fieldName: String): List[Map[String, List[String]]] = {{
+      pointerCache.getOrElseUpdate((originalType, fieldName), {{
+        val resolvedTypePair = cpg.typeDecl
+          .aliasTypeFullNameExact(originalType)
+          .distinctBy(x => (x.filename, x.lineNumber))
+          .distinctBy(_.name)
+          .map(t => (t.name, t.filename))
+          .l ++ cpg.typeDecl
+          .nameExact(originalType)
+          .distinctBy(x => (x.filename, x.lineNumber))
+          .distinctBy(_.code)
+          .map(t => (t.name, t.filename))
+          .l
+
+        val resolvedTypeName = {{
+          if (resolvedTypePair.isEmpty) List(originalType)
+          else resolvedTypePair.map(_._1).distinct
+        }}
+        val resolvedFilenames = {{
+          if (resolvedTypePair.isEmpty) {{
+            cpg.member
+              .where(_.typeDecl.nameExact(originalType))
+              .typeDecl
+              .filename
+              .l
+              .toSet
+          }} else {{
+            resolvedTypePair.map(_._2).toSet
+          }}
+        }}
+        // pre-defined fp inside of struct
+        val memberType = cpg.member
+          .name(fieldName)
+          .filter(m => resolvedTypeName.contains(m.typeDecl.name))
+          .distinctBy(_.typeFullName)
+          .typeFullName
+        // fp defined inside of struct
+        def localType = {{
+          def baseQuery = {{ cpg.local.name(fieldName).distinctBy(_.typeFullName) }}
+          if (resolvedFilenames.isEmpty) baseQuery.typeFullName
+          else {{
+            def candidate = {{ baseQuery.filter(x => x.file.name.headOption.exists(resolvedFilenames.contains)) }}
+            candidate.typeFullName.headOption match {{
+              case Some(typeName) if typeName != "ANY" => candidate.typeFullName
+              case _ => candidate.code
+            }}
+          }}
+        }}
+        List(Map("member" -> memberType.l, "local" -> localType.l))
+      }})
+    }}
+    def getCallee(method: Method): List[Method] = {{
+      def base(): List[Method] = {{
+        method.callee
+          .whereNot(_.name("^<operator>.*"))
+          .whereNot(_.name("^<operators>.*"))
+          .flatMap {{ callee =>
+            if (callee.astParentFullName == "<global>" && callee.filename == "<empty>") {{
+              cpg.method.nameExact(callee.name).filenameExact(method.filename).headOption.getOrElse(callee)
+            }} else {{
+              if (method.name == "LLVMFuzzerTestOneInput") {{
+                cpg.method.nameExact(callee.name).signatureExact(callee.signature)
+              }} else {{
+                callee
+              }}
+            }}
+          }}.l
+      }}
+      def functionPointer(): List[Method] = {{
+        def parseSignatureWithName(sig: String): Option[(String, List[String])] = {{
+          val pattern = """^(.+?)\s*\(\s*\*\s*\w+\s*\)\s*\((.*)\)\s*;?$""".r
+          sig match {{
+            case pattern(retType, paramString) =>
+              def splitParams(params: String): List[String] = {{
+                val buf = scala.collection.mutable.ListBuffer[String]()
+                val current = new StringBuilder
+                var depth = 0
+                for (ch <- params) {{
+                  ch match {{
+                    case ',' if depth == 0 =>
+                      buf += current.toString().trim
+                      current.clear()
+                    case '(' =>
+                      depth += 1
+                      current += ch
+                    case ')' =>
+                      depth -= 1
+                      current += ch
+                    case _ =>
+                      current += ch
+                  }}
+                }}
+                if (current.nonEmpty) buf += current.toString().trim
+                buf.toList
+              }}
+              def cleanParam(param: String): String = {{
+                val noConst = param.trim.replaceFirst("^const\\s+", "")
+                val noStruct = noConst.replaceFirst("^struct\\s+", "")
+                val fnPtrPattern = """^(.+?)\(\s*\*\s*\w+\s*\)\s*\(.*\)$""".r
+                noStruct match {{
+                  case fnPtrPattern(ret) => ret.trim.replaceAll("\\s+", "")
+                  case _ =>
+                    val arrayPattern = """^(.+?)\s+(\w+)(\[[^\]]*\])$""".r
+                    noStruct match {{
+                      case arrayPattern(tpe, _, arr) =>
+                        (tpe + arr).replaceAll("\\s+", "")
+                      case _ =>
+                        val tokens = noStruct.split("\\s+")
+                        if (tokens.length == 1) {{
+                          noStruct.replaceAll("\\s+", "")
+                        }} else {{
+                          val lastToken = tokens.last
+                          val beforeLastTokens = tokens.dropRight(1).mkString(" ")
+                          val pointerPart = lastToken.takeWhile(ch => ch == '*' || ch == '&')
+                          val varNamePart = lastToken.dropWhile(ch => ch == '*' || ch == '&')
+                          if (varNamePart.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {{
+                            (beforeLastTokens + " " + pointerPart).replaceAll("\\s+", "")
+                          }} else {{
+                            noStruct.replaceAll("\\s+", "")
+                          }}
+                        }}
+                    }}
+                }}
+              }}
+              val params =
+                if (paramString.trim.isEmpty || paramString.trim == "void") Nil
+                else splitParams(paramString).map(cleanParam)
+              Some((retType.trim, params))
+            case _ => None
+          }}
+        }}
+        def parseSignature(sig: String): Option[(String, List[String])] = {{
+          val idx = sig.indexOf("(*)")
+          if (idx != -1 && sig.length > idx + 3 && sig.charAt(idx + 3) == '(' && sig.last == ')') {{
+            val returnType = sig.substring(0, idx).trim
+            val paramString = sig.substring(idx + 4, sig.length - 1).trim
+            def splitParams(params: String): List[String] = {{
+              val buf = scala.collection.mutable.ListBuffer[String]()
+              val current = new StringBuilder
+              var depth = 0
+              for (ch <- params) {{
+                ch match {{
+                  case ',' if depth == 0 =>
+                    buf += current.toString().trim
+                    current.clear()
+                  case '(' =>
+                    depth += 1
+                    current += ch
+                  case ')' =>
+                    depth -= 1
+                    current += ch
+                  case _ =>
+                    current += ch
+                }}
+              }}
+              if (current.nonEmpty) buf += current.toString().trim
+              buf.toList
+            }}
+            def removeLeadingConst(param: String): String = {{
+              val trimmed = param.trim
+              if (trimmed.startsWith("const")) trimmed.stripPrefix("const").trim else trimmed
+            }}
+            def removeFunctionPointerParam(param: String): String = {{
+              val fnPtrPattern = """^([^\\(]+)\\(\\*\\)\\(.*\\)$""".r
+              removeLeadingConst(param) match {{
+                case fnPtrPattern(retType) => retType.trim
+                case other => other
+              }}
+            }}
+            val params =
+              if (paramString.isEmpty || paramString == "void") Nil
+              else splitParams(paramString).map(removeFunctionPointerParam)
+            Some((returnType, params))
+          }} else {{
+            parseSignatureWithName(sig)
+          }}
+        }}
+        def tracePointerType(baseType: String, fields: List[String]): Map[String, String] = {{
+          var currentTypeMember: Option[String] = Some(baseType)
+          var currentTypeLocal: Option[String] = None
+          for (field <- fields) {{
+            val result = resolvePointerType(currentTypeMember.getOrElse(currentTypeLocal.getOrElse(baseType)), field)
+            val memberType = result.flatMap(_.getOrElse("member", Nil)).map(_.replaceFirst("\\*+$", "")).distinct
+            val localType = result.flatMap(_.getOrElse("local", Nil)).map(_.replaceFirst("\\*+$", "")).distinct
+            currentTypeMember = memberType.headOption
+            currentTypeLocal = localType.headOption
+          }}
+          Map("member" -> currentTypeMember.getOrElse(""), "local" -> currentTypeLocal.getOrElse(""))
+        }}
+        def fromPointerCallOperator(): List[(String, List[String])] = {{
+          val callAst = method.call
+            .nameExact("<operator>.pointerCall")
+            .l
+            .map {{ target =>
+              target.astChildren.collect {{
+                case x: Call if x.argumentIndex == -1 => x
+                case x: Identifier if x.argumentIndex == -1 => x
+              }}.astMinusRoot.toList
+            }}
+          val retParamPairs = callAst.map {{ nodes =>
+            val relevantNodes = nodes.collect {{
+              case id: Identifier => id
+              case field: FieldIdentifier => field
+            }}
+            relevantNodes.collectFirst {{ case i: Identifier => i }} match {{
+              case Some(startIdentifier) =>
+                val initialType = startIdentifier.typeFullName.replaceFirst("\\*+$", "")
+                val fieldNames = relevantNodes.collect {{ case f: FieldIdentifier => f.canonicalName }}
+                val pointerType = tracePointerType(initialType, fieldNames)
+                val memberType = if (pointerType("member").isEmpty) Nil else List(pointerType("member"))
+                val localType = if (pointerType("local").isEmpty) Nil else List(pointerType("local"))
+                // returns the name of function pointer
+                val memberRetParamPairs = memberType.flatMap {{ x =>
+                  cpg.method.nameExact(x)
+                    .distinctBy(_.signature)
+                    .l
+                    .map {{ m => (m.methodReturn.typeFullName, Try(m.parameter.typeFullName.l).getOrElse(Nil)) }}
+                }}
+                // returns the signature of function pointer
+                val localRetParamPairs = localType.flatMap(parseSignature)
+                memberRetParamPairs ++ localRetParamPairs
+              case None => List.empty
+            }}
+          }}.flatten.distinct
+          retParamPairs
+        }}
+        def fromCallOut(): List[(String, List[String])] = {{
+          val fullName = method.call
+            .nameNot("^<(operator|operators|global|clinit)>.*")
+            .callOut
+            .filter(x => x.lineNumber.isEmpty)
+            .fullName
+          val pointerType = fullName.flatMap {{ x =>
+            cpg.local.name(Pattern.quote(x))
+              .filterNot(_.typeFullName == "ANY")
+              .headOption
+              .map(_.typeFullName)
+          }}.toList
+
+          pointerType.flatMap {{ x =>
+            cpg.method.nameExact(x)
+              .distinctBy(_.signature)
+              .l
+              .map {{ m => (m.methodReturn.typeFullName, Try(m.parameter.typeFullName.l).getOrElse(Nil)) }}
+          }}
+        }}
+        def getMethodByReturnParamPairs(retParamPairs: List[(String, List[String])]): List[Method] = {{
+          retParamPairs.flatMap {{ case (ret, param) =>
+            cpg.method
+              .filter {{ m =>
+                val methodParams = Try(m.parameter.typeFullName.l).getOrElse(Nil)
+                methodParams.length == param.length &&
+                methodParams.zip(param).forall {{
+                  case (actual, expected) => isTypeCompatible(actual, expected)
+                }}
+              }}
+              .fullNameNot("^<unresolvedNamespace>.*")
+              .filter {{ m =>
+                val returnType = Try(m.methodReturn.typeFullName).getOrElse("")
+                isTypeCompatible(returnType, ret)
+              }}
+              .distinctBy(_.fullName)
+              .l
+          }}
+        }}
+        def isTypeCompatible(actual: String, expected: String): Boolean = {{
+          def normalize(t: String): String =
+            t.replaceAll("""\[\d*\]""", "*")
+            .replace("[]", "*")
+            .replace(" ", "")
+          def getAllTypeAliasesWithPointers(typeName: String): Set[String] = {{
+            val ptrCount = typeName.count(_ == '*')
+            val baseType = typeName.replace("*", "")
+            val aliases = (0 to ptrCount).flatMap {{ i =>
+              val trimmedType = baseType + ("*" * (ptrCount - i))
+              val rawAliases = cpg.typeDecl.nameExact(trimmedType).aliasTypeFullName.toSet
+              if (rawAliases.nonEmpty)
+                rawAliases.map(a => a + ("*" * i))
+              else
+                Set(trimmedType)
+            }}.toSet
+            aliases
+          }}
+          val aliasTypes = getAllTypeAliasesWithPointers(actual)
+          normalize(actual) == normalize(expected) || aliasTypes.contains(expected)
+        }}
+        getMethodByReturnParamPairs(fromPointerCallOperator() ++ fromCallOut())
+      }}
+      (base() ++ functionPointer()).distinctBy(_.fullName)
+    }}
+    val queue = mutable.Queue[(Method, Int)]((method, 1))
+    val result = mutable.ListBuffer[Map[String, Any]]()
+    while (queue.nonEmpty) {{
+      val (currentMethod, depth) = queue.dequeue()
+      if (!visited.contains(currentMethod.id) && depth <= maxDepth) {{
+        visited += currentMethod.id
+        val callees = getCallee(currentMethod)
+          .filterNot(_.filename.contains("/src/test/"))
+          .map(_.id)
+        result += Map("id" -> currentMethod.id, "callees" -> callees)
+        queue ++= callees.flatMap(
+          callee => cpg.method.id(callee).l.map(m => (m, depth + 1))
+        )
+      }}
+    }}
+    result.toList
+  }}
+  def shallowestMatchingFilename(uri: String): Option[String] = {{
+    val cleanedUri = uri.stripPrefix("/")
+    val uriParts = cleanedUri.split("/")
+    cpg.method
+      .filename
+      .l
+      .filter {{ path =>
+        val pathParts = path.split("/")
+        pathParts.length >= uriParts.length &&
+        pathParts.takeRight(uriParts.length).mkString("/") == uri
+      }}
+      .sortBy(_.split("/").length)
+      .headOption
+  }}
+  val ids: Set[Long] = try {{
+    implicit val formats: Formats = DefaultFormats
+    val root = parse(Source.fromFile("{path}").getLines().mkString)
+    val nodes = (root \ "nodes")
+    nodes match {{
+      case JArray(nodeList) =>
+        nodeList.flatMap {{ node =>
+          (node \ "id").extractOpt[Long]
+        }}.toSet
+      case _ =>
+        Set.empty[Long]
+    }}
+  }} catch {{
+    case e: Exception => Set.empty[Long]
+  }}
+  val targets = Set({targets})
+  val visited = (ids -- targets).to(mutable.Set)
+  targets
+    .flatMap(x => cpg.method.id(x).l)
+    .flatMap(x => getCalleeTree(x, visited, {call_depth})).l
+sink_from_sarif: |
+  import scala.util.boundary
+  import scala.util.boundary.break
+  def shallowestMatchingFilenameList(uri: String): List[String] = {{
+    val cleanedUri = uri.stripPrefix("/")
+    val exactFilename = cpg.method.filenameExact(uri).filename.distinct.toList
+    if (exactFilename.size > 0) {{
+      exactFilename
+    }} else {{
+      val uriParts = cleanedUri.split("/")
+      cpg.method
+        .filename.toList
+        .filter {{ path =>
+          val pathParts = path.split("/")
+          pathParts.length >= uriParts.length &&
+          pathParts.takeRight(uriParts.length).mkString("/") == uri
+        }}
+        .sortBy(_.split("/").length).distinct
+    }}
+  }}
+  def relevantLines(filename: String, startLine: Int, endLine: Int): List[Int] = {{
+    (startLine to endLine).flatMap {{ line =>
+      def cfgNodes = {{
+        cpg.method
+          .where(_.astParentType("TYPE_DECL"))
+          .where(_.filenameExact(filename))
+          .where(_.lineNumberLte(line))
+          .sortBy(_.lineNumber)(Ordering[Option[Int]].reverse)
+          .headOption
+          .cfgNode
+      }}
+      val smallUnit = cfgNodes.filterNot {{
+        case _: ControlStructure | _: Block | _: JumpTarget | _: Unknown => true
+        case _ => false
+      }}
+      def nodes = {{
+        if (smallUnit.nonEmpty) smallUnit else cfgNodes
+      }}
+      nodes.find(_.lineNumber.contains(line)).orElse(nodes.headOption).map(_ => line)
+    }}.toSet.toList.sorted
+  }}
+  def findNodeId(filename: String, line: Int, column: Int): Map[String, Long | String | String] = {{
+    def maybeMethod = {{
+      cpg.method
+        .where(_.astParentType("TYPE_DECL"))
+        .where(_.filenameExact(filename))
+        .where(_.lineNumberLte(line))
+        .sortBy(_.lineNumber)(Ordering[Option[Int]].reverse)
+        .headOption
+    }}
+    def nodes = {{
+      if (maybeMethod.cfgNode.size == 1) {{
+        maybeMethod.cfgNode
+      }} else {{
+        val filtered = maybeMethod.cfgNode.lineNumber(line)
+        if (filtered.nonEmpty) filtered
+        else maybeMethod.cfgNode
+      }}.toList
+    }}
+    val result = if (column > 0) {{
+      val filtered = nodes.filter(_.columnNumber.contains(column))
+      if (filtered.nonEmpty) filtered
+      else nodes.headOption
+    }} else {{
+      nodes.headOption
+    }}
+    result.distinctBy(_.lineNumber).map( x =>
+      Map("id" -> x.id, "method" -> x.method.fullName, "signature" -> s"${{x.method.name}}:${{x.method.signature}}")
+    )
+  }}.head
+  def extractNodes(
+    uri: String,
+    startLine: Int,
+    endLine: Int,
+    startColumn: Int
+  ): List[Map[String, Long | Int | String | List[Map[String, Long | Int]]]] = {{
+    shallowestMatchingFilenameList(uri).toList.flatMap {{ filename =>
+      val lines = relevantLines(filename, startLine, endLine)
+      val column = if (lines == List(startLine)) startColumn else -1
+      val grouped = lines.map {{ line =>
+        val result = findNodeId(filename, line, column)
+        Map(
+          "id" -> result("id"),
+          "line" -> line,
+          "method" -> result("method"),
+          "signature" -> result("signature")
+        )
+      }}
+        .groupBy(node => (node("method"), node("signature")))
+        .map {{ case ((method, signature), group) =>
+          val locations = group.map {{ node =>
+            val id = node("id").asInstanceOf[Long]
+            val line = node("line").asInstanceOf[Int]
+            Map("id" -> id, "line" -> line)
+          }}.distinct
+          Map(
+            "method" -> method,
+            "signature" -> signature,
+            "locations" -> locations.toList
+          )
+        }}
+      grouped.toList
+    }}
+  }}
+  def extractNodesWithFallback(
+    uri: String,
+    startLine: Int,
+    endLine: Int,
+    startColumn: Int
+  ): (List[Map[String, Long | Int | String | List[Map[String, Long | Int]]]], Option[String]) = {{
+    boundary[(List[Map[String, Long | Int | String | List[Map[String, Long | Int]]]], Option[String])] {{
+      val parts = uri.stripPrefix("/").split("/").toList
+      parts.indices.foreach {{ i =>
+        val subUri = parts.drop(i).mkString("/")
+        val result = extractNodes(subUri, startLine, endLine, startColumn)
+        if (result.nonEmpty) break((result, Some(subUri)))
+      }}
+      (Nil, None)
+    }}
+  }}
+  def extractNodesWithTemplateFallback(
+    uri: String,
+    filteringKey: List[(String, Int, Int, Int, String)]
+  ): List[Map[String, Any]] = {{
+    boundary[List[Map[String, Any]]] {{
+      val parts = uri.stripPrefix("/").split("/").toList
+      parts.indices.foreach {{ i =>
+        val subUri = parts.drop(i).mkString("/")
+        val result: List[Map[String, Any]] =
+          shallowestMatchingFilenameList(subUri).toList.flatMap {{ filename =>
+            filteringKey.flatMap {{ case (origMethodName, origMethodStart, offsetStart, offsetEnd, signature) =>
+              val methodNodeOpt = cpg.method.filenameExact(filename)
+                .filter(x => s"${{x.method.name}}:${{x.method.signature}}" == signature)
+                .headOption
+              methodNodeOpt.toList.flatMap {{ m =>
+                m.lineNumber match {{
+                  case Some(lineNumber) =>
+                    val nodes = extractNodes(filename, lineNumber + offsetStart, lineNumber + offsetEnd, -1).headOption // expect only one
+                    nodes match {{
+                      case Some(nodes) =>
+                        List(Map(
+                          "origMethodName"      -> origMethodName,
+                          // "origMethodStartLine" -> origMethodStart,
+                          "newFilename"            -> filename,
+                          // "methodStartLine"     -> lineNumber,
+                          "nodes"               -> nodes
+                        ))
+                      case None => Nil
+                    }}
+                  case None => Nil
+                }}
+              }}
+            }}
+          }}
+        if (result.nonEmpty) break(result)
+      }}
+      Nil
+    }}
+  }}
+  val (nodes, maybeSubUri) = extractNodesWithFallback("{uri}", {start_line}, {end_line}, {start_column})
+  val additionalNodes = maybeSubUri match {{
+    case Some(subUri) if subUri.endsWith(".c.in") || subUri.endsWith(".h.in") =>
+      val uri = subUri.stripSuffix(".in")
+      val filteringKey = nodes.flatMap {{ group =>
+          val methodFullName = group("method").asInstanceOf[String]
+          val signature = group("signature").asInstanceOf[String]
+          val locations = group("locations").asInstanceOf[List[Map[String, Long | Int]]]
+          val lines = locations.map(_("line").asInstanceOf[Int])
+          if (lines.nonEmpty) {{
+              cpg.method.fullNameExact(methodFullName).headOption.map {{ m =>
+              val methodStart = m.lineNumber.getOrElse(-1).toInt
+              val offsetStart = lines.min - methodStart
+              val offsetEnd = lines.max - methodStart
+              (methodFullName, methodStart, offsetStart, offsetEnd, signature)
+              }}
+          }} else {{
+              None
+          }}
+      }}.distinct
+      val result = extractNodesWithTemplateFallback(uri, filteringKey)
+      if (result.nonEmpty) (result) else List.empty
+    case _ => List.empty
+  }}
+  Map(
+    "originals" -> nodes,
+    "additionals" -> additionalNodes
+  )
+sta: |
+  def shallowestMatchingFilename(uri: String): Option[String] = {{
+    val cleanedUri = uri.stripPrefix("/")
+    val uriParts = cleanedUri.split("/")
+    cpg.method
+      .filename
+      .l
+      .filter {{ path =>
+        val pathParts = path.split("/")
+        pathParts.length >= uriParts.length &&
+        pathParts.takeRight(uriParts.length).mkString("/") == uri
+      }}
+      .sortBy(_.split("/").length)
+      .headOption
+  }}
+  shallowestMatchingFilename("{harness}").map {{ filename =>
+    def entry = cpg.method.where(_.filenameExact(filename)).where(_.nameExact("LLVMFuzzerTestOneInput"))
+    def src = entry.parameter
+    def sink = cpg.ids({sink_ids})
+        .collect{{case x: CfgNode => x}}
+    val paths = sink.reachableByFlows(src).l
+    paths.map(_.elements.collect{{case x: CfgNode => x}})
+      .groupBy(_.lastOption.map(_.id).getOrElse(-1L))
+      .collect{{case (a, b) if a != -1 => (a, b)}}
+      .view.mapValues(_
+          .map(_.filterNot(x => x.isInstanceOf[MethodParameterIn] || x.isInstanceOf[MethodParameterOut])
+          .map(x => (x.method.filename, x.method.fullName, x.lineNumber, x.columnNumber.getOrElse(-1)))
+          .collect{{case (a, b, Some(c), d) => Map("filename" -> a, "fullName" -> b, "linNumber" -> c, "columnNumber" -> d)}}))
+      .toMap
+  }}.getOrElse(Map.empty)
+cg: |
+  def shallowestMatchingFilename(uri: String): Option[String] = {{
+    val cleanedUri = uri.stripPrefix("/")
+    val uriParts = cleanedUri.split("/")
+    cpg.method
+      .filename
+      .l
+      .filter {{ path =>
+        val pathParts = path.split("/")
+        pathParts.length >= uriParts.length &&
+        pathParts.takeRight(uriParts.length).mkString("/") == uri
+      }}
+      .sortBy(_.split("/").length)
+      .headOption
+  }}
+  shallowestMatchingFilename("{harness}").map {{ filename =>
+    def srcs = cpg.method.where(_.filenameExact(filename)).where(_.nameExact("LLVMFuzzerTestOneInput")).id
+    def dsts = cpg.ids({sink_ids})
+        .collect{{case x: CfgNode => x}}
+        .groupBy(_.method.id).view.mapValues(_.map(_.id))
+    Map(
+        "srcs" -> srcs.l,
+        "dst_table" -> dsts.toMap
+    )
+  }}.getOrElse(Map.empty)

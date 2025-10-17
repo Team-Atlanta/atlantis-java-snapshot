@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffField.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffField.java</span></div><h1>TiffField.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.nio.ByteOrder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.imaging.formats.tiff.constants.TiffConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+
+/**
+ * A TIFF field in a TIFF directory. Immutable.
+ */
+public class TiffField {
+
+    public final class OversizeValueElement extends AbstractTiffElement {
+<span class="nc" id="L45">        public OversizeValueElement(final int offset, final int length) {</span>
+<span class="nc" id="L46">            super(offset, length);</span>
+<span class="nc" id="L47">        }</span>
+
+        @Override
+        public String getElementDescription() {
+<span class="nc" id="L51">            return &quot;OversizeValueElement, tag: &quot; + getTagInfo().name + &quot;, fieldType: &quot; + getFieldType().getName();</span>
+        }
+    }
+
+<span class="fc" id="L55">    private static final Logger LOGGER = Logger.getLogger(TiffField.class.getName());</span>
+    private final TagInfo tagInfo;
+    private final int tag;
+    private final int directoryType;
+    private final AbstractFieldType abstractFieldType;
+    private final long count;
+    private final long offset;
+    private final byte[] value;
+    private final ByteOrder byteOrder;
+
+    private final int sortHint;
+
+    public TiffField(final int tag, final int directoryType, final AbstractFieldType abstractFieldType, final long count, final long offset, final byte[] value,
+<span class="fc" id="L68">            final ByteOrder byteOrder, final int sortHint) {</span>
+
+<span class="fc" id="L70">        this.tag = tag;</span>
+<span class="fc" id="L71">        this.directoryType = directoryType;</span>
+<span class="fc" id="L72">        this.abstractFieldType = abstractFieldType;</span>
+<span class="fc" id="L73">        this.count = count;</span>
+<span class="fc" id="L74">        this.offset = offset;</span>
+<span class="fc" id="L75">        this.value = value;</span>
+<span class="fc" id="L76">        this.byteOrder = byteOrder;</span>
+<span class="fc" id="L77">        this.sortHint = sortHint;</span>
+
+<span class="fc" id="L79">        tagInfo = TiffTags.getTag(directoryType, tag);</span>
+<span class="fc" id="L80">    }</span>
+
+    public void dump() {
+<span class="nc" id="L83">        try (StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L84">                PrintWriter pw = new PrintWriter(sw)) {</span>
+<span class="nc" id="L85">            dump(pw);</span>
+<span class="nc" id="L86">            pw.flush();</span>
+<span class="nc" id="L87">            sw.flush();</span>
+<span class="nc" id="L88">            LOGGER.fine(sw.toString());</span>
+<span class="nc" id="L89">        } catch (final IOException e) {</span>
+<span class="nc" id="L90">            LOGGER.log(Level.SEVERE, e.getMessage(), e);</span>
+<span class="nc" id="L91">        }</span>
+<span class="nc" id="L92">    }</span>
+
+    public void dump(final PrintWriter pw) {
+<span class="nc" id="L95">        dump(pw, null);</span>
+<span class="nc" id="L96">    }</span>
+
+    public void dump(final PrintWriter pw, final String prefix) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (prefix != null) {</span>
+<span class="nc" id="L100">            pw.print(prefix + &quot;: &quot;);</span>
+        }
+
+<span class="nc" id="L103">        pw.println(toString());</span>
+<span class="nc" id="L104">        pw.flush();</span>
+<span class="nc" id="L105">    }</span>
+
+    /**
+     * Returns a copy of the raw value of the field.
+     *
+     * @return the value of the field, in the byte order of the field.
+     */
+    public byte[] getByteArrayValue() {
+<span class="nc" id="L113">        return BinaryFunctions.head(value, getBytesLength());</span>
+    }
+
+    /**
+     * Returns the field's byte order.
+     *
+     * @return the byte order
+     */
+    public ByteOrder getByteOrder() {
+<span class="nc" id="L122">        return byteOrder;</span>
+    }
+
+    /**
+     * The length of the field's value.
+     *
+     * @return the length, in bytes.
+     */
+    public int getBytesLength() {
+<span class="nc" id="L131">        return (int) count * abstractFieldType.getSize();</span>
+    }
+
+    /**
+     * Returns the field's count, derived from bytes 4-7.
+     *
+     * @return the count
+     */
+    public long getCount() {
+<span class="nc" id="L140">        return count;</span>
+    }
+
+    public String getDescriptionWithoutValue() {
+<span class="nc" id="L144">        return getTag() + &quot; (0x&quot; + Integer.toHexString(getTag()) + &quot;: &quot; + getTagInfo().name + &quot;): &quot;;</span>
+    }
+
+    public int getDirectoryType() {
+<span class="nc" id="L148">        return directoryType;</span>
+    }
+
+    public double[] getDoubleArrayValue() throws ImagingException {
+<span class="nc" id="L152">        final Object o = getValue();</span>
+        // if (o == null)
+        // return null;
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (o instanceof Number) {</span>
+<span class="nc" id="L157">            return new double[] { ((Number) o).doubleValue() };</span>
+        }
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (o instanceof Number[]) {</span>
+<span class="nc" id="L160">            final Number[] numbers = (Number[]) o;</span>
+<span class="nc" id="L161">            final double[] result = Allocator.doubleArray(numbers.length);</span>
+<span class="nc" id="L162">            Arrays.setAll(result, i -&gt; numbers[i].doubleValue());</span>
+<span class="nc" id="L163">            return result;</span>
+        }
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (o instanceof short[]) {</span>
+<span class="nc" id="L166">            final short[] numbers = (short[]) o;</span>
+<span class="nc" id="L167">            final double[] result = Allocator.doubleArray(numbers.length);</span>
+<span class="nc" id="L168">            Arrays.setAll(result, i -&gt; numbers[i]);</span>
+<span class="nc" id="L169">            return result;</span>
+        }
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        if (o instanceof int[]) {</span>
+<span class="nc" id="L172">            final int[] numbers = (int[]) o;</span>
+<span class="nc" id="L173">            final double[] result = Allocator.doubleArray(numbers.length);</span>
+<span class="nc" id="L174">            Arrays.setAll(result, i -&gt; numbers[i]);</span>
+<span class="nc" id="L175">            return result;</span>
+        }
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (o instanceof float[]) {</span>
+<span class="nc" id="L178">            final float[] numbers = (float[]) o;</span>
+<span class="nc" id="L179">            final double[] result = Allocator.doubleArray(numbers.length);</span>
+<span class="nc" id="L180">            Arrays.setAll(result, i -&gt; numbers[i]);</span>
+<span class="nc" id="L181">            return result;</span>
+        }
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (o instanceof double[]) {</span>
+<span class="nc" id="L184">            final double[] numbers = (double[]) o;</span>
+<span class="nc" id="L185">            return Arrays.copyOf(numbers, numbers.length);</span>
+        }
+
+<span class="nc" id="L188">        throw new ImagingException(&quot;Unknown value: &quot; + o + &quot; for: &quot; + getTagInfo().getDescription());</span>
+        // return null;
+    }
+
+    public double getDoubleValue() throws ImagingException {
+<span class="nc" id="L193">        final Object o = getValue();</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (o == null) {</span>
+<span class="nc" id="L195">            throw new ImagingException(&quot;Missing value: &quot; + getTagInfo().getDescription());</span>
+        }
+
+<span class="nc" id="L198">        return ((Number) o).doubleValue();</span>
+    }
+
+    /**
+     * Returns the field's type, derived from bytes 2-3.
+     *
+     * @return the field's type, as a {@code FieldType} object.
+     */
+    public AbstractFieldType getFieldType() {
+<span class="nc" id="L207">        return abstractFieldType;</span>
+    }
+
+    public String getFieldTypeName() {
+<span class="nc" id="L211">        return getFieldType().getName();</span>
+    }
+
+    public int[] getIntArrayValue() throws ImagingException {
+<span class="nc" id="L215">        final Object o = getValue();</span>
+        // if (o == null)
+        // return null;
+
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (o instanceof Number) {</span>
+<span class="nc" id="L220">            return new int[] { ((Number) o).intValue() };</span>
+        }
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (o instanceof Number[]) {</span>
+<span class="nc" id="L223">            final Number[] numbers = (Number[]) o;</span>
+<span class="nc" id="L224">            final int[] result = Allocator.intArray(numbers.length);</span>
+<span class="nc" id="L225">            Arrays.setAll(result, i -&gt; numbers[i].intValue());</span>
+<span class="nc" id="L226">            return result;</span>
+        }
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if (o instanceof short[]) {</span>
+<span class="nc" id="L229">            final short[] numbers = (short[]) o;</span>
+<span class="nc" id="L230">            final int[] result = Allocator.intArray(numbers.length);</span>
+<span class="nc" id="L231">            Arrays.setAll(result, i -&gt; 0xffff &amp; numbers[i]);</span>
+<span class="nc" id="L232">            return result;</span>
+        }
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (o instanceof int[]) {</span>
+<span class="nc" id="L235">            final int[] numbers = (int[]) o;</span>
+<span class="nc" id="L236">            return Arrays.copyOf(numbers, numbers.length);</span>
+        }
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        if (o instanceof long[]) {</span>
+<span class="nc" id="L239">            final long[] numbers = (long[]) o;</span>
+<span class="nc" id="L240">            final int[] iNumbers = new int[numbers.length];</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">            for (int i = 0; i &lt; iNumbers.length; i++) {</span>
+<span class="nc" id="L242">                iNumbers[i] = (int) numbers[i];</span>
+            }
+<span class="nc" id="L244">            return iNumbers;</span>
+        }
+
+<span class="nc" id="L247">        throw new ImagingException(&quot;Unknown value: &quot; + o + &quot; for: &quot; + getTagInfo().getDescription());</span>
+        // return null;
+    }
+
+    public int getIntValue() throws ImagingException {
+<span class="nc" id="L252">        final Object o = getValue();</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        if (o == null) {</span>
+<span class="nc" id="L254">            throw new ImagingException(&quot;Missing value: &quot; + getTagInfo().getDescription());</span>
+        }
+
+<span class="nc" id="L257">        return ((Number) o).intValue();</span>
+    }
+
+    public int getIntValueOrArraySum() throws ImagingException {
+<span class="nc" id="L261">        final Object o = getValue();</span>
+        // if (o == null)
+        // return -1;
+
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        if (o instanceof Number) {</span>
+<span class="nc" id="L266">            return ((Number) o).intValue();</span>
+        }
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        if (o instanceof Number[]) {</span>
+<span class="nc" id="L269">            final Number[] numbers = (Number[]) o;</span>
+<span class="nc" id="L270">            int sum = 0;</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">            for (final Number number : numbers) {</span>
+<span class="nc" id="L272">                sum += number.intValue();</span>
+            }
+<span class="nc" id="L274">            return sum;</span>
+        }
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        if (o instanceof short[]) {</span>
+<span class="nc" id="L277">            final short[] numbers = (short[]) o;</span>
+<span class="nc" id="L278">            int sum = 0;</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            for (final short number : numbers) {</span>
+<span class="nc" id="L280">                sum += number;</span>
+            }
+<span class="nc" id="L282">            return sum;</span>
+        }
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        if (o instanceof int[]) {</span>
+<span class="nc" id="L285">            final int[] numbers = (int[]) o;</span>
+<span class="nc" id="L286">            int sum = 0;</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">            for (final int number : numbers) {</span>
+<span class="nc" id="L288">                sum += number;</span>
+            }
+<span class="nc" id="L290">            return sum;</span>
+        }
+
+<span class="nc" id="L293">        throw new ImagingException(&quot;Unknown value: &quot; + o + &quot; for: &quot; + getTagInfo().getDescription());</span>
+        // return -1;
+    }
+
+    /**
+     * Gets the value of the field in the form of an array of eight-byte (long) integers.
+     *
+     * @return an valid array of size zero or larger giving signed long integer values.
+     * @throws ImagingException if the field instance is of an incompatible type or does not contain a valid data element.
+     */
+    public long[] getLongArrayValue() throws ImagingException {
+<span class="nc" id="L304">        final Object o = getValue();</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (o instanceof Number) {</span>
+<span class="nc" id="L306">            return new long[] { ((Number) o).longValue() };</span>
+        }
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (o instanceof Number[]) {</span>
+<span class="nc" id="L309">            final Number[] numbers = (Number[]) o;</span>
+<span class="nc" id="L310">            final long[] result = Allocator.longArray(numbers.length);</span>
+<span class="nc" id="L311">            Arrays.setAll(result, i -&gt; numbers[i].longValue());</span>
+<span class="nc" id="L312">            return result;</span>
+        }
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        if (o instanceof short[]) {</span>
+<span class="nc" id="L315">            final short[] numbers = (short[]) o;</span>
+<span class="nc" id="L316">            final long[] result = Allocator.longArray(numbers.length);</span>
+<span class="nc" id="L317">            Arrays.setAll(result, i -&gt; 0xffff &amp; numbers[i]);</span>
+<span class="nc" id="L318">            return result;</span>
+        }
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        if (o instanceof int[]) {</span>
+<span class="nc" id="L321">            final int[] numbers = (int[]) o;</span>
+<span class="nc" id="L322">            final long[] result = Allocator.longArray(numbers.length);</span>
+<span class="nc" id="L323">            Arrays.setAll(result, i -&gt; 0xFFFFffffL &amp; numbers[i]);</span>
+<span class="nc" id="L324">            return result;</span>
+        }
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if (o instanceof long[]) {</span>
+<span class="nc" id="L327">            final long[] numbers = (long[]) o;</span>
+<span class="nc" id="L328">            return Arrays.copyOf(numbers, numbers.length);</span>
+        }
+
+<span class="nc" id="L331">        throw new ImagingException(&quot;Unknown value: &quot; + o + &quot; for: &quot; + getTagInfo().getDescription());</span>
+    }
+
+    /**
+     * Gets the value of the field in the form of an eight-byte (long) integer.
+     *
+     * @return a signed long integer value.
+     * @throws ImagingException if the field instance is of an incompatible type or does not contain a valid data element.
+     */
+    public long getLongValue() throws ImagingException {
+<span class="nc" id="L341">        final Object o = getValue();</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        if (o == null) {</span>
+<span class="nc" id="L343">            throw new ImagingException(&quot;Missing value: &quot; + getTagInfo().getDescription());</span>
+        }
+<span class="nc" id="L345">        return ((Number) o).longValue();</span>
+    }
+
+    /**
+     * Returns the TIFF field's offset/value field, derived from bytes 8-11.
+     *
+     * @return the field's offset in a {@code long} of 4 packed bytes, or its inlined value &amp;lt;= 4 bytes long encoded in the field's byte order.
+     */
+    public int getOffset() {
+<span class="nc" id="L354">        return (int) offset;</span>
+    }
+
+    public AbstractTiffElement getOversizeValueElement() {
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        if (isLocalValue()) {</span>
+<span class="nc" id="L359">            return null;</span>
+        }
+
+<span class="nc" id="L362">        return new OversizeValueElement(getOffset(), value.length);</span>
+    }
+
+    public int getSortHint() {
+<span class="nc" id="L366">        return sortHint;</span>
+    }
+
+    public String getStringValue() throws ImagingException {
+<span class="nc" id="L370">        final Object o = getValue();</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (o == null) {</span>
+<span class="nc" id="L372">            return null;</span>
+        }
+<span class="nc bnc" id="L374" title="All 2 branches missed.">        if (!(o instanceof String)) {</span>
+<span class="nc" id="L375">            throw new ImagingException(&quot;Expected String value(&quot; + getTagInfo().getDescription() + &quot;): &quot; + o);</span>
+        }
+<span class="nc" id="L377">        return (String) o;</span>
+    }
+
+    /**
+     * Returns the field's tag, derived from bytes 0-1.
+     *
+     * @return the tag, as an {@code int} in which only the lowest 2 bytes are set
+     */
+    public int getTag() {
+<span class="fc" id="L386">        return tag;</span>
+    }
+
+    public TagInfo getTagInfo() {
+<span class="nc" id="L390">        return tagInfo;</span>
+    }
+
+    public String getTagName() {
+<span class="nc bnc" id="L394" title="All 2 branches missed.">        if (getTagInfo() == TiffTagConstants.TIFF_TAG_UNKNOWN) {</span>
+<span class="nc" id="L395">            return getTagInfo().name + &quot; (0x&quot; + Integer.toHexString(getTag()) + &quot;)&quot;;</span>
+        }
+<span class="nc" id="L397">        return getTagInfo().name;</span>
+    }
+
+    public Object getValue() throws ImagingException {
+        // System.out.print(&quot;getValue&quot;);
+<span class="nc" id="L402">        return getTagInfo().getValue(this);</span>
+    }
+
+    public String getValueDescription() {
+        try {
+<span class="nc" id="L407">            return getValueDescription(getValue());</span>
+<span class="nc" id="L408">        } catch (final ImagingException e) {</span>
+<span class="nc" id="L409">            return &quot;Invalid value: &quot; + e.getMessage();</span>
+        }
+    }
+
+    private String getValueDescription(final Object o) {
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        if (o == null) {</span>
+<span class="nc" id="L415">            return null;</span>
+        }
+
+<span class="nc bnc" id="L418" title="All 2 branches missed.">        if (o instanceof Number) {</span>
+<span class="nc" id="L419">            return o.toString();</span>
+        }
+<span class="nc bnc" id="L421" title="All 2 branches missed.">        if (o instanceof String) {</span>
+<span class="nc" id="L422">            return &quot;'&quot; + o.toString().trim() + &quot;'&quot;;</span>
+        }
+<span class="nc bnc" id="L424" title="All 2 branches missed.">        if (o instanceof Date) {</span>
+<span class="nc" id="L425">            final DateFormat df = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss.SSSZ&quot;, Locale.ROOT);</span>
+<span class="nc" id="L426">            return df.format((Date) o);</span>
+        }
+<span class="nc bnc" id="L428" title="All 2 branches missed.">        if (o instanceof Object[]) {</span>
+<span class="nc" id="L429">            final Object[] objects = (Object[]) o;</span>
+<span class="nc" id="L430">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L432" title="All 2 branches missed.">            for (int i = 0; i &lt; objects.length; i++) {</span>
+<span class="nc" id="L433">                final Object object = objects[i];</span>
+
+<span class="nc bnc" id="L435" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L436">                    result.append(&quot;... (&quot;).append(objects.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L437">                    break;</span>
+                }
+<span class="nc bnc" id="L439" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L440">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L442">                result.append(object.toString());</span>
+            }
+<span class="nc" id="L444">            return result.toString();</span>
+            // } else if (o instanceof Number[])
+            // {
+            // Number[] numbers = (Number[]) o;
+            // StringBuilder result = new StringBuilder();
+            //
+            // for (int i = 0; i &lt; numbers.length; i++)
+            // {
+            // Number number = numbers[i];
+            //
+            // if (i &gt; 0)
+            // result.append(&quot;, &quot;);
+            // result.append(&quot;&quot; + number);
+            // }
+            // return result.toString();
+            // }
+        }
+<span class="nc bnc" id="L461" title="All 2 branches missed.">        if (o instanceof short[]) {</span>
+<span class="nc" id="L462">            final short[] values = (short[]) o;</span>
+<span class="nc" id="L463">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L465" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L466">                final short sVal = values[i];</span>
+
+<span class="nc bnc" id="L468" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L469">                    result.append(&quot;... (&quot;).append(values.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L470">                    break;</span>
+                }
+<span class="nc bnc" id="L472" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L473">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L475">                result.append(sVal);</span>
+            }
+<span class="nc" id="L477">            return result.toString();</span>
+        }
+<span class="nc bnc" id="L479" title="All 2 branches missed.">        if (o instanceof int[]) {</span>
+<span class="nc" id="L480">            final int[] values = (int[]) o;</span>
+<span class="nc" id="L481">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L483" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L484">                final int iVal = values[i];</span>
+
+<span class="nc bnc" id="L486" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L487">                    result.append(&quot;... (&quot;).append(values.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L488">                    break;</span>
+                }
+<span class="nc bnc" id="L490" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L491">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L493">                result.append(iVal);</span>
+            }
+<span class="nc" id="L495">            return result.toString();</span>
+        }
+<span class="nc bnc" id="L497" title="All 2 branches missed.">        if (o instanceof long[]) {</span>
+<span class="nc" id="L498">            final long[] values = (long[]) o;</span>
+<span class="nc" id="L499">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L501" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L502">                final long lVal = values[i];</span>
+
+<span class="nc bnc" id="L504" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L505">                    result.append(&quot;... (&quot;).append(values.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L506">                    break;</span>
+                }
+<span class="nc bnc" id="L508" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L509">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L511">                result.append(lVal);</span>
+            }
+<span class="nc" id="L513">            return result.toString();</span>
+        }
+<span class="nc bnc" id="L515" title="All 2 branches missed.">        if (o instanceof double[]) {</span>
+<span class="nc" id="L516">            final double[] values = (double[]) o;</span>
+<span class="nc" id="L517">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L519" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L520">                final double dVal = values[i];</span>
+
+<span class="nc bnc" id="L522" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L523">                    result.append(&quot;... (&quot;).append(values.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L524">                    break;</span>
+                }
+<span class="nc bnc" id="L526" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L527">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L529">                result.append(dVal);</span>
+            }
+<span class="nc" id="L531">            return result.toString();</span>
+        }
+<span class="nc bnc" id="L533" title="All 2 branches missed.">        if (o instanceof byte[]) {</span>
+<span class="nc" id="L534">            final byte[] values = (byte[]) o;</span>
+<span class="nc" id="L535">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L537" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L538">                final byte bVal = values[i];</span>
+
+<span class="nc bnc" id="L540" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L541">                    result.append(&quot;... (&quot;).append(values.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L542">                    break;</span>
+                }
+<span class="nc bnc" id="L544" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L545">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L547">                result.append(bVal);</span>
+            }
+<span class="nc" id="L549">            return result.toString();</span>
+        }
+<span class="nc bnc" id="L551" title="All 2 branches missed.">        if (o instanceof char[]) {</span>
+<span class="nc" id="L552">            final char[] values = (char[]) o;</span>
+<span class="nc" id="L553">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L555" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L556">                final char cVal = values[i];</span>
+
+<span class="nc bnc" id="L558" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L559">                    result.append(&quot;... (&quot;).append(values.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L560">                    break;</span>
+                }
+<span class="nc bnc" id="L562" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L563">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L565">                result.append(cVal);</span>
+            }
+<span class="nc" id="L567">            return result.toString();</span>
+        }
+<span class="nc bnc" id="L569" title="All 2 branches missed.">        if (o instanceof float[]) {</span>
+<span class="nc" id="L570">            final float[] values = (float[]) o;</span>
+<span class="nc" id="L571">            final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L573" title="All 2 branches missed.">            for (int i = 0; i &lt; values.length; i++) {</span>
+<span class="nc" id="L574">                final float fVal = values[i];</span>
+
+<span class="nc bnc" id="L576" title="All 2 branches missed.">                if (i &gt; 50) {</span>
+<span class="nc" id="L577">                    result.append(&quot;... (&quot;).append(values.length).append(&quot;)&quot;);</span>
+<span class="nc" id="L578">                    break;</span>
+                }
+<span class="nc bnc" id="L580" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L581">                    result.append(&quot;, &quot;);</span>
+                }
+<span class="nc" id="L583">                result.append(fVal);</span>
+            }
+<span class="nc" id="L585">            return result.toString();</span>
+        }
+        // else if (o instanceof short[])
+        // {
+        // short[] numbers = (short[]) o;
+        // StringBuilder result = new StringBuilder();
+        //
+        // for (int i = 0; i &lt; numbers.length; i++)
+        // {
+        // short number = numbers[i];
+        //
+        // if (i &gt; 0)
+        // result.append(&quot;, &quot;);
+        // result.append(&quot;&quot; + number);
+        // }
+        // return result.toString();
+        // }
+
+<span class="nc" id="L603">        return &quot;Unknown: &quot; + o.getClass().getName();</span>
+    }
+
+    /**
+     * Indicates whether the field's value is inlined into the offset field.
+     *
+     * @return true if the value is inlined
+     */
+    public boolean isLocalValue() {
+<span class="nc bnc" id="L612" title="All 2 branches missed.">        return count * abstractFieldType.getSize() &lt;= TiffConstants.TIFF_ENTRY_MAX_VALUE_LENGTH;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L617">        return getTag() + &quot; (0x&quot; + Integer.toHexString(getTag()) + &quot;: &quot; + getTagInfo().name + &quot;): &quot; + getValueDescription() + &quot; (&quot; + getCount() + &quot; &quot;</span>
+<span class="nc" id="L618">                + getFieldType().getName() + &quot;)&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

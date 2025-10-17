@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffOutputField.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.write</a> &gt; <span class="el_source">TiffOutputField.java</span></div><h1>TiffOutputField.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.write;
+
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_ENTRY_MAX_VALUE_LENGTH;
+
+import java.io.IOException;
+import java.nio.ByteOrder;
+import java.util.Arrays;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+
+public class TiffOutputField {
+<span class="nc" id="L31">    private static final String NEWLINE = System.lineSeparator();</span>
+
+    protected static TiffOutputField createOffsetField(final TagInfo tagInfo, final ByteOrder byteOrder) throws ImagingException {
+<span class="nc" id="L34">        return new TiffOutputField(tagInfo, AbstractFieldType.LONG, 1, AbstractFieldType.LONG.writeData(0, byteOrder));</span>
+    }
+
+    public final int tag;
+    public final TagInfo tagInfo;
+    public final AbstractFieldType abstractFieldType;
+    public final int count;
+    private byte[] bytes;
+    private final AbstractTiffOutputItem.Value separateValueItem;
+
+<span class="nc" id="L44">    private int sortHint = -1;</span>
+
+<span class="nc" id="L46">    public TiffOutputField(final int tag, final TagInfo tagInfo, final AbstractFieldType abstractFieldType, final int count, final byte[] bytes) {</span>
+<span class="nc" id="L47">        this.tag = tag;</span>
+<span class="nc" id="L48">        this.tagInfo = tagInfo;</span>
+<span class="nc" id="L49">        this.abstractFieldType = abstractFieldType;</span>
+<span class="nc" id="L50">        this.count = count;</span>
+<span class="nc" id="L51">        this.bytes = bytes;</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (isLocalValue()) {</span>
+<span class="nc" id="L54">            separateValueItem = null;</span>
+        } else {
+<span class="nc" id="L56">            final String name = &quot;Field Separate value (&quot; + tagInfo.getDescription() + &quot;)&quot;;</span>
+<span class="nc" id="L57">            separateValueItem = new AbstractTiffOutputItem.Value(name, bytes);</span>
+        }
+<span class="nc" id="L59">    }</span>
+
+    public TiffOutputField(final TagInfo tagInfo, final AbstractFieldType abstractFieldType, final int count, final byte[] bytes) {
+<span class="nc" id="L62">        this(tagInfo.tag, tagInfo, abstractFieldType, count, bytes);</span>
+<span class="nc" id="L63">    }</span>
+
+    /**
+     * Return a copy of the data in this TIFF output field.
+     * @return a copy of the data in this TIFF output field.
+     */
+    public byte[] getData() {
+<span class="nc" id="L70">        return Arrays.copyOf(this.bytes, this.bytes.length);</span>
+    }
+
+    protected AbstractTiffOutputItem getSeperateValue() {
+<span class="nc" id="L74">        return separateValueItem;</span>
+    }
+
+    public int getSortHint() {
+<span class="nc" id="L78">        return sortHint;</span>
+    }
+
+    protected final boolean isLocalValue() {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        return bytes.length &lt;= TIFF_ENTRY_MAX_VALUE_LENGTH;</span>
+    }
+
+    /**
+     * Set the data for this TIFF output field.
+     *
+     * @param bytes TIFF output field data.
+     * @throws ImagingException if the length of the bytes array do not match.
+     */
+    public void setData(final byte[] bytes) throws ImagingException {
+        // if (tagInfo.isUnknown())
+        // Debug.debug(&quot;unknown tag(0x&quot; + Integer.toHexString(tag)
+        // + &quot;) setData&quot;, bytes);
+
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (this.bytes.length != bytes.length) {</span>
+<span class="nc" id="L97">            throw new ImagingException(&quot;Cannot change size of value.&quot;);</span>
+        }
+
+        // boolean wasLocalValue = isLocalValue();
+<span class="nc" id="L101">        this.bytes = bytes;</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (separateValueItem != null) {</span>
+<span class="nc" id="L103">            separateValueItem.updateValue(bytes);</span>
+        }
+        // if (isLocalValue() != wasLocalValue)
+        // throw new Error(&quot;Bug. Locality disrupted! &quot;
+        // + tagInfo.getDescription());
+<span class="nc" id="L108">    }</span>
+
+    public void setSortHint(final int sortHint) {
+<span class="nc" id="L111">        this.sortHint = sortHint;</span>
+<span class="nc" id="L112">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L116">        return toString(null);</span>
+    }
+
+    public String toString(String prefix) {
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (prefix == null) {</span>
+<span class="nc" id="L121">            prefix = &quot;&quot;;</span>
+        }
+<span class="nc" id="L123">        final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc" id="L125">        result.append(prefix);</span>
+<span class="nc" id="L126">        result.append(tagInfo);</span>
+<span class="nc" id="L127">        result.append(NEWLINE);</span>
+
+<span class="nc" id="L129">        result.append(prefix);</span>
+<span class="nc" id="L130">        result.append(&quot;count: &quot;);</span>
+<span class="nc" id="L131">        result.append(count);</span>
+<span class="nc" id="L132">        result.append(NEWLINE);</span>
+
+<span class="nc" id="L134">        result.append(prefix);</span>
+<span class="nc" id="L135">        result.append(abstractFieldType);</span>
+<span class="nc" id="L136">        result.append(NEWLINE);</span>
+
+<span class="nc" id="L138">        return result.toString();</span>
+    }
+
+    protected void writeField(final BinaryOutputStream bos) throws IOException, ImagingException {
+<span class="nc" id="L142">        bos.write2Bytes(tag);</span>
+<span class="nc" id="L143">        bos.write2Bytes(abstractFieldType.getType());</span>
+<span class="nc" id="L144">        bos.write4Bytes(count);</span>
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (isLocalValue()) {</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            if (separateValueItem != null) {</span>
+<span class="nc" id="L148">                throw new ImagingException(&quot;Unexpected separate value item.&quot;);</span>
+            }
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (bytes.length &gt; 4) {</span>
+<span class="nc" id="L151">                throw new ImagingException(&quot;Local value has invalid length: &quot; + bytes.length);</span>
+            }
+
+<span class="nc" id="L154">            bos.write(bytes);</span>
+<span class="nc" id="L155">            final int remainder = TIFF_ENTRY_MAX_VALUE_LENGTH - bytes.length;</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            for (int i = 0; i &lt; remainder; i++) {</span>
+<span class="nc" id="L157">                bos.write(0);</span>
+            }
+<span class="nc" id="L159">        } else {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            if (separateValueItem == null) {</span>
+<span class="nc" id="L161">                throw new ImagingException(&quot;Missing separate value item.&quot;);</span>
+            }
+
+<span class="nc" id="L164">            bos.write4Bytes((int) separateValueItem.getOffset());</span>
+        }
+<span class="nc" id="L166">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

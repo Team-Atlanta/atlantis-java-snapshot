@@ -1,0 +1,5 @@
+```
+PROMPT_POC_GENERATION_RESP
+```
+
+The above is a response from LLM. It provides the final generated poc in hex string format. Find the hex string format poc in response and reply me with that hex string only (no quotes, no space, etc), I will directly pass it to bytes.fromhex.

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PackBits.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.common</a> &gt; <span class="el_source">PackBits.java</span></div><h1>PackBits.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.common;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.io.output.UnsynchronizedByteArrayOutputStream;
+
+public final class PackBits {
+
+    public static byte[] compress(final byte[] bytes) throws IOException {
+        // max length 1 extra byte for every 128
+<span class="nc" id="L29">        try (UnsynchronizedByteArrayOutputStream baos = UnsynchronizedByteArrayOutputStream.builder().setBufferSize(Allocator.checkByteArray(bytes.length * 2))</span>
+<span class="nc" id="L30">                .get()) {</span>
+<span class="nc" id="L31">            int ptr = 0;</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">            while (ptr &lt; bytes.length) {</span>
+<span class="nc" id="L33">                int dup = findNextDuplicate(bytes, ptr);</span>
+
+<span class="nc bnc" id="L35" title="All 2 branches missed.">                if (dup == ptr) {</span>
+                    // write run length
+<span class="nc" id="L37">                    final int len = findRunLength(bytes, dup);</span>
+<span class="nc" id="L38">                    final int actualLen = Math.min(len, 128);</span>
+<span class="nc" id="L39">                    baos.write(-(actualLen - 1));</span>
+<span class="nc" id="L40">                    baos.write(bytes[ptr]);</span>
+<span class="nc" id="L41">                    ptr += actualLen;</span>
+<span class="nc" id="L42">                } else {</span>
+                    // write literals
+<span class="nc" id="L44">                    int len = dup - ptr;</span>
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                    if (dup &gt; 0) {</span>
+<span class="nc" id="L47">                        final int runlen = findRunLength(bytes, dup);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">                        if (runlen &lt; 3) {</span>
+                            // may want to discard next run.
+<span class="nc" id="L50">                            final int nextptr = ptr + len + runlen;</span>
+<span class="nc" id="L51">                            final int nextdup = findNextDuplicate(bytes, nextptr);</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">                            if (nextdup != nextptr) {</span>
+                                // discard 2-byte run
+<span class="nc" id="L54">                                dup = nextdup;</span>
+<span class="nc" id="L55">                                len = dup - ptr;</span>
+                            }
+                        }
+                    }
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                    if (dup &lt; 0) {</span>
+<span class="nc" id="L61">                        len = bytes.length - ptr;</span>
+                    }
+<span class="nc" id="L63">                    final int actualLen = Math.min(len, 128);</span>
+
+<span class="nc" id="L65">                    baos.write(actualLen - 1);</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                    for (int i = 0; i &lt; actualLen; i++) {</span>
+<span class="nc" id="L67">                        baos.write(bytes[ptr]);</span>
+<span class="nc" id="L68">                        ptr++;</span>
+                    }
+                }
+<span class="nc" id="L71">            }</span>
+<span class="nc" id="L72">            return baos.toByteArray();</span>
+        }
+    }
+
+    public static byte[] decompress(final byte[] bytes, final int expected) throws ImagingException {
+<span class="nc" id="L77">        int total = 0;</span>
+
+<span class="nc" id="L79">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+        // Loop until you get the number of unpacked bytes you are expecting:
+<span class="nc" id="L82">        int i = 0;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        while (total &lt; expected) {</span>
+            // Read the next source byte into n.
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            if (i &gt;= bytes.length) {</span>
+<span class="nc" id="L86">                throw new ImagingException(&quot;Tiff: Unpack bits source exhausted: &quot; + i + &quot;, done + &quot; + total + &quot;, expected + &quot; + expected);</span>
+            }
+
+<span class="nc" id="L89">            final int n = bytes[i++];</span>
+<span class="nc bnc" id="L90" title="All 4 branches missed.">            if (n &gt;= 0 &amp;&amp; n &lt;= 127) {</span>
+                // If n is between 0 and 127 inclusive, copy the next n+1 bytes
+                // literally.
+<span class="nc" id="L93">                final int count = n + 1;</span>
+
+<span class="nc" id="L95">                total += count;</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                for (int j = 0; j &lt; count; j++) {</span>
+<span class="nc" id="L97">                    baos.write(bytes[i++]);</span>
+                }
+<span class="nc bnc" id="L99" title="All 4 branches missed.">            } else if (n &gt;= -127 &amp;&amp; n &lt;= -1) {</span>
+                // Else if n is between -127 and -1 inclusive, copy the next byte
+                // -n+1 times.
+
+<span class="nc" id="L103">                final int b = bytes[i++];</span>
+<span class="nc" id="L104">                final int count = -n + 1;</span>
+
+<span class="nc" id="L106">                total += count;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                for (int j = 0; j &lt; count; j++) {</span>
+<span class="nc" id="L108">                    baos.write(b);</span>
+                }
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            } else if (n == -128) {</span>
+                // Else if n is -128, noop.
+<span class="nc" id="L112">                throw new ImagingException(&quot;Packbits: &quot; + n);</span>
+            }
+<span class="nc" id="L114">        }</span>
+
+<span class="nc" id="L116">        return baos.toByteArray();</span>
+
+    }
+
+    private static int findNextDuplicate(final byte[] bytes, final int start) {
+        // int last = -1;
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (start &gt;= bytes.length) {</span>
+<span class="nc" id="L123">            return -1;</span>
+        }
+
+<span class="nc" id="L126">        byte prev = bytes[start];</span>
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        for (int i = start + 1; i &lt; bytes.length; i++) {</span>
+<span class="nc" id="L129">            final byte b = bytes[i];</span>
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">            if (b == prev) {</span>
+<span class="nc" id="L132">                return i - 1;</span>
+            }
+
+<span class="nc" id="L135">            prev = b;</span>
+        }
+
+<span class="nc" id="L138">        return -1;</span>
+    }
+
+    private static int findRunLength(final byte[] bytes, final int start) {
+<span class="nc" id="L142">        final byte b = bytes[start];</span>
+
+        int i;
+
+<span class="nc bnc" id="L146" title="All 4 branches missed.">        for (i = start + 1; i &lt; bytes.length &amp;&amp; bytes[i] == b; i++) {</span>
+            // do nothing
+        }
+
+<span class="nc" id="L150">        return i - start;</span>
+    }
+
+    private PackBits() {
+        // empty
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

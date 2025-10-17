@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BmpHeaderInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.bmp</a> &gt; <span class="el_source">BmpHeaderInfo.java</span></div><h1>BmpHeaderInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.bmp;
+
+final class BmpHeaderInfo {
+<span class="fc" id="L20">    static class ColorSpace {</span>
+        ColorSpaceCoordinate red;
+        ColorSpaceCoordinate green;
+        ColorSpaceCoordinate blue;
+    }
+
+<span class="fc" id="L26">    static class ColorSpaceCoordinate {</span>
+        int x;
+        int y;
+        int z;
+    }
+
+    // BM - Windows 3.1x, 95, NT
+    // BA - OS/2 Bitmap Array
+    // CI - OS/2 Color Icon
+    // CP - OS/2 Color Pointer
+    // IC - OS/2 Icon
+    // PT - OS/2 Pointer
+    public final byte identifier1;
+    public final byte identifier2;
+    public final int fileSize;
+
+    public final int reserved;
+    public final int bitmapDataOffset;
+    public final int bitmapHeaderSize;
+    public final int width;
+    public final int height;
+    public final int planes;
+    public final int bitsPerPixel;
+    public final int compression;
+    public final int bitmapDataSize;
+    public final int hResolution;
+    public final int vResolution;
+
+    public final int colorsUsed;
+    public final int colorsImportant;
+    public final int redMask;
+    public final int greenMask;
+
+    public final int blueMask;
+    public final int alphaMask;
+    public final int colorSpaceType;
+    public final ColorSpace colorSpace;
+    public final int gammaRed;
+    public final int gammaGreen;
+    public final int gammaBlue;
+    public final int intent;
+    public final int profileData;
+
+    public final int profileSize;
+
+    public final int reservedV5;
+
+    BmpHeaderInfo(final byte identifier1, final byte identifier2, final int fileSize, final int reserved, final int bitmapDataOffset,
+            final int bitmapHeaderSize, final int width, final int height, final int planes, final int bitsPerPixel, final int compression,
+            final int bitmapDataSize, final int hResolution, final int vResolution, final int colorsUsed, final int colorsImportant, final int redMask,
+            final int greenMask, final int blueMask, final int alphaMask, final int colorSpaceType, final ColorSpace colorSpace, final int gammaRed,
+<span class="fc" id="L77">            final int gammaGreen, final int gammaBlue, final int intent, final int profileData, final int profileSize, final int reservedV5) {</span>
+<span class="fc" id="L78">        this.identifier1 = identifier1;</span>
+<span class="fc" id="L79">        this.identifier2 = identifier2;</span>
+<span class="fc" id="L80">        this.fileSize = fileSize;</span>
+<span class="fc" id="L81">        this.reserved = reserved;</span>
+<span class="fc" id="L82">        this.bitmapDataOffset = bitmapDataOffset;</span>
+
+<span class="fc" id="L84">        this.bitmapHeaderSize = bitmapHeaderSize;</span>
+<span class="fc" id="L85">        this.width = width;</span>
+<span class="fc" id="L86">        this.height = height;</span>
+<span class="fc" id="L87">        this.planes = planes;</span>
+<span class="fc" id="L88">        this.bitsPerPixel = bitsPerPixel;</span>
+<span class="fc" id="L89">        this.compression = compression;</span>
+<span class="fc" id="L90">        this.bitmapDataSize = bitmapDataSize;</span>
+<span class="fc" id="L91">        this.hResolution = hResolution;</span>
+<span class="fc" id="L92">        this.vResolution = vResolution;</span>
+<span class="fc" id="L93">        this.colorsUsed = colorsUsed;</span>
+<span class="fc" id="L94">        this.colorsImportant = colorsImportant;</span>
+
+<span class="fc" id="L96">        this.redMask = redMask;</span>
+<span class="fc" id="L97">        this.greenMask = greenMask;</span>
+<span class="fc" id="L98">        this.blueMask = blueMask;</span>
+<span class="fc" id="L99">        this.alphaMask = alphaMask;</span>
+<span class="fc" id="L100">        this.colorSpaceType = colorSpaceType;</span>
+<span class="fc" id="L101">        this.colorSpace = colorSpace;</span>
+<span class="fc" id="L102">        this.gammaRed = gammaRed;</span>
+<span class="fc" id="L103">        this.gammaGreen = gammaGreen;</span>
+<span class="fc" id="L104">        this.gammaBlue = gammaBlue;</span>
+<span class="fc" id="L105">        this.intent = intent;</span>
+<span class="fc" id="L106">        this.profileData = profileData;</span>
+<span class="fc" id="L107">        this.profileSize = profileSize;</span>
+<span class="fc" id="L108">        this.reservedV5 = reservedV5;</span>
+<span class="fc" id="L109">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

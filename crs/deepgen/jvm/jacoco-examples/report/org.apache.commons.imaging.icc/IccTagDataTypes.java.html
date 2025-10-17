@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IccTagDataTypes.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.icc</a> &gt; <span class="el_source">IccTagDataTypes.java</span></div><h1>IccTagDataTypes.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.icc;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingException;
+
+<span class="nc" id="L30">public enum IccTagDataTypes implements IccTagDataType {</span>
+<span class="nc" id="L31">    DESC_TYPE(&quot;descType&quot;, 0x64657363) {</span>
+        @Override
+        public void dump(final String prefix, final byte[] bytes) throws ImagingException, IOException {
+<span class="nc" id="L34">            try (InputStream bis = new ByteArrayInputStream(bytes)) {</span>
+<span class="nc" id="L35">                read4Bytes(&quot;type_signature&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+
+                // bis.setDebug(true);
+<span class="nc" id="L38">                read4Bytes(&quot;ignore&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L39">                final int stringLength = read4Bytes(&quot;stringLength&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+
+                // bis.readByteArray(&quot;ignore&quot;, bytes.length -12, &quot;none&quot;);
+<span class="nc" id="L42">                final String s = new String(bytes, 12, stringLength - 1, StandardCharsets.US_ASCII);</span>
+<span class="nc" id="L43">                LOGGER.fine(prefix + &quot;s: '&quot; + s + &quot;'&quot;);</span>
+            }
+<span class="nc" id="L45">        }</span>
+
+    },
+
+<span class="nc" id="L49">    DATA_TYPE(&quot;dataType&quot;, 0x64617461) {</span>
+        @Override
+        public void dump(final String prefix, final byte[] bytes) throws ImagingException, IOException {
+<span class="nc" id="L52">            try (InputStream bis = new ByteArrayInputStream(bytes)) {</span>
+<span class="nc" id="L53">                read4Bytes(&quot;type_signature&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+            }
+<span class="nc" id="L55">        }</span>
+
+    },
+
+<span class="nc" id="L59">    MULTI_LOCALIZED_UNICODE_TYPE(&quot;multiLocalizedUnicodeType&quot;, 0x6D6C7563) {</span>
+        @Override
+        public void dump(final String prefix, final byte[] bytes) throws ImagingException, IOException {
+<span class="nc" id="L62">            try (InputStream bis = new ByteArrayInputStream(bytes)) {</span>
+<span class="nc" id="L63">                read4Bytes(&quot;type_signature&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+            }
+<span class="nc" id="L65">        }</span>
+
+    },
+
+<span class="nc" id="L69">    SIGNATURE_TYPE(&quot;signatureType&quot;, 0x73696720) {</span>
+        @Override
+        public void dump(final String prefix, final byte[] bytes) throws ImagingException, IOException {
+<span class="nc" id="L72">            try (InputStream bis = new ByteArrayInputStream(bytes)) {</span>
+<span class="nc" id="L73">                read4Bytes(&quot;type_signature&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L74">                read4Bytes(&quot;ignore&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L75">                final int theSignature = read4Bytes(&quot;theSignature &quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L76">                LOGGER.fine(prefix + &quot;theSignature: &quot; + Integer.toHexString(theSignature) + &quot; (&quot;</span>
+                        + new String(new byte[] { (byte) (0xff &amp; theSignature &gt;&gt; 24), (byte) (0xff &amp; theSignature &gt;&gt; 16),
+                                (byte) (0xff &amp; theSignature &gt;&gt; 8), (byte) (0xff &amp; theSignature &gt;&gt; 0), }, StandardCharsets.US_ASCII)
+                        + &quot;)&quot;);
+            }
+<span class="nc" id="L81">        }</span>
+
+    },
+
+<span class="nc" id="L85">    TEXT_TYPE(&quot;textType&quot;, 0x74657874) {</span>
+        @Override
+        public void dump(final String prefix, final byte[] bytes) throws ImagingException, IOException {
+<span class="nc" id="L88">            try (InputStream bis = new ByteArrayInputStream(bytes)) {</span>
+<span class="nc" id="L89">                read4Bytes(&quot;type_signature&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L90">                read4Bytes(&quot;ignore&quot;, bis, &quot;ICC: corrupt tag data&quot;, ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L91">                final String s = new String(bytes, 8, bytes.length - 8, StandardCharsets.US_ASCII);</span>
+<span class="nc" id="L92">                LOGGER.fine(prefix + &quot;s: '&quot; + s + &quot;'&quot;);</span>
+            }
+<span class="nc" id="L94">        }</span>
+
+    };
+
+<span class="nc" id="L98">    private static final Logger LOGGER = Logger.getLogger(IccTagDataTypes.class.getName());</span>
+
+    public final String name;
+    public final int signature;
+
+<span class="nc" id="L103">    IccTagDataTypes(final String name, final int signature) {</span>
+<span class="nc" id="L104">        this.name = name;</span>
+<span class="nc" id="L105">        this.signature = signature;</span>
+<span class="nc" id="L106">    }</span>
+
+    @Override
+    public String getName() {
+<span class="nc" id="L110">        return name;</span>
+    }
+
+    @Override
+    public int getSignature() {
+<span class="nc" id="L115">        return signature;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

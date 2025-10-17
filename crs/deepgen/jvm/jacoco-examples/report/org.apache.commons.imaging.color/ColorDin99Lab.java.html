@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColorDin99Lab.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.color</a> &gt; <span class="el_source">ColorDin99Lab.java</span></div><h1>ColorDin99Lab.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.color;
+
+/**
+ * Represents a color in the DIN99 color space, a derivation of the CIE LAB color space.
+ *
+ * @see &lt;a href=&quot;de.wikipedia.org/wiki/DIN99-Farbraum&quot;&gt;de.wikipedia.org/wiki/DIN99-Farbraum&lt;/a&gt;
+ * @see &lt;a href= &quot;https://pdfs.semanticscholar.org/647b/20bda458133ff2b883041746bc8cb75527fc.pdf&quot;&gt;Comparison of the metrics between the CIELAB and the DIN99
+ *      uniform color spaces&lt;/a&gt;
+ * @see &lt;a href=&quot;https://www.researchgate.net/publication/229891006_Uniform_colour_spaces_based_on_the_DIN99_colour-difference_formula&quot;&gt;DIN99b P.284:
+ *      Uniform_colour_spaces_based_on_the_DIN99_colour-difference_formula&lt;/a&gt;
+ * @since 1.0-alpha3
+ */
+public final class ColorDin99Lab {
+
+    public final double l99;
+
+    public final double a99;
+
+    public final double b99;
+
+<span class="nc" id="L35">    public ColorDin99Lab(final double l99, final double a99, final double b99) {</span>
+<span class="nc" id="L36">        this.l99 = l99;</span>
+<span class="nc" id="L37">        this.a99 = a99;</span>
+<span class="nc" id="L38">        this.b99 = b99;</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public boolean equals(final Object o) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (this == o) {</span>
+<span class="nc" id="L44">            return true;</span>
+        }
+<span class="nc bnc" id="L46" title="All 4 branches missed.">        if (o == null || getClass() != o.getClass()) {</span>
+<span class="nc" id="L47">            return false;</span>
+        }
+
+<span class="nc" id="L50">        final ColorDin99Lab that = (ColorDin99Lab) o;</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (Double.compare(that.l99, l99) != 0) {</span>
+<span class="nc" id="L52">            return false;</span>
+        }
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (Double.compare(that.a99, a99) != 0) {</span>
+<span class="nc" id="L55">            return false;</span>
+        }
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (Double.compare(that.b99, b99) != 0) {</span>
+<span class="nc" id="L58">            return false;</span>
+        }
+
+<span class="nc" id="L61">        return true;</span>
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+<span class="nc" id="L68">        temp = Double.doubleToLongBits(l99);</span>
+<span class="nc" id="L69">        result = (int) (temp ^ temp &gt;&gt;&gt; 32);</span>
+<span class="nc" id="L70">        temp = Double.doubleToLongBits(a99);</span>
+<span class="nc" id="L71">        result = 31 * result + (int) (temp ^ temp &gt;&gt;&gt; 32);</span>
+<span class="nc" id="L72">        temp = Double.doubleToLongBits(b99);</span>
+<span class="nc" id="L73">        return 31 * result + (int) (temp ^ temp &gt;&gt;&gt; 32);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L78">        return &quot;{l: &quot; + l99 + &quot;, a: &quot; + a99 + &quot;, b: &quot; + b99 + &quot;}&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

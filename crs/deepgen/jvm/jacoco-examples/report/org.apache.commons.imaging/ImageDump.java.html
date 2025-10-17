@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageDump.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging</a> &gt; <span class="el_source">ImageDump.java</span></div><h1>ImageDump.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging;
+
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.icc.IccProfileInfo;
+import org.apache.commons.imaging.icc.IccProfileParser;
+
+/**
+ * Used to store metadata and descriptive information extracted from image files.
+ */
+<span class="nc" id="L32">public class ImageDump {</span>
+
+<span class="nc" id="L34">    private static final Logger LOGGER = Logger.getLogger(ImageDump.class.getName());</span>
+
+    private String colorSpaceTypeToName(final ColorSpace cs) {
+        // System.out.println(prefix + &quot;: &quot; + &quot;type: &quot;
+        // + cs.getType() );
+<span class="nc bnc" id="L39" title="All 8 branches missed.">        switch (cs.getType()) {</span>
+        case ColorSpace.TYPE_CMYK:
+<span class="nc" id="L41">            return &quot;TYPE_CMYK&quot;;</span>
+        case ColorSpace.TYPE_RGB:
+<span class="nc" id="L43">            return &quot;TYPE_RGB&quot;;</span>
+        case ColorSpace.CS_sRGB:
+<span class="nc" id="L45">            return &quot;CS_sRGB&quot;;</span>
+        case ColorSpace.CS_GRAY:
+<span class="nc" id="L47">            return &quot;CS_GRAY&quot;;</span>
+        case ColorSpace.CS_CIEXYZ:
+<span class="nc" id="L49">            return &quot;CS_CIEXYZ&quot;;</span>
+        case ColorSpace.CS_LINEAR_RGB:
+<span class="nc" id="L51">            return &quot;CS_LINEAR_RGB&quot;;</span>
+        case ColorSpace.CS_PYCC:
+<span class="nc" id="L53">            return &quot;CS_PYCC&quot;;</span>
+        default:
+<span class="nc" id="L55">            return &quot;unknown&quot;;</span>
+        }
+    }
+
+    public void dump(final BufferedImage src) throws IOException {
+<span class="nc" id="L60">        dump(&quot;&quot;, src);</span>
+<span class="nc" id="L61">    }</span>
+
+    public void dump(final String prefix, final BufferedImage src) throws IOException {
+<span class="nc" id="L64">        LOGGER.fine(prefix + &quot;: &quot; + &quot;dump&quot;);</span>
+<span class="nc" id="L65">        dumpColorSpace(prefix, src.getColorModel().getColorSpace());</span>
+<span class="nc" id="L66">        dumpBiProps(prefix, src);</span>
+<span class="nc" id="L67">    }</span>
+
+    public void dumpBiProps(final String prefix, final BufferedImage src) {
+<span class="nc" id="L70">        final String[] keys = src.getPropertyNames();</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (keys == null) {</span>
+<span class="nc" id="L72">            LOGGER.fine(prefix + &quot;: no props&quot;);</span>
+<span class="nc" id="L73">            return;</span>
+        }
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        for (final String key : keys) {</span>
+<span class="nc" id="L76">            LOGGER.fine(prefix + &quot;: &quot; + key + &quot;: &quot; + src.getProperty(key));</span>
+        }
+<span class="nc" id="L78">    }</span>
+
+    public void dumpColorSpace(final String prefix, final ColorSpace cs) throws IOException {
+<span class="nc" id="L81">        LOGGER.fine(prefix + &quot;: &quot; + &quot;type: &quot; + cs.getType() + &quot; (&quot; + colorSpaceTypeToName(cs) + &quot;)&quot;);</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (!(cs instanceof ICC_ColorSpace)) {</span>
+<span class="nc" id="L84">            LOGGER.fine(prefix + &quot;: &quot; + &quot;Unknown ColorSpace: &quot; + cs.getClass().getName());</span>
+<span class="nc" id="L85">            return;</span>
+        }
+
+<span class="nc" id="L88">        final ICC_ColorSpace iccColorSpace = (ICC_ColorSpace) cs;</span>
+<span class="nc" id="L89">        final ICC_Profile iccProfile = iccColorSpace.getProfile();</span>
+
+<span class="nc" id="L91">        final byte[] bytes = iccProfile.getData();</span>
+
+<span class="nc" id="L93">        final IccProfileParser parser = new IccProfileParser();</span>
+
+<span class="nc" id="L95">        final IccProfileInfo info = parser.getIccProfileInfo(bytes);</span>
+<span class="nc" id="L96">        info.dump(prefix);</span>
+<span class="nc" id="L97">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

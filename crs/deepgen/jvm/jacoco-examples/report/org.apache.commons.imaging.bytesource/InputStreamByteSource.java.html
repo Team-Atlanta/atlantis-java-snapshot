@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InputStreamByteSource.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.bytesource</a> &gt; <span class="el_source">InputStreamByteSource.java</span></div><h1>InputStreamByteSource.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.bytesource;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Objects;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.build.AbstractOrigin.InputStreamOrigin;
+
+final class InputStreamByteSource extends ByteSource {
+
+    private final class Block {
+
+        public final byte[] bytes;
+        private Block next;
+        private boolean triedNext;
+
+<span class="fc" id="L39">        Block(final byte[] bytes) {</span>
+<span class="fc" id="L40">            this.bytes = bytes;</span>
+<span class="fc" id="L41">        }</span>
+
+        public Block getNext() throws IOException {
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">            if (null != next) {</span>
+<span class="nc" id="L45">                return next;</span>
+            }
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            if (triedNext) {</span>
+<span class="nc" id="L48">                return null;</span>
+            }
+<span class="fc" id="L50">            triedNext = true;</span>
+<span class="fc" id="L51">            next = readBlock();</span>
+<span class="fc" id="L52">            return next;</span>
+        }
+
+    }
+
+<span class="fc" id="L57">    private final class BlockInputStream extends InputStream {</span>
+        private Block block;
+        private boolean readFirst;
+        private int blockIndex;
+
+        @Override
+        public int read() throws IOException {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            if (null == block) {</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                if (readFirst) {</span>
+<span class="nc" id="L66">                    return -1;</span>
+                }
+<span class="nc" id="L68">                block = getFirstBlock();</span>
+<span class="nc" id="L69">                readFirst = true;</span>
+            }
+
+<span class="nc bnc" id="L72" title="All 4 branches missed.">            if (block != null &amp;&amp; blockIndex &gt;= block.bytes.length) {</span>
+<span class="nc" id="L73">                block = block.getNext();</span>
+<span class="nc" id="L74">                blockIndex = 0;</span>
+            }
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (null == block) {</span>
+<span class="nc" id="L78">                return -1;</span>
+            }
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            if (blockIndex &gt;= block.bytes.length) {</span>
+<span class="nc" id="L82">                return -1;</span>
+            }
+
+<span class="nc" id="L85">            return 0xff &amp; block.bytes[blockIndex++];</span>
+        }
+
+        @Override
+        public int read(final byte[] array, final int off, final int len) throws IOException {
+            // first section copied verbatim from InputStream
+<span class="fc" id="L91">            Objects.requireNonNull(array, &quot;array&quot;);</span>
+<span class="pc bpc" id="L92" title="5 of 10 branches missed.">            if (off &lt; 0 || off &gt; array.length || len &lt; 0 || off + len &gt; array.length || off + len &lt; 0) {</span>
+<span class="nc" id="L93">                throw new IndexOutOfBoundsException();</span>
+            }
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">            if (len == 0) {</span>
+<span class="nc" id="L96">                return 0;</span>
+            }
+
+            // optimized block read
+
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            if (null == block) {</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                if (readFirst) {</span>
+<span class="nc" id="L103">                    return -1;</span>
+                }
+<span class="fc" id="L105">                block = getFirstBlock();</span>
+<span class="fc" id="L106">                readFirst = true;</span>
+            }
+
+<span class="fc bfc" id="L109" title="All 4 branches covered.">            if (block != null &amp;&amp; blockIndex &gt;= block.bytes.length) {</span>
+<span class="fc" id="L110">                block = block.getNext();</span>
+<span class="fc" id="L111">                blockIndex = 0;</span>
+            }
+
+<span class="fc bfc" id="L114" title="All 2 branches covered.">            if (null == block) {</span>
+<span class="fc" id="L115">                return -1;</span>
+            }
+
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">            if (blockIndex &gt;= block.bytes.length) {</span>
+<span class="nc" id="L119">                return -1;</span>
+            }
+
+<span class="fc" id="L122">            final int readSize = Math.min(len, block.bytes.length - blockIndex);</span>
+<span class="fc" id="L123">            System.arraycopy(block.bytes, blockIndex, array, off, readSize);</span>
+<span class="fc" id="L124">            blockIndex += readSize;</span>
+<span class="fc" id="L125">            return readSize;</span>
+        }
+
+        @Override
+        public long skip(final long n) throws IOException {
+
+<span class="nc" id="L131">            long remaining = n;</span>
+
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            if (n &lt;= 0) {</span>
+<span class="nc" id="L134">                return 0;</span>
+            }
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            while (remaining &gt; 0) {</span>
+                // read the first block
+<span class="nc bnc" id="L139" title="All 2 branches missed.">                if (null == block) {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">                    if (readFirst) {</span>
+<span class="nc" id="L141">                        return -1;</span>
+                    }
+<span class="nc" id="L143">                    block = getFirstBlock();</span>
+<span class="nc" id="L144">                    readFirst = true;</span>
+                }
+
+                // get next block
+<span class="nc bnc" id="L148" title="All 4 branches missed.">                if (block != null &amp;&amp; blockIndex &gt;= block.bytes.length) {</span>
+<span class="nc" id="L149">                    block = block.getNext();</span>
+<span class="nc" id="L150">                    blockIndex = 0;</span>
+                }
+
+<span class="nc bnc" id="L153" title="All 2 branches missed.">                if (null == block) {</span>
+<span class="nc" id="L154">                    break;</span>
+                }
+
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                if (blockIndex &gt;= block.bytes.length) {</span>
+<span class="nc" id="L158">                    break;</span>
+                }
+
+<span class="nc" id="L161">                final int readSize = Math.min((int) Math.min(BLOCK_SIZE, remaining), block.bytes.length - blockIndex);</span>
+
+<span class="nc" id="L163">                blockIndex += readSize;</span>
+<span class="nc" id="L164">                remaining -= readSize;</span>
+<span class="nc" id="L165">            }</span>
+
+<span class="nc" id="L167">            return n - remaining;</span>
+        }
+
+    }
+
+    private static final int BLOCK_SIZE = 1024;
+    private final InputStream inputStream;
+    private Block headBlock;
+    private byte[] readBuffer;
+<span class="fc" id="L176">    private long streamLength = -1;</span>
+
+    InputStreamByteSource(final InputStream inputStream, final String fileName) {
+<span class="fc" id="L179">        super(new InputStreamOrigin(inputStream), fileName);</span>
+<span class="fc" id="L180">        this.inputStream = new BufferedInputStream(inputStream);</span>
+<span class="fc" id="L181">    }</span>
+
+    @Override
+    public byte[] getByteArray(final long position, final int length) throws IOException {
+        // We include a separate check for int overflow.
+<span class="nc bnc" id="L186" title="All 8 branches missed.">        if (position &lt; 0 || length &lt; 0 || position + length &lt; 0 || position + length &gt; size()) {</span>
+<span class="nc" id="L187">            throw new ImagingException(</span>
+                    &quot;Could not read block (block start: &quot; + position + &quot;, block length: &quot; + length + &quot;, data length: &quot; + streamLength + &quot;).&quot;);
+        }
+
+<span class="nc" id="L191">        final InputStream cis = getInputStream();</span>
+<span class="nc" id="L192">        BinaryFunctions.skipBytes(cis, position);</span>
+
+<span class="nc" id="L194">        final byte[] bytes = Allocator.byteArray(length);</span>
+<span class="nc" id="L195">        int total = 0;</span>
+        while (true) {
+<span class="nc" id="L197">            final int read = cis.read(bytes, total, bytes.length - total);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            if (read &lt; 1) {</span>
+<span class="nc" id="L199">                throw new ImagingException(&quot;Could not read block.&quot;);</span>
+            }
+<span class="nc" id="L201">            total += read;</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">            if (total &gt;= length) {</span>
+<span class="nc" id="L203">                return bytes;</span>
+            }
+<span class="nc" id="L205">        }</span>
+    }
+
+    private Block getFirstBlock() throws IOException {
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if (null == headBlock) {</span>
+<span class="fc" id="L210">            headBlock = readBlock();</span>
+        }
+<span class="fc" id="L212">        return headBlock;</span>
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+<span class="fc" id="L217">        return new BlockInputStream();</span>
+    }
+
+    private Block readBlock() throws IOException {
+<span class="fc bfc" id="L221" title="All 2 branches covered.">        if (null == readBuffer) {</span>
+<span class="fc" id="L222">            readBuffer = new byte[BLOCK_SIZE];</span>
+        }
+
+<span class="fc" id="L225">        final int read = inputStream.read(readBuffer);</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        if (read &lt; 1) {</span>
+<span class="fc" id="L227">            return null;</span>
+        }
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        if (read &lt; BLOCK_SIZE) {</span>
+            // return a copy.
+<span class="fc" id="L231">            return new Block(Arrays.copyOf(readBuffer, read));</span>
+        }
+        // return current buffer.
+<span class="fc" id="L234">        final byte[] result = readBuffer;</span>
+<span class="fc" id="L235">        readBuffer = null;</span>
+<span class="fc" id="L236">        return new Block(result);</span>
+    }
+
+    @Override
+    public long size() throws IOException {
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        if (streamLength &gt;= 0) {</span>
+<span class="nc" id="L242">            return streamLength;</span>
+        }
+
+<span class="nc" id="L245">        try (InputStream cis = getInputStream()) {</span>
+<span class="nc" id="L246">            final long result = IOUtils.consume(cis);</span>
+<span class="nc" id="L247">            streamLength = result;</span>
+<span class="nc" id="L248">            return result;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,218 @@
+/*
+ * Copyright (c) 2014, 2024, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * The Universal Permissive License (UPL), Version 1.0
+ *
+ * Subject to the condition set forth below, permission is hereby granted to any
+ * person obtaining a copy of this software, associated documentation and/or
+ * data (collectively the "Software"), free of charge and under any and all
+ * copyright rights in the Software, and any and all patent rights owned or
+ * freely licensable by each licensor hereunder covering either (i) the
+ * unmodified Software as contributed to or provided by such licensor, or (ii)
+ * the Larger Works (as defined below), to deal in both
+ *
+ * (a) the Software, and
+ *
+ * (b) any piece of software and/or hardware listed in the lrgrwrks.txt file if
+ * one is included with the Software each a "Larger Work" to which the Software
+ * is contributed by such licensors),
+ *
+ * without restriction, including without limitation the rights to copy, create
+ * derivative works of, display, perform, and distribute the Software and make,
+ * use, sell, offer for sale, import, export, have made, and have sold the
+ * Software and the Larger Work(s), and to sublicense the foregoing rights on
+ * either these or other terms.
+ *
+ * This license is subject to the following condition:
+ *
+ * The above copyright notice and either this complete permission notice or at a
+ * minimum a reference to the UPL must be included in all copies or substantial
+ * portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.oracle.truffle.api.frame;
+
+import com.oracle.truffle.api.CallTarget;
+import com.oracle.truffle.api.RootCallTarget;
+import com.oracle.truffle.api.TruffleRuntime;
+import com.oracle.truffle.api.nodes.DirectCallNode;
+import com.oracle.truffle.api.nodes.EncapsulatingNodeReference;
+import com.oracle.truffle.api.nodes.IndirectCallNode;
+import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.nodes.RootNode;
+
+/**
+ * Represents a current frame instance on the stack. Please note that any frame instance must not be
+ * used after the {@link TruffleRuntime#iterateFrames(FrameInstanceVisitor) iterateFrames()} method
+ * returned.
+ *
+ * @see TruffleRuntime#iterateFrames(FrameInstanceVisitor) To iterate the current frame instances on
+ *      the stack.
+ * @since 0.8 or earlier
+ */
+public interface FrameInstance {
+
+    /**
+     * Access mode for {@link FrameInstance#getFrame(FrameAccess)}.
+     *
+     * @see FrameInstance#getFrame(FrameAccess)
+     * @since 0.8 or earlier
+     */
+    enum FrameAccess {
+
+        /**
+         * This mode allows to read the frame and provides read only access to its local variables.
+         * The returned frame must not be stored/persisted. Writing local variables in this mode
+         * will result in an {@link AssertionError} only if assertions (-ea) are enabled.
+         *
+         * @since 0.8 or earlier
+         */
+        READ_ONLY,
+
+        /**
+         * This mode allows to read the frame and provides read and write access to its local
+         * variables. The returned frame must not be stored/persisted.
+         *
+         * @since 0.8 or earlier
+         **/
+        READ_WRITE,
+        /**
+         * This mode allows to read a materialized version of the frame and provides read and write
+         * access to its local variables. In addition to {@link #READ_WRITE} this mode allows to
+         * store/persist the returned frame.
+         *
+         * @since 0.8 or earlier
+         **/
+        MATERIALIZE
+    }
+
+    /**
+     * Accesses the underlying frame using a specified {@link FrameAccess access mode}.
+     *
+     * @see FrameAccess
+     * @since 0.23
+     */
+    Frame getFrame(FrameAccess access);
+
+    /** @since 0.8 or earlier */
+    boolean isVirtualFrame();
+
+    /**
+     * Returns an integer for the optimized tier of this method. If <code>0</code> is returned then
+     * this means that the frame is currently being interpreted without any optimization. The number
+     * of tiers is unlimited, but is typically restricted to a small set. e.g. 0-2. Where 0 could
+     * indicate interpreted, 1 indicates first tier and 2 indicates last tier compilation. It is
+     * best to not interpret this number and just print it for the user.
+     *
+     * @since 21.3.0
+     */
+    default int getCompilationTier() {
+        return 0;
+    }
+
+    /**
+     * Returns whether or not the current frame is a compilation root. A compilation root is a
+     * compiled {@link CallTarget} which was itself compiled i.e. not inlined into another target.
+     *
+     * @since 21.3.0
+     */
+    default boolean isCompilationRoot() {
+        return true;
+    }
+
+    /**
+     * Returns a node representing the callsite of the next new target on the stack.
+     *
+     * This picture indicates how {@link FrameInstance} groups the stack.
+     *
+     * <pre>
+     *                      ===============
+     *  Current:         ,>|  CallTarget   | FrameInstance
+     *                   |  ===============
+     *  Caller:          '-|  CallNode     | FrameInstance
+     *                   ,>|  CallTarget   |
+     *                   |  ===============
+     *                   '-|  CallNode     | FrameInstance
+     *                     |  CallTarget   |
+     *                      ===============
+     *                           ...
+     *                      ===============
+     *                     |  CallNode     | FrameInstance
+     * Initial call:       |  CallTarget   |
+     *                      ===============
+     *
+     * </pre>
+     *
+     * @return a node representing the callsite of the next new target on the stack. Returns
+     *         <code>null</code> in case there is no upper target or location. The set of possible
+     *         call nodes is restricted to any node that was passed to
+     *         {@link CallTarget#call(Node, Object...)} or the node set using
+     *         {@link EncapsulatingNodeReference} when invoking {@link CallTarget#call(Object...)}.
+     *         If a cached variant of {@link DirectCallNode} or {@link IndirectCallNode} was used
+     *         then the call node will be the {@link DirectCallNode} or {@link IndirectCallNode}
+     *         respectively.
+     *
+     * @since 0.8 or earlier
+     **/
+    Node getCallNode();
+
+    /**
+     * Returns an instrumentable call node from a frame instance. This method should be preferred
+     * over {@link #getCallNode()} by tools to find the instrumentable node associated with this
+     * call node. In case of bytecode interpreters the instrumentable node needs to be resolved by
+     * the language and is not directly accessible from the {@link Node#getParent() parent} chain of
+     * the regular {@link FrameInstance#getCallNode() call node}. Just like {@link #getCallNode()}
+     * this method may not directly return an instrumentable node. To find the eventual
+     * instrumentable node the {@link Node#getParent() parent} chain must be searched. There is no
+     * guarantee that an instrumentable node can be found, e.g. if the language does not support
+     * instrumentation.
+     *
+     * @see RootNode#findInstrumentableCallNode
+     * @since 24.2
+     */
+    default Node getInstrumentableCallNode() {
+        RootNode root = ((RootCallTarget) getCallTarget()).getRootNode();
+        Frame frame = captureFrame(root);
+        Node callNode = getCallNode();
+        int bytecodeIndex = FrameAccessor.NODES.findBytecodeIndex(root, callNode, frame);
+        return FrameAccessor.ACCESSOR.nodeSupport().findInstrumentableCallNode(root, callNode, frame, bytecodeIndex);
+    }
+
+    /**
+     * The {@link CallTarget} being invoked in this frame.
+     * <p>
+     * See {@link #getCallNode()} for the relation between call node and CallTarget.
+     *
+     * @since 0.8 or earlier
+     **/
+    CallTarget getCallTarget();
+
+    /**
+     * Returns the resolved bytecode index for this frame instance if the root node returns one.
+     * This method returns a negative integer for invalid or an unavailable bytecode index. The
+     * meaning of negative bytecode indices is not specified and should not be relied upon across
+     * guest language implementations.
+     *
+     * @see RootNode#findBytecodeIndex
+     * @since 24.1
+     */
+    default int getBytecodeIndex() {
+        RootCallTarget target = (RootCallTarget) getCallTarget();
+        Node callNode = getCallNode();
+        RootNode rootNode = target.getRootNode();
+        return FrameAccessor.NODES.findBytecodeIndex(rootNode, callNode, captureFrame(rootNode));
+    }
+
+    private Frame captureFrame(RootNode rootNode) {
+        return FrameAccessor.NODES.isCaptureFramesForTrace(rootNode, getCompilationTier() > 0) ? getFrame(FrameAccess.READ_ONLY) : null;
+    }
+
+}

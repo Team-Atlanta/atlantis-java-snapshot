@@ -1,0 +1,16 @@
+# pytest
+oss-fuzz/
+workdir/
+cloned-repos/
+.pytest_cache/
+
+# lint and checkers
+.ruff_cache/
+__pycache__
+
+
+context_store/
+*.egg-info/
+# venv and uv
+.venv/
+build/

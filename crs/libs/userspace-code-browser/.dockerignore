@@ -1,0 +1,6 @@
+**/.git
+**/.gitignore
+sandbox
+target
+**/venv
+**/.venv

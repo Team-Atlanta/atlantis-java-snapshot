@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Allocator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.common</a> &gt; <span class="el_source">Allocator.java</span></div><h1>Allocator.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.apache.commons.imaging.common;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.function.IntFunction;
+
+/**
+ * Checks inputs for meeting allocation limits and allocates arrays.
+ */
+<span class="nc" id="L27">public class Allocator {</span>
+
+<span class="fc" id="L29">    private static final String CANONICAL_NAME = Allocator.class.getCanonicalName();</span>
+
+    /** One GB. */
+    private static final int DEFAULT = 1_073_741_824;
+    private static final int LIMIT;
+
+    static {
+<span class="fc" id="L36">        LIMIT = Integer.getInteger(CANONICAL_NAME, DEFAULT);</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * Allocates an Object of type T of the requested size.
+     *
+     * @param &lt;T&gt;     The return array type
+     * @param request The requested size.
+     * @param factory The array factory.
+     * @return a new byte array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int)
+     */
+    public static &lt;T&gt; T apply(final int request, final IntFunction&lt;T&gt; factory) {
+<span class="fc" id="L50">        return factory.apply(check(request));</span>
+    }
+
+    /**
+     * Allocates an array of type T of the requested size.
+     *
+     * @param &lt;T&gt;                The return array type
+     * @param request            The requested size.
+     * @param factory            The array factory.
+     * @param eltShallowByteSize The shallow byte size of an element.
+     * @return a new byte array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int)
+     */
+    public static &lt;T&gt; T[] array(final int request, final IntFunction&lt;T[]&gt; factory, final int eltShallowByteSize) {
+<span class="fc" id="L65">        check(request * eltShallowByteSize);</span>
+<span class="fc" id="L66">        return factory.apply(request);</span>
+    }
+
+    /**
+     * Allocates an Object array of type T of the requested size.
+     *
+     * @param &lt;T&gt;     The return array type
+     * @param request The requested size.
+     * @return a new byte array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int)
+     */
+    public static &lt;T&gt; ArrayList&lt;T&gt; arrayList(final int request) {
+<span class="fc" id="L79">        check(24 + request * 4); // 4 bytes per element</span>
+<span class="fc" id="L80">        return apply(request, ArrayList::new);</span>
+    }
+
+    /**
+     * Allocates a byte array of the requested size.
+     *
+     * @param request The requested size.
+     * @return a new byte array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static byte[] byteArray(final int request) {
+<span class="nc" id="L92">        return new byte[checkByteArray(request)];</span>
+    }
+
+    /**
+     * Allocates a byte array of the requested size.
+     *
+     * @param request The requested size is cast down to an int.
+     * @return a new byte array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static byte[] byteArray(final long request) {
+<span class="nc" id="L104">        return new byte[check(request, Byte.BYTES)];</span>
+    }
+
+    /**
+     * Allocates a char array of the requested size.
+     *
+     * @param request The requested size.
+     * @return a new char array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static char[] charArray(final int request) {
+<span class="nc" id="L116">        return new char[check(request, Character.BYTES)];</span>
+    }
+
+    /**
+     * Checks a request for meeting allocation limits.
+     * &lt;p&gt;
+     * The default limit is {@value #DEFAULT}, override with the system property &quot;org.apache.commons.imaging.common.mylzw.AllocationChecker&quot;.
+     * &lt;/p&gt;
+     *
+     * @param request an allocation request.
+     * @return the request.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     */
+    public static int check(final int request) {
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (request &gt; LIMIT) {</span>
+<span class="fc" id="L131">            throw new AllocationRequestException(LIMIT, request);</span>
+        }
+<span class="fc" id="L133">        return request;</span>
+    }
+
+    /**
+     * Checks a request for meeting allocation limits.
+     * &lt;p&gt;
+     * The default limit is {@value #DEFAULT}, override with the system property &quot;org.apache.commons.imaging.common.mylzw.AllocationChecker&quot;.
+     * &lt;/p&gt;
+     *
+     * @param request     an allocation request count.
+     * @param elementSize The element size.
+     * @return the request.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     */
+    public static int check(final int request, final int elementSize) {
+        int multiplyExact;
+        try {
+<span class="fc" id="L150">            multiplyExact = Math.multiplyExact(request, elementSize);</span>
+<span class="fc" id="L151">        } catch (final ArithmeticException e) {</span>
+<span class="fc" id="L152">            throw new AllocationRequestException(LIMIT, BigInteger.valueOf(request).multiply(BigInteger.valueOf(elementSize)), e);</span>
+<span class="fc" id="L153">        }</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if (multiplyExact &gt; LIMIT) {</span>
+<span class="fc" id="L155">            throw new AllocationRequestException(LIMIT, request);</span>
+        }
+<span class="fc" id="L157">        return request;</span>
+    }
+
+    /**
+     * Checks a request for meeting allocation limits.
+     * &lt;p&gt;
+     * The default limit is {@value #DEFAULT}, override with the system property &quot;org.apache.commons.imaging.common.mylzw.AllocationChecker&quot;.
+     * &lt;/p&gt;
+     *
+     * @param request     an allocation request count is cast down to an int.
+     * @param elementSize The element size.
+     * @return the request.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     */
+    public static int check(final long request, final int elementSize) {
+        try {
+<span class="nc" id="L173">            return check(Math.toIntExact(request), elementSize);</span>
+<span class="nc" id="L174">        } catch (final ArithmeticException e) {</span>
+<span class="nc" id="L175">            throw new AllocationRequestException(LIMIT, request, e);</span>
+        }
+    }
+
+    /**
+     * Checks that allocating a byte array of the requested size is within the limit.
+     *
+     * @param request The byte array size.
+     * @return The input request.
+     */
+    public static int checkByteArray(final int request) {
+<span class="fc" id="L186">        return check(request, Byte.BYTES);</span>
+    }
+
+    /**
+     * Allocates a double array of the requested size.
+     *
+     * @param request The requested size.
+     * @return a new double array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static double[] doubleArray(final int request) {
+<span class="nc" id="L198">        return new double[check(request, Double.BYTES)];</span>
+    }
+
+    /**
+     * Allocates a float array of the requested size.
+     *
+     * @param request The requested size.
+     * @return a new float array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static float[] floatArray(final int request) {
+<span class="nc" id="L210">        return new float[check(request, Float.BYTES)];</span>
+    }
+
+    /**
+     * Allocates a int array of the requested size.
+     *
+     * @param request The requested size.
+     * @return a new int array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static int[] intArray(final int request) {
+<span class="fc" id="L222">        return new int[check(request, Integer.BYTES)];</span>
+    }
+
+    /**
+     * Allocates a long array of the requested size.
+     *
+     * @param request The requested size.
+     * @return a new long array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static long[] longArray(final int request) {
+<span class="nc" id="L234">        return new long[check(request, Long.BYTES)];</span>
+    }
+
+    /**
+     * Allocates a short array of the requested size.
+     *
+     * @param request The requested size.
+     * @return a new short array.
+     * @throws AllocationRequestException Thrown when the request exceeds the limit.
+     * @see #check(int, int)
+     */
+    public static short[] shortArray(final int request) {
+<span class="nc" id="L246">        return new short[check(request, Short.BYTES)];</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

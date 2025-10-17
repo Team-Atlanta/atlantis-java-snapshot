@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffEpTagConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.constants</a> &gt; <span class="el_source">TiffEpTagConstants.java</span></div><h1>TiffEpTagConstants.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.constants;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAsciiOrRational;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoBytes;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRational;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRationals;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSShorts;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShorts;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoUndefineds;
+
+/**
+ */
+public final class TiffEpTagConstants {
+
+<span class="fc" id="L39">    public static final TagInfoShorts EXIF_TAG_CFAREPEAT_PATTERN_DIM = new TagInfoShorts(&quot;CFARepeatPatternDim&quot;, 0x828d, 2,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L42">    public static final TagInfoBytes EXIF_TAG_CFAPATTERN_2 = new TagInfoBytes(&quot;CFAPattern2&quot;, 0x828e, -1, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L44">    public static final TagInfoAsciiOrRational EXIF_TAG_BATTERY_LEVEL = new TagInfoAsciiOrRational(&quot;BatteryLevel&quot;, 0x828f, -1,</span>
+            TiffDirectoryType.TIFF_DIRECTORY_ROOT);
+
+<span class="fc" id="L47">    public static final TagInfoUndefineds EXIF_TAG_INTER_COLOR_PROFILE = new TagInfoUndefineds(&quot;InterColorProfile&quot;, 0x8773, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L50">    public static final TagInfoShort EXIF_TAG_INTERLACE = new TagInfoShort(&quot;Interlace&quot;, 0x8829, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L52">    public static final TagInfoSShorts EXIF_TAG_TIME_ZONE_OFFSET = new TagInfoSShorts(&quot;TimeZoneOffset&quot;, 0x882a, -1, TiffDirectoryType.EXIF_DIRECTORY_EXIF_IFD);</span>
+
+<span class="fc" id="L54">    public static final TagInfoShort EXIF_TAG_SELF_TIMER_MODE = new TagInfoShort(&quot;SelfTimerMode&quot;, 0x882b, TiffDirectoryType.EXIF_DIRECTORY_EXIF_IFD);</span>
+
+<span class="fc" id="L56">    public static final TagInfoRationals EXIF_TAG_FLASH_ENERGY = new TagInfoRationals(&quot;FlashEnergy&quot;, 0x920b, -1, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L58">    public static final TagInfoUndefineds EXIF_TAG_SPATIAL_FREQUENCY_RESPONSE_1 = new TagInfoUndefineds(&quot;SpatialFrequencyResponse&quot;, 0x920c, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L61">    public static final TagInfoUndefineds EXIF_TAG_NOISE_1 = new TagInfoUndefineds(&quot;Noise&quot;, 0x920d, -1, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L63">    public static final TagInfoRational EXIF_TAG_FOCAL_PLANE_XRESOLUTION = new TagInfoRational(&quot;FocalPlaneXResolution&quot;, 0x920e,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L66">    public static final TagInfoRational EXIF_TAG_FOCAL_PLANE_YRESOLUTION = new TagInfoRational(&quot;FocalPlaneYResolution&quot;, 0x920f,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+
+<span class="fc" id="L69">    public static final TagInfoShort EXIF_TAG_FOCAL_PLANE_RESOLUTION_UNIT = new TagInfoShort(&quot;FocalPlaneResolutionUnit&quot;, 0x9210,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);
+    public static final int FOCAL_PLANE_RESOLUTION_UNIT_VALUE_NONE = 1;
+    public static final int FOCAL_PLANE_RESOLUTION_UNIT_VALUE_INCHES = 2;
+    public static final int FOCAL_PLANE_RESOLUTION_UNIT_VALUE_CM = 3;
+    public static final int FOCAL_PLANE_RESOLUTION_UNIT_VALUE_MM = 4;
+    public static final int FOCAL_PLANE_RESOLUTION_UNIT_VALUE_UM = 5;
+
+<span class="fc" id="L77">    public static final TagInfoLong EXIF_TAG_IMAGE_NUMBER_EXIF_IFD = new TagInfoLong(&quot;ImageNumber&quot;, 0x9211, TiffDirectoryType.EXIF_DIRECTORY_EXIF_IFD);</span>
+
+<span class="fc" id="L79">    public static final TagInfoAscii EXIF_TAG_SECURITY_CLASSIFICATION_EXIF_IFD = new TagInfoAscii(&quot;SecurityClassification&quot;, 0x9212, -1,</span>
+            TiffDirectoryType.EXIF_DIRECTORY_EXIF_IFD);
+
+<span class="fc" id="L82">    public static final TagInfoAscii EXIF_TAG_IMAGE_HISTORY_EXIF_IFD = new TagInfoAscii(&quot;ImageHistory&quot;, 0x9213, -1, TiffDirectoryType.EXIF_DIRECTORY_EXIF_IFD);</span>
+
+<span class="fc" id="L84">    public static final TagInfoRationals EXIF_TAG_EXPOSURE_INDEX = new TagInfoRationals(&quot;ExposureIndex&quot;, 0x9215, -1, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L86">    public static final TagInfoBytes EXIF_TAG_TIFF_EPSTANDARD_ID_1 = new TagInfoBytes(&quot;TIFF/EPStandardID&quot;, 0x9216, 4, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+
+<span class="fc" id="L88">    public static final TagInfoShort EXIF_TAG_SENSING_METHOD = new TagInfoShort(&quot;SensingMethod&quot;, 0x9217, TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN);</span>
+    public static final int SENSING_METHOD_VALUE_MONOCHROME_AREA = 1;
+    public static final int SENSING_METHOD_VALUE_ONE_CHIP_COLOR_AREA = 2;
+    public static final int SENSING_METHOD_VALUE_TWO_CHIP_COLOR_AREA = 3;
+    public static final int SENSING_METHOD_VALUE_THREE_CHIP_COLOR_AREA = 4;
+    public static final int SENSING_METHOD_VALUE_COLOR_SEQUENTIAL_AREA = 5;
+    public static final int SENSING_METHOD_VALUE_MONOCHROME_LINEAR = 6;
+    public static final int SENSING_METHOD_VALUE_TRILINEAR = 7;
+    public static final int SENSING_METHOD_VALUE_COLOR_SEQUENTIAL_LINEAR = 8;
+
+<span class="fc" id="L98">    public static final List&lt;TagInfo&gt; ALL_TIFF_EP_TAGS = Collections.unmodifiableList(Arrays.asList(EXIF_TAG_CFAREPEAT_PATTERN_DIM, EXIF_TAG_CFAPATTERN_2,</span>
+            EXIF_TAG_BATTERY_LEVEL, EXIF_TAG_INTER_COLOR_PROFILE, EXIF_TAG_INTERLACE, EXIF_TAG_TIME_ZONE_OFFSET, EXIF_TAG_SELF_TIMER_MODE,
+            EXIF_TAG_FLASH_ENERGY, EXIF_TAG_SPATIAL_FREQUENCY_RESPONSE_1, EXIF_TAG_NOISE_1, EXIF_TAG_FOCAL_PLANE_XRESOLUTION, EXIF_TAG_FOCAL_PLANE_YRESOLUTION,
+            EXIF_TAG_FOCAL_PLANE_RESOLUTION_UNIT, EXIF_TAG_IMAGE_NUMBER_EXIF_IFD, EXIF_TAG_SECURITY_CLASSIFICATION_EXIF_IFD, EXIF_TAG_IMAGE_HISTORY_EXIF_IFD,
+            EXIF_TAG_EXPOSURE_INDEX, EXIF_TAG_TIFF_EPSTANDARD_ID_1, EXIF_TAG_SENSING_METHOD));
+
+    private TiffEpTagConstants() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

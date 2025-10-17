@@ -1,0 +1,412 @@
+#!/usr/bin/env python3
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os
+import sys
+import random
+import string
+import argparse
+import ipaddress
+from pathlib import Path
+import time # Import time module
+
+class NginxFuzzSeedGenerator:
+    """
+    Generator for creating high-quality fuzzing seeds for nginx.
+    Focuses on generating HTTP requests that will exercise various
+    parts of the nginx codebase, particularly the string handling,
+    memory allocation, and array manipulation functions.
+    """
+    
+    # HTTP Methods
+    HTTP_METHODS = [
+        "GET", "POST", "HEAD", "PUT", "DELETE", 
+        "OPTIONS", "TRACE", "CONNECT", "PATCH"
+    ]
+    
+    # HTTP Versions
+    HTTP_VERSIONS = [
+        "HTTP/1.0", "HTTP/1.1", "HTTP/2.0", "HTTP/3.0"
+    ]
+    
+    # Common HTTP Headers
+    COMMON_HEADERS = [
+        "Host", "User-Agent", "Accept", "Accept-Language", "Accept-Encoding",
+        "Connection", "Content-Type", "Content-Length", "Cookie", "Referer",
+        "Authorization", "X-Forwarded-For", "X-Real-IP", "X-Requested-With",
+        "If-Modified-Since", "If-None-Match", "Cache-Control", "Pragma",
+        "Origin", "Upgrade-Insecure-Requests", "Sec-Fetch-Dest", "Sec-Fetch-Mode"
+    ]
+    
+    # Content Types
+    CONTENT_TYPES = [
+        "text/html", "text/plain", "application/json", "application/xml",
+        "application/x-www-form-urlencoded", "multipart/form-data",
+        "application/octet-stream", "image/jpeg", "image/png", "audio/mpeg"
+    ]
+    
+    # URI Paths
+    URI_PATHS = [
+        "/", "/index.html", "/api/v1/users", "/static/css/main.css",
+        "/images/logo.png", "/login", "/logout", "/admin", "/profile",
+        "/search", "/download", "/upload", "/about", "/contact", "/sitemap.xml",
+        "/robots.txt", "/favicon.ico", "/js/script.js", "/css/style.css"
+    ]
+    
+    # Special characters for edge cases
+    SPECIAL_CHARS = "!@#$%^&*()_+-=[]{}|;:'\",.<>/?\\~`"
+    
+    def __init__(self):
+        """Initialize the seed generator."""
+        random.seed(os.urandom(16))  # Use a secure random seed
+    
+    def generate_random_string(self, min_length=1, max_length=100, include_special=False):
+        """Generate a random string of specified length."""
+        length = random.randint(min_length, max_length)
+        chars = string.ascii_letters + string.digits
+        if include_special:
+            chars += self.SPECIAL_CHARS
+        return ''.join(random.choice(chars) for _ in range(length))
+    
+    def generate_random_ip(self):
+        """Generate a random IP address."""
+        return str(ipaddress.IPv4Address(random.randint(0, 2**32-1)))
+    
+    def generate_random_uri(self, include_query=True, include_fragment=True):
+        """Generate a random URI, optionally with query parameters and fragment."""
+        if random.random() < 0.7:  # 70% chance to use a common path
+            path = random.choice(self.URI_PATHS)
+        else:  # 30% chance to generate a random path
+            segments = random.randint(0, 5)
+            path = '/' + '/'.join(self.generate_random_string(1, 10) for _ in range(segments))
+        
+        # Add query parameters
+        if include_query and random.random() < 0.6:  # 60% chance to include query
+            num_params = random.randint(1, 5)
+            query_params = []
+            for _ in range(num_params):
+                param_name = self.generate_random_string(1, 10)
+                param_value = self.generate_random_string(0, 20, include_special=True)
+                query_params.append(f"{param_name}={param_value}")
+            path += '?' + '&'.join(query_params)
+        
+        # Add fragment
+        if include_fragment and random.random() < 0.3:  # 30% chance to include fragment
+            path += '#' + self.generate_random_string(1, 15)
+        
+        return path
+    
+    def generate_random_headers(self, min_headers=0, max_headers=15):
+        """Generate a random set of HTTP headers."""
+        num_headers = random.randint(min_headers, max_headers)
+        headers = []
+        
+        # Ensure we have a Host header most of the time
+        if random.random() < 0.9:  # 90% chance
+            host = f"{self.generate_random_string(3, 15)}.{random.choice(['com', 'org', 'net', 'io'])}"
+            headers.append(f"Host: {host}")
+        
+        # Add other random headers
+        used_headers = set()
+        for _ in range(num_headers):
+            if random.random() < 0.8:  # 80% chance to use a common header
+                header_name = random.choice(self.COMMON_HEADERS)
+            else:  # 20% chance to generate a custom header
+                header_name = f"X-{self.generate_random_string(3, 10)}"
+            
+            # Skip if we've already used this header
+            if header_name in used_headers:
+                continue
+            used_headers.add(header_name)
+            
+            # Generate header value based on header type
+            if header_name == "Content-Type":
+                header_value = random.choice(self.CONTENT_TYPES)
+            elif header_name == "Content-Length":
+                header_value = str(random.randint(0, 10000))
+            elif header_name in ["X-Forwarded-For", "X-Real-IP"]:
+                header_value = self.generate_random_ip()
+            else:
+                header_value = self.generate_random_string(1, 50, include_special=True)
+            
+            headers.append(f"{header_name}: {header_value}")
+        
+        return headers
+    
+    def generate_random_body(self, content_type=None, min_size=0, max_size=1024):
+        """Generate a random HTTP body based on content type."""
+        if not content_type:
+            return b""
+        
+        size = random.randint(min_size, max_size)
+        
+        if "json" in content_type:
+            # Generate a simple JSON object
+            fields = random.randint(1, 10)
+            json_obj = {}
+            for _ in range(fields):
+                key = self.generate_random_string(1, 10)
+                if random.random() < 0.7:  # 70% string, 30% number
+                    value = self.generate_random_string(1, 20)
+                    json_obj[key] = f'"{value}"'
+                else:
+                    value = random.randint(0, 1000)
+                    json_obj[key] = str(value)
+            
+            body = "{" + ",".join(f'"{k}":{v}' for k, v in json_obj.items()) + "}"
+            return body.encode('utf-8')
+        
+        elif "form-urlencoded" in content_type:
+            # Generate form data
+            fields = random.randint(1, 10)
+            form_data = []
+            for _ in range(fields):
+                key = self.generate_random_string(1, 10)
+                value = self.generate_random_string(1, 20)
+                form_data.append(f"{key}={value}")
+            
+            return "&".join(form_data).encode('utf-8')
+        
+        elif "multipart/form-data" in content_type:
+            # Generate multipart form data
+            boundary = self.generate_random_string(10, 20)
+            parts = []
+            
+            for _ in range(random.randint(1, 5)):
+                name = self.generate_random_string(1, 10)
+                value = self.generate_random_string(1, 50)
+                part = f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'
+                parts.append(part)
+            
+            # Add a file part sometimes
+            if random.random() < 0.5:
+                filename = self.generate_random_string(1, 15) + ".txt"
+                file_content = self.generate_random_string(10, 100)
+                file_part = (
+                    f'--{boundary}\r\n'
+                    f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
+                    f'Content-Type: text/plain\r\n\r\n{file_content}\r\n'
+                )
+                parts.append(file_part)
+            
+            parts.append(f'--{boundary}--\r\n')
+            return ''.join(parts).encode('utf-8')
+        
+        else:
+            # For other content types, just generate random data
+            return os.urandom(size)
+    
+    def generate_http_request(self, method=None, uri=None, version=None, 
+                             headers=None, body=None, include_body=True):
+        """Generate a complete HTTP request."""
+        # Use provided values or generate random ones
+        if method is None:
+            method = random.choice(self.HTTP_METHODS)
+        
+        if uri is None:
+            uri = self.generate_random_uri()
+        
+        if version is None:
+            version = random.choice(self.HTTP_VERSIONS)
+        
+        # Generate the request line
+        request = f"{method} {uri} {version}\r\n"
+        
+        # Add headers
+        if headers is None:
+            headers = self.generate_random_headers()
+        
+        # Check if we have Content-Type and Content-Length headers
+        has_content_type = any(h.startswith("Content-Type:") for h in headers)
+        has_content_length = any(h.startswith("Content-Length:") for h in headers)
+        
+        # Generate body if needed
+        body_data = b""
+        if include_body and method in ["POST", "PUT", "PATCH"]:
+            content_type = None
+            if has_content_type:
+                for header in headers:
+                    if header.startswith("Content-Type:"):
+                        content_type = header.split(":", 1)[1].strip()
+                        break
+            else:
+                content_type = random.choice(self.CONTENT_TYPES)
+                headers.append(f"Content-Type: {content_type}")
+            
+            if body is None:
+                body_data = self.generate_random_body(content_type)
+            else:
+                body_data = body.encode('utf-8') if isinstance(body, str) else body
+            
+            if not has_content_length:
+                headers.append(f"Content-Length: {len(body_data)}")
+        
+        # Add all headers to the request
+        for header in headers:
+            request += header + "\r\n"
+        
+        # Add the empty line that separates headers from body
+        request += "\r\n"
+        
+        # Combine the request string with the body data
+        return request.encode('utf-8') + body_data
+    
+    def generate_malformed_request(self):
+        """Generate a deliberately malformed HTTP request to test error handling."""
+        malformation_type = random.randint(0, 5)
+        
+        if malformation_type == 0:
+            # Missing space in request line
+            method = random.choice(self.HTTP_METHODS)
+            uri = self.generate_random_uri()
+            version = random.choice(self.HTTP_VERSIONS)
+            request = f"{method}{uri} {version}\r\n\r\n"
+            return request.encode('utf-8')
+        
+        elif malformation_type == 1:
+            # Invalid HTTP method
+            invalid_methods = ["GETX", "POST2", "HEAD+", "PUT!", "DELETE?"]
+            method = random.choice(invalid_methods)
+            uri = self.generate_random_uri()
+            version = random.choice(self.HTTP_VERSIONS)
+            request = f"{method} {uri} {version}\r\n\r\n"
+            return request.encode('utf-8')
+        
+        elif malformation_type == 2:
+            # Missing HTTP version
+            method = random.choice(self.HTTP_METHODS)
+            uri = self.generate_random_uri()
+            request = f"{method} {uri}\r\n\r\n"
+            return request.encode('utf-8')
+        
+        elif malformation_type == 3:
+            # Malformed headers (missing colon)
+            method = random.choice(self.HTTP_METHODS)
+            uri = self.generate_random_uri()
+            version = random.choice(self.HTTP_VERSIONS)
+            request = f"{method} {uri} {version}\r\n"
+            request += f"Host {self.generate_random_string(5, 10)}.com\r\n\r\n"
+            return request.encode('utf-8')
+        
+        elif malformation_type == 4:
+            # Extremely long URI
+            method = random.choice(self.HTTP_METHODS)
+            uri = "/" + self.generate_random_string(1000, 2000)
+            version = random.choice(self.HTTP_VERSIONS)
+            request = f"{method} {uri} {version}\r\n\r\n"
+            return request.encode('utf-8')
+        
+        else:
+            # Content-Length doesn't match actual body length
+            method = "POST"
+            uri = self.generate_random_uri()
+            version = random.choice(self.HTTP_VERSIONS)
+            body = self.generate_random_string(10, 50)
+            request = f"{method} {uri} {version}\r\n"
+            request += f"Content-Type: text/plain\r\n"
+            request += f"Content-Length: {len(body) * 2}\r\n\r\n"
+            request += body
+            return request.encode('utf-8')
+    
+    def generate_edge_case_request(self):
+        """Generate HTTP requests that test edge cases."""
+        edge_case_type = random.randint(0, 5)
+        
+        if edge_case_type == 0:
+            # Request with many headers
+            return self.generate_http_request(
+                headers=self.generate_random_headers(30, 50)
+            )
+        
+        elif edge_case_type == 1:
+            # Request with very long header values
+            headers = [
+                f"X-Long-Header: {self.generate_random_string(1000, 2000)}"
+            ]
+            return self.generate_http_request(headers=headers)
+        
+        elif edge_case_type == 2:
+            # Request with Unicode characters
+            uri = "/unicode/" + "".join(chr(random.randint(0x0080, 0x07FF)) for _ in range(20))
+            return self.generate_http_request(uri=uri)
+        
+        elif edge_case_type == 3:
+            # Request with special characters in various fields
+            uri = "/special/" + self.generate_random_string(10, 30, include_special=True)
+            headers = [
+                f"X-Special: {self.generate_random_string(10, 30, include_special=True)}"
+            ]
+            return self.generate_http_request(uri=uri, headers=headers)
+        
+        elif edge_case_type == 4:
+            # Request with very large body
+            body = self.generate_random_string(5000, 10000)
+            headers = [
+                "Content-Type: text/plain",
+                f"Content-Length: {len(body)}"
+            ]
+            return self.generate_http_request(
+                method="POST",
+                headers=headers,
+                body=body
+            )
+        
+        else:
+            # Request with empty components
+            if random.random() < 0.5:
+                # Empty URI
+                return self.generate_http_request(uri="")
+            else:
+                # Empty method (technically invalid but good for testing)
+                return self.generate_http_request(method="")
+    
+    def generate_seed(self, seed_type=None):
+        """Generate a seed based on the specified type."""
+        if seed_type is None:
+            seed_type = random.choices(
+                ["normal", "malformed", "edge_case"],
+                weights=[0.7, 0.15, 0.15],
+                k=1
+            )[0]
+        
+        if seed_type == "normal":
+            return self.generate_http_request()
+        elif seed_type == "malformed":
+            return self.generate_malformed_request()
+        elif seed_type == "edge_case":
+            return self.generate_edge_case_request()
+        else:
+            raise ValueError(f"Unknown seed type: {seed_type}")
+    
+    def generate_seeds(self, count=1):
+        """Generate multiple seeds and save them to the output directory."""
+        for i in range(count):
+            # Determine seed type with weighted probabilities
+            seed_type = random.choices(
+                ["normal", "malformed", "edge_case"],
+                weights=[0.7, 0.15, 0.15],
+                k=1
+            )[0]
+            
+            seed_data = self.generate_seed(seed_type)
+            
+            return seed_data
+
+
+
+gen = NginxFuzzSeedGenerator()
+
+def gen_one_seed() -> bytes:
+    return gen.generate_seeds()

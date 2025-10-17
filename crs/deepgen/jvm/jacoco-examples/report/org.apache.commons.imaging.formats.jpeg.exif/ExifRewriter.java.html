@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExifRewriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.exif</a> &gt; <span class="el_source">ExifRewriter.java</span></div><h1>ExifRewriter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.jpeg.exif;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.remainingBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.startsWith;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.ImagingOverflowException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.imaging.common.ByteConversions;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+import org.apache.commons.imaging.formats.jpeg.JpegUtils;
+import org.apache.commons.imaging.formats.tiff.write.AbstractTiffImageWriter;
+import org.apache.commons.imaging.formats.tiff.write.TiffImageWriterLossless;
+import org.apache.commons.imaging.formats.tiff.write.TiffImageWriterLossy;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
+
+/**
+ * Interface for Exif write/update/remove functionality for Jpeg/JFIF images.
+ *
+ * &lt;p&gt;
+ * See the source of the ExifMetadataUpdateExample class for example usage.
+ * &lt;/p&gt;
+ *
+ * @see &lt;a href=
+ *      &quot;https://svn.apache.org/repos/asf/commons/proper/imaging/trunk/src/test/java/org/apache/commons/imaging/examples/WriteExifMetadataExample.java&quot;&gt;
+ *      org.apache.commons.imaging.examples.WriteExifMetadataExample&lt;/a&gt;
+ */
+public class ExifRewriter extends BinaryFileParser {
+
+    private abstract static class JFIFPiece {
+        protected abstract void write(OutputStream os) throws IOException;
+    }
+
+    private static final class JFIFPieceImageData extends JFIFPiece {
+        public final byte[] markerBytes;
+        public final byte[] imageData;
+
+<span class="nc" id="L65">        JFIFPieceImageData(final byte[] markerBytes, final byte[] imageData) {</span>
+<span class="nc" id="L66">            this.markerBytes = markerBytes;</span>
+<span class="nc" id="L67">            this.imageData = imageData;</span>
+<span class="nc" id="L68">        }</span>
+
+        @Override
+        protected void write(final OutputStream os) throws IOException {
+<span class="nc" id="L72">            os.write(markerBytes);</span>
+<span class="nc" id="L73">            os.write(imageData);</span>
+<span class="nc" id="L74">        }</span>
+    }
+
+    private static final class JFIFPieces {
+        public final List&lt;JFIFPiece&gt; pieces;
+        public final List&lt;JFIFPiece&gt; exifPieces;
+
+<span class="nc" id="L81">        JFIFPieces(final List&lt;JFIFPiece&gt; pieces, final List&lt;JFIFPiece&gt; exifPieces) {</span>
+<span class="nc" id="L82">            this.pieces = pieces;</span>
+<span class="nc" id="L83">            this.exifPieces = exifPieces;</span>
+<span class="nc" id="L84">        }</span>
+
+    }
+
+    private static class JFIFPieceSegment extends JFIFPiece {
+        public final int marker;
+        public final byte[] markerBytes;
+        public final byte[] markerLengthBytes;
+        public final byte[] segmentData;
+
+<span class="nc" id="L94">        JFIFPieceSegment(final int marker, final byte[] markerBytes, final byte[] markerLengthBytes, final byte[] segmentData) {</span>
+<span class="nc" id="L95">            this.marker = marker;</span>
+<span class="nc" id="L96">            this.markerBytes = markerBytes;</span>
+<span class="nc" id="L97">            this.markerLengthBytes = markerLengthBytes;</span>
+<span class="nc" id="L98">            this.segmentData = segmentData;</span>
+<span class="nc" id="L99">        }</span>
+
+        @Override
+        protected void write(final OutputStream os) throws IOException {
+<span class="nc" id="L103">            os.write(markerBytes);</span>
+<span class="nc" id="L104">            os.write(markerLengthBytes);</span>
+<span class="nc" id="L105">            os.write(segmentData);</span>
+<span class="nc" id="L106">        }</span>
+    }
+
+    private static final class JFIFPieceSegmentExif extends JFIFPieceSegment {
+
+        JFIFPieceSegmentExif(final int marker, final byte[] markerBytes, final byte[] markerLengthBytes, final byte[] segmentData) {
+<span class="nc" id="L112">            super(marker, markerBytes, markerLengthBytes, segmentData);</span>
+<span class="nc" id="L113">        }</span>
+    }
+
+    /**
+     * Constructs a new instance. to guess whether a file contains an image based on its file extension.
+     */
+    public ExifRewriter() {
+<span class="nc" id="L120">        this(ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L121">    }</span>
+
+    /**
+     * Constructs a new instance.
+     * &lt;p&gt;
+     *
+     * @param byteOrder byte order of EXIF segment.
+     */
+    public ExifRewriter(final ByteOrder byteOrder) {
+<span class="nc" id="L130">        super(byteOrder);</span>
+<span class="nc" id="L131">    }</span>
+
+    private JFIFPieces analyzeJfif(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L134">        final List&lt;JFIFPiece&gt; pieces = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L135">        final List&lt;JFIFPiece&gt; exifPieces = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L137">        final JpegUtils.Visitor visitor = new JpegUtils.Visitor() {</span>
+            // return false to exit before reading image data.
+            @Override
+            public boolean beginSos() {
+<span class="nc" id="L141">                return true;</span>
+            }
+
+            // return false to exit traversal.
+            @Override
+            public boolean visitSegment(final int marker, final byte[] markerBytes, final int markerLength, final byte[] markerLengthBytes,
+                    final byte[] segmentData) throws
+            // ImageWriteException,
+            ImagingException, IOException {
+<span class="nc bnc" id="L150" title="All 4 branches missed.">                if (marker != JpegConstants.JPEG_APP1_MARKER || !startsWith(segmentData, JpegConstants.EXIF_IDENTIFIER_CODE)) {</span>
+<span class="nc" id="L151">                    pieces.add(new JFIFPieceSegment(marker, markerBytes, markerLengthBytes, segmentData));</span>
+                } else {
+<span class="nc" id="L153">                    final JFIFPiece piece = new JFIFPieceSegmentExif(marker, markerBytes, markerLengthBytes, segmentData);</span>
+<span class="nc" id="L154">                    pieces.add(piece);</span>
+<span class="nc" id="L155">                    exifPieces.add(piece);</span>
+                }
+<span class="nc" id="L157">                return true;</span>
+            }
+
+            @Override
+            public void visitSos(final int marker, final byte[] markerBytes, final byte[] imageData) {
+<span class="nc" id="L162">                pieces.add(new JFIFPieceImageData(markerBytes, imageData));</span>
+<span class="nc" id="L163">            }</span>
+        };
+
+<span class="nc" id="L166">        new JpegUtils().traverseJfif(byteSource, visitor);</span>
+
+        // GenericSegment exifSegment = exifSegmentArray[0];
+        // if (exifSegments.size() &lt; 1)
+        // {
+        // // TODO: add support for adding, not just replacing.
+        // throw new ImageReadException(&quot;No APP1 EXIF segment found.&quot;);
+        // }
+
+<span class="nc" id="L175">        return new JFIFPieces(pieces, exifPieces);</span>
+    }
+
+    /**
+     * Reads a JPEG image, removes all EXIF metadata (by removing the APP1 segment), and writes the result to a stream.
+     *
+     * @param src Byte array containing JPEG image data.
+     * @param os  OutputStream to write the image to.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void removeExifMetadata(final byte[] src, final OutputStream os) throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L188">        final ByteSource byteSource = ByteSource.array(src);</span>
+<span class="nc" id="L189">        removeExifMetadata(byteSource, os);</span>
+<span class="nc" id="L190">    }</span>
+
+    /**
+     * Reads a JPEG image, removes all EXIF metadata (by removing the APP1 segment), and writes the result to a stream.
+     *
+     * @param byteSource ByteSource containing JPEG image data.
+     * @param os         OutputStream to write the image to.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void removeExifMetadata(final ByteSource byteSource, final OutputStream os) throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L202">        final JFIFPieces jfifPieces = analyzeJfif(byteSource);</span>
+<span class="nc" id="L203">        final List&lt;JFIFPiece&gt; pieces = jfifPieces.pieces;</span>
+
+        // Debug.debug(&quot;pieces&quot;, pieces);
+
+        // pieces.removeAll(jfifPieces.exifSegments);
+
+        // Debug.debug(&quot;pieces&quot;, pieces);
+
+<span class="nc" id="L211">        writeSegmentsReplacingExif(os, pieces, null);</span>
+<span class="nc" id="L212">    }</span>
+
+    /**
+     * Reads a JPEG image, removes all EXIF metadata (by removing the APP1 segment), and writes the result to a stream.
+     * &lt;p&gt;
+     *
+     * @param src Image file.
+     * @param os  OutputStream to write the image to.
+     *
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     * @see java.io.File
+     * @see java.io.OutputStream
+     * @see java.io.File
+     * @see java.io.OutputStream
+     */
+    public void removeExifMetadata(final File src, final OutputStream os) throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L230">        final ByteSource byteSource = ByteSource.file(src);</span>
+<span class="nc" id="L231">        removeExifMetadata(byteSource, os);</span>
+<span class="nc" id="L232">    }</span>
+
+    /**
+     * Reads a JPEG image, removes all EXIF metadata (by removing the APP1 segment), and writes the result to a stream.
+     *
+     * @param src InputStream containing JPEG image data.
+     * @param os  OutputStream to write the image to.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void removeExifMetadata(final InputStream src, final OutputStream os) throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L244">        final ByteSource byteSource = ByteSource.inputStream(src, null);</span>
+<span class="nc" id="L245">        removeExifMetadata(byteSource, os);</span>
+<span class="nc" id="L246">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossless&quot; approach - in order to preserve data embedded in the EXIF segment that it can't parse (such as Maker Notes), this
+     * algorithm avoids overwriting any part of the original segment that it couldn't parse. This can cause the EXIF segment to grow with each update, which is
+     * a serious issue, since all EXIF data must fit in a single APP1 segment of the JPEG image.
+     * &lt;/p&gt;
+     *
+     * @param src       Byte array containing JPEG image data.
+     * @param os        OutputStream to write the image to.
+     * @param outputSet TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossless(final byte[] src, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L266">        final ByteSource byteSource = ByteSource.array(src);</span>
+<span class="nc" id="L267">        updateExifMetadataLossless(byteSource, os, outputSet);</span>
+<span class="nc" id="L268">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossless&quot; approach - in order to preserve data embedded in the EXIF segment that it can't parse (such as Maker Notes), this
+     * algorithm avoids overwriting any part of the original segment that it couldn't parse. This can cause the EXIF segment to grow with each update, which is
+     * a serious issue, since all EXIF data must fit in a single APP1 segment of the JPEG image.
+     * &lt;/p&gt;
+     *
+     * @param byteSource ByteSource containing JPEG image data.
+     * @param os         OutputStream to write the image to.
+     * @param outputSet  TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossless(final ByteSource byteSource, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+        // List outputDirectories = outputSet.getDirectories();
+<span class="nc" id="L289">        final JFIFPieces jfifPieces = analyzeJfif(byteSource);</span>
+<span class="nc" id="L290">        final List&lt;JFIFPiece&gt; pieces = jfifPieces.pieces;</span>
+
+        AbstractTiffImageWriter writer;
+        // Just use first APP1 segment for now.
+        // Multiple APP1 segments are rare and poorly supported.
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        if (!jfifPieces.exifPieces.isEmpty()) {</span>
+<span class="nc" id="L296">            final JFIFPieceSegment exifPiece = (JFIFPieceSegment) jfifPieces.exifPieces.get(0);</span>
+
+<span class="nc" id="L298">            byte[] exifBytes = exifPiece.segmentData;</span>
+<span class="nc" id="L299">            exifBytes = remainingBytes(&quot;trimmed exif bytes&quot;, exifBytes, 6);</span>
+
+<span class="nc" id="L301">            writer = new TiffImageWriterLossless(outputSet.byteOrder, exifBytes);</span>
+
+<span class="nc" id="L303">        } else {</span>
+<span class="nc" id="L304">            writer = new TiffImageWriterLossy(outputSet.byteOrder);</span>
+        }
+
+<span class="nc" id="L307">        final boolean includeEXIFPrefix = true;</span>
+<span class="nc" id="L308">        final byte[] newBytes = writeExifSegment(writer, outputSet, includeEXIFPrefix);</span>
+
+<span class="nc" id="L310">        writeSegmentsReplacingExif(os, pieces, newBytes);</span>
+<span class="nc" id="L311">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossless&quot; approach - in order to preserve data embedded in the EXIF segment that it can't parse (such as Maker Notes), this
+     * algorithm avoids overwriting any part of the original segment that it couldn't parse. This can cause the EXIF segment to grow with each update, which is
+     * a serious issue, since all EXIF data must fit in a single APP1 segment of the JPEG image.
+     * &lt;/p&gt;
+     *
+     * @param src       Image file.
+     * @param os        OutputStream to write the image to.
+     * @param outputSet TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossless(final File src, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L331">        final ByteSource byteSource = ByteSource.file(src);</span>
+<span class="nc" id="L332">        updateExifMetadataLossless(byteSource, os, outputSet);</span>
+<span class="nc" id="L333">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossless&quot; approach - in order to preserve data embedded in the EXIF segment that it can't parse (such as Maker Notes), this
+     * algorithm avoids overwriting any part of the original segment that it couldn't parse. This can cause the EXIF segment to grow with each update, which is
+     * a serious issue, since all EXIF data must fit in a single APP1 segment of the JPEG image.
+     * &lt;/p&gt;
+     *
+     * @param src       InputStream containing JPEG image data.
+     * @param os        OutputStream to write the image to.
+     * @param outputSet TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossless(final InputStream src, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L353">        final ByteSource byteSource = ByteSource.inputStream(src, null);</span>
+<span class="nc" id="L354">        updateExifMetadataLossless(byteSource, os, outputSet);</span>
+<span class="nc" id="L355">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossy&quot; approach - the algorithm overwrites the entire EXIF segment, ignoring the possibility that it may be discarding data it
+     * couldn't parse (such as Maker Notes).
+     * &lt;/p&gt;
+     *
+     * @param src       Byte array containing JPEG image data.
+     * @param os        OutputStream to write the image to.
+     * @param outputSet TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossy(final byte[] src, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L374">        final ByteSource byteSource = ByteSource.array(src);</span>
+<span class="nc" id="L375">        updateExifMetadataLossy(byteSource, os, outputSet);</span>
+<span class="nc" id="L376">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossy&quot; approach - the algorithm overwrites the entire EXIF segment, ignoring the possibility that it may be discarding data it
+     * couldn't parse (such as Maker Notes).
+     * &lt;/p&gt;
+     *
+     * @param byteSource ByteSource containing JPEG image data.
+     * @param os         OutputStream to write the image to.
+     * @param outputSet  TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossy(final ByteSource byteSource, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L395">        final JFIFPieces jfifPieces = analyzeJfif(byteSource);</span>
+<span class="nc" id="L396">        final List&lt;JFIFPiece&gt; pieces = jfifPieces.pieces;</span>
+
+<span class="nc" id="L398">        final AbstractTiffImageWriter writer = new TiffImageWriterLossy(outputSet.byteOrder);</span>
+
+<span class="nc" id="L400">        final boolean includeEXIFPrefix = true;</span>
+<span class="nc" id="L401">        final byte[] newBytes = writeExifSegment(writer, outputSet, includeEXIFPrefix);</span>
+
+<span class="nc" id="L403">        writeSegmentsReplacingExif(os, pieces, newBytes);</span>
+<span class="nc" id="L404">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossy&quot; approach - the algorithm overwrites the entire EXIF segment, ignoring the possibility that it may be discarding data it
+     * couldn't parse (such as Maker Notes).
+     * &lt;/p&gt;
+     *
+     * @param src       Image file.
+     * @param os        OutputStream to write the image to.
+     * @param outputSet TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossy(final File src, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L423">        final ByteSource byteSource = ByteSource.file(src);</span>
+<span class="nc" id="L424">        updateExifMetadataLossy(byteSource, os, outputSet);</span>
+<span class="nc" id="L425">    }</span>
+
+    /**
+     * Reads a JPEG image, replaces the EXIF metadata and writes the result to a stream.
+     *
+     * &lt;p&gt;
+     * Note that this uses the &quot;Lossy&quot; approach - the algorithm overwrites the entire EXIF segment, ignoring the possibility that it may be discarding data it
+     * couldn't parse (such as Maker Notes).
+     * &lt;/p&gt;
+     *
+     * @param src       InputStream containing JPEG image data.
+     * @param os        OutputStream to write the image to.
+     * @param outputSet TiffOutputSet containing the EXIF data to write.
+     * @throws ImagingException if it fails to read the JFIF segments
+     * @throws IOException      if it fails to read the image data
+     * @throws ImagingException if it fails to write the updated data
+     */
+    public void updateExifMetadataLossy(final InputStream src, final OutputStream os, final TiffOutputSet outputSet)
+            throws ImagingException, IOException, ImagingException {
+<span class="nc" id="L444">        final ByteSource byteSource = ByteSource.inputStream(src, null);</span>
+<span class="nc" id="L445">        updateExifMetadataLossy(byteSource, os, outputSet);</span>
+<span class="nc" id="L446">    }</span>
+
+    private byte[] writeExifSegment(final AbstractTiffImageWriter writer, final TiffOutputSet outputSet, final boolean includeEXIFPrefix)
+            throws IOException, ImagingException {
+<span class="nc" id="L450">        final ByteArrayOutputStream os = new ByteArrayOutputStream();</span>
+
+<span class="nc bnc" id="L452" title="All 2 branches missed.">        if (includeEXIFPrefix) {</span>
+<span class="nc" id="L453">            JpegConstants.EXIF_IDENTIFIER_CODE.writeTo(os);</span>
+<span class="nc" id="L454">            os.write(0);</span>
+<span class="nc" id="L455">            os.write(0);</span>
+        }
+
+<span class="nc" id="L458">        writer.write(os, outputSet);</span>
+
+<span class="nc" id="L460">        return os.toByteArray();</span>
+    }
+
+    private void writeSegmentsReplacingExif(final OutputStream outputStream, final List&lt;JFIFPiece&gt; segments, final byte[] newBytes)
+            throws ImagingException, IOException {
+
+<span class="nc" id="L466">        try (DataOutputStream os = new DataOutputStream(outputStream)) {</span>
+<span class="nc" id="L467">            JpegConstants.SOI.writeTo(os);</span>
+
+<span class="nc" id="L469">            boolean hasExif = false;</span>
+
+<span class="nc bnc" id="L471" title="All 2 branches missed.">            for (final JFIFPiece piece : segments) {</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">                if (piece instanceof JFIFPieceSegmentExif) {</span>
+<span class="nc" id="L473">                    hasExif = true;</span>
+<span class="nc" id="L474">                    break;</span>
+                }
+<span class="nc" id="L476">            }</span>
+
+<span class="nc bnc" id="L478" title="All 4 branches missed.">            if (!hasExif &amp;&amp; newBytes != null) {</span>
+<span class="nc" id="L479">                final byte[] markerBytes = ByteConversions.toBytes((short) JpegConstants.JPEG_APP1_MARKER, getByteOrder());</span>
+<span class="nc bnc" id="L480" title="All 2 branches missed.">                if (newBytes.length &gt; 0xffff) {</span>
+<span class="nc" id="L481">                    throw new ImagingOverflowException(&quot;APP1 Segment is too long: &quot; + newBytes.length);</span>
+                }
+<span class="nc" id="L483">                final int markerLength = newBytes.length + 2;</span>
+<span class="nc" id="L484">                final byte[] markerLengthBytes = ByteConversions.toBytes((short) markerLength, getByteOrder());</span>
+
+<span class="nc" id="L486">                int index = 0;</span>
+<span class="nc" id="L487">                final JFIFPieceSegment firstSegment = (JFIFPieceSegment) segments.get(index);</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">                if (firstSegment.marker == JpegConstants.JFIF_MARKER) {</span>
+<span class="nc" id="L489">                    index = 1;</span>
+                }
+<span class="nc" id="L491">                segments.add(index, new JFIFPieceSegmentExif(JpegConstants.JPEG_APP1_MARKER, markerBytes, markerLengthBytes, newBytes));</span>
+            }
+
+<span class="nc" id="L494">            boolean APP1Written = false;</span>
+
+<span class="nc bnc" id="L496" title="All 2 branches missed.">            for (final JFIFPiece piece : segments) {</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                if (piece instanceof JFIFPieceSegmentExif) {</span>
+                    // only replace first APP1 segment; skips others.
+<span class="nc bnc" id="L499" title="All 2 branches missed.">                    if (APP1Written) {</span>
+<span class="nc" id="L500">                        continue;</span>
+                    }
+<span class="nc" id="L502">                    APP1Written = true;</span>
+
+<span class="nc bnc" id="L504" title="All 2 branches missed.">                    if (newBytes == null) {</span>
+<span class="nc" id="L505">                        continue;</span>
+                    }
+
+<span class="nc" id="L508">                    final byte[] markerBytes = ByteConversions.toBytes((short) JpegConstants.JPEG_APP1_MARKER, getByteOrder());</span>
+<span class="nc bnc" id="L509" title="All 2 branches missed.">                    if (newBytes.length &gt; 0xffff) {</span>
+<span class="nc" id="L510">                        throw new ImagingOverflowException(&quot;APP1 Segment is too long: &quot; + newBytes.length);</span>
+                    }
+<span class="nc" id="L512">                    final int markerLength = newBytes.length + 2;</span>
+<span class="nc" id="L513">                    final byte[] markerLengthBytes = ByteConversions.toBytes((short) markerLength, getByteOrder());</span>
+
+<span class="nc" id="L515">                    os.write(markerBytes);</span>
+<span class="nc" id="L516">                    os.write(markerLengthBytes);</span>
+<span class="nc" id="L517">                    os.write(newBytes);</span>
+<span class="nc" id="L518">                } else {</span>
+<span class="nc" id="L519">                    piece.write(os);</span>
+                }
+<span class="nc" id="L521">            }</span>
+        }
+<span class="nc" id="L523">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

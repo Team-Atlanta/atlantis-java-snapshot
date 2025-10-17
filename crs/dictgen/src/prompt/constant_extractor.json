@@ -1,0 +1,37 @@
+{
+    "model_role_name": "Constant Extractor",
+    "user_role_name": "Constant Extractor",
+    "system_role": "You are a senior programmer that are really good to analyze source code written in Java or C.",
+    "task": "You are given a snippet program written in Java or C. You are asked to analyze the snippet and answer the following questions: Enumerate constants defined globally or as a member of a class (or a struct) in this file.",
+    "analysis_rules": [
+        "- A constant is a variable that is assigned a value once and never changed.",
+        "- Do not enumerate constants defined in a function.",
+        "- Do not enumerate constants not defined in the given program. You must be able to find definitions of constants at a line number in the given program.",
+        "- If possible, you must calculate the resulting value."
+    ],
+    "analysis_examples": [],
+    "output_constraints": [
+        "You must output in a json file.\n",
+        "For integer-like types, such as, int, long, short, byte, char, you must output the value of the constant.\n",
+        "If the value can be determined by calculating from the expression, you must calculate the value.\n",
+        "If the value cannot be determined, you must output the expression, and specify the \"static\" field as false.\n",
+        "For byte array-like types, such as byte[] or String, you must output each byte in a form of \"\\x01\\x02\".\n",
+        "If a constant is defined in a class, you must output the class name as well.\n",
+        "At the first element of the output json file, you must explain on which line each constant is defined in a string. After that, enumerate the constants in a json format.\n",
+		"Don't explain anything outside of the json file\n"
+    ],
+    "output_examples": [
+        "The json file must have the following format:",
+        "{",
+		"\"EXPLANATION\": \"{Your explanation}\"",
+        "\"CONSTANT_A\": { \"name\": \"class.CONSTANT_A\", \"expression\": \"1+2\", \"value\": 3, \"line\": \"5\" },",
+        "\"CONSTANT_B\": { \"name\": \"class.CONSTANT_B\", \"expression\": \"x+y\", \"value\": \"x+y\", \"line\": \"7\", \"static\": false},",
+        "\"CONSTANT_C\": { \"name\": \"class.CONSTANT_C\", \"expression\": \"\\x01\\x02\", \"value\": \"\\x01\\x02\", \"line\": \"10\"},",
+        "}",
+		"Uncalculated values of integer-like types are not allowed. For example,",
+        "{",
+        "\"CONSTANT_A\": { \"name\": \"class.CONSTANT_A\", \"expression\": \"0xff00 | JPEG_APP0\", \"value\": 65280 | 224 \"line\": \"line\" },",
+		"}",
+		"the above is not allowed. you must calculate the value of the constant (ie, 65504)."
+    ]
+}

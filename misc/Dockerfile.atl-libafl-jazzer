@@ -1,0 +1,37 @@
+FROM ghcr.io/aixcc-finals/base-builder-jvm:v1.3.0
+
+# libAFL requires bindgen which requires libclang.
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y libclang-dev
+
+COPY crs/fuzzers/atl-libafl-jazzer /app/crs-cp-java/fuzzers/atl-libafl-jazzer
+COPY crs/fuzzers/jazzer-libafl /app/crs-cp-java/fuzzers/jazzer-libafl
+WORKDIR /app/crs-cp-java/fuzzers/atl-libafl-jazzer
+RUN yes | adduser --disabled-password builder && \
+    chown -R builder . && chown -R builder ../jazzer-libafl/
+
+USER builder:builder
+# Install Rust.
+RUN curl https://sh.rustup.rs -sSf | sh -s -- --component llvm-tools --default-toolchain nightly-2025-06-04 -y
+ENV PATH="/home/builder/.cargo/bin:${PATH}"
+RUN ln -sf /home/builder/.rustup/toolchains/nightly-2025-06-04-x86_64-unknown-linux-gnu /home/builder/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
+RUN echo "build --java_runtime_version=local_jdk_17" >> .bazelrc \
+    && echo "build --cxxopt=-stdlib=libc++" >> .bazelrc \
+    && echo "build --linkopt=-lc++" >> .bazelrc
+RUN bazel build \
+    //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar \
+    //deploy:jazzer-api \
+    //deploy:jazzer-junit \
+    //launcher:jazzer
+RUN mkdir out && \
+    cp $(bazel cquery --output=files //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar) out/jazzer_agent_deploy.jar && \
+    cp $(bazel cquery --output=files //launcher:jazzer) out/jazzer_driver && \
+    cp $(bazel cquery --output=files //deploy:jazzer-api) out/jazzer_api_deploy.jar && \
+    cp $(bazel cquery --output=files //deploy:jazzer-junit) out/jazzer_junit.jar
+
+USER root
+RUN mkdir /classpath && mkdir /classpath/atl-libafl-jazzer && \
+    cp out/jazzer_agent_deploy.jar /classpath/atl-libafl-jazzer/jazzer_standalone_deploy.jar && \
+    cp out/jazzer_driver /classpath/atl-libafl-jazzer/jazzer && \
+    cp out/jazzer_junit.jar /classpath/atl-libafl-jazzer/ && \
+    cp out/jazzer_api_deploy.jar /classpath/atl-libafl-jazzer/

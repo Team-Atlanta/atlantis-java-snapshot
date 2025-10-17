@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""
+mock_jazzer - Simple replacement for jazzer_driver to capture args and envs
+"""
+
+import json
+import os
+import sys
+import traceback
+
+
+def main():
+    cmdline_args = sys.argv[1:]
+    env_vars = dict(os.environ)
+    env_vars["PWD"] = os.getcwd()
+    output_data = {"cmd_args": cmdline_args, "env_vars": env_vars}
+
+    output_path = os.environ.get("MOCK_JAZZER_CPMETA_OUT")
+    if output_path:
+        try:
+            with open(output_path, "w") as f:
+                json.dump(output_data, f, indent=2, sort_keys=True)
+            print(f"Mock jazzer_driver completed. Arguments captured to {output_path}")
+        except Exception as e1:
+            try:
+                with open(output_path, "w") as f:
+                    json.dump({}, f)
+                print(
+                    f"ERROR: {e1} {traceback.format_exc()}. Empty JSON written to {output_path}"
+                )
+            except Exception as e2:
+                print(
+                    f"ERROR: Failed to create empty output to {output_path}: {e2} {traceback.format_exc()}"
+                )
+    else:
+        print("WARN: MOCK_JAZZER_CPMETA_OUT not set, print to stdout")
+        print(json.dumps(output_data, indent=2, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

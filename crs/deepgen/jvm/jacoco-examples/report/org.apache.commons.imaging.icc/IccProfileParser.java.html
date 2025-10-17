@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IccProfileParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.icc</a> &gt; <span class="el_source">IccProfileParser.java</span></div><h1>IccProfileParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.icc;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.logCharQuad;
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.skipBytes;
+
+import java.awt.color.ICC_Profile;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.io.IOUtils;
+
+public class IccProfileParser extends BinaryFileParser {
+
+<span class="nc" id="L39">    private static final Logger LOGGER = Logger.getLogger(IccProfileParser.class.getName());</span>
+
+    public IccProfileParser() {
+<span class="nc" id="L42">        super(ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L43">    }</span>
+
+    public IccProfileInfo getIccProfileInfo(final byte[] bytes) throws IOException {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (bytes == null) {</span>
+<span class="nc" id="L47">            return null;</span>
+        }
+<span class="nc" id="L49">        return getIccProfileInfo(ByteSource.array(bytes));</span>
+    }
+
+    public IccProfileInfo getIccProfileInfo(final ByteSource byteSource) throws IOException {
+        // TODO Throw instead of logging?
+        final IccProfileInfo result;
+<span class="nc" id="L55">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L56">            result = readIccProfileInfo(is);</span>
+        }
+        //
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        for (final IccTag tag : result.getTags()) {</span>
+<span class="nc" id="L60">            final byte[] bytes = byteSource.getByteArray(tag.offset, tag.length);</span>
+            // Debug.debug(&quot;bytes: &quot; + bytes.length);
+<span class="nc" id="L62">            tag.setData(bytes);</span>
+            // tag.dump(&quot;\t&quot; + i + &quot;: &quot;);
+        }
+        // result.fillInTagData(byteSource);
+<span class="nc" id="L66">        return result;</span>
+    }
+
+    public IccProfileInfo getIccProfileInfo(final File file) throws IOException {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L71">            return null;</span>
+        }
+
+<span class="nc" id="L74">        return getIccProfileInfo(ByteSource.file(file));</span>
+    }
+
+    public IccProfileInfo getIccProfileInfo(final ICC_Profile iccProfile) throws IOException {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (iccProfile == null) {</span>
+<span class="nc" id="L79">            return null;</span>
+        }
+
+<span class="nc" id="L82">        return getIccProfileInfo(ByteSource.array(iccProfile.getData()));</span>
+    }
+
+    private IccTagType getIccTagType(final int quad) {
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        for (final IccTagType iccTagType : IccTagTypes.values()) {</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (iccTagType.getSignature() == quad) {</span>
+<span class="nc" id="L88">                return iccTagType;</span>
+            }
+        }
+
+<span class="nc" id="L92">        return null;</span>
+    }
+
+    public boolean isSrgb(final byte[] bytes) throws IOException {
+<span class="nc" id="L96">        return isSrgb(ByteSource.array(bytes));</span>
+    }
+
+    public boolean isSrgb(final ByteSource byteSource) throws IOException {
+        // setDebug(true);
+
+        // long length = byteSource.getLength();
+        //
+        // if (LOGGER.isLoggable(Level.FINEST))
+        // Debug.debug(&quot;length: &quot; + length);
+
+<span class="nc" id="L107">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L108">            read4Bytes(&quot;ProfileSize&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+
+            // if (length != ProfileSize)
+            // return null;
+
+<span class="nc" id="L113">            skipBytes(is, 4 * 5);</span>
+
+<span class="nc" id="L115">            skipBytes(is, 12, &quot;Not a Valid ICC Profile&quot;);</span>
+
+<span class="nc" id="L117">            skipBytes(is, 4 * 3);</span>
+
+<span class="nc" id="L119">            final int deviceManufacturer = read4Bytes(&quot;ProfileFileSignature&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L121">                logCharQuad(&quot;DeviceManufacturer&quot;, deviceManufacturer);</span>
+            }
+
+<span class="nc" id="L124">            final int deviceModel = read4Bytes(&quot;DeviceModel&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L126">                logCharQuad(&quot;DeviceModel&quot;, deviceModel);</span>
+            }
+
+<span class="nc bnc" id="L129" title="All 4 branches missed.">            return deviceManufacturer == IccConstants.IEC &amp;&amp; deviceModel == IccConstants.sRGB;</span>
+        }
+    }
+
+    public boolean isSrgb(final File file) throws IOException {
+<span class="nc" id="L134">        return isSrgb(ByteSource.file(file));</span>
+    }
+
+    public boolean isSrgb(final ICC_Profile iccProfile) throws IOException {
+<span class="nc" id="L138">        return isSrgb(ByteSource.array(iccProfile.getData()));</span>
+    }
+
+    private IccProfileInfo readIccProfileInfo(InputStream is) throws IOException {
+<span class="nc" id="L142">        final CachingInputStream cis = new CachingInputStream(is);</span>
+<span class="nc" id="L143">        is = cis;</span>
+
+        // setDebug(true);
+
+        // if (LOGGER.isLoggable(Level.FINEST))
+        // Debug.debug(&quot;length: &quot; + length);
+
+<span class="nc" id="L150">        final int profileSize = read4Bytes(&quot;ProfileSize&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+
+        // if (length != ProfileSize)
+        // {
+        // // Debug.debug(&quot;Unexpected Length data expected: &quot; +
+        // Integer.toHexString((int) length)
+        // // + &quot;, encoded: &quot; + Integer.toHexString(ProfileSize));
+        // // Debug.debug(&quot;Unexpected Length data: &quot; + length
+        // // + &quot;, length: &quot; + ProfileSize);
+        // // throw new Error(&quot;asd&quot;);
+        // return null;
+        // }
+
+<span class="nc" id="L163">        final int cmmTypeSignature = read4Bytes(&quot;Signature&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L165">            logCharQuad(&quot;CMMTypeSignature&quot;, cmmTypeSignature);</span>
+        }
+
+<span class="nc" id="L168">        final int profileVersion = read4Bytes(&quot;ProfileVersion&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+
+<span class="nc" id="L170">        final int profileDeviceClassSignature = read4Bytes(&quot;ProfileDeviceClassSignature&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L172">            logCharQuad(&quot;ProfileDeviceClassSignature&quot;, profileDeviceClassSignature);</span>
+        }
+
+<span class="nc" id="L175">        final int colorSpace = read4Bytes(&quot;ColorSpace&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L177">            logCharQuad(&quot;ColorSpace&quot;, colorSpace);</span>
+        }
+
+<span class="nc" id="L180">        final int profileConnectionSpace = read4Bytes(&quot;ProfileConnectionSpace&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L182">            logCharQuad(&quot;ProfileConnectionSpace&quot;, profileConnectionSpace);</span>
+        }
+
+<span class="nc" id="L185">        skipBytes(is, 12, &quot;Not a Valid ICC Profile&quot;);</span>
+
+<span class="nc" id="L187">        final int profileFileSignature = read4Bytes(&quot;ProfileFileSignature&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L189">            logCharQuad(&quot;ProfileFileSignature&quot;, profileFileSignature);</span>
+        }
+
+<span class="nc" id="L192">        final int primaryPlatformSignature = read4Bytes(&quot;PrimaryPlatformSignature&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L194">            logCharQuad(&quot;PrimaryPlatformSignature&quot;, primaryPlatformSignature);</span>
+        }
+
+<span class="nc" id="L197">        final int variousFlags = read4Bytes(&quot;VariousFlags&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L199">            logCharQuad(&quot;VariousFlags&quot;, profileFileSignature);</span>
+        }
+
+<span class="nc" id="L202">        final int deviceManufacturer = read4Bytes(&quot;DeviceManufacturer&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L204">            logCharQuad(&quot;DeviceManufacturer&quot;, deviceManufacturer);</span>
+        }
+
+<span class="nc" id="L207">        final int deviceModel = read4Bytes(&quot;DeviceModel&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L209">            logCharQuad(&quot;DeviceModel&quot;, deviceModel);</span>
+        }
+
+<span class="nc" id="L212">        skipBytes(is, 8, &quot;Not a Valid ICC Profile&quot;);</span>
+
+<span class="nc" id="L214">        final int renderingIntent = read4Bytes(&quot;RenderingIntent&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L216">            logCharQuad(&quot;RenderingIntent&quot;, renderingIntent);</span>
+        }
+
+<span class="nc" id="L219">        skipBytes(is, 12, &quot;Not a Valid ICC Profile&quot;);</span>
+
+<span class="nc" id="L221">        final int profileCreatorSignature = read4Bytes(&quot;ProfileCreatorSignature&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L223">            logCharQuad(&quot;ProfileCreatorSignature&quot;, profileCreatorSignature);</span>
+        }
+
+<span class="nc" id="L226">        skipBytes(is, 16, &quot;Not a Valid ICC Profile&quot;);</span>
+        // readByteArray(&quot;ProfileID&quot;, 16, is,
+        // &quot;Not a Valid ICC Profile&quot;);
+        // if (LOGGER.isLoggable(Level.FINEST))
+        // System.out
+        // .println(&quot;ProfileID: '&quot; + new String(ProfileID) + &quot;'&quot;);
+
+<span class="nc" id="L233">        skipBytes(is, 28, &quot;Not a Valid ICC Profile&quot;);</span>
+
+        // this.setDebug(true);
+
+<span class="nc" id="L237">        final int tagCount = read4Bytes(&quot;TagCount&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+
+        // List tags = new ArrayList();
+<span class="nc" id="L240">        final IccTag[] tags = Allocator.array(tagCount, IccTag[]::new, IccTag.SHALLOW_SIZE);</span>
+
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        for (int i = 0; i &lt; tagCount; i++) {</span>
+<span class="nc" id="L243">            final int tagSignature = read4Bytes(&quot;TagSignature[&quot; + i + &quot;]&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+            // Debug.debug(&quot;TagSignature t &quot;
+            // + Integer.toHexString(TagSignature));
+
+            // this.printCharQuad(&quot;TagSignature&quot;, TagSignature);
+<span class="nc" id="L248">            final int offsetToData = read4Bytes(&quot;OffsetToData[&quot; + i + &quot;]&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+<span class="nc" id="L249">            final int elementSize = read4Bytes(&quot;ElementSize[&quot; + i + &quot;]&quot;, is, &quot;Not a Valid ICC Profile&quot;, getByteOrder());</span>
+
+<span class="nc" id="L251">            final IccTagType fIccTagType = getIccTagType(tagSignature);</span>
+            // if (fIccTagType == null)
+            // throw new Error(&quot;oops.&quot;);
+
+            // System.out
+            // .println(&quot;\t[&quot;
+            // + i
+            // + &quot;]: &quot;
+            // + ((fIccTagType == null)
+            // ? &quot;unknown&quot;
+            // : fIccTagType.name));
+            // Debug.debug();
+
+<span class="nc" id="L264">            final IccTag tag = new IccTag(tagSignature, offsetToData, elementSize, fIccTagType);</span>
+            // tag.dump(&quot;\t&quot; + i + &quot;: &quot;);
+<span class="nc" id="L266">            tags[i] = tag;</span>
+            // tags .add(tag);
+        }
+
+        // read stream to end, filling cache.
+<span class="nc" id="L271">        IOUtils.consume(is);</span>
+
+<span class="nc" id="L273">        final byte[] data = cis.getCache();</span>
+
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (data.length &lt; profileSize) {</span>
+<span class="nc" id="L276">            throw new ImagingException(&quot;Couldn't read ICC Profile.&quot;);</span>
+        }
+
+<span class="nc" id="L279">        final IccProfileInfo result = new IccProfileInfo(data, profileSize, cmmTypeSignature, profileVersion, profileDeviceClassSignature, colorSpace,</span>
+                profileConnectionSpace, profileFileSignature, primaryPlatformSignature, variousFlags, deviceManufacturer, deviceModel, renderingIntent,
+                profileCreatorSignature, null, tags);
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L284">            LOGGER.finest(&quot;issRGB: &quot; + result.isSrgb());</span>
+        }
+
+<span class="nc" id="L287">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

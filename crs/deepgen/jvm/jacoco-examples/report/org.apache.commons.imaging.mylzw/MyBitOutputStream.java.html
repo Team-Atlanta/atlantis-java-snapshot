@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyBitOutputStream.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.mylzw</a> &gt; <span class="el_source">MyBitOutputStream.java</span></div><h1>MyBitOutputStream.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.mylzw;
+
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteOrder;
+
+final class MyBitOutputStream extends FilterOutputStream {
+
+    private final ByteOrder byteOrder;
+    private int bitsInCache;
+    private int bitCache;
+    private int bytesWritten;
+
+    MyBitOutputStream(final OutputStream os, final ByteOrder byteOrder) {
+<span class="nc" id="L32">        super(os);</span>
+<span class="nc" id="L33">        this.byteOrder = byteOrder;</span>
+<span class="nc" id="L34">    }</span>
+
+    private void actualWrite(final int value) throws IOException {
+<span class="nc" id="L37">        out.write(value);</span>
+<span class="nc" id="L38">        bytesWritten++;</span>
+<span class="nc" id="L39">    }</span>
+
+    public void flushCache() throws IOException {
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (bitsInCache &gt; 0) {</span>
+<span class="nc" id="L43">            final int bitMask = (1 &lt;&lt; bitsInCache) - 1;</span>
+<span class="nc" id="L44">            int b = bitMask &amp; bitCache;</span>
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+                // MSB, so write from left
+<span class="nc" id="L48">                b &lt;&lt;= 8 - bitsInCache; // left align fragment.</span>
+            }
+<span class="nc" id="L50">            out.write(b);</span>
+        }
+
+<span class="nc" id="L53">        bitsInCache = 0;</span>
+<span class="nc" id="L54">        bitCache = 0;</span>
+<span class="nc" id="L55">    }</span>
+
+    public int getBytesWritten() {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        return bytesWritten + (bitsInCache &gt; 0 ? 1 : 0);</span>
+    }
+
+    @Override
+    public void write(final int value) throws IOException {
+<span class="nc" id="L63">        writeBits(value, 8);</span>
+<span class="nc" id="L64">    }</span>
+
+    // TODO: in and out streams CANNOT accurately read/write 32bits at a time,
+    // as int will overflow. should have used a long
+    public void writeBits(int value, final int sampleBits) throws IOException {
+<span class="nc" id="L69">        final int sampleMask = (1 &lt;&lt; sampleBits) - 1;</span>
+<span class="nc" id="L70">        value &amp;= sampleMask;</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+            // MSB, so add to right
+<span class="nc" id="L74">            bitCache = bitCache &lt;&lt; sampleBits | value;</span>
+        } else {
+            // LSB, so add to left
+<span class="nc" id="L77">            bitCache |= value &lt;&lt; bitsInCache;</span>
+        }
+<span class="nc" id="L79">        bitsInCache += sampleBits;</span>
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        while (bitsInCache &gt;= 8) {</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (byteOrder == ByteOrder.BIG_ENDIAN) {</span>
+                // MSB, so write from left
+<span class="nc" id="L84">                final int b = 0xff &amp; bitCache &gt;&gt; bitsInCache - 8;</span>
+<span class="nc" id="L85">                actualWrite(b);</span>
+<span class="nc" id="L86">            } else {</span>
+                // LSB, so write from right
+<span class="nc" id="L88">                final int b = 0xff &amp; bitCache;</span>
+<span class="nc" id="L89">                actualWrite(b);</span>
+
+<span class="nc" id="L91">                bitCache &gt;&gt;= 8;</span>
+            }
+<span class="nc" id="L93">            bitsInCache -= 8;</span>
+<span class="nc" id="L94">            final int remainderMask = (1 &lt;&lt; bitsInCache) - 1; // unnecessary</span>
+<span class="nc" id="L95">            bitCache &amp;= remainderMask; // unnecessary</span>
+<span class="nc" id="L96">        }</span>
+
+<span class="nc" id="L98">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

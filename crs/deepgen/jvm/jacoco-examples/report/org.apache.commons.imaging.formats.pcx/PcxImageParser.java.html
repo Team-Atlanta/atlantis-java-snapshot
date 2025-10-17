@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PcxImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.pcx</a> &gt; <span class="el_source">PcxImageParser.java</span></div><h1>PcxImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.pcx;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.skipBytes;
+import static org.apache.commons.imaging.common.ByteConversions.toUInt16;
+
+import java.awt.Dimension;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.IndexColorModel;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Properties;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.ImageMetadata;
+
+public class PcxImageParser extends AbstractImageParser&lt;PcxImagingParameters&gt; {
+    // ZSoft's official spec is at [BROKEN URL] http://www.qzx.com/pc-gpe/pcx.txt
+    // (among other places) but it's pretty thin. The fileformat.fine document
+    // at [BROEKN URL] http://www.fileformat.fine/format/pcx/egff.htm is a little better
+    // but their gray sample image seems corrupt. PCX files themselves are
+    // the ultimate test but pretty hard to find nowadays, so the best
+    // test is against other image viewers (Irfanview is pretty good).
+    //
+    // Open source projects are generally poor at parsing PCX,
+    // SDL_Image/gdk-pixbuf/Eye of Gnome/GIMP/F-Spot all only do some formats,
+    // don't support uncompressed PCX, and/or don't handle black and white
+    // images properly.
+
+    static class PcxHeader {
+
+        public static final int ENCODING_UNCOMPRESSED = 0;
+        public static final int ENCODING_RLE = 1;
+        public static final int PALETTE_INFO_COLOR = 1;
+        public static final int PALETTE_INFO_GRAYSCALE = 2;
+        public final int manufacturer; // Always 10 = ZSoft .pcx
+        public final int version; // 0 = PC Paintbrush 2.5
+                                  // 2 = PC Paintbrush 2.8 with palette
+                                  // 3 = PC Paintbrush 2.8 w/o palette
+                                  // 4 = PC Paintbrush for Windows
+                                  // 5 = PC Paintbrush &gt;= 3.0
+        public final int encoding; // 0 = very old uncompressed format, 1 = .pcx
+                                   // run length encoding
+        public final int bitsPerPixel; // Bits ***PER PLANE*** for each pixel
+        public final int xMin; // window
+        public final int yMin;
+        public final int xMax;
+        public final int yMax;
+        public final int hDpi; // horizontal dpi
+        public final int vDpi; // vertical dpi
+        public final int[] colormap; // palette for &lt;= 16 colors
+        public final int reserved; // Always 0
+        public final int nPlanes; // Number of color planes
+        public final int bytesPerLine; // Number of bytes per scanline plane,
+                                       // must be an even number.
+        public final int paletteInfo; // 1 = Color/BW, 2 = Grayscale, ignored in
+                                      // Paintbrush IV/IV+
+        public final int hScreenSize; // horizontal screen size, in pixels.
+                                      // PaintBrush &gt;= IV only.
+        public final int vScreenSize; // vertical screen size, in pixels.
+                                      // PaintBrush &gt;= IV only.
+
+        PcxHeader(final int manufacturer, final int version, final int encoding, final int bitsPerPixel, final int xMin, final int yMin, final int xMax,
+                final int yMax, final int hDpi, final int vDpi, final int[] colormap, final int reserved, final int nPlanes, final int bytesPerLine,
+<span class="nc" id="L100">                final int paletteInfo, final int hScreenSize, final int vScreenSize) {</span>
+<span class="nc" id="L101">            this.manufacturer = manufacturer;</span>
+<span class="nc" id="L102">            this.version = version;</span>
+<span class="nc" id="L103">            this.encoding = encoding;</span>
+<span class="nc" id="L104">            this.bitsPerPixel = bitsPerPixel;</span>
+<span class="nc" id="L105">            this.xMin = xMin;</span>
+<span class="nc" id="L106">            this.yMin = yMin;</span>
+<span class="nc" id="L107">            this.xMax = xMax;</span>
+<span class="nc" id="L108">            this.yMax = yMax;</span>
+<span class="nc" id="L109">            this.hDpi = hDpi;</span>
+<span class="nc" id="L110">            this.vDpi = vDpi;</span>
+<span class="nc" id="L111">            this.colormap = colormap;</span>
+<span class="nc" id="L112">            this.reserved = reserved;</span>
+<span class="nc" id="L113">            this.nPlanes = nPlanes;</span>
+<span class="nc" id="L114">            this.bytesPerLine = bytesPerLine;</span>
+<span class="nc" id="L115">            this.paletteInfo = paletteInfo;</span>
+<span class="nc" id="L116">            this.hScreenSize = hScreenSize;</span>
+<span class="nc" id="L117">            this.vScreenSize = vScreenSize;</span>
+<span class="nc" id="L118">        }</span>
+
+        public void dump(final PrintWriter pw) {
+<span class="nc" id="L121">            pw.println(&quot;PcxHeader&quot;);</span>
+<span class="nc" id="L122">            pw.println(&quot;Manufacturer: &quot; + manufacturer);</span>
+<span class="nc" id="L123">            pw.println(&quot;Version: &quot; + version);</span>
+<span class="nc" id="L124">            pw.println(&quot;Encoding: &quot; + encoding);</span>
+<span class="nc" id="L125">            pw.println(&quot;BitsPerPixel: &quot; + bitsPerPixel);</span>
+<span class="nc" id="L126">            pw.println(&quot;xMin: &quot; + xMin);</span>
+<span class="nc" id="L127">            pw.println(&quot;yMin: &quot; + yMin);</span>
+<span class="nc" id="L128">            pw.println(&quot;xMax: &quot; + xMax);</span>
+<span class="nc" id="L129">            pw.println(&quot;yMax: &quot; + yMax);</span>
+<span class="nc" id="L130">            pw.println(&quot;hDpi: &quot; + hDpi);</span>
+<span class="nc" id="L131">            pw.println(&quot;vDpi: &quot; + vDpi);</span>
+<span class="nc" id="L132">            pw.print(&quot;ColorMap: &quot;);</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            for (int i = 0; i &lt; colormap.length; i++) {</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">                if (i &gt; 0) {</span>
+<span class="nc" id="L135">                    pw.print(&quot;,&quot;);</span>
+                }
+<span class="nc" id="L137">                pw.print(&quot;(&quot; + (0xff &amp; colormap[i] &gt;&gt; 16) + &quot;,&quot; + (0xff &amp; colormap[i] &gt;&gt; 8) + &quot;,&quot; + (0xff &amp; colormap[i]) + &quot;)&quot;);</span>
+            }
+<span class="nc" id="L139">            pw.println();</span>
+<span class="nc" id="L140">            pw.println(&quot;Reserved: &quot; + reserved);</span>
+<span class="nc" id="L141">            pw.println(&quot;nPlanes: &quot; + nPlanes);</span>
+<span class="nc" id="L142">            pw.println(&quot;BytesPerLine: &quot; + bytesPerLine);</span>
+<span class="nc" id="L143">            pw.println(&quot;PaletteInfo: &quot; + paletteInfo);</span>
+<span class="nc" id="L144">            pw.println(&quot;hScreenSize: &quot; + hScreenSize);</span>
+<span class="nc" id="L145">            pw.println(&quot;vScreenSize: &quot; + vScreenSize);</span>
+<span class="nc" id="L146">            pw.println();</span>
+<span class="nc" id="L147">        }</span>
+    }
+
+<span class="fc" id="L150">    private static final String DEFAULT_EXTENSION = ImageFormats.PCX.getDefaultExtension();</span>
+
+<span class="fc" id="L152">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.PCX.getExtensions();</span>
+
+    public PcxImageParser() {
+<span class="fc" id="L155">        super(ByteOrder.LITTLE_ENDIAN);</span>
+<span class="fc" id="L156">    }</span>
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L160">        readPcxHeader(byteSource).dump(pw);</span>
+<span class="nc" id="L161">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L166">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L171">        return new ImageFormat[] { ImageFormats.PCX, //</span>
+        };
+    }
+
+    @Override
+    public final BufferedImage getBufferedImage(final ByteSource byteSource, PcxImagingParameters params) throws ImagingException, IOException {
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        if (params == null) {</span>
+<span class="nc" id="L178">            params = new PcxImagingParameters();</span>
+        }
+<span class="fc" id="L180">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L181">            final PcxHeader pcxHeader = readPcxHeader(is, params.isStrict());</span>
+<span class="nc" id="L182">            return readImage(pcxHeader, is, byteSource);</span>
+        }
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L188">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public PcxImagingParameters getDefaultParameters() {
+<span class="nc" id="L193">        return new PcxImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L198">        return null;</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L203">        final PcxHeader pcxHeader = readPcxHeader(byteSource);</span>
+<span class="nc" id="L204">        final Dimension size = getImageSize(byteSource, params);</span>
+<span class="nc" id="L205">        return new ImageInfo(&quot;PCX&quot;, pcxHeader.nPlanes * pcxHeader.bitsPerPixel, new ArrayList&lt;&gt;(), ImageFormats.PCX, &quot;ZSoft PCX Image&quot;, size.height,</span>
+<span class="nc bnc" id="L206" title="All 4 branches missed.">                &quot;image/x-pcx&quot;, 1, pcxHeader.vDpi, Math.round(size.getHeight() / pcxHeader.vDpi), pcxHeader.hDpi, Math.round(size.getWidth() / pcxHeader.hDpi),</span>
+                size.width, false, false, !(pcxHeader.nPlanes == 3 &amp;&amp; pcxHeader.bitsPerPixel == 8), ImageInfo.ColorType.RGB,
+<span class="nc bnc" id="L208" title="All 2 branches missed.">                pcxHeader.encoding == PcxHeader.ENCODING_RLE ? ImageInfo.CompressionAlgorithm.RLE : ImageInfo.CompressionAlgorithm.NONE);</span>
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L213">        final PcxHeader pcxHeader = readPcxHeader(byteSource);</span>
+<span class="nc" id="L214">        final int xSize = pcxHeader.xMax - pcxHeader.xMin + 1;</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        if (xSize &lt; 0) {</span>
+<span class="nc" id="L216">            throw new ImagingException(&quot;Image width is negative&quot;);</span>
+        }
+<span class="nc" id="L218">        final int ySize = pcxHeader.yMax - pcxHeader.yMin + 1;</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (ySize &lt; 0) {</span>
+<span class="nc" id="L220">            throw new ImagingException(&quot;Image height is negative&quot;);</span>
+        }
+<span class="nc" id="L222">        return new Dimension(xSize, ySize);</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L227">        return null;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L232">        return &quot;Pcx-Custom&quot;;</span>
+    }
+
+    private int[] read256ColorPalette(final InputStream stream) throws IOException {
+<span class="nc" id="L236">        final byte[] paletteBytes = readBytes(&quot;Palette&quot;, stream, 769, &quot;Error reading palette&quot;);</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        if (paletteBytes[0] != 12) {</span>
+<span class="nc" id="L238">            return null;</span>
+        }
+<span class="nc" id="L240">        final int[] palette = new int[256];</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        for (int i = 0; i &lt; palette.length; i++) {</span>
+<span class="nc" id="L242">            palette[i] = (0xff &amp; paletteBytes[1 + 3 * i]) &lt;&lt; 16 | (0xff &amp; paletteBytes[1 + 3 * i + 1]) &lt;&lt; 8 | 0xff &amp; paletteBytes[1 + 3 * i + 2];</span>
+        }
+<span class="nc" id="L244">        return palette;</span>
+    }
+
+    private int[] read256ColorPaletteFromEndOfFile(final ByteSource byteSource) throws IOException {
+<span class="nc" id="L248">        try (InputStream stream = byteSource.getInputStream()) {</span>
+<span class="nc" id="L249">            final long toSkip = byteSource.size() - 769;</span>
+<span class="nc" id="L250">            skipBytes(stream, (int) toSkip);</span>
+<span class="nc" id="L251">            return read256ColorPalette(stream);</span>
+        }
+    }
+
+    private BufferedImage readImage(final PcxHeader pcxHeader, final InputStream is, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L256">        final int xSize = pcxHeader.xMax - pcxHeader.xMin + 1;</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (xSize &lt; 0) {</span>
+<span class="nc" id="L258">            throw new ImagingException(&quot;Image width is negative&quot;);</span>
+        }
+<span class="nc" id="L260">        final int ySize = pcxHeader.yMax - pcxHeader.yMin + 1;</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (ySize &lt; 0) {</span>
+<span class="nc" id="L262">            throw new ImagingException(&quot;Image height is negative&quot;);</span>
+        }
+<span class="nc bnc" id="L264" title="All 4 branches missed.">        if (pcxHeader.nPlanes &lt;= 0 || 4 &lt; pcxHeader.nPlanes) {</span>
+<span class="nc" id="L265">            throw new ImagingException(&quot;Unsupported/invalid image with &quot; + pcxHeader.nPlanes + &quot; planes&quot;);</span>
+        }
+        final RleReader rleReader;
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        if (pcxHeader.encoding == PcxHeader.ENCODING_UNCOMPRESSED) {</span>
+<span class="nc" id="L269">            rleReader = new RleReader(false);</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">        } else if (pcxHeader.encoding == PcxHeader.ENCODING_RLE) {</span>
+<span class="nc" id="L271">            rleReader = new RleReader(true);</span>
+        } else {
+<span class="nc" id="L273">            throw new ImagingException(&quot;Unsupported/invalid image encoding &quot; + pcxHeader.encoding);</span>
+        }
+<span class="nc" id="L275">        final int scanlineLength = pcxHeader.bytesPerLine * pcxHeader.nPlanes;</span>
+<span class="nc" id="L276">        final byte[] scanline = Allocator.byteArray(scanlineLength);</span>
+<span class="nc bnc" id="L277" title="All 10 branches missed.">        if ((pcxHeader.bitsPerPixel == 1 || pcxHeader.bitsPerPixel == 2 || pcxHeader.bitsPerPixel == 4 || pcxHeader.bitsPerPixel == 8)</span>
+                &amp;&amp; pcxHeader.nPlanes == 1) {
+<span class="nc" id="L279">            final int bytesPerImageRow = (xSize * pcxHeader.bitsPerPixel + 7) / 8;</span>
+<span class="nc" id="L280">            final byte[] image = Allocator.byteArray(ySize * bytesPerImageRow);</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">            for (int y = 0; y &lt; ySize; y++) {</span>
+<span class="nc" id="L282">                rleReader.read(is, scanline);</span>
+<span class="nc" id="L283">                System.arraycopy(scanline, 0, image, y * bytesPerImageRow, bytesPerImageRow);</span>
+            }
+<span class="nc" id="L285">            final DataBufferByte dataBuffer = new DataBufferByte(image, image.length);</span>
+            int[] palette;
+<span class="nc bnc" id="L287" title="All 2 branches missed.">            if (pcxHeader.bitsPerPixel == 1) {</span>
+<span class="nc" id="L288">                palette = new int[] { 0x000000, 0xffffff };</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">            } else if (pcxHeader.bitsPerPixel == 8) {</span>
+                // Normally the palette is read 769 bytes from the end of the
+                // file.
+                // However DCX files have multiple PCX images in one file, so
+                // there could be extra data before the end! So try look for the
+                // palette
+                // immediately after the image data first.
+<span class="nc" id="L296">                palette = read256ColorPalette(is);</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">                if (palette == null) {</span>
+<span class="nc" id="L298">                    palette = read256ColorPaletteFromEndOfFile(byteSource);</span>
+                }
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                if (palette == null) {</span>
+<span class="nc" id="L301">                    throw new ImagingException(&quot;No 256 color palette found in image that needs it&quot;);</span>
+                }
+            } else {
+<span class="nc" id="L304">                palette = pcxHeader.colormap;</span>
+            }
+            WritableRaster raster;
+<span class="nc bnc" id="L307" title="All 2 branches missed.">            if (pcxHeader.bitsPerPixel == 8) {</span>
+<span class="nc" id="L308">                raster = Raster.createInterleavedRaster(dataBuffer, xSize, ySize, bytesPerImageRow, 1, new int[] { 0 }, null);</span>
+            } else {
+<span class="nc" id="L310">                raster = Raster.createPackedRaster(dataBuffer, xSize, ySize, pcxHeader.bitsPerPixel, null);</span>
+            }
+<span class="nc" id="L312">            final IndexColorModel colorModel = new IndexColorModel(pcxHeader.bitsPerPixel, 1 &lt;&lt; pcxHeader.bitsPerPixel, palette, 0, false, -1,</span>
+                    DataBuffer.TYPE_BYTE);
+<span class="nc" id="L314">            return new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+        }
+<span class="nc bnc" id="L316" title="All 6 branches missed.">        if (pcxHeader.bitsPerPixel == 1 &amp;&amp; 2 &lt;= pcxHeader.nPlanes &amp;&amp; pcxHeader.nPlanes &lt;= 4) {</span>
+<span class="nc" id="L317">            final IndexColorModel colorModel = new IndexColorModel(pcxHeader.nPlanes, 1 &lt;&lt; pcxHeader.nPlanes, pcxHeader.colormap, 0, false, -1,</span>
+                    DataBuffer.TYPE_BYTE);
+<span class="nc" id="L319">            final BufferedImage image = new BufferedImage(xSize, ySize, BufferedImage.TYPE_BYTE_BINARY, colorModel);</span>
+<span class="nc" id="L320">            final byte[] unpacked = Allocator.byteArray(xSize);</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">            for (int y = 0; y &lt; ySize; y++) {</span>
+<span class="nc" id="L322">                rleReader.read(is, scanline);</span>
+<span class="nc" id="L323">                int nextByte = 0;</span>
+<span class="nc" id="L324">                Arrays.fill(unpacked, (byte) 0);</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">                for (int plane = 0; plane &lt; pcxHeader.nPlanes; plane++) {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">                    for (int i = 0; i &lt; pcxHeader.bytesPerLine; i++) {</span>
+<span class="nc" id="L327">                        final int b = 0xff &amp; scanline[nextByte++];</span>
+<span class="nc bnc" id="L328" title="All 4 branches missed.">                        for (int j = 0; j &lt; 8 &amp;&amp; 8 * i + j &lt; unpacked.length; j++) {</span>
+<span class="nc" id="L329">                            unpacked[8 * i + j] |= (byte) ((b &gt;&gt; 7 - j &amp; 0x1) &lt;&lt; plane);</span>
+                        }
+                    }
+                }
+<span class="nc" id="L333">                image.getRaster().setDataElements(0, y, xSize, 1, unpacked);</span>
+            }
+<span class="nc" id="L335">            return image;</span>
+        }
+<span class="nc bnc" id="L337" title="All 4 branches missed.">        if (pcxHeader.bitsPerPixel == 8 &amp;&amp; pcxHeader.nPlanes == 3) {</span>
+<span class="nc" id="L338">            final byte[][] image = new byte[3][];</span>
+<span class="nc" id="L339">            final int xySize = xSize * ySize;</span>
+<span class="nc" id="L340">            image[0] = Allocator.byteArray(xySize);</span>
+<span class="nc" id="L341">            image[1] = Allocator.byteArray(xySize);</span>
+<span class="nc" id="L342">            image[2] = Allocator.byteArray(xySize);</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">            for (int y = 0; y &lt; ySize; y++) {</span>
+<span class="nc" id="L344">                rleReader.read(is, scanline);</span>
+<span class="nc" id="L345">                System.arraycopy(scanline, 0, image[0], y * xSize, xSize);</span>
+<span class="nc" id="L346">                System.arraycopy(scanline, pcxHeader.bytesPerLine, image[1], y * xSize, xSize);</span>
+<span class="nc" id="L347">                System.arraycopy(scanline, 2 * pcxHeader.bytesPerLine, image[2], y * xSize, xSize);</span>
+            }
+<span class="nc" id="L349">            final DataBufferByte dataBuffer = new DataBufferByte(image, image[0].length);</span>
+<span class="nc" id="L350">            final WritableRaster raster = Raster.createBandedRaster(dataBuffer, xSize, ySize, xSize, new int[] { 0, 1, 2 }, new int[] { 0, 0, 0 }, null);</span>
+<span class="nc" id="L351">            final ColorModel colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false, Transparency.OPAQUE,</span>
+                    DataBuffer.TYPE_BYTE);
+<span class="nc" id="L353">            return new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+        }
+<span class="nc bnc" id="L355" title="All 8 branches missed.">        if ((pcxHeader.bitsPerPixel != 24 || pcxHeader.nPlanes != 1) &amp;&amp; (pcxHeader.bitsPerPixel != 32 || pcxHeader.nPlanes != 1)) {</span>
+<span class="nc" id="L356">            throw new ImagingException(&quot;Invalid/unsupported image with bitsPerPixel &quot; + pcxHeader.bitsPerPixel + &quot; and planes &quot; + pcxHeader.nPlanes);</span>
+        }
+<span class="nc" id="L358">        final int rowLength = 3 * xSize;</span>
+<span class="nc" id="L359">        final byte[] image = Allocator.byteArray(rowLength * ySize);</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        for (int y = 0; y &lt; ySize; y++) {</span>
+<span class="nc" id="L361">            rleReader.read(is, scanline);</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if (pcxHeader.bitsPerPixel == 24) {</span>
+<span class="nc" id="L363">                System.arraycopy(scanline, 0, image, y * rowLength, rowLength);</span>
+            } else {
+<span class="nc bnc" id="L365" title="All 2 branches missed.">                for (int x = 0; x &lt; xSize; x++) {</span>
+<span class="nc" id="L366">                    image[y * rowLength + 3 * x] = scanline[4 * x];</span>
+<span class="nc" id="L367">                    image[y * rowLength + 3 * x + 1] = scanline[4 * x + 1];</span>
+<span class="nc" id="L368">                    image[y * rowLength + 3 * x + 2] = scanline[4 * x + 2];</span>
+                }
+            }
+        }
+<span class="nc" id="L372">        final DataBufferByte dataBuffer = new DataBufferByte(image, image.length);</span>
+<span class="nc" id="L373">        final WritableRaster raster = Raster.createInterleavedRaster(dataBuffer, xSize, ySize, rowLength, 3, new int[] { 2, 1, 0 }, null);</span>
+<span class="nc" id="L374">        final ColorModel colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false, Transparency.OPAQUE,</span>
+                DataBuffer.TYPE_BYTE);
+<span class="nc" id="L376">        return new BufferedImage(colorModel, raster, colorModel.isAlphaPremultiplied(), new Properties());</span>
+    }
+
+    private PcxHeader readPcxHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L380">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L381">            return readPcxHeader(is, false);</span>
+        }
+    }
+
+    private PcxHeader readPcxHeader(final InputStream is, final boolean isStrict) throws ImagingException, IOException {
+<span class="fc" id="L386">        final byte[] pcxHeaderBytes = readBytes(&quot;PcxHeader&quot;, is, 128, &quot;Not a Valid PCX File&quot;);</span>
+<span class="fc" id="L387">        final int manufacturer = 0xff &amp; pcxHeaderBytes[0];</span>
+<span class="fc" id="L388">        final int version = 0xff &amp; pcxHeaderBytes[1];</span>
+<span class="fc" id="L389">        final int encoding = 0xff &amp; pcxHeaderBytes[2];</span>
+<span class="fc" id="L390">        final int bitsPerPixel = 0xff &amp; pcxHeaderBytes[3];</span>
+<span class="fc" id="L391">        final int xMin = toUInt16(pcxHeaderBytes, 4, getByteOrder());</span>
+<span class="fc" id="L392">        final int yMin = toUInt16(pcxHeaderBytes, 6, getByteOrder());</span>
+<span class="fc" id="L393">        final int xMax = toUInt16(pcxHeaderBytes, 8, getByteOrder());</span>
+<span class="fc" id="L394">        final int yMax = toUInt16(pcxHeaderBytes, 10, getByteOrder());</span>
+<span class="fc" id="L395">        final int hDpi = toUInt16(pcxHeaderBytes, 12, getByteOrder());</span>
+<span class="fc" id="L396">        final int vDpi = toUInt16(pcxHeaderBytes, 14, getByteOrder());</span>
+<span class="fc" id="L397">        final int[] colormap = new int[16];</span>
+<span class="fc" id="L398">        Arrays.setAll(colormap, i -&gt; 0xff000000 | (0xff &amp; pcxHeaderBytes[16 + 3 * i]) &lt;&lt; 16 | (0xff &amp; pcxHeaderBytes[16 + 3 * i + 1]) &lt;&lt; 8</span>
+                | 0xff &amp; pcxHeaderBytes[16 + 3 * i + 2]);
+<span class="fc" id="L400">        final int reserved = 0xff &amp; pcxHeaderBytes[64];</span>
+<span class="fc" id="L401">        final int nPlanes = 0xff &amp; pcxHeaderBytes[65];</span>
+<span class="fc" id="L402">        final int bytesPerLine = toUInt16(pcxHeaderBytes, 66, getByteOrder());</span>
+<span class="fc" id="L403">        final int paletteInfo = toUInt16(pcxHeaderBytes, 68, getByteOrder());</span>
+<span class="fc" id="L404">        final int hScreenSize = toUInt16(pcxHeaderBytes, 70, getByteOrder());</span>
+<span class="fc" id="L405">        final int vScreenSize = toUInt16(pcxHeaderBytes, 72, getByteOrder());</span>
+
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">        if (manufacturer != 10) {</span>
+<span class="fc" id="L408">            throw new ImagingException(&quot;Not a Valid PCX File: manufacturer is &quot; + manufacturer);</span>
+        }
+        // Note that reserved is sometimes set to a non-zero value
+        // by Paintbrush itself, so it shouldn't be enforced.
+<span class="nc bnc" id="L412" title="All 4 branches missed.">        if (isStrict &amp;&amp; bytesPerLine % 2 != 0) {</span>
+<span class="nc" id="L413">            throw new ImagingException(&quot;Not a Valid PCX File: bytesPerLine is odd&quot;);</span>
+        }
+
+<span class="nc" id="L416">        return new PcxHeader(manufacturer, version, encoding, bitsPerPixel, xMin, yMin, xMax, yMax, hDpi, vDpi, colormap, reserved, nPlanes, bytesPerLine,</span>
+                paletteInfo, hScreenSize, vScreenSize);
+    }
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final PcxImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L422">        new PcxWriter(params).writeImage(src, os);</span>
+<span class="nc" id="L423">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

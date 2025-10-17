@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebPChunk.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.webp.chunks</a> &gt; <span class="el_source">WebPChunk.java</span></div><h1>WebPChunk.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.webp.chunks;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.imaging.internal.SafeOperations;
+
+/**
+ * A WebP image is composed of several chunks. This is the base class for the chunks, used by the parser.
+ *
+ * @see &lt;a href=&quot;https://developers.google.com/speed/webp/docs/riff_container&quot;&gt;WebP Container Specification&lt;/a&gt;
+ * @since 1.0-alpha4
+ */
+public abstract class WebPChunk extends BinaryFileParser {
+    private final int type;
+    private final int size;
+    protected final byte[] bytes;
+    private final int chunkSize;
+
+    /**
+     * Create a new WebP chunk.
+     *
+     * @param type  chunk type.
+     * @param size  chunk size.
+     * @param bytes chunk data.
+     * @throws ImagingException if the chunk data and the size provided do not match.
+     */
+    WebPChunk(final int type, final int size, final byte[] bytes) throws ImagingException {
+<span class="nc" id="L49">        super(ByteOrder.LITTLE_ENDIAN);</span>
+
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (size != bytes.length) {</span>
+<span class="nc" id="L52">            throw new ImagingException(&quot;Chunk size must match bytes length&quot;);</span>
+        }
+
+<span class="nc" id="L55">        this.type = type;</span>
+<span class="nc" id="L56">        this.size = size;</span>
+<span class="nc" id="L57">        this.bytes = bytes;</span>
+
+        // if chunk size is odd, a single padding byte is added
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        final int padding = size % 2 != 0 ? 1 : 0;</span>
+
+        // Chunk FourCC (4 bytes) + Chunk Size (4 bytes) + Chunk Payload (n bytes) + Padding
+<span class="nc" id="L63">        this.chunkSize = SafeOperations.add(4, 4, size, padding);</span>
+<span class="nc" id="L64">    }</span>
+
+    /**
+     * Print the chunk to the given stream.
+     *
+     * @param pw     a stream to write to.
+     * @param offset chunk offset.
+     * @throws ImagingException if the image is invalid.
+     * @throws IOException      if it fails to write to the given stream.
+     */
+    public void dump(final PrintWriter pw, final int offset) throws ImagingException, IOException {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        pw.printf(&quot;Chunk %s at offset %s, length %d%n, payload size %d%n&quot;, getTypeDescription(), offset &gt;= 0 ? String.valueOf(offset) : &quot;unknown&quot;,</span>
+<span class="nc" id="L76">                getChunkSize(), getPayloadSize());</span>
+<span class="nc" id="L77">    }</span>
+
+    /**
+     * @return a copy of the chunk data as bytes.
+     */
+    public byte[] getBytes() {
+<span class="nc" id="L83">        return bytes.clone();</span>
+    }
+
+    /**
+     * @return the chunk size.
+     */
+    public int getChunkSize() {
+<span class="nc" id="L90">        return chunkSize;</span>
+    }
+
+    /**
+     * @return the payload size.
+     */
+    public int getPayloadSize() {
+<span class="nc" id="L97">        return size;</span>
+    }
+
+    /**
+     * @return the chunk type.
+     */
+    public int getType() {
+<span class="nc" id="L104">        return type;</span>
+    }
+
+    /**
+     * @return the description of the chunk type.
+     */
+    public String getTypeDescription() {
+<span class="nc" id="L111">        return new String(new byte[] { (byte) (type &amp; 0xff), (byte) (type &gt;&gt; 8 &amp; 0xff), (byte) (type &gt;&gt; 16 &amp; 0xff), (byte) (type &gt;&gt; 24 &amp; 0xff) },</span>
+                StandardCharsets.UTF_8);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

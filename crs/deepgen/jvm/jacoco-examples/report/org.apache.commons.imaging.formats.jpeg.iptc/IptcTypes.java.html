@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IptcTypes.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.iptc</a> &gt; <span class="el_source">IptcTypes.java</span></div><h1>IptcTypes.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.jpeg.iptc;
+
+<span class="nc" id="L19">public enum IptcTypes implements IptcType {</span>
+<span class="nc" id="L20">    RECORD_VERSION(0, &quot;Record Version&quot;), OBJECT_TYPE_REFERENCE(3, &quot;Object Type Reference&quot;), OBJECT_ATTRIBUTE_REFERENCE(4, &quot;Object Attribute Reference&quot;),</span>
+<span class="nc" id="L21">    OBJECT_NAME(5, &quot;Object Name&quot;), EDIT_STATUS(7, &quot;Edit Status&quot;), EDITORIAL_UPDATE(8, &quot;Editorial Update&quot;), URGENCY(10, &quot;Urgency&quot;),</span>
+<span class="nc" id="L22">    SUBJECT_REFERENCE(12, &quot;Subject Reference&quot;), CATEGORY(15, &quot;Category&quot;), SUPPLEMENTAL_CATEGORY(20, &quot;Supplemental Category&quot;),</span>
+<span class="nc" id="L23">    FIXTURE_IDENTIFIER(22, &quot;Fixture Identifier&quot;), KEYWORDS(25, &quot;Keywords&quot;), CONTENT_LOCATION_CODE(26, &quot;Content Location Code&quot;),</span>
+<span class="nc" id="L24">    CONTENT_LOCATION_NAME(27, &quot;Content Location Name&quot;), RELEASE_DATE(30, &quot;Release Date&quot;), RELEASE_TIME(35, &quot;Release Time&quot;),</span>
+<span class="nc" id="L25">    EXPIRATION_DATE(37, &quot;Expiration Date&quot;), EXPIRATION_TIME(38, &quot;Expiration Time&quot;), SPECIAL_INSTRUCTIONS(40, &quot;Special Instructions&quot;),</span>
+<span class="nc" id="L26">    ACTION_ADVISED(42, &quot;Action Advised&quot;), REFERENCE_SERVICE(45, &quot;Reference Service&quot;), REFERENCE_DATE(47, &quot;Reference Date&quot;),</span>
+<span class="nc" id="L27">    REFERENCE_NUMBER(50, &quot;Reference Number&quot;), DATE_CREATED(55, &quot;Date Created&quot;), TIME_CREATED(60, &quot;Time Created&quot;),</span>
+<span class="nc" id="L28">    DIGITAL_CREATION_DATE(62, &quot;Digital Creation Date&quot;), DIGITAL_CREATION_TIME(63, &quot;Digital Creation Time&quot;), ORIGINATING_PROGRAM(65, &quot;Originating Program&quot;),</span>
+<span class="nc" id="L29">    PROGRAM_VERSION(70, &quot;Program Version&quot;), OBJECT_CYCLE(75, &quot;Object Cycle&quot;), BYLINE(80, &quot;By-line&quot;), BYLINE_TITLE(85, &quot;By-line Title&quot;), CITY(90, &quot;City&quot;),</span>
+<span class="nc" id="L30">    SUBLOCATION(92, &quot;Sublocation&quot;), PROVINCE_STATE(95, &quot;Province/State&quot;), COUNTRY_PRIMARY_LOCATION_CODE(100, &quot;Country/Primary Location Code&quot;),</span>
+<span class="nc" id="L31">    COUNTRY_PRIMARY_LOCATION_NAME(101, &quot;Country/Primary Location Name&quot;), ORIGINAL_TRANSMISSION_REFERENCE(103, &quot;Original Transmission, Reference&quot;),</span>
+<span class="nc" id="L32">    HEADLINE(105, &quot;Headline&quot;), CREDIT(110, &quot;Credit&quot;), SOURCE(115, &quot;Source&quot;), COPYRIGHT_NOTICE(116, &quot;Copyright Notice&quot;), CONTACT(118, &quot;Contact&quot;),</span>
+<span class="nc" id="L33">    CAPTION_ABSTRACT(120, &quot;Caption/Abstract&quot;), WRITER_EDITOR(122, &quot;Writer/Editor&quot;), RASTERIZED_CAPTION(125, &quot;Rasterized Caption&quot;), IMAGE_TYPE(130, &quot;ImageType&quot;),</span>
+<span class="nc" id="L34">    IMAGE_ORIENTATION(131, &quot;Image Orientation&quot;), LANGUAGE_IDENTIFIER(135, &quot;Language Identifier&quot;), AUDIO_TYPE(150, &quot;Audio Type&quot;),</span>
+<span class="nc" id="L35">    AUDIO_SAMPLING_RATE(151, &quot;Audio Sampling Rate&quot;), AUDIO_SAMPLING_RESOLUTION(152, &quot;Audio Sampling Resolution&quot;), AUDIO_DURATION(153, &quot;Audio Duration&quot;),</span>
+<span class="nc" id="L36">    AUDIO_OUTCUE(154, &quot;Audio Outcue&quot;), OBJECT_DATA_PREVIEW_FILE_FORMAT(200, &quot;Object Data Preview, File Format&quot;),</span>
+<span class="nc" id="L37">    OBJECT_DATA_PREVIEW_FILE_FORMAT_VERSION(201, &quot;Object Data Preview, File Format Version&quot;), OBJECT_DATA_PREVIEW_DATA(202, &quot;Object Data Preview Data&quot;);</span>
+
+    public static IptcType getUnknown(final int type) {
+<span class="nc" id="L40">        return new IptcType() {</span>
+            @Override
+            public String getName() {
+<span class="nc" id="L43">                return &quot;Unknown&quot;;</span>
+            }
+
+            @Override
+            public int getType() {
+<span class="nc" id="L48">                return type;</span>
+            }
+
+            @Override
+            public String toString() {
+<span class="nc" id="L53">                return &quot;Unknown (&quot; + type + &quot;)&quot;;</span>
+            }
+        };
+    }
+
+    public final int type;
+
+    public final String name;
+
+<span class="nc" id="L62">    IptcTypes(final int type, final String name) {</span>
+<span class="nc" id="L63">        this.type = type;</span>
+<span class="nc" id="L64">        this.name = name;</span>
+<span class="nc" id="L65">    }</span>
+
+    @Override
+    public String getName() {
+<span class="nc" id="L69">        return name;</span>
+    }
+
+    @Override
+    public int getType() {
+<span class="nc" id="L74">        return type;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L79">        return name + &quot; (&quot; + type + &quot;)&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

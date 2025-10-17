@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RgbeInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.rgbe</a> &gt; <span class="el_source">RgbeInfo.java</span></div><h1>RgbeInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.rgbe;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.imaging.common.ByteConversions;
+import org.apache.commons.imaging.common.GenericImageMetadata;
+import org.apache.commons.imaging.common.ImageMetadata;
+
+final class RgbeInfo implements Closeable {
+    // #?RADIANCE
+<span class="fc" id="L36">    private static final byte[] HEADER = { 0x23, 0x3F, 0x52, 0x41, 0x44, 0x49, 0x41, 0x4E, 0x43, 0x45 };</span>
+<span class="fc" id="L37">    private static final Pattern RESOLUTION_STRING = Pattern.compile(&quot;-Y (\\d+) \\+X (\\d+)&quot;);</span>
+
+<span class="fc" id="L39">    private static final byte[] TWO_TWO = { 0x2, 0x2 };</span>
+
+    private static void decompress(final InputStream in, final byte[] out) throws IOException, ImagingException {
+<span class="nc" id="L42">        int position = 0;</span>
+<span class="nc" id="L43">        final int total = out.length;</span>
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        while (position &lt; total) {</span>
+<span class="nc" id="L46">            final int n = in.read();</span>
+
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (n &lt; 0) {</span>
+<span class="nc" id="L49">                throw new ImagingException(&quot;Error decompressing RGBE file&quot;);</span>
+            }
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (n &gt; 128) {</span>
+<span class="nc" id="L53">                final int value = in.read();</span>
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                for (int i = 0; i &lt; (n &amp; 0x7f); i++) {</span>
+<span class="nc" id="L56">                    out[position++] = (byte) value;</span>
+                }
+<span class="nc" id="L58">            } else {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L60">                    out[position++] = (byte) in.read();</span>
+                }
+            }
+<span class="nc" id="L63">        }</span>
+<span class="nc" id="L64">    }</span>
+
+    private final InputStream in;
+    private GenericImageMetadata metadata;
+<span class="fc" id="L68">    private int width = -1;</span>
+
+<span class="fc" id="L70">    private int height = -1;</span>
+
+<span class="fc" id="L72">    RgbeInfo(final ByteSource byteSource) throws IOException {</span>
+<span class="fc" id="L73">        this.in = byteSource.getInputStream();</span>
+<span class="fc" id="L74">    }</span>
+
+    @Override
+    public void close() throws IOException {
+<span class="fc" id="L78">        in.close();</span>
+<span class="fc" id="L79">    }</span>
+
+    int getHeight() throws IOException, ImagingException {
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if (-1 == height) {</span>
+<span class="nc" id="L83">            readDimensions();</span>
+        }
+
+<span class="nc" id="L86">        return height;</span>
+    }
+
+    ImageMetadata getMetadata() throws IOException, ImagingException {
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if (null == metadata) {</span>
+<span class="nc" id="L91">            readMetadata();</span>
+        }
+
+<span class="nc" id="L94">        return metadata;</span>
+    }
+
+    public float[][] getPixelData() throws IOException, ImagingException {
+        // Read into local variables to ensure that we have seeked into the file
+        // far enough
+<span class="nc" id="L100">        final int ht = getHeight();</span>
+<span class="nc" id="L101">        final int wd = getWidth();</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (wd &gt;= 32768) {</span>
+<span class="nc" id="L104">            throw new ImagingException(&quot;Scan lines must be less than 32768 bytes long&quot;);</span>
+        }
+
+<span class="nc" id="L107">        final byte[] scanLineBytes = ByteConversions.toBytes((short) wd, ByteOrder.BIG_ENDIAN);</span>
+<span class="nc" id="L108">        final byte[] rgbe = Allocator.byteArray(wd * 4);</span>
+<span class="nc" id="L109">        final float[][] out = new float[3][Allocator.check(wd * ht)];</span>
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        for (int i = 0; i &lt; ht; i++) {</span>
+<span class="nc" id="L112">            BinaryFunctions.readAndVerifyBytes(in, TWO_TWO, &quot;Scan line &quot; + i + &quot; expected to start with 0x2 0x2&quot;);</span>
+<span class="nc" id="L113">            BinaryFunctions.readAndVerifyBytes(in, scanLineBytes, &quot;Scan line &quot; + i + &quot; length expected&quot;);</span>
+
+<span class="nc" id="L115">            decompress(in, rgbe);</span>
+
+<span class="nc bnc" id="L117" title="All 2 branches missed.">            for (int channel = 0; channel &lt; 3; channel++) {</span>
+<span class="nc" id="L118">                final int channelOffset = channel * wd;</span>
+<span class="nc" id="L119">                final int eOffset = 3 * wd;</span>
+
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                for (int p = 0; p &lt; wd; p++) {</span>
+<span class="nc" id="L122">                    final int mantissa = rgbe[p + eOffset] &amp; 0xff;</span>
+<span class="nc" id="L123">                    final int pos = p + i * wd;</span>
+
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                    if (0 == mantissa) {</span>
+<span class="nc" id="L126">                        out[channel][pos] = 0;</span>
+                    } else {
+<span class="nc" id="L128">                        final float mult = (float) Math.pow(2, mantissa - (128 + 8));</span>
+<span class="nc" id="L129">                        out[channel][pos] = ((rgbe[p + channelOffset] &amp; 0xff) + 0.5f) * mult;</span>
+                    }
+                }
+            }
+        }
+
+<span class="nc" id="L135">        return out;</span>
+    }
+
+    int getWidth() throws IOException, ImagingException {
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (-1 == width) {</span>
+<span class="nc" id="L140">            readDimensions();</span>
+        }
+
+<span class="nc" id="L143">        return width;</span>
+    }
+
+    private void readDimensions() throws IOException, ImagingException {
+<span class="nc" id="L147">        getMetadata(); // Ensure we've read past this</span>
+
+<span class="nc" id="L149">        final InfoHeaderReader reader = new InfoHeaderReader(in);</span>
+<span class="nc" id="L150">        final String resolution = reader.readNextLine();</span>
+<span class="nc" id="L151">        final Matcher matcher = RESOLUTION_STRING.matcher(resolution);</span>
+
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (!matcher.matches()) {</span>
+<span class="nc" id="L154">            throw new ImagingException(&quot;Invalid HDR resolution string. Only \&quot;-Y N +X M\&quot; is supported. Found \&quot;&quot; + resolution + &quot;\&quot;&quot;);</span>
+        }
+
+<span class="nc" id="L157">        height = Integer.parseInt(matcher.group(1));</span>
+<span class="nc" id="L158">        width = Integer.parseInt(matcher.group(2));</span>
+<span class="nc" id="L159">    }</span>
+
+    private void readMetadata() throws IOException, ImagingException {
+<span class="nc" id="L162">        BinaryFunctions.readAndVerifyBytes(in, HEADER, &quot;Not a valid HDR: Incorrect Header&quot;);</span>
+
+<span class="nc" id="L164">        final InfoHeaderReader reader = new InfoHeaderReader(in);</span>
+
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (!reader.readNextLine().isEmpty()) {</span>
+<span class="nc" id="L167">            throw new ImagingException(&quot;Not a valid HDR: Incorrect Header&quot;);</span>
+        }
+
+<span class="nc" id="L170">        metadata = new GenericImageMetadata();</span>
+
+<span class="nc" id="L172">        String info = reader.readNextLine();</span>
+
+<span class="nc bnc" id="L174" title="All 2 branches missed.">        while (!info.isEmpty()) {</span>
+<span class="nc" id="L175">            final int equals = info.indexOf('=');</span>
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            if (equals &gt; 0) {</span>
+<span class="nc" id="L178">                final String variable = info.substring(0, equals);</span>
+<span class="nc" id="L179">                final String value = info.substring(equals + 1);</span>
+
+<span class="nc bnc" id="L181" title="All 4 branches missed.">                if (&quot;FORMAT&quot;.equals(value) &amp;&amp; !&quot;32-bit_rle_rgbe&quot;.equals(value)) {</span>
+<span class="nc" id="L182">                    throw new ImagingException(&quot;Only 32-bit_rle_rgbe images are supported, trying to read &quot; + value);</span>
+                }
+
+<span class="nc" id="L185">                metadata.add(variable, value);</span>
+<span class="nc" id="L186">            } else {</span>
+<span class="nc" id="L187">                metadata.add(&quot;&lt;command&gt;&quot;, info);</span>
+            }
+
+<span class="nc" id="L190">            info = reader.readNextLine();</span>
+<span class="nc" id="L191">        }</span>
+<span class="nc" id="L192">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

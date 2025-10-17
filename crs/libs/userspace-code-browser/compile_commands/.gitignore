@@ -1,0 +1,3 @@
+nix
+build
+compile-wrapper.sh

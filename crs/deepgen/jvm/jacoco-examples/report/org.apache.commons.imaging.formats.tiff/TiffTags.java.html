@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffTags.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffTags.java</span></div><h1>TiffTags.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.imaging.formats.tiff.constants.AdobePageMaker6TagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.AdobePhotoshopTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.AliasSketchbookProTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.DcfTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.DngTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.GdalLibraryTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.GeoTiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.GpsTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.HylaFaxTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.MicrosoftHdPhotoTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.MicrosoftTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.MolecularDynamicsGelTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.OceScanjobTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.Rfc2301TagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.Tiff4TagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryType;
+import org.apache.commons.imaging.formats.tiff.constants.TiffEpTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.WangTagConstants;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+
+final class TiffTags {
+
+<span class="fc" id="L49">    private static final List&lt;TagInfo&gt; ALL_TAGS = makeMergedTagList();</span>
+
+<span class="fc" id="L51">    private static final Map&lt;Integer, List&lt;TagInfo&gt;&gt; ALL_TAG_MAP = makeTagMap(TiffTags.ALL_TAGS);</span>
+<span class="fc" id="L52">    private static final Map&lt;Integer, Integer&gt; TAG_COUNTS = countTags(TiffTags.ALL_TAGS);</span>
+
+    private static Map&lt;Integer, Integer&gt; countTags(final List&lt;TagInfo&gt; tags) {
+<span class="fc" id="L55">        final Map&lt;Integer, Integer&gt; map = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (final TagInfo tag : tags) {</span>
+<span class="fc" id="L58">            map.merge(tag.tag, 1, Integer::sum);</span>
+<span class="fc" id="L59">        }</span>
+
+<span class="fc" id="L61">        return map;</span>
+    }
+
+    static TagInfo getTag(final int directoryType, final int tag) {
+<span class="fc" id="L65">        final List&lt;TagInfo&gt; possibleMatches = ALL_TAG_MAP.get(tag);</span>
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (null == possibleMatches) {</span>
+<span class="fc" id="L68">            return TiffTagConstants.TIFF_TAG_UNKNOWN;</span>
+        }
+
+<span class="fc" id="L71">        return getTag(directoryType, possibleMatches);</span>
+    }
+
+    private static TagInfo getTag(final int directoryType, final List&lt;TagInfo&gt; possibleMatches) {
+        // Please keep this method in sync with TiffImageMetadata's findField()
+
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">        if (possibleMatches.isEmpty()) {</span>
+<span class="nc" id="L78">            return null;</span>
+        }
+
+        // first search for exact match.
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        for (final TagInfo tagInfo : possibleMatches) {</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            if (tagInfo.directoryType == TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN) {</span>
+                // pass
+<span class="fc" id="L85">                continue;</span>
+            }
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            if (directoryType == tagInfo.directoryType.directoryType) {</span>
+<span class="fc" id="L88">                return tagInfo;</span>
+            }
+<span class="fc" id="L90">        }</span>
+
+        // accept an inexact match.
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for (final TagInfo tagInfo : possibleMatches) {</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">            if (tagInfo.directoryType == TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN) {</span>
+                // pass
+<span class="fc" id="L96">                continue;</span>
+            }
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">            if (directoryType &gt;= 0 &amp;&amp; tagInfo.directoryType.isImageDirectory()) {</span>
+<span class="nc" id="L99">                return tagInfo;</span>
+            }
+<span class="pc bpc" id="L101" title="3 of 4 branches missed.">            if (directoryType &lt; 0 &amp;&amp; !tagInfo.directoryType.isImageDirectory()) {</span>
+<span class="nc" id="L102">                return tagInfo;</span>
+            }
+<span class="fc" id="L104">        }</span>
+
+        // accept a wildcard match.
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (final TagInfo tagInfo : possibleMatches) {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (tagInfo.directoryType == TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN) {</span>
+<span class="fc" id="L109">                return tagInfo;</span>
+            }
+<span class="fc" id="L111">        }</span>
+
+<span class="fc" id="L113">        return TiffTagConstants.TIFF_TAG_UNKNOWN;</span>
+    }
+
+    static Integer getTagCount(final int tag) {
+<span class="nc" id="L117">        return TAG_COUNTS.get(tag);</span>
+    }
+
+    private static List&lt;TagInfo&gt; makeMergedTagList() {
+<span class="fc" id="L121">        final ArrayList&lt;TagInfo&gt; result = new ArrayList&lt;&gt;(AdobePageMaker6TagConstants.ALL_ADOBE_PAGEMAKER_6_TAGS);</span>
+<span class="fc" id="L122">        result.addAll(AdobePhotoshopTagConstants.ALL_ADOBE_PHOTOSHOP_TAGS);</span>
+<span class="fc" id="L123">        result.addAll(AliasSketchbookProTagConstants.ALL_ALIAS_SKETCHBOOK_PRO_TAGS);</span>
+<span class="fc" id="L124">        result.addAll(DcfTagConstants.ALL_DCF_TAGS);</span>
+<span class="fc" id="L125">        result.addAll(DngTagConstants.ALL_DNG_TAGS);</span>
+<span class="fc" id="L126">        result.addAll(ExifTagConstants.ALL_EXIF_TAGS);</span>
+<span class="fc" id="L127">        result.addAll(GeoTiffTagConstants.ALL_GEO_TIFF_TAGS);</span>
+<span class="fc" id="L128">        result.addAll(GdalLibraryTagConstants.ALL_GDAL_LIBRARY_TAGS);</span>
+<span class="fc" id="L129">        result.addAll(GpsTagConstants.ALL_GPS_TAGS);</span>
+<span class="fc" id="L130">        result.addAll(HylaFaxTagConstants.ALL_HYLAFAX_TAGS);</span>
+<span class="fc" id="L131">        result.addAll(MicrosoftTagConstants.ALL_MICROSOFT_TAGS);</span>
+<span class="fc" id="L132">        result.addAll(MicrosoftHdPhotoTagConstants.ALL_MICROSOFT_HD_PHOTO_TAGS);</span>
+<span class="fc" id="L133">        result.addAll(MolecularDynamicsGelTagConstants.ALL_MOLECULAR_DYNAMICS_GEL_TAGS);</span>
+<span class="fc" id="L134">        result.addAll(OceScanjobTagConstants.ALL_OCE_SCANJOB_TAGS);</span>
+<span class="fc" id="L135">        result.addAll(Rfc2301TagConstants.ALL_RFC_2301_TAGS);</span>
+<span class="fc" id="L136">        result.addAll(Tiff4TagConstants.ALL_TIFF_4_TAGS);</span>
+<span class="fc" id="L137">        result.addAll(TiffEpTagConstants.ALL_TIFF_EP_TAGS);</span>
+<span class="fc" id="L138">        result.addAll(TiffTagConstants.ALL_TIFF_TAGS);</span>
+<span class="fc" id="L139">        result.addAll(WangTagConstants.ALL_WANG_TAGS);</span>
+
+<span class="fc" id="L141">        return Collections.unmodifiableList(result);</span>
+    }
+
+    private static Map&lt;Integer, List&lt;TagInfo&gt;&gt; makeTagMap(final List&lt;TagInfo&gt; tags) {
+        // make sure to use the thread-safe version; this is shared state.
+<span class="fc" id="L146">        final Map&lt;Integer, List&lt;TagInfo&gt;&gt; map = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        for (final TagInfo tag : tags) {</span>
+<span class="fc" id="L149">            final List&lt;TagInfo&gt; tagList = map.computeIfAbsent(tag.tag, k -&gt; new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L150">            tagList.add(tag);</span>
+<span class="fc" id="L151">        }</span>
+
+<span class="fc" id="L153">        return map;</span>
+    }
+
+    private TiffTags() {
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

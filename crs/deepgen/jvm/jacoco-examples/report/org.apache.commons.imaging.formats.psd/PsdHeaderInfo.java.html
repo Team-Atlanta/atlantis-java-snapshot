@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PsdHeaderInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.psd</a> &gt; <span class="el_source">PsdHeaderInfo.java</span></div><h1>PsdHeaderInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.psd;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class PsdHeaderInfo {
+
+<span class="nc" id="L27">    private static final Logger LOGGER = Logger.getLogger(PsdHeaderInfo.class.getName());</span>
+
+    public final int version;
+    private final byte[] reserved;
+    public final int channels;
+    public final int rows;
+    public final int columns;
+    public final int depth;
+    public final int mode;
+
+<span class="nc" id="L37">    public PsdHeaderInfo(final int version, final byte[] reserved, final int channels, final int rows, final int columns, final int depth, final int mode) {</span>
+<span class="nc" id="L38">        this.version = version;</span>
+<span class="nc" id="L39">        this.reserved = reserved.clone();</span>
+<span class="nc" id="L40">        this.channels = channels;</span>
+<span class="nc" id="L41">        this.rows = rows;</span>
+<span class="nc" id="L42">        this.columns = columns;</span>
+<span class="nc" id="L43">        this.depth = depth;</span>
+<span class="nc" id="L44">        this.mode = mode;</span>
+
+<span class="nc" id="L46">    }</span>
+
+    public void dump() {
+<span class="nc" id="L49">        try (StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L50">                PrintWriter pw = new PrintWriter(sw)) {</span>
+<span class="nc" id="L51">            dump(pw);</span>
+<span class="nc" id="L52">            pw.flush();</span>
+<span class="nc" id="L53">            sw.flush();</span>
+<span class="nc" id="L54">            LOGGER.fine(sw.toString());</span>
+<span class="nc" id="L55">        } catch (final IOException e) {</span>
+<span class="nc" id="L56">            LOGGER.log(Level.SEVERE, e.getMessage(), e);</span>
+<span class="nc" id="L57">        }</span>
+<span class="nc" id="L58">    }</span>
+
+    public void dump(final PrintWriter pw) {
+<span class="nc" id="L61">        pw.println(&quot;&quot;);</span>
+<span class="nc" id="L62">        pw.println(&quot;Header&quot;);</span>
+<span class="nc" id="L63">        pw.println(&quot;Version: &quot; + version + &quot; (&quot; + Integer.toHexString(version) + &quot;)&quot;);</span>
+<span class="nc" id="L64">        pw.println(&quot;Channels: &quot; + channels + &quot; (&quot; + Integer.toHexString(channels) + &quot;)&quot;);</span>
+<span class="nc" id="L65">        pw.println(&quot;Rows: &quot; + rows + &quot; (&quot; + Integer.toHexString(rows) + &quot;)&quot;);</span>
+<span class="nc" id="L66">        pw.println(&quot;Columns: &quot; + columns + &quot; (&quot; + Integer.toHexString(columns) + &quot;)&quot;);</span>
+<span class="nc" id="L67">        pw.println(&quot;Depth: &quot; + depth + &quot; (&quot; + Integer.toHexString(depth) + &quot;)&quot;);</span>
+<span class="nc" id="L68">        pw.println(&quot;Mode: &quot; + mode + &quot; (&quot; + Integer.toHexString(mode) + &quot;)&quot;);</span>
+<span class="nc" id="L69">        pw.println(&quot;Reserved: &quot; + reserved.length);</span>
+<span class="nc" id="L70">        pw.println(&quot;&quot;);</span>
+<span class="nc" id="L71">        pw.flush();</span>
+<span class="nc" id="L72">    }</span>
+
+    public byte[] getReserved() {
+<span class="nc" id="L75">        return reserved.clone();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

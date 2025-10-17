@@ -1,0 +1,17 @@
+FROM gcr.io/oss-fuzz-base/base-builder@sha256:770700ccc95934ec0ad92686036baebbbbdb472fa6bf9b5ea9263b9540a03b12
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV JAZZER_API_PATH="/usr/local/lib/jazzer_api_deploy.jar"
+
+COPY crs/fuzzers/atl-jazzer /app/crs-cp-java/fuzzers/atl-jazzer
+
+RUN apt-get update && \
+    apt-get install -y curl git python3 python3-pip openjdk-17-jdk-headless maven && \
+    curl -L https://github.com/bazelbuild/bazel/releases/download/7.3.0/bazel-7.3.0-linux-x86_64 -o /usr/bin/bazel && \
+    chmod +x /usr/bin/bazel && \
+    yes | adduser --disabled-password builder && \
+    chown -R builder /app/crs-cp-java/fuzzers/atl-jazzer
+
+WORKDIR /app/crs-cp-java/fuzzers/atl-jazzer
+USER builder:builder
+RUN bazel build //:jazzer_release

@@ -1,0 +1,307 @@
+{
+    "sinks": {
+        "Remote Code Execution": [
+            {
+                "path": "src/oripa/src/main/java/oripa/file/InitDataFileReader.java",
+                "line": 43,
+                "column": 26
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderXML.java",
+                "line": 44,
+                "column": 24
+            },
+            {
+                "path": "src/oripa/src/oripa/LoaderXML.java",
+                "line": 34,
+                "column": 33
+            },
+            {
+                "path": "src/oripa/src/oripa/MainFrame.java",
+                "line": 614,
+                "column": 35
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/oripa/src/main/java/oripa/cli/CommandLineFolder.java",
+                "line": 78,
+                "column": 51
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/cli/FoldedModelImageExporter.java",
+                "line": 94,
+                "column": 31
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/doc/OptionParser.java",
+                "line": 54,
+                "column": 28
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/doc/OptionParser.java",
+                "line": 55,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/gui/presenter/file/FileAccessPresenter.java",
+                "line": 140,
+                "column": 26
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/swing/view/main/UIPanel.java",
+                "line": 767,
+                "column": 80
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/swing/view/main/UIPanel.java",
+                "line": 767,
+                "column": 58
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/oripa/src/main/java/oripa/file/FoldedModelSVGConfigReader.java",
+                "line": 40,
+                "column": 23
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/file/FoldedModelSVGConfigWriter.java",
+                "line": 36,
+                "column": 45
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/exporter/ExporterFOLD.java",
+                "line": 88,
+                "column": 45
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderFOLD.java",
+                "line": 55,
+                "column": 23
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/FoldedModelAllExporterFOLD.java",
+                "line": 61,
+                "column": 45
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/FoldedModelSingleExporterFOLD.java",
+                "line": 49,
+                "column": 45
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/loader/FoldedModelLoaderFOLD.java",
+                "line": 60,
+                "column": 23
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/file/InitDataFileReader.java",
+                "line": 40,
+                "column": 38
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/file/InitDataFileWriter.java",
+                "line": 40,
+                "column": 39
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/exporter/ExporterCP.java",
+                "line": 38,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/exporter/ExporterEPS.java",
+                "line": 34,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/exporter/ExporterXML.java",
+                "line": 35,
+                "column": 39
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderCP.java",
+                "line": 37,
+                "column": 31
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderDXF.java",
+                "line": 42,
+                "column": 31
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderPDF.java",
+                "line": 35,
+                "column": 31
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderXML.java",
+                "line": 41,
+                "column": 38
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/CreasePatternExporterDXF.java",
+                "line": 53,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/CreasePatternExporterSVG.java",
+                "line": 43,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/ExporterORmat.java",
+                "line": 42,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/FoldedModelExporterSVG.java",
+                "line": 67,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/OrigamiModelExporterDXF.java",
+                "line": 53,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/OrigamiModelExporterOBJ.java",
+                "line": 45,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/main/java/oripa/persistence/entity/exporter/OrigamiModelExporterSVG.java",
+                "line": 58,
+                "column": 32
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterCP.java",
+                "line": 27,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterDXF.java",
+                "line": 33,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterDXF.java",
+                "line": 102,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterEPS.java",
+                "line": 28,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterOBJ.java",
+                "line": 31,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterOBJ2.java",
+                "line": 32,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterOBJ2.java",
+                "line": 62,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterORmat.java",
+                "line": 31,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterSVG.java",
+                "line": 43,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterSVG.java",
+                "line": 122,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterSVG.java",
+                "line": 156,
+                "column": 40
+            },
+            {
+                "path": "src/oripa/src/oripa/ExporterXML.java",
+                "line": 32,
+                "column": 42
+            },
+            {
+                "path": "src/oripa/src/oripa/LoaderDXF.java",
+                "line": 39,
+                "column": 39
+            },
+            {
+                "path": "src/oripa/src/oripa/LoaderLines.java",
+                "line": 37,
+                "column": 39
+            },
+            {
+                "path": "src/oripa/src/oripa/LoaderPDF.java",
+                "line": 38,
+                "column": 39
+            },
+            {
+                "path": "src/oripa/src/oripa/LoaderXML.java",
+                "line": 33,
+                "column": 41
+            },
+            {
+                "path": "src/oripa/src/oripa/MainFrame.java",
+                "line": 601,
+                "column": 42
+            },
+            {
+                "path": "src/oripa/src/oripa/MainFrame.java",
+                "line": 613,
+                "column": 41
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxqYXZhIHZlcnNpb249IjEuOC4wXzE5MSIgY2xhc3M9ImphdmEuYmVhbnMuWE1MRGVjb2RlciI+CiA8b2JqZWN0IGNsYXNzPSJvcmlwYS5wZXJzaXN0ZW5jZS5kb2MuRGF0YVNldCI+CiAgPHZvaWQgbWV0aG9kPSJzZXRTb21lUHJvcGVydHkiPgogICA8c3RyaW5nPm1hbGljaW91c192YWx1ZTwvc3RyaW5nPgogIDwvdm9pZD4KICA8IS0tIEFkZCBhZGRpdGlvbmFsIGZpZWxkcyBvciBtZXRob2RzIHRvIGV4cGxvaXQgdGhlIHZ1bG5lcmFiaWxpdHkgLS0+CiA8L29iamVjdD4KPC9qYXZhPg=="
+            ],
+            "code": "src/oripa-harnesses/oripa-harness-one/src/main/java/com/aixcc/oripa/harnesses/one/OripaOne.java:\n32       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n33           try {\n34               new OripaOne().fuzz(data);\n35           } catch (FuzzerSecurityIssueLow |\n36                    FuzzerSecurityIssueMedium |\n37                    FuzzerSecurityIssueHigh |\n38                    FuzzerSecurityIssueCritical e) {\n39               throw e;\n40           } catch (Throwable t) {}\n41       }\n43       public void fuzz(byte[] data) throws Throwable {\n44           File file = new File(\"/tmp/oripa-1\");\n45           try (FileOutputStream fos = new FileOutputStream(file)) {\n46               fos.write(data);\n47               fos.flush();\n48           } catch (IOException e) {\n49               return;\n50           }\n51           loader.loadAsDataSet(\"/tmp/oripa-1\");\n52       }\n\nsrc/oripa/src/main/java/oripa/persistence/doc/loader/LoaderXML.java:\n39   \tpublic DataSet loadAsDataSet(final String filePath) throws IOException {\n40   \t\tDataSet dataset;\n41   \t\ttry (var fis = new FileInputStream(filePath);\n42   \t\t\t\tvar bis = new BufferedInputStream(fis);\n43   \t\t\t\tvar dec = new XMLDecoder(bis)) {\n44   \t\t\tdataset = (DataSet) dec.readObject();\n45   \t\t}\n46   \n47   \t\treturn dataset;\n48   \t}\n",
+            "cost": 0.34554999999999997,
+            "harness_id": "OripaOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderXML.java:44:24",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 1
+        },
+        {
+            "blob": [
+                "PD94bWwgdmVyc2lvbj0iMS4wIj8+CiAgICA8IURPQ1RZUEUgZGF0YSBbCiAgICA8IUVOVElUWSAlIGZpbGUgU1lTVEVNICJmaWxlOi8vL2phenplci10cmF2ZXJzYWwiPgogICAgPCFFTlRJVFkgJSBkdGQgU1lTVEVNICJodHRwOi8vbWFsaWNpb3VzLmNvbS9leHBsb2l0LmR0ZCI+CiAgICAlZHRkOwogICAgXT4KICAgIDxkYXRhPiZzZW5kOzwvZGF0YT4KICAgIA=="
+            ],
+            "code": "src/oripa-harnesses/oripa-harness-one/src/main/java/com/aixcc/oripa/harnesses/one/OripaOne.java:\n32       public static void fuzzerTestOneInput(byte[] data) throws Throwable {\n33           try {\n34               new OripaOne().fuzz(data);\n35           } catch (FuzzerSecurityIssueLow |\n36                    FuzzerSecurityIssueMedium |\n37                    FuzzerSecurityIssueHigh |\n38                    FuzzerSecurityIssueCritical e) {\n39               throw e;\n40           } catch (Throwable t) {}\n41       }\n43       public void fuzz(byte[] data) throws Throwable {\n44           File file = new File(\"/tmp/oripa-1\");\n45           try (FileOutputStream fos = new FileOutputStream(file)) {\n46               fos.write(data);\n47               fos.flush();\n48           } catch (IOException e) {\n49               return;\n50           }\n51           loader.loadAsDataSet(\"/tmp/oripa-1\");\n52       }\n\nsrc/oripa/src/main/java/oripa/persistence/doc/loader/LoaderXML.java:\n39   \tpublic DataSet loadAsDataSet(final String filePath) throws IOException {\n40   \t\tDataSet dataset;\n41   \t\ttry (var fis = new FileInputStream(filePath);\n42   \t\t\t\tvar bis = new BufferedInputStream(fis);\n43   \t\t\t\tvar dec = new XMLDecoder(bis)) {\n44   \t\t\tdataset = (DataSet) dec.readObject();\n45   \t\t}\n46   \n47   \t\treturn dataset;\n48   \t}\n",
+            "cost": 0.31263,
+            "harness_id": "OripaOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/oripa/src/main/java/oripa/persistence/doc/loader/LoaderXML.java:41:38",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 2
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "OripaOne",
+            "blob": [
+                "PD94bWwgdmVyc2lvbj0iMS4wIj8+CiAgICA8IURPQ1RZUEUgZGF0YSBbCiAgICA8IUVOVElUWSAlIGZpbGUgU1lTVEVNICJmaWxlOi8vL2phenplci10cmF2ZXJzYWwiPgogICAgPCFFTlRJVFkgJSBkdGQgU1lTVEVNICJodHRwOi8vbWFsaWNpb3VzLmNvbS9leHBsb2l0LmR0ZCI+CiAgICAlZHRkOwogICAgXT4KICAgIDxkYXRhPiZzZW5kOzwvZGF0YT4KICAgIA==",
+                "PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxqYXZhIHZlcnNpb249IjEuOC4wXzE5MSIgY2xhc3M9ImphdmEuYmVhbnMuWE1MRGVjb2RlciI+CiA8b2JqZWN0IGNsYXNzPSJvcmlwYS5wZXJzaXN0ZW5jZS5kb2MuRGF0YVNldCI+CiAgPHZvaWQgbWV0aG9kPSJzZXRTb21lUHJvcGVydHkiPgogICA8c3RyaW5nPm1hbGljaW91c192YWx1ZTwvc3RyaW5nPgogIDwvdm9pZD4KICA8IS0tIEFkZCBhZGRpdGlvbmFsIGZpZWxkcyBvciBtZXRob2RzIHRvIGV4cGxvaXQgdGhlIHZ1bG5lcmFiaWxpdHkgLS0+CiA8L29iamVjdD4KPC9qYXZhPg=="
+            ]
+        }
+    ]
+}

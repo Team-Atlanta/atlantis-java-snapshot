@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FieldTypeAscii.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.fieldtypes</a> &gt; <span class="el_source">FieldTypeAscii.java</span></div><h1>FieldTypeAscii.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.fieldtypes;
+
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.formats.tiff.TiffField;
+
+public class FieldTypeAscii extends AbstractFieldType {
+    public FieldTypeAscii(final int type, final String name) {
+<span class="fc" id="L29">        super(type, name, 1);</span>
+<span class="fc" id="L30">    }</span>
+
+    @Override
+    public Object getValue(final TiffField entry) {
+        // According to EXIF specification
+        // &quot;2 = ASCII An 8-bit byte containing one 7-bit ASCII code. The final byte is terminated with NULL.&quot;
+<span class="nc" id="L36">        final byte[] bytes = entry.getByteArrayValue();</span>
+<span class="nc" id="L37">        int nullCount = 1;</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">        for (int i = 0; i &lt; bytes.length - 1; i++) {</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">            if (bytes[i] == 0) {</span>
+<span class="nc" id="L40">                nullCount++;</span>
+            }
+        }
+<span class="nc" id="L43">        final String[] strings = Allocator.array(nullCount, String[]::new, 24);</span>
+<span class="nc" id="L44">        int stringsAdded = 0;</span>
+<span class="nc" id="L45">        strings[0] = &quot;&quot;; // if we have a 0 length string</span>
+<span class="nc" id="L46">        int nextStringPos = 0;</span>
+        // According to the Exiftool FAQ, [BROKEN URL] http://www.metadataworkinggroup.org
+        // specifies that the TIFF ASCII fields are actually UTF-8.
+        // Exiftool however allows you to configure the charset used.
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        for (int i = 0; i &lt; bytes.length; i++) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (bytes[i] == 0) {</span>
+<span class="nc" id="L52">                final String string = new String(bytes, nextStringPos, i - nextStringPos, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L53">                strings[stringsAdded++] = string;</span>
+<span class="nc" id="L54">                nextStringPos = i + 1;</span>
+            }
+        }
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (nextStringPos &lt; bytes.length) {</span>
+            // Buggy file, string wasn't null terminated
+<span class="nc" id="L59">            final String string = new String(bytes, nextStringPos, bytes.length - nextStringPos, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L60">            strings[stringsAdded++] = string;</span>
+        }
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (strings.length == 1) {</span>
+<span class="nc" id="L63">            return strings[0];</span>
+        }
+<span class="nc" id="L65">        return strings;</span>
+    }
+
+    @Override
+    public byte[] writeData(final Object o, final ByteOrder byteOrder) throws ImagingException {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (o instanceof byte[]) {</span>
+<span class="nc" id="L71">            final byte[] bytes = (byte[]) o;</span>
+<span class="nc" id="L72">            final byte[] result = Arrays.copyOf(bytes, bytes.length + 1);</span>
+<span class="nc" id="L73">            result[result.length - 1] = 0;</span>
+<span class="nc" id="L74">            return result;</span>
+        }
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (o instanceof String) {</span>
+<span class="nc" id="L77">            final byte[] bytes = ((String) o).getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L78">            final byte[] result = Arrays.copyOf(bytes, bytes.length + 1);</span>
+<span class="nc" id="L79">            result[result.length - 1] = 0;</span>
+<span class="nc" id="L80">            return result;</span>
+        }
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (!(o instanceof String[])) {</span>
+<span class="nc" id="L83">            throw new ImagingException(&quot;Unknown data type: &quot; + o);</span>
+        }
+<span class="nc" id="L85">        final String[] strings = (String[]) o;</span>
+<span class="nc" id="L86">        int totalLength = 0;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        for (final String string : strings) {</span>
+<span class="nc" id="L88">            final byte[] bytes = string.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L89">            totalLength += bytes.length + 1;</span>
+        }
+<span class="nc" id="L91">        final byte[] result = Allocator.byteArray(totalLength);</span>
+<span class="nc" id="L92">        int position = 0;</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        for (final String string : strings) {</span>
+<span class="nc" id="L94">            final byte[] bytes = string.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L95">            System.arraycopy(bytes, 0, result, position, bytes.length);</span>
+<span class="nc" id="L96">            position += bytes.length + 1;</span>
+        }
+<span class="nc" id="L98">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,173 @@
+/*
+ * Copyright (c) 2013, 2017, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+package com.oracle.graal.pointsto.flow;
+
+import com.oracle.graal.pointsto.PointsToAnalysis;
+import com.oracle.graal.pointsto.flow.context.object.AnalysisObject;
+import com.oracle.graal.pointsto.meta.AnalysisField;
+import com.oracle.graal.pointsto.typestate.TypeState;
+
+import jdk.vm.ci.code.BytecodePosition;
+
+/**
+ * Implements a field load operation type flow.
+ */
+public abstract class LoadFieldTypeFlow extends AccessFieldTypeFlow {
+
+    protected LoadFieldTypeFlow(BytecodePosition loadLocation, AnalysisField field) {
+        super(loadLocation, field);
+    }
+
+    protected LoadFieldTypeFlow(MethodFlowsGraph methodFlows, LoadFieldTypeFlow original) {
+        super(original, methodFlows);
+    }
+
+    public static class LoadStaticFieldTypeFlow extends LoadFieldTypeFlow {
+
+        private final FieldTypeFlow fieldFlow;
+
+        LoadStaticFieldTypeFlow(BytecodePosition loadLocation, AnalysisField field, FieldTypeFlow fieldFlow) {
+            super(loadLocation, field);
+            this.fieldFlow = fieldFlow;
+
+            /*
+             * The original static load cannot be added as a use to the static field, even using the
+             * non-state-transfering method, because whenever the field is updated would also update
+             * the load. We only want that update in the clone.
+             */
+        }
+
+        LoadStaticFieldTypeFlow(MethodFlowsGraph methodFlows, LoadStaticFieldTypeFlow original) {
+            super(methodFlows, original);
+            fieldFlow = original.fieldFlow;
+        }
+
+        @Override
+        public TypeFlow<BytecodePosition> copy(PointsToAnalysis bb, MethodFlowsGraph methodFlows) {
+            return new LoadStaticFieldTypeFlow(methodFlows, this);
+        }
+
+        @Override
+        public void initFlow(PointsToAnalysis bb) {
+            fieldFlow.addUse(bb, this);
+        }
+
+        @Override
+        public boolean needsInitialization() {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "LoadStaticFieldTypeFlow<" + getStateDescription() + ">";
+        }
+
+    }
+
+    /**
+     * The type state of the load instance field flow reflects the type state of the field on the
+     * receiver objects that triggered this load operation.
+     */
+    public static class LoadInstanceFieldTypeFlow extends LoadFieldTypeFlow {
+
+        /**
+         * The flow of the receiver object. The load flow is registered as an observer of the
+         * receiver object.
+         */
+        private TypeFlow<?> objectFlow;
+
+        LoadInstanceFieldTypeFlow(BytecodePosition loadLocation, AnalysisField field, TypeFlow<?> objectFlow) {
+            super(loadLocation, field);
+            this.objectFlow = objectFlow;
+        }
+
+        LoadInstanceFieldTypeFlow(PointsToAnalysis bb, MethodFlowsGraph methodFlows, LoadInstanceFieldTypeFlow original) {
+            super(methodFlows, original);
+            this.objectFlow = methodFlows.lookupCloneOf(bb, original.objectFlow);
+        }
+
+        @Override
+        public LoadFieldTypeFlow copy(PointsToAnalysis bb, MethodFlowsGraph methodFlows) {
+            return new LoadInstanceFieldTypeFlow(bb, methodFlows, this);
+        }
+
+        /** Return the receiver object flow. */
+        @Override
+        public TypeFlow<?> receiver() {
+            return objectFlow;
+        }
+
+        @Override
+        public void setObserved(TypeFlow<?> newObjectFlow) {
+            this.objectFlow = newObjectFlow;
+        }
+
+        @Override
+        public void onObservedUpdate(PointsToAnalysis bb) {
+            /*
+             * The state of the receiver object of the load operation has changed. Link the new heap
+             * sensitive field flows.
+             */
+
+            TypeState objectState = objectFlow.getState();
+            objectState = filterObjectState(bb, objectState);
+            /* Iterate over the receiver objects. */
+            for (AnalysisObject object : objectState.objects(bb)) {
+                /* Get the field flow corresponding to the receiver object. */
+
+                FieldTypeFlow fieldFlow = object.getInstanceFieldFlow(bb, objectFlow, source, field, false);
+
+                /* Add the load field flow as a use to the heap sensitive field flow. */
+                fieldFlow.addUse(bb, this);
+            }
+        }
+
+        @Override
+        public void onObservedSaturated(PointsToAnalysis bb, TypeFlow<?> observed) {
+            /*
+             * Nothing needs to change for open world analysis: we want to link all field flows when
+             * the receiver saturates.
+             */
+            if (!isSaturated()) {
+                /*
+                 * When the receiver flow saturates start observing the flow of the field declaring
+                 * type, unless the load is already saturated.
+                 */
+                replaceObservedWith(bb, field.getDeclaringClass());
+            }
+        }
+
+        @Override
+        protected void onSaturated() {
+            /* Deregister the load as an observer of the receiver. */
+            objectFlow.removeObserver(this);
+        }
+
+        @Override
+        public String toString() {
+            return "LoadInstanceFieldTypeFlow<" + getStateDescription() + ">";
+        }
+    }
+}

@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffReader.java</span></div><h1>TiffReader.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.read8Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.skipBytes;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_ENTRY_MAX_VALUE_LENGTH;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_ENTRY_MAX_VALUE_LENGTH_BIG;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_VERSION_BIG;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_VERSION_STANDARD;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.FormatCompliance;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.BinaryFileParser;
+import org.apache.commons.imaging.common.ByteConversions;
+import org.apache.commons.imaging.formats.jpeg.JpegConstants;
+import org.apache.commons.imaging.formats.tiff.TiffDirectory.ImageDataElement;
+import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoDirectory;
+
+public class TiffReader extends BinaryFileParser {
+
+    private static class Collector implements Listener {
+
+        private TiffHeader tiffHeader;
+<span class="fc" id="L54">        private final List&lt;TiffDirectory&gt; directories = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L55">        private final List&lt;TiffField&gt; fields = new ArrayList&lt;&gt;();</span>
+        private final boolean readThumbnails;
+
+        Collector() {
+<span class="fc" id="L59">            this(new TiffImagingParameters());</span>
+<span class="fc" id="L60">        }</span>
+
+<span class="fc" id="L62">        Collector(final TiffImagingParameters params) {</span>
+<span class="fc" id="L63">            this.readThumbnails = params.isReadThumbnails();</span>
+<span class="fc" id="L64">        }</span>
+
+        @Override
+        public boolean addDirectory(final TiffDirectory directory) {
+<span class="fc" id="L68">            directories.add(directory);</span>
+<span class="fc" id="L69">            return true;</span>
+        }
+
+        @Override
+        public boolean addField(final TiffField field) {
+<span class="fc" id="L74">            fields.add(field);</span>
+<span class="fc" id="L75">            return true;</span>
+        }
+
+        public TiffContents getContents() {
+<span class="fc" id="L79">            return new TiffContents(tiffHeader, directories, fields);</span>
+        }
+
+        @Override
+        public boolean readImageData() {
+<span class="nc" id="L84">            return readThumbnails;</span>
+        }
+
+        @Override
+        public boolean readOffsetDirectories() {
+<span class="nc" id="L89">            return true;</span>
+        }
+
+        @Override
+        public boolean setTiffHeader(final TiffHeader tiffHeader) {
+<span class="fc" id="L94">            this.tiffHeader = tiffHeader;</span>
+<span class="fc" id="L95">            return true;</span>
+        }
+    }
+
+    private static final class FirstDirectoryCollector extends Collector {
+        private final boolean readImageData;
+
+<span class="fc" id="L102">        FirstDirectoryCollector(final boolean readImageData) {</span>
+<span class="fc" id="L103">            this.readImageData = readImageData;</span>
+<span class="fc" id="L104">        }</span>
+
+        @Override
+        public boolean addDirectory(final TiffDirectory directory) {
+<span class="fc" id="L108">            super.addDirectory(directory);</span>
+<span class="fc" id="L109">            return false;</span>
+        }
+
+        @Override
+        public boolean readImageData() {
+<span class="fc" id="L114">            return readImageData;</span>
+        }
+    }
+
+    public interface Listener {
+        boolean addDirectory(TiffDirectory directory);
+
+        boolean addField(TiffField field);
+
+        boolean readImageData();
+
+        boolean readOffsetDirectories();
+
+        boolean setTiffHeader(TiffHeader tiffHeader);
+    }
+
+    private final boolean strict;
+    private boolean bigTiff;
+    private boolean standardTiff;
+    private int entryMaxValueLength;
+
+<span class="fc" id="L135">    public TiffReader(final boolean strict) {</span>
+<span class="fc" id="L136">        this.strict = strict;</span>
+<span class="fc" id="L137">    }</span>
+
+    private JpegImageData getJpegRawImageData(final ByteSource byteSource, final TiffDirectory directory) throws ImagingException, IOException {
+<span class="nc" id="L140">        final ImageDataElement element = directory.getJpegRawImageDataElement();</span>
+<span class="nc" id="L141">        final long offset = element.offset;</span>
+<span class="nc" id="L142">        int length = element.length;</span>
+        // In case the length is not correct, adjust it and check if the last read byte actually is the end of the image
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (offset + length &gt; byteSource.size()) {</span>
+<span class="nc" id="L145">            length = (int) (byteSource.size() - offset);</span>
+        }
+<span class="nc" id="L147">        final byte[] data = byteSource.getByteArray(offset, length);</span>
+        // check if the last read byte is actually the end of the image data
+<span class="nc bnc" id="L149" title="All 6 branches missed.">        if (strict &amp;&amp; (length &lt; 2 || ((data[data.length - 2] &amp; 0xff) &lt;&lt; 8 | data[data.length - 1] &amp; 0xff) != JpegConstants.EOI_MARKER)) {</span>
+<span class="nc" id="L150">            throw new ImagingException(&quot;JPEG EOI marker could not be found at expected location&quot;);</span>
+        }
+<span class="nc" id="L152">        return new JpegImageData(offset, length, data);</span>
+    }
+
+    private ByteOrder getTiffByteOrder(final int byteOrderByte) throws ImagingException {
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (byteOrderByte == 'I') {</span>
+<span class="fc" id="L157">            return ByteOrder.LITTLE_ENDIAN; // Intel</span>
+        }
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (byteOrderByte == 'M') {</span>
+<span class="fc" id="L160">            return ByteOrder.BIG_ENDIAN; // Motorola</span>
+        }
+<span class="nc" id="L162">        throw new ImagingException(&quot;Invalid TIFF byte order &quot; + (0xff &amp; byteOrderByte));</span>
+    }
+
+    private AbstractTiffImageData getTiffRawImageData(final ByteSource byteSource, final TiffDirectory directory) throws ImagingException, IOException {
+
+<span class="nc" id="L167">        final List&lt;ImageDataElement&gt; elements = directory.getTiffRawImageDataElements();</span>
+<span class="nc" id="L168">        final AbstractTiffImageData.Data[] data = new AbstractTiffImageData.Data[elements.size()];</span>
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        for (int i = 0; i &lt; elements.size(); i++) {</span>
+<span class="nc" id="L171">            final TiffDirectory.ImageDataElement element = elements.get(i);</span>
+<span class="nc" id="L172">            final byte[] bytes = byteSource.getByteArray(element.offset, element.length);</span>
+<span class="nc" id="L173">            data[i] = new AbstractTiffImageData.Data(element.offset, element.length, bytes);</span>
+        }
+
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (directory.imageDataInStrips()) {</span>
+<span class="nc" id="L177">            final TiffField rowsPerStripField = directory.findField(TiffTagConstants.TIFF_TAG_ROWS_PER_STRIP);</span>
+            //
+            // Default value of rowsPerStripField is assumed to be infinity
+            // https://www.awaresystems.be/imaging/tiff/tifftags/rowsperstrip.html
+            //
+<span class="nc" id="L182">            int rowsPerStrip = Integer.MAX_VALUE;</span>
+
+<span class="nc bnc" id="L184" title="All 2 branches missed.">            if (null != rowsPerStripField) {</span>
+<span class="nc" id="L185">                rowsPerStrip = rowsPerStripField.getIntValue();</span>
+            } else {
+<span class="nc" id="L187">                final TiffField imageHeight = directory.findField(TiffTagConstants.TIFF_TAG_IMAGE_LENGTH);</span>
+                //
+                // if rows per strip not present then rowsPerStrip is equal to
+                // imageLength or an infinity value;
+                //
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                if (imageHeight != null) {</span>
+<span class="nc" id="L193">                    rowsPerStrip = imageHeight.getIntValue();</span>
+                }
+
+            }
+
+<span class="nc" id="L198">            return new AbstractTiffImageData.Strips(data, rowsPerStrip);</span>
+        }
+<span class="nc" id="L200">        final TiffField tileWidthField = directory.findField(TiffTagConstants.TIFF_TAG_TILE_WIDTH);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        if (null == tileWidthField) {</span>
+<span class="nc" id="L202">            throw new ImagingException(&quot;Can't find tile width field.&quot;);</span>
+        }
+<span class="nc" id="L204">        final int tileWidth = tileWidthField.getIntValue();</span>
+
+<span class="nc" id="L206">        final TiffField tileLengthField = directory.findField(TiffTagConstants.TIFF_TAG_TILE_LENGTH);</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">        if (null == tileLengthField) {</span>
+<span class="nc" id="L208">            throw new ImagingException(&quot;Can't find tile length field.&quot;);</span>
+        }
+<span class="nc" id="L210">        final int tileLength = tileLengthField.getIntValue();</span>
+
+<span class="nc" id="L212">        return new AbstractTiffImageData.Tiles(data, tileWidth, tileLength);</span>
+    }
+
+    public void read(final ByteSource byteSource, final FormatCompliance formatCompliance, final Listener listener) throws ImagingException, IOException {
+<span class="fc" id="L216">        readDirectories(byteSource, formatCompliance, listener);</span>
+<span class="fc" id="L217">    }</span>
+
+    public TiffContents readContents(final ByteSource byteSource, final TiffImagingParameters params, final FormatCompliance formatCompliance)
+            throws ImagingException, IOException {
+
+<span class="nc" id="L222">        final Collector collector = new Collector(params);</span>
+<span class="nc" id="L223">        read(byteSource, formatCompliance, collector);</span>
+<span class="nc" id="L224">        return collector.getContents();</span>
+    }
+
+    public TiffContents readDirectories(final ByteSource byteSource, final boolean readImageData, final FormatCompliance formatCompliance)
+            throws ImagingException, IOException {
+<span class="nc" id="L229">        final TiffImagingParameters params = new TiffImagingParameters();</span>
+<span class="nc" id="L230">        params.setReadThumbnails(readImageData);</span>
+<span class="nc" id="L231">        final Collector collector = new Collector(params);</span>
+<span class="nc" id="L232">        readDirectories(byteSource, formatCompliance, collector);</span>
+<span class="nc" id="L233">        final TiffContents contents = collector.getContents();</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (contents.directories.isEmpty()) {</span>
+<span class="nc" id="L235">            throw new ImagingException(&quot;Image did not contain any directories.&quot;);</span>
+        }
+<span class="nc" id="L237">        return contents;</span>
+    }
+
+//    NOT USED
+//    private static final class DirectoryCollector extends Collector {
+//        private final boolean readImageData;
+//
+//        public DirectoryCollector(final boolean readImageData) {
+//            this.readImageData = readImageData;
+//        }
+//
+//        @Override
+//        public boolean addDirectory(final TiffDirectory directory) {
+//            super.addDirectory(directory);
+//            return false;
+//        }
+//
+//        @Override
+//        public boolean readImageData() {
+//            return readImageData;
+//        }
+//    }
+
+    private void readDirectories(final ByteSource byteSource, final FormatCompliance formatCompliance, final Listener listener)
+            throws ImagingException, IOException {
+<span class="fc" id="L262">        final TiffHeader tiffHeader = readTiffHeader(byteSource);</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">        if (!listener.setTiffHeader(tiffHeader)) {</span>
+<span class="nc" id="L264">            return;</span>
+        }
+
+<span class="fc" id="L267">        final long offset = tiffHeader.offsetToFirstIFD;</span>
+<span class="fc" id="L268">        final int dirType = TiffDirectoryConstants.DIRECTORY_TYPE_ROOT;</span>
+
+<span class="fc" id="L270">        final List&lt;Number&gt; visited = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L271">        readDirectory(byteSource, offset, dirType, formatCompliance, listener, visited);</span>
+<span class="fc" id="L272">    }</span>
+
+    private boolean readDirectory(final ByteSource byteSource, final long directoryOffset, final int dirType, final FormatCompliance formatCompliance,
+            final Listener listener, final boolean ignoreNextDirectory, final List&lt;Number&gt; visited) throws ImagingException, IOException {
+
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">        if (visited.contains(directoryOffset)) {</span>
+<span class="nc" id="L278">            return false;</span>
+        }
+<span class="fc" id="L280">        visited.add(directoryOffset);</span>
+
+<span class="fc" id="L282">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">            if (directoryOffset &gt;= byteSource.size()) {</span>
+<span class="fc" id="L284">                return true;</span>
+            }
+
+<span class="fc" id="L287">            skipBytes(is, directoryOffset);</span>
+
+<span class="fc" id="L289">            final List&lt;TiffField&gt; fields = new ArrayList&lt;&gt;();</span>
+
+            long entryCount;
+            try {
+<span class="fc bfc" id="L293" title="All 2 branches covered.">                if (standardTiff) {</span>
+<span class="fc" id="L294">                    entryCount = read2Bytes(&quot;DirectoryEntryCount&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+                } else {
+<span class="fc" id="L296">                    entryCount = read8Bytes(&quot;DirectoryEntryCount&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+                }
+<span class="fc" id="L298">            } catch (final IOException e) {</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">                if (strict) {</span>
+<span class="nc" id="L300">                    throw e;</span>
+                }
+<span class="fc" id="L302">                return true;</span>
+<span class="fc" id="L303">            }</span>
+
+<span class="fc bfc" id="L305" title="All 2 branches covered.">            for (int i = 0; i &lt; entryCount; i++) {</span>
+<span class="fc" id="L306">                final int tag = read2Bytes(&quot;Tag&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc" id="L307">                final int type = read2Bytes(&quot;Type&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+                final long count;
+                final byte[] offsetBytes;
+                final long offset;
+<span class="fc bfc" id="L311" title="All 2 branches covered.">                if (standardTiff) {</span>
+<span class="fc" id="L312">                    count = 0xFFFFffffL &amp; read4Bytes(&quot;Count&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc" id="L313">                    offsetBytes = readBytes(&quot;Offset&quot;, is, 4, &quot;Not a Valid TIFF File&quot;);</span>
+<span class="fc" id="L314">                    offset = 0xFFFFffffL &amp; ByteConversions.toInt(offsetBytes, getByteOrder());</span>
+                } else {
+<span class="fc" id="L316">                    count = read8Bytes(&quot;Count&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc" id="L317">                    offsetBytes = readBytes(&quot;Offset&quot;, is, 8, &quot;Not a Valid TIFF File&quot;);</span>
+<span class="fc" id="L318">                    offset = ByteConversions.toLong(offsetBytes, getByteOrder());</span>
+                }
+
+<span class="fc bfc" id="L321" title="All 2 branches covered.">                if (tag == 0) {</span>
+                    // skip invalid fields.
+                    // These are seen very rarely, but can have invalid value
+                    // lengths,
+                    // which can cause OOM problems.
+<span class="fc" id="L326">                    continue;</span>
+                }
+
+                final AbstractFieldType abstractFieldType;
+                try {
+<span class="fc" id="L331">                    abstractFieldType = AbstractFieldType.getFieldType(type);</span>
+<span class="fc" id="L332">                } catch (final ImagingException imageReadEx) {</span>
+                    // skip over unknown fields types, since we
+                    // can't calculate their size without
+                    // knowing their type
+<span class="fc" id="L336">                    continue;</span>
+<span class="fc" id="L337">                }</span>
+<span class="fc" id="L338">                final long valueLength = count * abstractFieldType.getSize();</span>
+                final byte[] value;
+<span class="fc bfc" id="L340" title="All 2 branches covered.">                if (valueLength &gt; entryMaxValueLength) {</span>
+<span class="fc bfc" id="L341" title="All 4 branches covered.">                    if (offset &lt; 0 || offset + valueLength &gt; byteSource.size()) {</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">                        if (strict) {</span>
+<span class="nc" id="L343">                            throw new IOException(&quot;Attempt to read byte range starting from &quot; + offset + &quot; &quot; + &quot;of length &quot; + valueLength + &quot; &quot;</span>
+<span class="nc" id="L344">                                    + &quot;which is outside the file's size of &quot; + byteSource.size());</span>
+                        }
+                        // corrupt field, ignore it
+                        continue;
+                    }
+<span class="fc" id="L349">                    value = byteSource.getByteArray(offset, (int) valueLength);</span>
+                } else {
+<span class="fc" id="L351">                    value = offsetBytes;</span>
+                }
+
+<span class="fc" id="L354">                final TiffField field = new TiffField(tag, dirType, abstractFieldType, count, offset, value, getByteOrder(), i);</span>
+
+<span class="fc" id="L356">                fields.add(field);</span>
+
+<span class="pc bpc" id="L358" title="1 of 2 branches missed.">                if (!listener.addField(field)) {</span>
+<span class="nc" id="L359">                    return true;</span>
+                }
+            }
+
+<span class="fc" id="L363">            final long nextDirectoryOffset = 0xFFFFffffL &amp; read4Bytes(&quot;nextDirectoryOffset&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+
+<span class="fc" id="L365">            final TiffDirectory directory = new TiffDirectory(dirType, fields, directoryOffset, nextDirectoryOffset, getByteOrder());</span>
+
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">            if (listener.readImageData()) {</span>
+<span class="pc bpc" id="L368" title="1 of 2 branches missed.">                if (directory.hasTiffImageData()) {</span>
+<span class="nc" id="L369">                    final AbstractTiffImageData rawImageData = getTiffRawImageData(byteSource, directory);</span>
+<span class="nc" id="L370">                    directory.setTiffImageData(rawImageData);</span>
+                }
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">                if (directory.hasJpegImageData()) {</span>
+<span class="nc" id="L373">                    final JpegImageData rawJpegImageData = getJpegRawImageData(byteSource, directory);</span>
+<span class="nc" id="L374">                    directory.setJpegImageData(rawJpegImageData);</span>
+                }
+            }
+
+<span class="pc bpc" id="L378" title="1 of 2 branches missed.">            if (!listener.addDirectory(directory)) {</span>
+<span class="fc" id="L379">                return true;</span>
+            }
+
+<span class="nc bnc" id="L382" title="All 2 branches missed.">            if (listener.readOffsetDirectories()) {</span>
+<span class="nc" id="L383">                final TagInfoDirectory[] offsetFields = { ExifTagConstants.EXIF_TAG_EXIF_OFFSET, ExifTagConstants.EXIF_TAG_GPSINFO,</span>
+                        ExifTagConstants.EXIF_TAG_INTEROP_OFFSET };
+<span class="nc" id="L385">                final int[] directoryTypes = { TiffDirectoryConstants.DIRECTORY_TYPE_EXIF, TiffDirectoryConstants.DIRECTORY_TYPE_GPS,</span>
+                        TiffDirectoryConstants.DIRECTORY_TYPE_INTEROPERABILITY };
+<span class="nc bnc" id="L387" title="All 2 branches missed.">                for (int i = 0; i &lt; offsetFields.length; i++) {</span>
+<span class="nc" id="L388">                    final TagInfoDirectory offsetField = offsetFields[i];</span>
+<span class="nc" id="L389">                    final TiffField field = directory.findField(offsetField);</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">                    if (field != null) {</span>
+                        long subDirectoryOffset;
+                        int subDirectoryType;
+<span class="nc" id="L393">                        boolean subDirectoryRead = false;</span>
+                        try {
+<span class="nc" id="L395">                            subDirectoryOffset = directory.getFieldValue(offsetField);</span>
+<span class="nc" id="L396">                            subDirectoryType = directoryTypes[i];</span>
+<span class="nc" id="L397">                            subDirectoryRead = readDirectory(byteSource, subDirectoryOffset, subDirectoryType, formatCompliance, listener, true, visited);</span>
+
+<span class="nc" id="L399">                        } catch (final ImagingException imageReadException) {</span>
+<span class="nc bnc" id="L400" title="All 2 branches missed.">                            if (strict) {</span>
+<span class="nc" id="L401">                                throw imageReadException;</span>
+                            }
+<span class="nc" id="L403">                        }</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">                        if (!subDirectoryRead) {</span>
+<span class="nc" id="L405">                            fields.remove(field);</span>
+                        }
+                    }
+                }
+            }
+
+<span class="nc bnc" id="L411" title="All 4 branches missed.">            if (!ignoreNextDirectory &amp;&amp; directory.getNextDirectoryOffset() &gt; 0) {</span>
+                // Debug.debug(&quot;next dir&quot;, directory.nextDirectoryOffset );
+<span class="nc" id="L413">                readDirectory(byteSource, directory.getNextDirectoryOffset(), dirType + 1, formatCompliance, listener, visited);</span>
+            }
+
+<span class="nc" id="L416">            return true;</span>
+<span class="pc bpc" id="L417" title="5 of 8 branches missed.">        }</span>
+    }
+
+    private boolean readDirectory(final ByteSource byteSource, final long offset, final int dirType, final FormatCompliance formatCompliance,
+            final Listener listener, final List&lt;Number&gt; visited) throws ImagingException, IOException {
+<span class="fc" id="L422">        final boolean ignoreNextDirectory = false;</span>
+<span class="fc" id="L423">        return readDirectory(byteSource, offset, dirType, formatCompliance, listener, ignoreNextDirectory, visited);</span>
+    }
+
+    public TiffContents readFirstDirectory(final ByteSource byteSource, final boolean readImageData, final FormatCompliance formatCompliance)
+            throws ImagingException, IOException {
+<span class="fc" id="L428">        final Collector collector = new FirstDirectoryCollector(readImageData);</span>
+<span class="fc" id="L429">        read(byteSource, formatCompliance, collector);</span>
+<span class="fc" id="L430">        final TiffContents contents = collector.getContents();</span>
+<span class="fc bfc" id="L431" title="All 2 branches covered.">        if (contents.directories.isEmpty()) {</span>
+<span class="fc" id="L432">            throw new ImagingException(&quot;Image did not contain any directories.&quot;);</span>
+        }
+<span class="fc" id="L434">        return contents;</span>
+    }
+
+    private TiffHeader readTiffHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="fc" id="L438">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="fc" id="L439">            return readTiffHeader(is);</span>
+        }
+    }
+
+    private TiffHeader readTiffHeader(final InputStream is) throws ImagingException, IOException {
+<span class="fc" id="L444">        final int byteOrder1 = readByte(&quot;BYTE_ORDER_1&quot;, is, &quot;Not a Valid TIFF File&quot;);</span>
+<span class="fc" id="L445">        final int byteOrder2 = readByte(&quot;BYTE_ORDER_2&quot;, is, &quot;Not a Valid TIFF File&quot;);</span>
+<span class="pc bpc" id="L446" title="1 of 2 branches missed.">        if (byteOrder1 != byteOrder2) {</span>
+<span class="nc" id="L447">            throw new ImagingException(&quot;Byte Order bytes don't match (&quot; + byteOrder1 + &quot;, &quot; + byteOrder2 + &quot;).&quot;);</span>
+        }
+
+<span class="fc" id="L450">        final ByteOrder byteOrder = getTiffByteOrder(byteOrder1);</span>
+<span class="fc" id="L451">        setByteOrder(byteOrder);</span>
+
+        // verify that the file is a supported TIFF format using
+        // the numeric indentifier
+        // Classic TIFF (32 bit): 42
+        // Big TIFF (64 bit): 43
+        //
+        final long offsetToFirstIFD;
+<span class="fc" id="L459">        final int tiffVersion = read2Bytes(&quot;tiffVersion&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc bfc" id="L460" title="All 2 branches covered.">        if (tiffVersion == TIFF_VERSION_STANDARD) {</span>
+<span class="fc" id="L461">            bigTiff = false;</span>
+<span class="fc" id="L462">            standardTiff = true;</span>
+<span class="fc" id="L463">            entryMaxValueLength = TIFF_ENTRY_MAX_VALUE_LENGTH;</span>
+<span class="fc" id="L464">            offsetToFirstIFD = 0xFFFFffffL &amp; read4Bytes(&quot;offsetToFirstIFD&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc bfc" id="L465" title="All 2 branches covered.">        } else if (tiffVersion == TIFF_VERSION_BIG) {</span>
+<span class="fc" id="L466">            bigTiff = true;</span>
+<span class="fc" id="L467">            standardTiff = false;</span>
+<span class="fc" id="L468">            entryMaxValueLength = TIFF_ENTRY_MAX_VALUE_LENGTH_BIG;</span>
+<span class="fc" id="L469">            final int byteSize = read2Bytes(&quot;bytesizeOfOffset&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc" id="L470">            final int expectedZero = read2Bytes(&quot;expectedZero&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc bfc" id="L471" title="All 4 branches covered.">            if (byteSize != 8 || expectedZero != 0) {</span>
+<span class="fc" id="L472">                throw new ImagingException(&quot;Misformed Big-TIFF header: &quot; + tiffVersion);</span>
+            }
+<span class="fc" id="L474">            offsetToFirstIFD = read8Bytes(&quot;offsetToFirstIFD&quot;, is, &quot;Not a Valid TIFF File&quot;, getByteOrder());</span>
+<span class="fc" id="L475">        } else {</span>
+<span class="fc" id="L476">            throw new ImagingException(&quot;Unknown TIFF Version: &quot; + tiffVersion);</span>
+        }
+
+<span class="fc" id="L479">        skipBytes(is, offsetToFirstIFD - 8, &quot;Not a Valid TIFF File: couldn't find IFDs&quot;);</span>
+
+<span class="fc" id="L481">        return new TiffHeader(byteOrder, tiffVersion, offsetToFirstIFD, bigTiff);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

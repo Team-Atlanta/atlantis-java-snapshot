@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Debug.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.internal</a> &gt; <span class="el_source">Debug.java</span></div><h1>Debug.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.internal;
+
+import java.awt.color.ICC_Profile;
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Internal-only debug class. Used for collecting extra information when parsing or modifying images or metadata. These methods are useful for troubleshooting
+ * and issue analysis, but this should not be used directly by end-users, nor extended in any way. This may change or be removed at any time.
+ */
+public final class Debug {
+
+<span class="fc" id="L39">    private static final Logger LOGGER = Logger.getLogger(Debug.class.getName());</span>
+
+    // public static String newline = System.getProperty(&quot;line.separator&quot;);
+    private static final String NEWLINE = &quot;\r\n&quot;;
+    private static long counter;
+
+    private static String byteQuadToString(final int byteQuad) {
+<span class="nc" id="L46">        final byte b1 = (byte) (byteQuad &gt;&gt; 24 &amp; 0xff);</span>
+<span class="nc" id="L47">        final byte b2 = (byte) (byteQuad &gt;&gt; 16 &amp; 0xff);</span>
+<span class="nc" id="L48">        final byte b3 = (byte) (byteQuad &gt;&gt; 8 &amp; 0xff);</span>
+<span class="nc" id="L49">        final byte b4 = (byte) (byteQuad &gt;&gt; 0 &amp; 0xff);</span>
+
+<span class="nc" id="L51">        final char c1 = (char) b1;</span>
+<span class="nc" id="L52">        final char c2 = (char) b2;</span>
+<span class="nc" id="L53">        final char c3 = (char) b3;</span>
+<span class="nc" id="L54">        final char c4 = (char) b4;</span>
+        // return new String(new char[] { c1, c2, c3, c4 });
+<span class="nc" id="L56">        final StringBuilder buffer = new StringBuilder(31);</span>
+<span class="nc" id="L57">        buffer.append(new String(new char[] { c1, c2, c3, c4 }));</span>
+<span class="nc" id="L58">        buffer.append(&quot; byteQuad: &quot;);</span>
+<span class="nc" id="L59">        buffer.append(byteQuad);</span>
+<span class="nc" id="L60">        buffer.append(&quot; b1: &quot;);</span>
+<span class="nc" id="L61">        buffer.append(b1);</span>
+<span class="nc" id="L62">        buffer.append(&quot; b2: &quot;);</span>
+<span class="nc" id="L63">        buffer.append(b2);</span>
+<span class="nc" id="L64">        buffer.append(&quot; b3: &quot;);</span>
+<span class="nc" id="L65">        buffer.append(b3);</span>
+<span class="nc" id="L66">        buffer.append(&quot; b4: &quot;);</span>
+<span class="nc" id="L67">        buffer.append(b4);</span>
+
+<span class="nc" id="L69">        return buffer.toString();</span>
+    }
+
+    public static void debug() {
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L74">            LOGGER.finest(NEWLINE);</span>
+        }
+<span class="nc" id="L76">    }</span>
+
+    public static void debug(final String message) {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L80">            LOGGER.finest(message);</span>
+        }
+<span class="fc" id="L82">    }</span>
+
+    private static void debug(final String message, final byte[] v) {
+<span class="nc" id="L85">        debug(getDebug(message, v));</span>
+<span class="nc" id="L86">    }</span>
+
+    private static void debug(final String message, final Calendar value) {
+<span class="nc" id="L89">        final DateFormat df = new SimpleDateFormat(&quot;MM/dd/yyyy HH:mm:ss&quot;, Locale.ROOT);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        debug(message, value == null ? &quot;null&quot; : df.format(value.getTime()));</span>
+<span class="nc" id="L91">    }</span>
+
+    private static void debug(final String message, final char[] v) {
+<span class="nc" id="L94">        debug(getDebug(message, v));</span>
+<span class="nc" id="L95">    }</span>
+
+    private static void debug(final String message, final Date value) {
+<span class="nc" id="L98">        final DateFormat df = new SimpleDateFormat(&quot;MM/dd/yyyy HH:mm:ss&quot;, Locale.ROOT);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        debug(message, value == null ? &quot;null&quot; : df.format(value));</span>
+<span class="nc" id="L100">    }</span>
+
+    private static void debug(final String message, final File file) {
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        debug(message + &quot;: &quot; + (file == null ? &quot;null&quot; : file.getPath()));</span>
+<span class="nc" id="L104">    }</span>
+
+    private static void debug(final String message, final ICC_Profile value) {
+<span class="nc" id="L107">        debug(&quot;ICC_Profile &quot; + message + &quot;: &quot; + Objects.toString(value));</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        if (value != null) {</span>
+<span class="nc" id="L109">            debug(&quot;\t getProfileClass: &quot; + byteQuadToString(value.getProfileClass()));</span>
+<span class="nc" id="L110">            debug(&quot;\t getPCSType: &quot; + byteQuadToString(value.getPCSType()));</span>
+<span class="nc" id="L111">            debug(&quot;\t getColorSpaceType() : &quot; + byteQuadToString(value.getColorSpaceType()));</span>
+        }
+<span class="nc" id="L113">    }</span>
+
+    private static void debug(final String message, final int[] v) {
+<span class="nc" id="L116">        debug(getDebug(message, v));</span>
+<span class="nc" id="L117">    }</span>
+
+    private static void debug(final String message, final List&lt;?&gt; v) {
+<span class="nc" id="L120">        final String suffix = &quot; [&quot; + counter++ + &quot;]&quot;;</span>
+
+<span class="nc" id="L122">        debug(message + &quot; (&quot; + v.size() + &quot;)&quot; + suffix);</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        for (final Object aV : v) {</span>
+<span class="nc" id="L124">            debug(&quot;\t&quot; + aV.toString() + suffix);</span>
+<span class="nc" id="L125">        }</span>
+<span class="nc" id="L126">        debug();</span>
+<span class="nc" id="L127">    }</span>
+
+    private static void debug(final String message, final Map&lt;?, ?&gt; map) {
+<span class="nc" id="L130">        debug(getDebug(message, map));</span>
+<span class="nc" id="L131">    }</span>
+
+    public static void debug(final String message, final Object value) {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (value == null) {</span>
+<span class="nc" id="L135">            debug(message, &quot;null&quot;);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        } else if (value instanceof char[]) {</span>
+<span class="nc" id="L137">            debug(message, (char[]) value);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        } else if (value instanceof byte[]) {</span>
+<span class="nc" id="L139">            debug(message, (byte[]) value);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        } else if (value instanceof int[]) {</span>
+<span class="nc" id="L141">            debug(message, (int[]) value);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        } else if (value instanceof String) {</span>
+<span class="nc" id="L143">            debug(message, (String) value);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        } else if (value instanceof List) {</span>
+<span class="nc" id="L145">            debug(message, (List&lt;?&gt;) value);</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        } else if (value instanceof Map) {</span>
+<span class="nc" id="L147">            debug(message, (Map&lt;?, ?&gt;) value);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        } else if (value instanceof ICC_Profile) {</span>
+<span class="nc" id="L149">            debug(message, (ICC_Profile) value);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        } else if (value instanceof File) {</span>
+<span class="nc" id="L151">            debug(message, (File) value);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        } else if (value instanceof Date) {</span>
+<span class="nc" id="L153">            debug(message, (Date) value);</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        } else if (value instanceof Calendar) {</span>
+<span class="nc" id="L155">            debug(message, (Calendar) value);</span>
+        } else {
+<span class="nc" id="L157">            debug(message, value.toString());</span>
+        }
+<span class="nc" id="L159">    }</span>
+
+    private static void debug(final String message, final String value) {
+<span class="nc" id="L162">        debug(message + &quot; &quot; + value);</span>
+<span class="nc" id="L163">    }</span>
+
+    public static void debug(final Throwable e) {
+<span class="nc" id="L166">        debug(getDebug(e));</span>
+<span class="nc" id="L167">    }</span>
+
+    public static void debug(final Throwable e, final int value) {
+<span class="nc" id="L170">        debug(getDebug(e, value));</span>
+<span class="nc" id="L171">    }</span>
+
+    private static String getDebug(final String message, final byte[] v) {
+<span class="nc" id="L174">        final int max = 250;</span>
+<span class="nc" id="L175">        return getDebug(message, v, max);</span>
+    }
+
+    private static String getDebug(final String message, final byte[] v, final int max) {
+
+<span class="nc" id="L180">        final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (v == null) {</span>
+<span class="nc" id="L183">            result.append(message + &quot; (&quot; + null + &quot;)&quot; + NEWLINE);</span>
+        } else {
+<span class="nc" id="L185">            result.append(message + &quot; (&quot; + v.length + &quot;)&quot; + NEWLINE);</span>
+<span class="nc bnc" id="L186" title="All 4 branches missed.">            for (int i = 0; i &lt; max &amp;&amp; i &lt; v.length; i++) {</span>
+<span class="nc" id="L187">                final int b = 0xff &amp; v[i];</span>
+
+                char c;
+<span class="nc bnc" id="L190" title="All 8 branches missed.">                if (b == 0 || b == 10 || b == 11 || b == 13) {</span>
+<span class="nc" id="L191">                    c = ' ';</span>
+                } else {
+<span class="nc" id="L193">                    c = (char) b;</span>
+                }
+
+<span class="nc" id="L196">                result.append(&quot;\t&quot; + i + &quot;: &quot; + b + &quot; (&quot; + c + &quot;, 0x&quot; + Integer.toHexString(b) + &quot;)&quot; + NEWLINE);</span>
+            }
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            if (v.length &gt; max) {</span>
+<span class="nc" id="L199">                result.append(&quot;\t...&quot; + NEWLINE);</span>
+            }
+
+<span class="nc" id="L202">            result.append(NEWLINE);</span>
+        }
+<span class="nc" id="L204">        return result.toString();</span>
+    }
+
+    private static String getDebug(final String message, final char[] v) {
+<span class="nc" id="L208">        final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        if (v == null) {</span>
+<span class="nc" id="L211">            result.append(message + &quot; (&quot; + null + &quot;)&quot; + NEWLINE);</span>
+        } else {
+<span class="nc" id="L213">            result.append(message + &quot; (&quot; + v.length + &quot;)&quot; + NEWLINE);</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            for (final char element : v) {</span>
+<span class="nc" id="L215">                result.append(&quot;\t&quot; + element + &quot; (&quot; + (0xff &amp; element) + &quot;)&quot; + NEWLINE);</span>
+            }
+<span class="nc" id="L217">            result.append(NEWLINE);</span>
+        }
+<span class="nc" id="L219">        return result.toString();</span>
+    }
+
+    private static String getDebug(final String message, final int[] v) {
+<span class="nc" id="L223">        final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (v == null) {</span>
+<span class="nc" id="L226">            result.append(message + &quot; (&quot; + null + &quot;)&quot; + NEWLINE);</span>
+        } else {
+<span class="nc" id="L228">            result.append(message + &quot; (&quot; + v.length + &quot;)&quot; + NEWLINE);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">            for (final int element : v) {</span>
+<span class="nc" id="L230">                result.append(&quot;\t&quot; + element + NEWLINE);</span>
+            }
+<span class="nc" id="L232">            result.append(NEWLINE);</span>
+        }
+<span class="nc" id="L234">        return result.toString();</span>
+    }
+
+    private static String getDebug(final String message, final Map&lt;?, ?&gt; map) {
+<span class="nc" id="L238">        final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        if (map == null) {</span>
+<span class="nc" id="L241">            return message + &quot; map: &quot; + null;</span>
+        }
+
+<span class="nc" id="L244">        final List&lt;Object&gt; keys = new ArrayList&lt;&gt;(map.keySet());</span>
+<span class="nc" id="L245">        result.append(message + &quot; map: &quot; + keys.size() + NEWLINE);</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        for (int i = 0; i &lt; keys.size(); i++) {</span>
+<span class="nc" id="L247">            final Object key = keys.get(i);</span>
+<span class="nc" id="L248">            final Object value = map.get(key);</span>
+<span class="nc" id="L249">            result.append(&quot;\t&quot; + i + &quot;: '&quot; + key + &quot;' -&gt; '&quot; + value + &quot;'&quot; + NEWLINE);</span>
+        }
+
+<span class="nc" id="L252">        result.append(NEWLINE);</span>
+
+<span class="nc" id="L254">        return result.toString();</span>
+    }
+
+    private static String getDebug(final Throwable e) {
+<span class="nc" id="L258">        return getDebug(e, -1);</span>
+    }
+
+    private static String getDebug(final Throwable e, final int max) {
+<span class="nc" id="L262">        final StringBuilder result = new StringBuilder(35);</span>
+
+<span class="nc" id="L264">        final SimpleDateFormat timestamp = new SimpleDateFormat(&quot;yyyy-MM-dd kk:mm:ss:SSS&quot;, Locale.ROOT);</span>
+<span class="nc" id="L265">        final String datetime = timestamp.format(new Date()).toLowerCase();</span>
+
+<span class="nc" id="L267">        result.append(NEWLINE);</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        result.append(&quot;Throwable: &quot; + (e == null ? &quot;&quot; : &quot;(&quot; + e.getClass().getName() + &quot;)&quot;) + &quot;:&quot; + datetime + NEWLINE);</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        result.append(&quot;Throwable: &quot; + (e == null ? &quot;null&quot; : e.getLocalizedMessage()) + NEWLINE);</span>
+<span class="nc" id="L270">        result.append(NEWLINE);</span>
+
+<span class="nc" id="L272">        result.append(getStackTrace(e, max));</span>
+
+<span class="nc" id="L274">        result.append(&quot;Caught here:&quot; + NEWLINE);</span>
+<span class="nc" id="L275">        result.append(getStackTrace(new Exception(), max, 1));</span>
+        // Debug.dumpStack();
+<span class="nc" id="L277">        result.append(NEWLINE);</span>
+<span class="nc" id="L278">        return result.toString();</span>
+    }
+
+    private static String getStackTrace(final Throwable e, final int limit) {
+<span class="nc" id="L282">        return getStackTrace(e, limit, 0);</span>
+    }
+
+    private static String getStackTrace(final Throwable e, final int limit, final int skip) {
+<span class="nc" id="L286">        final StringBuilder result = new StringBuilder();</span>
+
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        if (e != null) {</span>
+<span class="nc" id="L289">            final StackTraceElement[] stes = e.getStackTrace();</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">            if (stes != null) {</span>
+<span class="nc bnc" id="L291" title="All 6 branches missed.">                for (int i = skip; i &lt; stes.length &amp;&amp; (limit &lt; 0 || i &lt; limit); i++) {</span>
+<span class="nc" id="L292">                    final StackTraceElement ste = stes[i];</span>
+
+<span class="nc" id="L294">                    result.append(</span>
+<span class="nc" id="L295">                            &quot;\tat &quot; + ste.getClassName() + &quot;.&quot; + ste.getMethodName() + &quot;(&quot; + ste.getFileName() + &quot;:&quot; + ste.getLineNumber() + &quot;)&quot; + NEWLINE);</span>
+                }
+<span class="nc bnc" id="L297" title="All 4 branches missed.">                if (limit &gt;= 0 &amp;&amp; stes.length &gt; limit) {</span>
+<span class="nc" id="L298">                    result.append(&quot;\t...&quot; + NEWLINE);</span>
+                }
+            }
+
+            // e.printStackTrace(System.out);
+<span class="nc" id="L303">            result.append(NEWLINE);</span>
+        }
+
+<span class="nc" id="L306">        return result.toString();</span>
+    }
+
+    private Debug() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

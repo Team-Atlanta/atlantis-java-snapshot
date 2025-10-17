@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LongestAxisMedianCut.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.palette</a> &gt; <span class="el_source">LongestAxisMedianCut.java</span></div><h1>LongestAxisMedianCut.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.palette;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+
+<span class="nc" id="L25">public class LongestAxisMedianCut implements MedianCut {</span>
+<span class="nc" id="L26">    private static final Comparator&lt;ColorGroup&gt; COMPARATOR = (cg1, cg2) -&gt; {</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (cg1.maxDiff == cg2.maxDiff) {</span>
+<span class="nc" id="L28">            return cg2.diffTotal - cg1.diffTotal;</span>
+        }
+<span class="nc" id="L30">        return cg2.maxDiff - cg1.maxDiff;</span>
+    };
+
+    private void doCut(final ColorGroup colorGroup, final ColorComponent mode, final List&lt;ColorGroup&gt; colorGroups, final boolean ignoreAlpha)
+            throws ImagingException {
+
+<span class="nc" id="L36">        final List&lt;ColorCount&gt; colorCounts = colorGroup.getColorCounts();</span>
+<span class="nc" id="L37">        colorCounts.sort(new ColorCountComparator(mode));</span>
+<span class="nc" id="L38">        final int countHalf = (int) Math.round((double) colorGroup.totalPoints / 2);</span>
+<span class="nc" id="L39">        int oldCount = 0;</span>
+<span class="nc" id="L40">        int newCount = 0;</span>
+        int medianIndex;
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        for (medianIndex = 0; medianIndex &lt; colorCounts.size(); medianIndex++) {</span>
+<span class="nc" id="L43">            final ColorCount colorCount = colorCounts.get(medianIndex);</span>
+
+<span class="nc" id="L45">            newCount += colorCount.count;</span>
+
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if (newCount &gt;= countHalf) {</span>
+<span class="nc" id="L48">                break;</span>
+            }
+<span class="nc" id="L50">            oldCount = newCount;</span>
+        }
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (medianIndex == colorCounts.size() - 1) {</span>
+<span class="nc" id="L54">            medianIndex--;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        } else if (medianIndex &gt; 0) {</span>
+<span class="nc" id="L56">            final int newDiff = Math.abs(newCount - countHalf);</span>
+<span class="nc" id="L57">            final int oldDiff = Math.abs(countHalf - oldCount);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            if (oldDiff &lt; newDiff) {</span>
+<span class="nc" id="L59">                medianIndex--;</span>
+            }
+        }
+
+<span class="nc" id="L63">        colorGroups.remove(colorGroup);</span>
+<span class="nc" id="L64">        final List&lt;ColorCount&gt; colorCounts1 = new ArrayList&lt;&gt;(colorCounts.subList(0, medianIndex + 1));</span>
+<span class="nc" id="L65">        final List&lt;ColorCount&gt; colorCounts2 = new ArrayList&lt;&gt;(colorCounts.subList(medianIndex + 1, colorCounts.size()));</span>
+
+<span class="nc" id="L67">        final ColorGroup less = new ColorGroup(new ArrayList&lt;&gt;(colorCounts1), ignoreAlpha);</span>
+<span class="nc" id="L68">        colorGroups.add(less);</span>
+<span class="nc" id="L69">        final ColorGroup more = new ColorGroup(new ArrayList&lt;&gt;(colorCounts2), ignoreAlpha);</span>
+<span class="nc" id="L70">        colorGroups.add(more);</span>
+
+<span class="nc" id="L72">        final ColorCount medianValue = colorCounts.get(medianIndex);</span>
+        int limit;
+<span class="nc bnc" id="L74" title="All 5 branches missed.">        switch (mode) {</span>
+        case ALPHA:
+<span class="nc" id="L76">            limit = medianValue.alpha;</span>
+<span class="nc" id="L77">            break;</span>
+        case RED:
+<span class="nc" id="L79">            limit = medianValue.red;</span>
+<span class="nc" id="L80">            break;</span>
+        case GREEN:
+<span class="nc" id="L82">            limit = medianValue.green;</span>
+<span class="nc" id="L83">            break;</span>
+        case BLUE:
+<span class="nc" id="L85">            limit = medianValue.blue;</span>
+<span class="nc" id="L86">            break;</span>
+        default:
+<span class="nc" id="L88">            throw new IllegalArgumentException(&quot;Bad mode &quot; + mode);</span>
+        }
+<span class="nc" id="L90">        colorGroup.cut = new ColorGroupCut(less, more, mode, limit);</span>
+<span class="nc" id="L91">    }</span>
+
+    @Override
+    public boolean performNextMedianCut(final List&lt;ColorGroup&gt; colorGroups, final boolean ignoreAlpha) throws ImagingException {
+<span class="nc" id="L95">        colorGroups.sort(COMPARATOR);</span>
+<span class="nc" id="L96">        final ColorGroup colorGroup = colorGroups.get(0);</span>
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (colorGroup.maxDiff == 0) {</span>
+<span class="nc" id="L99">            return false;</span>
+        }
+<span class="nc bnc" id="L101" title="All 8 branches missed.">        if (!ignoreAlpha &amp;&amp; colorGroup.alphaDiff &gt; colorGroup.redDiff &amp;&amp; colorGroup.alphaDiff &gt; colorGroup.greenDiff</span>
+                &amp;&amp; colorGroup.alphaDiff &gt; colorGroup.blueDiff) {
+<span class="nc" id="L103">            doCut(colorGroup, ColorComponent.ALPHA, colorGroups, ignoreAlpha);</span>
+<span class="nc bnc" id="L104" title="All 4 branches missed.">        } else if (colorGroup.redDiff &gt; colorGroup.greenDiff &amp;&amp; colorGroup.redDiff &gt; colorGroup.blueDiff) {</span>
+<span class="nc" id="L105">            doCut(colorGroup, ColorComponent.RED, colorGroups, ignoreAlpha);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        } else if (colorGroup.greenDiff &gt; colorGroup.blueDiff) {</span>
+<span class="nc" id="L107">            doCut(colorGroup, ColorComponent.GREEN, colorGroups, ignoreAlpha);</span>
+        } else {
+<span class="nc" id="L109">            doCut(colorGroup, ColorComponent.BLUE, colorGroups, ignoreAlpha);</span>
+        }
+<span class="nc" id="L111">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

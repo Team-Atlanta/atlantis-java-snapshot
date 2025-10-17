@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffImageMetadata.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffImageMetadata.java</span></div><h1>TiffImageMetadata.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.GenericImageMetadata;
+import org.apache.commons.imaging.common.RationalNumber;
+import org.apache.commons.imaging.formats.tiff.constants.GpsTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryType;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoByte;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoDoubles;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoFloats;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoGpsText;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLongs;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRationals;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSBytes;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSLongs;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSRationals;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSShorts;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShorts;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoXpString;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputField;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
+
+public class TiffImageMetadata extends GenericImageMetadata {
+    public static class Directory extends GenericImageMetadata implements ImageMetadataItem {
+        // private BufferedImage thumbnail;
+
+        public final int type;
+
+        private final TiffDirectory directory;
+        private final ByteOrder byteOrder;
+
+<span class="nc" id="L59">        public Directory(final ByteOrder byteOrder, final TiffDirectory directory) {</span>
+<span class="nc" id="L60">            this.type = directory.type;</span>
+<span class="nc" id="L61">            this.directory = directory;</span>
+<span class="nc" id="L62">            this.byteOrder = byteOrder;</span>
+<span class="nc" id="L63">        }</span>
+
+        public void add(final TiffField entry) {
+<span class="nc" id="L66">            add(new TiffMetadataItem(entry));</span>
+<span class="nc" id="L67">        }</span>
+
+        public TiffField findField(final TagInfo tagInfo) throws ImagingException {
+<span class="nc" id="L70">            return directory.findField(tagInfo);</span>
+        }
+
+        public List&lt;TiffField&gt; getAllFields() {
+<span class="nc" id="L74">            return directory.getDirectoryEntries();</span>
+        }
+
+        public JpegImageData getJpegImageData() {
+<span class="nc" id="L78">            return directory.getJpegImageData();</span>
+        }
+
+        public TiffOutputDirectory getOutputDirectory(final ByteOrder byteOrder) throws ImagingException {
+            try {
+<span class="nc" id="L83">                final TiffOutputDirectory dstDir = new TiffOutputDirectory(type, byteOrder);</span>
+
+<span class="nc" id="L85">                final List&lt;? extends ImageMetadataItem&gt; entries = getItems();</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                for (final ImageMetadataItem entry : entries) {</span>
+<span class="nc" id="L87">                    final TiffMetadataItem item = (TiffMetadataItem) entry;</span>
+<span class="nc" id="L88">                    final TiffField srcField = item.getTiffField();</span>
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                    if (null != dstDir.findField(srcField.getTag())) {</span>
+                        // ignore duplicate tags in a directory.
+<span class="nc" id="L92">                        continue;</span>
+                    }
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                    if (srcField.getTagInfo().isOffset()) {</span>
+                        // ignore offset fields.
+<span class="nc" id="L96">                        continue;</span>
+                    }
+
+<span class="nc" id="L99">                    final TagInfo tagInfo = srcField.getTagInfo();</span>
+<span class="nc" id="L100">                    final AbstractFieldType abstractFieldType = srcField.getFieldType();</span>
+                    // byte[] bytes = srcField.fieldType.getRawBytes(srcField);
+
+                    // Debug.debug(&quot;tagInfo&quot;, tagInfo);
+
+<span class="nc" id="L105">                    final Object value = srcField.getValue();</span>
+
+                    // Debug.debug(&quot;value&quot;, Debug.getType(value));
+
+<span class="nc" id="L109">                    final byte[] bytes = tagInfo.encodeValue(abstractFieldType, value, byteOrder);</span>
+
+                    // if (tagInfo.isUnknown())
+                    // Debug.debug(
+                    // &quot;\t&quot; + &quot;unknown tag(0x&quot;
+                    // + Integer.toHexString(srcField.tag)
+                    // + &quot;) bytes&quot;, bytes);
+
+<span class="nc" id="L117">                    final int count = bytes.length / abstractFieldType.getSize();</span>
+<span class="nc" id="L118">                    final TiffOutputField dstField = new TiffOutputField(srcField.getTag(), tagInfo, abstractFieldType, count, bytes);</span>
+<span class="nc" id="L119">                    dstField.setSortHint(srcField.getSortHint());</span>
+<span class="nc" id="L120">                    dstDir.add(dstField);</span>
+<span class="nc" id="L121">                }</span>
+
+<span class="nc" id="L123">                dstDir.setTiffImageData(getTiffImageData());</span>
+<span class="nc" id="L124">                dstDir.setJpegImageData(getJpegImageData());</span>
+
+<span class="nc" id="L126">                return dstDir;</span>
+<span class="nc" id="L127">            } catch (final ImagingException e) {</span>
+<span class="nc" id="L128">                throw new ImagingException(e.getMessage(), e);</span>
+            }
+        }
+
+        public BufferedImage getThumbnail() throws ImagingException, IOException {
+<span class="nc" id="L133">            return directory.getTiffImage(byteOrder);</span>
+        }
+
+        public AbstractTiffImageData getTiffImageData() {
+<span class="nc" id="L137">            return directory.getTiffImageData();</span>
+        }
+
+        @Override
+        public String toString(final String prefix) {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">            return (prefix != null ? prefix : &quot;&quot;) + directory.description() + &quot;: &quot; //</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">                    + (getTiffImageData() != null ? &quot; (tiffImageData)&quot; : &quot;&quot;) //</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                    + (getJpegImageData() != null ? &quot; (jpegImageData)&quot; : &quot;&quot;) //</span>
+<span class="nc" id="L145">                    + &quot;\n&quot; + super.toString(prefix) + &quot;\n&quot;;</span>
+        }
+
+    }
+
+    public static class GpsInfo {
+        public final String latitudeRef;
+        public final String longitudeRef;
+
+        public final RationalNumber latitudeDegrees;
+        public final RationalNumber latitudeMinutes;
+        public final RationalNumber latitudeSeconds;
+        public final RationalNumber longitudeDegrees;
+        public final RationalNumber longitudeMinutes;
+        public final RationalNumber longitudeSeconds;
+
+        public GpsInfo(final String latitudeRef, final String longitudeRef, final RationalNumber latitudeDegrees, final RationalNumber latitudeMinutes,
+                final RationalNumber latitudeSeconds, final RationalNumber longitudeDegrees, final RationalNumber longitudeMinutes,
+<span class="nc" id="L163">                final RationalNumber longitudeSeconds) {</span>
+<span class="nc" id="L164">            this.latitudeRef = latitudeRef;</span>
+<span class="nc" id="L165">            this.longitudeRef = longitudeRef;</span>
+<span class="nc" id="L166">            this.latitudeDegrees = latitudeDegrees;</span>
+<span class="nc" id="L167">            this.latitudeMinutes = latitudeMinutes;</span>
+<span class="nc" id="L168">            this.latitudeSeconds = latitudeSeconds;</span>
+<span class="nc" id="L169">            this.longitudeDegrees = longitudeDegrees;</span>
+<span class="nc" id="L170">            this.longitudeMinutes = longitudeMinutes;</span>
+<span class="nc" id="L171">            this.longitudeSeconds = longitudeSeconds;</span>
+<span class="nc" id="L172">        }</span>
+
+        public double getLatitudeAsDegreesNorth() throws ImagingException {
+<span class="nc" id="L175">            final double result = latitudeDegrees.doubleValue() + latitudeMinutes.doubleValue() / 60.0 + latitudeSeconds.doubleValue() / 3600.0;</span>
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            if (latitudeRef.trim().equalsIgnoreCase(&quot;n&quot;)) {</span>
+<span class="nc" id="L178">                return result;</span>
+            }
+<span class="nc bnc" id="L180" title="All 2 branches missed.">            if (latitudeRef.trim().equalsIgnoreCase(&quot;s&quot;)) {</span>
+<span class="nc" id="L181">                return -result;</span>
+            }
+<span class="nc" id="L183">            throw new ImagingException(&quot;Unknown latitude ref: \&quot;&quot; + latitudeRef + &quot;\&quot;&quot;);</span>
+        }
+
+        public double getLongitudeAsDegreesEast() throws ImagingException {
+<span class="nc" id="L187">            final double result = longitudeDegrees.doubleValue() + longitudeMinutes.doubleValue() / 60.0 + longitudeSeconds.doubleValue() / 3600.0;</span>
+
+<span class="nc bnc" id="L189" title="All 2 branches missed.">            if (longitudeRef.trim().equalsIgnoreCase(&quot;e&quot;)) {</span>
+<span class="nc" id="L190">                return result;</span>
+            }
+<span class="nc bnc" id="L192" title="All 2 branches missed.">            if (longitudeRef.trim().equalsIgnoreCase(&quot;w&quot;)) {</span>
+<span class="nc" id="L193">                return -result;</span>
+            }
+<span class="nc" id="L195">            throw new ImagingException(&quot;Unknown longitude ref: \&quot;&quot; + longitudeRef + &quot;\&quot;&quot;);</span>
+        }
+
+        @Override
+        public String toString() {
+            // This will format the gps info like so:
+            //
+            // latitude: 8 degrees, 40 minutes, 42.2 seconds S
+            // longitude: 115 degrees, 26 minutes, 21.8 seconds E
+
+<span class="nc" id="L205">            return &quot;[GPS. Latitude: &quot; + latitudeDegrees.toDisplayString() + &quot; degrees, &quot; + latitudeMinutes.toDisplayString() + &quot; minutes, &quot;</span>
+<span class="nc" id="L206">                    + latitudeSeconds.toDisplayString() + &quot; seconds &quot; + latitudeRef + &quot;, Longitude: &quot; + longitudeDegrees.toDisplayString() + &quot; degrees, &quot;</span>
+<span class="nc" id="L207">                    + longitudeMinutes.toDisplayString() + &quot; minutes, &quot; + longitudeSeconds.toDisplayString() + &quot; seconds &quot; + longitudeRef + ']';</span>
+        }
+
+    }
+
+    public static class TiffMetadataItem extends GenericImageMetadataItem {
+        private final TiffField entry;
+
+        public TiffMetadataItem(final TiffField entry) {
+            // super(entry.getTagName() + &quot; (&quot; + entry.getFieldTypeName() + &quot;)&quot;,
+<span class="nc" id="L217">            super(entry.getTagName(), entry.getValueDescription());</span>
+<span class="nc" id="L218">            this.entry = entry;</span>
+<span class="nc" id="L219">        }</span>
+
+        public TiffField getTiffField() {
+<span class="nc" id="L222">            return entry;</span>
+        }
+
+    }
+
+    public final TiffContents contents;
+
+<span class="nc" id="L229">    public TiffImageMetadata(final TiffContents contents) {</span>
+<span class="nc" id="L230">        this.contents = contents;</span>
+<span class="nc" id="L231">    }</span>
+
+    public TiffDirectory findDirectory(final int directoryType) {
+<span class="nc" id="L234">        final List&lt;? extends ImageMetadataItem&gt; directories = getDirectories();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        for (final ImageMetadataItem directory1 : directories) {</span>
+<span class="nc" id="L236">            final Directory directory = (Directory) directory1;</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">            if (directory.type == directoryType) {</span>
+<span class="nc" id="L238">                return directory.directory;</span>
+            }
+<span class="nc" id="L240">        }</span>
+<span class="nc" id="L241">        return null;</span>
+    }
+
+    public TiffField findField(final TagInfo tagInfo) throws ImagingException {
+<span class="nc" id="L245">        return findField(tagInfo, false);</span>
+    }
+
+    public TiffField findField(final TagInfo tagInfo, final boolean exactDirectoryMatch) throws ImagingException {
+        // Please keep this method in sync with TiffField's getTag()
+<span class="nc" id="L250">        final Integer tagCount = TiffTags.getTagCount(tagInfo.tag);</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">        final int tagsMatching = tagCount == null ? 0 : tagCount;</span>
+
+<span class="nc" id="L253">        final List&lt;? extends ImageMetadataItem&gt; directories = getDirectories();</span>
+<span class="nc bnc" id="L254" title="All 4 branches missed.">        if (exactDirectoryMatch || tagInfo.directoryType != TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN) {</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            for (final ImageMetadataItem directory1 : directories) {</span>
+<span class="nc" id="L256">                final Directory directory = (Directory) directory1;</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                if (directory.type == tagInfo.directoryType.directoryType) {</span>
+<span class="nc" id="L258">                    final TiffField field = directory.findField(tagInfo);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                    if (field != null) {</span>
+<span class="nc" id="L260">                        return field;</span>
+                    }
+                }
+<span class="nc" id="L263">            }</span>
+<span class="nc bnc" id="L264" title="All 4 branches missed.">            if (exactDirectoryMatch || tagsMatching &gt; 1) {</span>
+<span class="nc" id="L265">                return null;</span>
+            }
+<span class="nc bnc" id="L267" title="All 2 branches missed.">            for (final ImageMetadataItem directory1 : directories) {</span>
+<span class="nc" id="L268">                final Directory directory = (Directory) directory1;</span>
+<span class="nc bnc" id="L269" title="All 8 branches missed.">                if (tagInfo.directoryType.isImageDirectory() &amp;&amp; directory.type &gt;= 0 || !tagInfo.directoryType.isImageDirectory() &amp;&amp; directory.type &lt; 0) {</span>
+<span class="nc" id="L270">                    final TiffField field = directory.findField(tagInfo);</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                    if (field != null) {</span>
+<span class="nc" id="L272">                        return field;</span>
+                    }
+                }
+<span class="nc" id="L275">            }</span>
+        }
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        for (final ImageMetadataItem directory1 : directories) {</span>
+<span class="nc" id="L279">            final Directory directory = (Directory) directory1;</span>
+<span class="nc" id="L280">            final TiffField field = directory.findField(tagInfo);</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">            if (field != null) {</span>
+<span class="nc" id="L282">                return field;</span>
+            }
+<span class="nc" id="L284">        }</span>
+
+<span class="nc" id="L286">        return null;</span>
+    }
+
+    public List&lt;TiffField&gt; getAllFields() {
+<span class="nc" id="L290">        final List&lt;TiffField&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L291">        final List&lt;? extends ImageMetadataItem&gt; directories = getDirectories();</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        for (final ImageMetadataItem directory1 : directories) {</span>
+<span class="nc" id="L293">            final Directory directory = (Directory) directory1;</span>
+<span class="nc" id="L294">            result.addAll(directory.getAllFields());</span>
+<span class="nc" id="L295">        }</span>
+<span class="nc" id="L296">        return result;</span>
+    }
+
+    public List&lt;? extends ImageMetadataItem&gt; getDirectories() {
+<span class="nc" id="L300">        return super.getItems();</span>
+    }
+
+    public Object getFieldValue(final TagInfo tag) throws ImagingException {
+<span class="nc" id="L304">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L306">            return null;</span>
+        }
+<span class="nc" id="L308">        return field.getValue();</span>
+    }
+
+    public String[] getFieldValue(final TagInfoAscii tag) throws ImagingException {
+<span class="nc" id="L312">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L314">            return null;</span>
+        }
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L317">            return null;</span>
+        }
+<span class="nc" id="L319">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L320">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public byte[] getFieldValue(final TagInfoByte tag) throws ImagingException {
+<span class="nc" id="L324">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L326">            return null;</span>
+        }
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L329">            return null;</span>
+        }
+<span class="nc" id="L331">        return field.getByteArrayValue();</span>
+    }
+
+    public double[] getFieldValue(final TagInfoDoubles tag) throws ImagingException {
+<span class="nc" id="L335">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L337">            return null;</span>
+        }
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L340">            return null;</span>
+        }
+<span class="nc" id="L342">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L343">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public float[] getFieldValue(final TagInfoFloats tag) throws ImagingException {
+<span class="nc" id="L347">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L349">            return null;</span>
+        }
+<span class="nc bnc" id="L351" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L352">            return null;</span>
+        }
+<span class="nc" id="L354">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L355">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public String getFieldValue(final TagInfoGpsText tag) throws ImagingException {
+<span class="nc" id="L359">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L361">            return null;</span>
+        }
+<span class="nc" id="L363">        return tag.getValue(field);</span>
+    }
+
+    public int[] getFieldValue(final TagInfoLongs tag) throws ImagingException {
+<span class="nc" id="L367">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L369">            return null;</span>
+        }
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L372">            return null;</span>
+        }
+<span class="nc" id="L374">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L375">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public RationalNumber[] getFieldValue(final TagInfoRationals tag) throws ImagingException {
+<span class="nc" id="L379">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L381">            return null;</span>
+        }
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L384">            return null;</span>
+        }
+<span class="nc" id="L386">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L387">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public byte[] getFieldValue(final TagInfoSBytes tag) throws ImagingException {
+<span class="nc" id="L391">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L393">            return null;</span>
+        }
+<span class="nc bnc" id="L395" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L396">            return null;</span>
+        }
+<span class="nc" id="L398">        return field.getByteArrayValue();</span>
+    }
+
+    public short[] getFieldValue(final TagInfoShorts tag) throws ImagingException {
+<span class="nc" id="L402">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L404">            return null;</span>
+        }
+<span class="nc bnc" id="L406" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L407">            return null;</span>
+        }
+<span class="nc" id="L409">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L410">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public int[] getFieldValue(final TagInfoSLongs tag) throws ImagingException {
+<span class="nc" id="L414">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L416">            return null;</span>
+        }
+<span class="nc bnc" id="L418" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L419">            return null;</span>
+        }
+<span class="nc" id="L421">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L422">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public RationalNumber[] getFieldValue(final TagInfoSRationals tag) throws ImagingException {
+<span class="nc" id="L426">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L428">            return null;</span>
+        }
+<span class="nc bnc" id="L430" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L431">            return null;</span>
+        }
+<span class="nc" id="L433">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L434">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public short[] getFieldValue(final TagInfoSShorts tag) throws ImagingException {
+<span class="nc" id="L438">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L440">            return null;</span>
+        }
+<span class="nc bnc" id="L442" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L443">            return null;</span>
+        }
+<span class="nc" id="L445">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L446">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public String getFieldValue(final TagInfoXpString tag) throws ImagingException {
+<span class="nc" id="L450">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L452">            return null;</span>
+        }
+<span class="nc" id="L454">        return tag.getValue(field);</span>
+    }
+
+    public GpsInfo getGpsInfo() throws ImagingException {
+<span class="nc" id="L458">        final TiffDirectory gpsDirectory = findDirectory(TiffDirectoryConstants.DIRECTORY_TYPE_GPS);</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">        if (null == gpsDirectory) {</span>
+<span class="nc" id="L460">            return null;</span>
+        }
+
+        // more specific example of how to access GPS values.
+<span class="nc" id="L464">        final TiffField latitudeRefField = gpsDirectory.findField(GpsTagConstants.GPS_TAG_GPS_LATITUDE_REF);</span>
+<span class="nc" id="L465">        final TiffField latitudeField = gpsDirectory.findField(GpsTagConstants.GPS_TAG_GPS_LATITUDE);</span>
+<span class="nc" id="L466">        final TiffField longitudeRefField = gpsDirectory.findField(GpsTagConstants.GPS_TAG_GPS_LONGITUDE_REF);</span>
+<span class="nc" id="L467">        final TiffField longitudeField = gpsDirectory.findField(GpsTagConstants.GPS_TAG_GPS_LONGITUDE);</span>
+
+<span class="nc bnc" id="L469" title="All 8 branches missed.">        if (latitudeRefField == null || latitudeField == null || longitudeRefField == null || longitudeField == null) {</span>
+<span class="nc" id="L470">            return null;</span>
+        }
+
+        // all of these values are strings.
+<span class="nc" id="L474">        final String latitudeRef = latitudeRefField.getStringValue();</span>
+<span class="nc" id="L475">        final RationalNumber[] latitude = (RationalNumber[]) latitudeField.getValue();</span>
+<span class="nc" id="L476">        final String longitudeRef = longitudeRefField.getStringValue();</span>
+<span class="nc" id="L477">        final RationalNumber[] longitude = (RationalNumber[]) longitudeField.getValue();</span>
+
+<span class="nc bnc" id="L479" title="All 4 branches missed.">        if (latitude.length != 3 || longitude.length != 3) {</span>
+<span class="nc" id="L480">            throw new ImagingException(&quot;Expected three values for latitude and longitude.&quot;);</span>
+        }
+
+<span class="nc" id="L483">        final RationalNumber latitudeDegrees = latitude[0];</span>
+<span class="nc" id="L484">        final RationalNumber latitudeMinutes = latitude[1];</span>
+<span class="nc" id="L485">        final RationalNumber latitudeSeconds = latitude[2];</span>
+
+<span class="nc" id="L487">        final RationalNumber longitudeDegrees = longitude[0];</span>
+<span class="nc" id="L488">        final RationalNumber longitudeMinutes = longitude[1];</span>
+<span class="nc" id="L489">        final RationalNumber longitudeSeconds = longitude[2];</span>
+
+<span class="nc" id="L491">        return new GpsInfo(latitudeRef, longitudeRef, latitudeDegrees, latitudeMinutes, latitudeSeconds, longitudeDegrees, longitudeMinutes, longitudeSeconds);</span>
+    }
+
+    @Override
+    public List&lt;? extends ImageMetadataItem&gt; getItems() {
+<span class="nc" id="L496">        final List&lt;ImageMetadataItem&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L498">        final List&lt;? extends ImageMetadataItem&gt; items = super.getItems();</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">        for (final ImageMetadataItem item : items) {</span>
+<span class="nc" id="L500">            final Directory dir = (Directory) item;</span>
+<span class="nc" id="L501">            result.addAll(dir.getItems());</span>
+<span class="nc" id="L502">        }</span>
+
+<span class="nc" id="L504">        return result;</span>
+    }
+
+    public TiffOutputSet getOutputSet() throws ImagingException {
+<span class="nc" id="L508">        final ByteOrder byteOrder = contents.header.byteOrder;</span>
+<span class="nc" id="L509">        final TiffOutputSet result = new TiffOutputSet(byteOrder);</span>
+
+<span class="nc" id="L511">        final List&lt;? extends ImageMetadataItem&gt; srcDirs = getDirectories();</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        for (final ImageMetadataItem srcDir1 : srcDirs) {</span>
+<span class="nc" id="L513">            final Directory srcDir = (Directory) srcDir1;</span>
+
+<span class="nc bnc" id="L515" title="All 2 branches missed.">            if (null != result.findDirectory(srcDir.type)) {</span>
+                // Certain cameras right directories more than once.
+                // This is a bug.
+                // Ignore second directory of a given type.
+<span class="nc" id="L519">                continue;</span>
+            }
+
+<span class="nc" id="L522">            final TiffOutputDirectory outputDirectory = srcDir.getOutputDirectory(byteOrder);</span>
+<span class="nc" id="L523">            result.addDirectory(outputDirectory);</span>
+<span class="nc" id="L524">        }</span>
+
+<span class="nc" id="L526">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

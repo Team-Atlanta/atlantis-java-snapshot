@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PsdImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.psd</a> &gt; <span class="el_source">PsdImageParser.java</span></div><h1>PsdImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.psd;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readAndVerifyBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.skipBytes;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.common.XmpEmbeddable;
+import org.apache.commons.imaging.common.XmpImagingParameters;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParser;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParserBitmap;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParserCmyk;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParserGrayscale;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParserIndexed;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParserLab;
+import org.apache.commons.imaging.formats.psd.dataparsers.DataParserRgb;
+import org.apache.commons.imaging.formats.psd.datareaders.CompressedDataReader;
+import org.apache.commons.imaging.formats.psd.datareaders.DataReader;
+import org.apache.commons.imaging.formats.psd.datareaders.UncompressedDataReader;
+
+<span class="fc" id="L56">public class PsdImageParser extends AbstractImageParser&lt;PsdImagingParameters&gt; implements XmpEmbeddable {</span>
+
+<span class="fc" id="L58">    private static final String DEFAULT_EXTENSION = ImageFormats.PSD.getDefaultExtension();</span>
+<span class="fc" id="L59">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.PSD.getExtensions();</span>
+    private static final int PSD_SECTION_HEADER = 0;
+    private static final int PSD_SECTION_COLOR_MODE = 1;
+    private static final int PSD_SECTION_IMAGE_RESOURCES = 2;
+    private static final int PSD_SECTION_LAYER_AND_MASK_DATA = 3;
+    private static final int PSD_SECTION_IMAGE_DATA = 4;
+    private static final int PSD_HEADER_LENGTH = 26;
+    private static final int COLOR_MODE_INDEXED = 2;
+    public static final int IMAGE_RESOURCE_ID_ICC_PROFILE = 0x040F;
+    public static final int IMAGE_RESOURCE_ID_XMP = 0x0424;
+    public static final String BLOCK_NAME_XMP = &quot;XMP&quot;;
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L73">        pw.println(&quot;gif.dumpImageFile&quot;);</span>
+
+<span class="nc" id="L75">        final ImageInfo fImageData = getImageInfo(byteSource);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (fImageData == null) {</span>
+<span class="nc" id="L77">            return false;</span>
+        }
+
+<span class="nc" id="L80">        fImageData.toString(pw, &quot;&quot;);</span>
+<span class="nc" id="L81">        final PsdImageContents imageContents = readImageContents(byteSource);</span>
+
+<span class="nc" id="L83">        imageContents.dump(pw);</span>
+<span class="nc" id="L84">        imageContents.header.dump(pw);</span>
+
+<span class="nc" id="L86">        final List&lt;ImageResourceBlock&gt; blocks = readImageResourceBlocks(byteSource,</span>
+                // fImageContents.ImageResources,
+                null, -1);
+
+<span class="nc" id="L90">        pw.println(&quot;blocks.size(): &quot; + blocks.size());</span>
+
+        // System.out.println(&quot;gif.blocks: &quot; + blocks.blocks.size());
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        for (int i = 0; i &lt; blocks.size(); i++) {</span>
+<span class="nc" id="L94">            final ImageResourceBlock block = blocks.get(i);</span>
+<span class="nc" id="L95">            pw.println(&quot;\t&quot; + i + &quot; (&quot; + Integer.toHexString(block.id) + &quot;, &quot; + &quot;'&quot; + new String(block.nameData, StandardCharsets.ISO_8859_1) + &quot;' (&quot;</span>
+                    + block.nameData.length + &quot;), &quot;
+                    // + block.getClass().getName()
+                    // + &quot;, &quot;
+<span class="nc" id="L99">                    + &quot; data: &quot; + block.data.length + &quot; type: '&quot; + ImageResourceType.getDescription(block.id) + &quot;' &quot; + &quot;)&quot;);</span>
+        }
+
+<span class="nc" id="L102">        pw.println(&quot;&quot;);</span>
+
+<span class="nc" id="L104">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L109">        return ACCEPTED_EXTENSIONS.clone();</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L114">        return new ImageFormat[] { ImageFormats.PSD, //</span>
+        };
+    }
+
+    @Override
+    public BufferedImage getBufferedImage(final ByteSource byteSource, final PsdImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L120">        final PsdImageContents imageContents = readImageContents(byteSource);</span>
+        // ImageContents imageContents = readImage(byteSource, false);
+
+<span class="nc" id="L123">        final PsdHeaderInfo header = imageContents.header;</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if (header == null) {</span>
+<span class="nc" id="L125">            throw new ImagingException(&quot;PSD: Couldn't read Header&quot;);</span>
+        }
+
+        // ImageDescriptor id = (ImageDescriptor)
+        // findBlock(fImageContents.blocks,
+        // kImageSeperator);
+        // if (id == null)
+        // throw new ImageReadException(&quot;PSD: Couldn't read Image Descriptor&quot;);
+        // GraphicControlExtension gce = (GraphicControlExtension) findBlock(
+        // fImageContents.blocks, kGraphicControlExtension);
+
+<span class="nc" id="L136">        readImageResourceBlocks(byteSource,</span>
+                // fImageContents.ImageResources,
+                null, -1);
+
+<span class="nc" id="L140">        final int width = header.columns;</span>
+<span class="nc" id="L141">        final int height = header.rows;</span>
+        // int height = header.Columns;
+
+        // int transfer_type;
+
+        // transfer_type = DataBuffer.TYPE_BYTE;
+
+<span class="nc" id="L148">        final boolean hasAlpha = false;</span>
+<span class="nc" id="L149">        final BufferedImage result = getBufferedImageFactory(params).getColorBufferedImage(width, height, hasAlpha);</span>
+
+        DataParser dataParser;
+<span class="nc bnc" id="L152" title="All 7 branches missed.">        switch (imageContents.header.mode) {</span>
+        case 0: // bitmap
+<span class="nc" id="L154">            dataParser = new DataParserBitmap();</span>
+<span class="nc" id="L155">            break;</span>
+        case 1:
+        case 8: // Duotone=8;
+<span class="nc" id="L158">            dataParser = new DataParserGrayscale();</span>
+<span class="nc" id="L159">            break;</span>
+        case 3:
+<span class="nc" id="L161">            dataParser = new DataParserRgb();</span>
+<span class="nc" id="L162">            break;</span>
+        case 4:
+<span class="nc" id="L164">            dataParser = new DataParserCmyk();</span>
+<span class="nc" id="L165">            break;</span>
+        case 9:
+<span class="nc" id="L167">            dataParser = new DataParserLab();</span>
+<span class="nc" id="L168">            break;</span>
+        case COLOR_MODE_INDEXED: {
+            // case 2 : // Indexed=2;
+<span class="nc" id="L171">            final byte[] ColorModeData = getData(byteSource, PSD_SECTION_COLOR_MODE);</span>
+
+            // ImageResourceBlock block = findImageResourceBlock(blocks,
+            // 0x03EB);
+            // if (block == null)
+            // throw new ImageReadException(
+            // &quot;Missing: Indexed Color Image Resource Block&quot;);
+
+<span class="nc" id="L179">            dataParser = new DataParserIndexed(ColorModeData);</span>
+<span class="nc" id="L180">            break;</span>
+        }
+        case 7: // Multichannel=7;
+            // fDataParser = new DataParserStub();
+            // break;
+
+            // case 1 :
+            // fDataReader = new CompressedDataReader();
+            // break;
+        default:
+<span class="nc" id="L190">            throw new ImagingException(&quot;Unknown Mode: &quot; + imageContents.header.mode);</span>
+        }
+        DataReader fDataReader;
+<span class="nc bnc" id="L193" title="All 3 branches missed.">        switch (imageContents.compression) {</span>
+        case 0:
+<span class="nc" id="L195">            fDataReader = new UncompressedDataReader(dataParser);</span>
+<span class="nc" id="L196">            break;</span>
+        case 1:
+<span class="nc" id="L198">            fDataReader = new CompressedDataReader(dataParser);</span>
+<span class="nc" id="L199">            break;</span>
+        default:
+<span class="nc" id="L201">            throw new ImagingException(&quot;Unknown Compression: &quot; + imageContents.compression);</span>
+        }
+
+<span class="nc" id="L204">        try (InputStream is = getInputStream(byteSource, PSD_SECTION_IMAGE_DATA)) {</span>
+<span class="nc" id="L205">            fDataReader.readData(is, result, imageContents, this);</span>
+
+            // is.
+            // ImageContents imageContents = readImageContents(is);
+            // return imageContents;
+        }
+
+<span class="nc" id="L212">        return result;</span>
+
+    }
+
+    private int getChannelsPerMode(final int mode) {
+<span class="nc bnc" id="L217" title="All 9 branches missed.">        switch (mode) {</span>
+        case 0: // Bitmap
+<span class="nc" id="L219">            return 1;</span>
+        case 1: // Grayscale
+<span class="nc" id="L221">            return 1;</span>
+        case 2: // Indexed
+<span class="nc" id="L223">            return -1;</span>
+        case 3: // RGB
+<span class="nc" id="L225">            return 3;</span>
+        case 4: // CMYK
+<span class="nc" id="L227">            return 4;</span>
+        case 7: // Multichannel
+<span class="nc" id="L229">            return -1;</span>
+        case 8: // Duotone
+<span class="nc" id="L231">            return -1;</span>
+        case 9: // Lab
+<span class="nc" id="L233">            return 4;</span>
+        default:
+<span class="nc" id="L235">            return -1;</span>
+
+        }
+    }
+
+    private byte[] getData(final ByteSource byteSource, final int section) throws ImagingException, IOException {
+<span class="nc" id="L241">        try (InputStream is = byteSource.getInputStream()) {</span>
+            // PsdHeaderInfo header = readHeader(is);
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if (section == PSD_SECTION_HEADER) {</span>
+<span class="nc" id="L244">                return readBytes(&quot;Header&quot;, is, PSD_HEADER_LENGTH, &quot;Not a Valid PSD File&quot;);</span>
+            }
+<span class="nc" id="L246">            skipBytes(is, PSD_HEADER_LENGTH);</span>
+
+<span class="nc" id="L248">            final int colorModeDataLength = read4Bytes(&quot;ColorModeDataLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            if (section == PSD_SECTION_COLOR_MODE) {</span>
+<span class="nc" id="L251">                return readBytes(&quot;ColorModeData&quot;, is, colorModeDataLength, &quot;Not a Valid PSD File&quot;);</span>
+            }
+
+<span class="nc" id="L254">            skipBytes(is, colorModeDataLength);</span>
+            // byte[] ColorModeData = readByteArray(&quot;ColorModeData&quot;,
+            // ColorModeDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L258">            final int imageResourcesLength = read4Bytes(&quot;ImageResourcesLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L260" title="All 2 branches missed.">            if (section == PSD_SECTION_IMAGE_RESOURCES) {</span>
+<span class="nc" id="L261">                return readBytes(&quot;ImageResources&quot;, is, imageResourcesLength, &quot;Not a Valid PSD File&quot;);</span>
+            }
+
+<span class="nc" id="L264">            skipBytes(is, imageResourcesLength);</span>
+            // byte[] ImageResources = readByteArray(&quot;ImageResources&quot;,
+            // ImageResourcesLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L268">            final int layerAndMaskDataLength = read4Bytes(&quot;LayerAndMaskDataLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L270" title="All 2 branches missed.">            if (section == PSD_SECTION_LAYER_AND_MASK_DATA) {</span>
+<span class="nc" id="L271">                return readBytes(&quot;LayerAndMaskData&quot;, is, layerAndMaskDataLength, &quot;Not a Valid PSD File&quot;);</span>
+            }
+
+<span class="nc" id="L274">            skipBytes(is, layerAndMaskDataLength);</span>
+            // byte[] LayerAndMaskData = readByteArray(&quot;LayerAndMaskData&quot;,
+            // LayerAndMaskDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L278">            read2Bytes(&quot;Compression&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+            // byte[] ImageData = readByteArray(&quot;ImageData&quot;,
+            // LayerAndMaskDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+            // if (section == kPSD_SECTION_IMAGE_DATA)
+            // return readByteArray(&quot;LayerAndMaskData&quot;, LayerAndMaskDataLength,
+            // is,
+            // &quot;Not a Valid PSD File&quot;);
+<span class="nc bnc" id="L287" title="All 8 branches missed.">        }</span>
+<span class="nc" id="L288">        throw new ImagingException(&quot;getInputStream: Unknown Section: &quot; + section);</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L293">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public PsdImagingParameters getDefaultParameters() {
+<span class="nc" id="L298">        return new PsdImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final PsdImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L303">        final List&lt;ImageResourceBlock&gt; blocks = readImageResourceBlocks(byteSource, new int[] { IMAGE_RESOURCE_ID_ICC_PROFILE, }, 1);</span>
+
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (blocks.isEmpty()) {</span>
+<span class="nc" id="L306">            return null;</span>
+        }
+
+<span class="nc" id="L309">        final ImageResourceBlock irb = blocks.get(0);</span>
+<span class="nc" id="L310">        final byte[] bytes = irb.data;</span>
+<span class="nc bnc" id="L311" title="All 4 branches missed.">        if (bytes == null || bytes.length &lt; 1) {</span>
+<span class="nc" id="L312">            return null;</span>
+        }
+<span class="nc" id="L314">        return bytes.clone();</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final PsdImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L319">        final PsdImageContents imageContents = readImageContents(byteSource);</span>
+        // ImageContents imageContents = readImage(byteSource, false);
+
+<span class="nc" id="L322">        final PsdHeaderInfo header = imageContents.header;</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if (header == null) {</span>
+<span class="nc" id="L324">            throw new ImagingException(&quot;PSD: Couldn't read Header&quot;);</span>
+        }
+
+<span class="nc" id="L327">        final int width = header.columns;</span>
+<span class="nc" id="L328">        final int height = header.rows;</span>
+
+<span class="nc" id="L330">        final List&lt;String&gt; comments = new ArrayList&lt;&gt;();</span>
+        // TODO: comments...
+
+<span class="nc" id="L333">        int bitsPerPixel = header.depth * getChannelsPerMode(header.mode);</span>
+        // System.out.println(&quot;header.Depth: &quot; + header.Depth);
+        // System.out.println(&quot;header.Mode: &quot; + header.Mode);
+        // System.out.println(&quot;getChannelsPerMode(header.Mode): &quot; +
+        // getChannelsPerMode(header.Mode));
+<span class="nc bnc" id="L338" title="All 2 branches missed.">        if (bitsPerPixel &lt; 0) {</span>
+<span class="nc" id="L339">            bitsPerPixel = 0;</span>
+        }
+<span class="nc" id="L341">        final ImageFormat format = ImageFormats.PSD;</span>
+<span class="nc" id="L342">        final String formatName = &quot;Photoshop&quot;;</span>
+<span class="nc" id="L343">        final String mimeType = &quot;image/x-photoshop&quot;;</span>
+        // we ought to count images, but don't yet.
+<span class="nc" id="L345">        final int numberOfImages = -1;</span>
+        // not accurate ... only reflects first
+<span class="nc" id="L347">        final boolean progressive = false;</span>
+
+<span class="nc" id="L349">        final int physicalWidthDpi = 72;</span>
+<span class="nc" id="L350">        final float physicalWidthInch = (float) ((double) width / (double) physicalWidthDpi);</span>
+<span class="nc" id="L351">        final int physicalHeightDpi = 72;</span>
+<span class="nc" id="L352">        final float physicalHeightInch = (float) ((double) height / (double) physicalHeightDpi);</span>
+
+<span class="nc" id="L354">        final String formatDetails = &quot;Psd&quot;;</span>
+
+<span class="nc" id="L356">        final boolean transparent = false; // TODO: inaccurate.</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">        final boolean usesPalette = header.mode == COLOR_MODE_INDEXED;</span>
+<span class="nc" id="L358">        final ImageInfo.ColorType colorType = ImageInfo.ColorType.UNKNOWN;</span>
+
+        ImageInfo.CompressionAlgorithm compressionAlgorithm;
+<span class="nc bnc" id="L361" title="All 3 branches missed.">        switch (imageContents.compression) {</span>
+        case 0:
+<span class="nc" id="L363">            compressionAlgorithm = ImageInfo.CompressionAlgorithm.NONE;</span>
+<span class="nc" id="L364">            break;</span>
+        case 1:
+<span class="nc" id="L366">            compressionAlgorithm = ImageInfo.CompressionAlgorithm.PSD;</span>
+<span class="nc" id="L367">            break;</span>
+        default:
+<span class="nc" id="L369">            compressionAlgorithm = ImageInfo.CompressionAlgorithm.UNKNOWN;</span>
+        }
+
+<span class="nc" id="L372">        return new ImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType, numberOfImages, physicalHeightDpi, physicalHeightInch,</span>
+                physicalWidthDpi, physicalWidthInch, width, progressive, transparent, usesPalette, colorType, compressionAlgorithm);
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final PsdImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L378">        final PsdHeaderInfo bhi = readHeader(byteSource);</span>
+
+<span class="nc" id="L380">        return new Dimension(bhi.columns, bhi.rows);</span>
+
+    }
+
+    private InputStream getInputStream(final ByteSource byteSource, final int section) throws ImagingException, IOException {
+<span class="nc" id="L385">        InputStream is = null;</span>
+<span class="nc" id="L386">        boolean notFound = false;</span>
+        try {
+<span class="nc" id="L388">            is = byteSource.getInputStream();</span>
+
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            if (section == PSD_SECTION_HEADER) {</span>
+<span class="nc" id="L391">                return is;</span>
+            }
+
+<span class="nc" id="L394">            skipBytes(is, PSD_HEADER_LENGTH);</span>
+            // is.skip(kHeaderLength);
+
+<span class="nc" id="L397">            final int colorModeDataLength = read4Bytes(&quot;ColorModeDataLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L399" title="All 2 branches missed.">            if (section == PSD_SECTION_COLOR_MODE) {</span>
+<span class="nc" id="L400">                return is;</span>
+            }
+
+<span class="nc" id="L403">            skipBytes(is, colorModeDataLength);</span>
+            // byte[] ColorModeData = readByteArray(&quot;ColorModeData&quot;,
+            // ColorModeDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L407">            final int imageResourcesLength = read4Bytes(&quot;ImageResourcesLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L409" title="All 2 branches missed.">            if (section == PSD_SECTION_IMAGE_RESOURCES) {</span>
+<span class="nc" id="L410">                return is;</span>
+            }
+
+<span class="nc" id="L413">            skipBytes(is, imageResourcesLength);</span>
+            // byte[] ImageResources = readByteArray(&quot;ImageResources&quot;,
+            // ImageResourcesLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L417">            final int layerAndMaskDataLength = read4Bytes(&quot;LayerAndMaskDataLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L419" title="All 2 branches missed.">            if (section == PSD_SECTION_LAYER_AND_MASK_DATA) {</span>
+<span class="nc" id="L420">                return is;</span>
+            }
+
+<span class="nc" id="L423">            skipBytes(is, layerAndMaskDataLength);</span>
+            // byte[] LayerAndMaskData = readByteArray(&quot;LayerAndMaskData&quot;,
+            // LayerAndMaskDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L427">            read2Bytes(&quot;Compression&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+            // byte[] ImageData = readByteArray(&quot;ImageData&quot;,
+            // LayerAndMaskDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc bnc" id="L432" title="All 2 branches missed.">            if (section == PSD_SECTION_IMAGE_DATA) {</span>
+<span class="nc" id="L433">                return is;</span>
+            }
+<span class="nc" id="L435">            notFound = true;</span>
+        } finally {
+<span class="nc bnc" id="L437" title="All 4 branches missed.">            if (notFound &amp;&amp; is != null) {</span>
+<span class="nc" id="L438">                is.close();</span>
+            }
+        }
+<span class="nc" id="L441">        throw new ImagingException(&quot;getInputStream: Unknown Section: &quot; + section);</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final PsdImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L446">        return null;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L451">        return &quot;PSD-Custom&quot;;</span>
+    }
+
+    /**
+     * Extracts embedded XML metadata as XML string.
+     *
+     * @param byteSource File containing image data.
+     * @param params     Map of optional parameters, defined in ImagingConstants.
+     * @return Xmp Xml as String, if present. Otherwise, returns null.
+     */
+    @Override
+    public String getXmpXml(final ByteSource byteSource, final XmpImagingParameters params) throws ImagingException, IOException {
+
+<span class="nc" id="L464">        final PsdImageContents imageContents = readImageContents(byteSource);</span>
+
+<span class="nc" id="L466">        final PsdHeaderInfo header = imageContents.header;</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        if (header == null) {</span>
+<span class="nc" id="L468">            throw new ImagingException(&quot;PSD: Couldn't read Header&quot;);</span>
+        }
+
+<span class="nc" id="L471">        final List&lt;ImageResourceBlock&gt; blocks = readImageResourceBlocks(byteSource, new int[] { IMAGE_RESOURCE_ID_XMP, }, -1);</span>
+
+<span class="nc bnc" id="L473" title="All 2 branches missed.">        if (blocks.isEmpty()) {</span>
+<span class="nc" id="L474">            return null;</span>
+        }
+
+<span class="nc" id="L477">        final List&lt;ImageResourceBlock&gt; xmpBlocks = new ArrayList&lt;&gt;(blocks);</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">        if (xmpBlocks.isEmpty()) {</span>
+<span class="nc" id="L479">            return null;</span>
+        }
+<span class="nc bnc" id="L481" title="All 2 branches missed.">        if (xmpBlocks.size() &gt; 1) {</span>
+<span class="nc" id="L482">            throw new ImagingException(&quot;PSD contains more than one XMP block.&quot;);</span>
+        }
+
+<span class="nc" id="L485">        final ImageResourceBlock block = xmpBlocks.get(0);</span>
+
+        // segment data is UTF-8 encoded xml.
+<span class="nc" id="L488">        return new String(block.data, 0, block.data.length, StandardCharsets.UTF_8);</span>
+    }
+
+    private boolean keepImageResourceBlock(final int id, final int[] imageResourceIDs) {
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        if (imageResourceIDs == null) {</span>
+<span class="nc" id="L493">            return true;</span>
+        }
+
+<span class="nc bnc" id="L496" title="All 2 branches missed.">        for (final int imageResourceID : imageResourceIDs) {</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">            if (id == imageResourceID) {</span>
+<span class="nc" id="L498">                return true;</span>
+            }
+        }
+
+<span class="nc" id="L502">        return false;</span>
+    }
+
+    private PsdHeaderInfo readHeader(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L506">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L507">            return readHeader(is);</span>
+        }
+    }
+
+    private PsdHeaderInfo readHeader(final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L512">        readAndVerifyBytes(is, new byte[] { 56, 66, 80, 83 }, &quot;Not a Valid PSD File&quot;);</span>
+
+<span class="nc" id="L514">        final int version = read2Bytes(&quot;Version&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L515">        final byte[] reserved = readBytes(&quot;Reserved&quot;, is, 6, &quot;Not a Valid PSD File&quot;);</span>
+<span class="nc" id="L516">        final int channels = read2Bytes(&quot;Channels&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L517">        final int rows = read4Bytes(&quot;Rows&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L518">        final int columns = read4Bytes(&quot;Columns&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L519">        final int depth = read2Bytes(&quot;Depth&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L520">        final int mode = read2Bytes(&quot;Mode&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+<span class="nc" id="L522">        return new PsdHeaderInfo(version, reserved, channels, rows, columns, depth, mode);</span>
+    }
+
+    private PsdImageContents readImageContents(final ByteSource byteSource) throws ImagingException, IOException {
+<span class="fc" id="L526">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L527">            return readImageContents(is);</span>
+        }
+    }
+
+    private PsdImageContents readImageContents(final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L532">        final PsdHeaderInfo header = readHeader(is);</span>
+
+<span class="nc" id="L534">        final int colorModeDataLength = read4Bytes(&quot;ColorModeDataLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L535">        skipBytes(is, colorModeDataLength);</span>
+        // is.skip(ColorModeDataLength);
+        // byte[] ColorModeData = readByteArray(&quot;ColorModeData&quot;,
+        // ColorModeDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L540">        final int imageResourcesLength = read4Bytes(&quot;ImageResourcesLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L541">        skipBytes(is, imageResourcesLength);</span>
+        // long skipped = is.skip(ImageResourcesLength);
+        // byte[] ImageResources = readByteArray(&quot;ImageResources&quot;,
+        // ImageResourcesLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L546">        final int layerAndMaskDataLength = read4Bytes(&quot;LayerAndMaskDataLength&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L547">        skipBytes(is, layerAndMaskDataLength);</span>
+        // is.skip(LayerAndMaskDataLength);
+        // byte[] LayerAndMaskData = readByteArray(&quot;LayerAndMaskData&quot;,
+        // LayerAndMaskDataLength, is, &quot;Not a Valid PSD File&quot;);
+
+<span class="nc" id="L552">        final int compression = read2Bytes(&quot;Compression&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+
+        // skip_bytes(is, LayerAndMaskDataLength);
+        // byte[] ImageData = readByteArray(&quot;ImageData&quot;, LayerAndMaskDataLength,
+        // is, &quot;Not a Valid PSD File&quot;);
+
+        // System.out.println(&quot;Compression: &quot; + Compression);
+
+<span class="nc" id="L560">        return new PsdImageContents(header, colorModeDataLength,</span>
+                // ColorModeData,
+                imageResourcesLength,
+                // ImageResources,
+                layerAndMaskDataLength,
+                // LayerAndMaskData,
+                compression);
+    }
+
+    private List&lt;ImageResourceBlock&gt; readImageResourceBlocks(final byte[] bytes, final int[] imageResourceIDs, final int maxBlocksToRead)
+            throws ImagingException, IOException {
+<span class="nc" id="L571">        return readImageResourceBlocks(new ByteArrayInputStream(bytes), imageResourceIDs, maxBlocksToRead, bytes.length);</span>
+    }
+
+    private List&lt;ImageResourceBlock&gt; readImageResourceBlocks(final ByteSource byteSource, final int[] imageResourceIDs, final int maxBlocksToRead)
+            throws ImagingException, IOException {
+<span class="nc" id="L576">        try (InputStream imageStream = byteSource.getInputStream();</span>
+<span class="nc" id="L577">                InputStream resourceStream = this.getInputStream(byteSource, PSD_SECTION_IMAGE_RESOURCES)) {</span>
+
+<span class="nc" id="L579">            final PsdImageContents imageContents = readImageContents(imageStream);</span>
+
+<span class="nc" id="L581">            final byte[] ImageResources = readBytes(&quot;ImageResources&quot;, resourceStream, imageContents.imageResourcesLength, &quot;Not a Valid PSD File&quot;);</span>
+
+<span class="nc" id="L583">            return readImageResourceBlocks(ImageResources, imageResourceIDs, maxBlocksToRead);</span>
+        }
+    }
+
+    private List&lt;ImageResourceBlock&gt; readImageResourceBlocks(final InputStream is, final int[] imageResourceIDs, final int maxBlocksToRead, int available)
+            throws ImagingException, IOException {
+<span class="nc" id="L589">        final List&lt;ImageResourceBlock&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L591" title="All 2 branches missed.">        while (available &gt; 0) {</span>
+<span class="nc" id="L592">            readAndVerifyBytes(is, new byte[] { 56, 66, 73, 77 }, &quot;Not a Valid PSD File&quot;);</span>
+<span class="nc" id="L593">            available -= 4;</span>
+
+<span class="nc" id="L595">            final int id = read2Bytes(&quot;ID&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L596">            available -= 2;</span>
+
+<span class="nc" id="L598">            final int nameLength = readByte(&quot;NameLength&quot;, is, &quot;Not a Valid PSD File&quot;);</span>
+
+<span class="nc" id="L600">            available -= 1;</span>
+<span class="nc" id="L601">            final byte[] nameBytes = readBytes(&quot;NameData&quot;, is, nameLength, &quot;Not a Valid PSD File&quot;);</span>
+<span class="nc" id="L602">            available -= nameLength;</span>
+<span class="nc bnc" id="L603" title="All 2 branches missed.">            if ((nameLength + 1) % 2 != 0) {</span>
+                // final int NameDiscard =
+<span class="nc" id="L605">                readByte(&quot;NameDiscard&quot;, is, &quot;Not a Valid PSD File&quot;);</span>
+<span class="nc" id="L606">                available -= 1;</span>
+            }
+            // String Name = readPString(&quot;Name&quot;, 6, is, &quot;Not a Valid PSD File&quot;);
+<span class="nc" id="L609">            final int dataSize = read4Bytes(&quot;Size&quot;, is, &quot;Not a Valid PSD File&quot;, getByteOrder());</span>
+<span class="nc" id="L610">            available -= 4;</span>
+            // int ActualDataSize = ((DataSize % 2) == 0)
+            // ? DataSize
+            // : DataSize + 1; // pad to make even
+
+<span class="nc" id="L615">            final byte[] data = readBytes(&quot;Data&quot;, is, dataSize, &quot;Not a Valid PSD File&quot;);</span>
+<span class="nc" id="L616">            available -= dataSize;</span>
+
+<span class="nc bnc" id="L618" title="All 2 branches missed.">            if (dataSize % 2 != 0) {</span>
+                // final int DataDiscard =
+<span class="nc" id="L620">                readByte(&quot;DataDiscard&quot;, is, &quot;Not a Valid PSD File&quot;);</span>
+<span class="nc" id="L621">                available -= 1;</span>
+            }
+
+<span class="nc bnc" id="L624" title="All 2 branches missed.">            if (keepImageResourceBlock(id, imageResourceIDs)) {</span>
+<span class="nc" id="L625">                result.add(new ImageResourceBlock(id, nameBytes, data));</span>
+
+<span class="nc bnc" id="L627" title="All 4 branches missed.">                if (maxBlocksToRead &gt;= 0 &amp;&amp; result.size() &gt;= maxBlocksToRead) {</span>
+<span class="nc" id="L628">                    return result;</span>
+                }
+            }
+            // debugNumber(&quot;ID&quot;, ID, 2);
+
+<span class="nc" id="L633">        }</span>
+
+<span class="nc" id="L635">        return result;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

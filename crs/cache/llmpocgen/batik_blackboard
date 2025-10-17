@@ -1,0 +1,628 @@
+{
+    "sinks": {
+        "Server Side Request Forgery (SSRF)": [
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/ScriptingEnvironment.java",
+                "line": 1218,
+                "column": 46
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java",
+                "line": 554,
+                "column": 30
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/ScriptingEnvironment.java",
+                "line": 1170,
+                "column": 55
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java",
+                "line": 197,
+                "column": 24
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/ScriptingEnvironment.java",
+                "line": 1168,
+                "column": 47
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java",
+                "line": 192,
+                "column": 32
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/ScriptingEnvironment.java",
+                "line": 1170,
+                "column": 47
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/ParsedURLData.java",
+                "line": 194,
+                "column": 28
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/ToSVGAbstractTranscoder.java",
+                "line": 204,
+                "column": 39
+            }
+        ],
+        "Remote Code Execution": [
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLReflect.java",
+                "line": 58,
+                "column": 34
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLReflect.java",
+                "line": 243,
+                "column": 38
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/image/TIFFTranscoder.java",
+                "line": 65,
+                "column": 41
+            },
+            {
+                "path": "src/batik/batik-dom/src/main/java/org/apache/batik/dom/AbstractDocument.java",
+                "line": 2642,
+                "column": 33
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/SimpleTestRunner.java",
+                "line": 64,
+                "column": 32
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/image/PNGTranscoder.java",
+                "line": 66,
+                "column": 41
+            },
+            {
+                "path": "src/batik/batik-dom/src/main/java/org/apache/batik/dom/ExtensibleDOMImplementation.java",
+                "line": 127,
+                "column": 39
+            }
+        ],
+        "XPath Injection": [
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/svg12/XPathPatternContentSelector.java",
+                "line": 84,
+                "column": 38
+            },
+            {
+                "path": "src/batik/batik-dom/src/main/java/org/apache/batik/dom/AbstractDocument.java",
+                "line": 2203,
+                "column": 42
+            }
+        ],
+        "load arbitrary library": [
+            {
+                "path": "src/batik/batik-dom/src/main/java/org/apache/batik/dom/AbstractDocument.java",
+                "line": 2642,
+                "column": 33
+            },
+            {
+                "path": "src/batik/batik-dom/src/main/java/org/apache/batik/dom/ExtensibleDOMImplementation.java",
+                "line": 127,
+                "column": 39
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 193,
+                "column": 27
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 951,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 953,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 955,
+                "column": 22
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 277,
+                "column": 51
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 279,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 281,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/AbstractImageHandlerEncoder.java",
+                "line": 76,
+                "column": 45
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/DefaultCachedImageHandler.java",
+                "line": 104,
+                "column": 45
+            },
+            {
+                "path": "src/batik/batik-svgrasterizer/src/main/java/org/apache/batik/apps/rasterizer/DestinationType.java",
+                "line": 96,
+                "column": 52
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/SimpleTestRunner.java",
+                "line": 64,
+                "column": 32
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLReflect.java",
+                "line": 58,
+                "column": 34
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLReflect.java",
+                "line": 243,
+                "column": 38
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/image/PNGTranscoder.java",
+                "line": 66,
+                "column": 41
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/image/TIFFTranscoder.java",
+                "line": 65,
+                "column": 41
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/Service.java",
+                "line": 123,
+                "column": 51
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 201,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 201,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 201,
+                "column": 49
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 201,
+                "column": 64
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 201,
+                "column": 70
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 202,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 292,
+                "column": 28
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 292,
+                "column": 46
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 293,
+                "column": 46
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 294,
+                "column": 46
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 295,
+                "column": 46
+            },
+            {
+                "path": "src/batik/batik-bridge/src/main/java/org/apache/batik/bridge/RhinoInterpreter.java",
+                "line": 295,
+                "column": 49
+            },
+            {
+                "path": "src/batik/batik-dom/src/main/java/org/apache/batik/dom/AbstractDocument.java",
+                "line": 2646,
+                "column": 49
+            },
+            {
+                "path": "src/batik/batik-dom/src/main/java/org/apache/batik/dom/AbstractDocument.java",
+                "line": 2646,
+                "column": 58
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1061,
+                "column": 33
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1062,
+                "column": 22
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1075,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1076,
+                "column": 22
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1089,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1090,
+                "column": 22
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1103,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1103,
+                "column": 55
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1117,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1117,
+                "column": 51
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1131,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1132,
+                "column": 22
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1145,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1145,
+                "column": 56
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1160,
+                "column": 24
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1160,
+                "column": 55
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 326,
+                "column": 38
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 326,
+                "column": 60
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 327,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 327,
+                "column": 50
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 333,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 333,
+                "column": 47
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 318,
+                "column": 29
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 318,
+                "column": 47
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/PreferenceDialog.java",
+                "line": 1197,
+                "column": 17
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/PreferenceDialog.java",
+                "line": 1199,
+                "column": 29
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/AbstractImageHandlerEncoder.java",
+                "line": 93,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/AbstractImageHandlerEncoder.java",
+                "line": 93,
+                "column": 57
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/DefaultCachedImageHandler.java",
+                "line": 119,
+                "column": 35
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/DefaultCachedImageHandler.java",
+                "line": 119,
+                "column": 57
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLReflect.java",
+                "line": 194,
+                "column": 13
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLReflect.java",
+                "line": 194,
+                "column": 22
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/batik/batik-slideshow/src/main/java/org/apache/batik/apps/slideshow/Main.java",
+                "line": 304,
+                "column": 52
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1601,
+                "column": 44
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1734,
+                "column": 83
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1797,
+                "column": 83
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/JSVGViewerFrame.java",
+                "line": 1852,
+                "column": 59
+            },
+            {
+                "path": "src/batik/batik-svgbrowser/src/main/java/org/apache/batik/apps/svgbrowser/Main.java",
+                "line": 485,
+                "column": 39
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/ImageCacher.java",
+                "line": 332,
+                "column": 51
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/ImageCacher.java",
+                "line": 377,
+                "column": 66
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/ImageHandlerJPEGEncoder.java",
+                "line": 80,
+                "column": 52
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/ImageHandlerPNGEncoder.java",
+                "line": 79,
+                "column": 52
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/SVGGraphics2D.java",
+                "line": 404,
+                "column": 61
+            },
+            {
+                "path": "src/batik/batik-svggen/src/main/java/org/apache/batik/svggen/font/SVGFont.java",
+                "line": 742,
+                "column": 44
+            },
+            {
+                "path": "src/batik/batik-svgpp/src/main/java/org/apache/batik/apps/svgpp/Main.java",
+                "line": 116,
+                "column": 61
+            },
+            {
+                "path": "src/batik/batik-svgpp/src/main/java/org/apache/batik/apps/svgpp/Main.java",
+                "line": 119,
+                "column": 67
+            },
+            {
+                "path": "src/batik/batik-svgrasterizer/src/main/java/org/apache/batik/apps/rasterizer/SVGConverter.java",
+                "line": 987,
+                "column": 53
+            },
+            {
+                "path": "src/batik/batik-svgrasterizer/src/main/java/org/apache/batik/apps/rasterizer/SVGConverterFileSource.java",
+                "line": 87,
+                "column": 36
+            },
+            {
+                "path": "src/batik/batik-test-svg/src/main/java/org/apache/batik/test/svg/AbstractRenderingAccuracyTest.java",
+                "line": 427,
+                "column": 46
+            },
+            {
+                "path": "src/batik/batik-test-svg/src/main/java/org/apache/batik/test/svg/AbstractRenderingAccuracyTest.java",
+                "line": 477,
+                "column": 69
+            },
+            {
+                "path": "src/batik/batik-test-svg/src/main/java/org/apache/batik/test/svg/AbstractRenderingAccuracyTest.java",
+                "line": 556,
+                "column": 62
+            },
+            {
+                "path": "src/batik/batik-test-svg/src/main/java/org/apache/batik/test/svg/AbstractRenderingAccuracyTest.java",
+                "line": 654,
+                "column": 49
+            },
+            {
+                "path": "src/batik/batik-test-svg/src/main/java/org/apache/batik/test/svg/ImageCompareTest.java",
+                "line": 266,
+                "column": 49
+            },
+            {
+                "path": "src/batik/batik-test-svg/src/main/java/org/apache/batik/test/svg/SVGRenderingAccuracyTestValidator.java",
+                "line": 124,
+                "column": 44
+            },
+            {
+                "path": "src/batik/batik-test-svg/src/main/java/org/apache/batik/test/svg/SVGRenderingAccuracyTestValidator.java",
+                "line": 140,
+                "column": 57
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLTestReportProcessor.java",
+                "line": 500,
+                "column": 70
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLTestReportProcessor.java",
+                "line": 501,
+                "column": 73
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XMLTestReportProcessor.java",
+                "line": 523,
+                "column": 40
+            },
+            {
+                "path": "src/batik/batik-test/src/main/java/org/apache/batik/test/xml/XSLXMLReportConsumer.java",
+                "line": 95,
+                "column": 69
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/wmf/tosvg/WMFHeaderProperties.java",
+                "line": 77,
+                "column": 82
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/wmf/tosvg/WMFHeaderProperties.java",
+                "line": 98,
+                "column": 82
+            },
+            {
+                "path": "src/batik/batik-transcoder/src/main/java/org/apache/batik/transcoder/wmf/tosvg/WMFTranscoder.java",
+                "line": 255,
+                "column": 89
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/ClassFileUtilities.java",
+                "line": 261,
+                "column": 57
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/ClassFileUtilities.java",
+                "line": 305,
+                "column": 57
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/PreferenceManager.java",
+                "line": 163,
+                "column": 43
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/PreferenceManager.java",
+                "line": 171,
+                "column": 45
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/PreferenceManager.java",
+                "line": 180,
+                "column": 45
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/PreferenceManager.java",
+                "line": 184,
+                "column": 51
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/PreferenceManager.java",
+                "line": 216,
+                "column": 44
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/PreferenceManager.java",
+                "line": 224,
+                "column": 46
+            },
+            {
+                "path": "src/batik/batik-util/src/main/java/org/apache/batik/util/PreferenceManager.java",
+                "line": 233,
+                "column": 46
+            },
+            {
+                "path": "src/batik/contrib/tiledTranscoder/TiledImageTranscoder.java",
+                "line": 93,
+                "column": 57
+            }
+        ]
+    },
+    "tasks": [],
+    "result": []
+}

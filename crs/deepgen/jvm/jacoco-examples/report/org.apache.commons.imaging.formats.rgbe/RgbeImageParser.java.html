@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RgbeImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.rgbe</a> &gt; <span class="el_source">RgbeImageParser.java</span></div><h1>RgbeImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.rgbe;
+
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BandedSampleModel;
+import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferFloat;
+import java.awt.image.Raster;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.ImageMetadata;
+
+/**
+ * Parser for Radiance HDR images
+ */
+<span class="fc" id="L43">public class RgbeImageParser extends AbstractImageParser&lt;RgbeImagingParameters&gt; {</span>
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L47">        return ImageFormats.RGBE.getExtensions();</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L52">        return new ImageFormat[] { ImageFormats.RGBE };</span>
+    }
+
+    @Override
+    public BufferedImage getBufferedImage(final ByteSource byteSource, final RgbeImagingParameters params) throws ImagingException, IOException {
+<span class="fc" id="L57">        try (RgbeInfo info = new RgbeInfo(byteSource)) {</span>
+            // It is necessary to create our own BufferedImage here as the
+            // org.apache.commons.imaging.common.IBufferedImageFactory interface does
+            // not expose this complexity
+<span class="nc" id="L61">            final DataBuffer buffer = new DataBufferFloat(info.getPixelData(), info.getWidth() * info.getHeight());</span>
+
+<span class="nc" id="L63">            return new BufferedImage(</span>
+<span class="nc" id="L64">                    new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false, Transparency.OPAQUE, buffer.getDataType()),</span>
+<span class="nc" id="L65">                    Raster.createWritableRaster(new BandedSampleModel(buffer.getDataType(), info.getWidth(), info.getHeight(), 3), buffer, new Point()), false,</span>
+                    null);
+        }
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L72">        return ImageFormats.RGBE.getDefaultExtension();</span>
+    }
+
+    @Override
+    public RgbeImagingParameters getDefaultParameters() {
+<span class="nc" id="L77">        return new RgbeImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final RgbeImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L82">        return null;</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final RgbeImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L87">        try (RgbeInfo info = new RgbeInfo(byteSource)) {</span>
+<span class="nc" id="L88">            return new ImageInfo(getName(), 32, // todo may be 64 if double?</span>
+<span class="nc" id="L89">                    new ArrayList&lt;&gt;(), ImageFormats.RGBE, getName(), info.getHeight(), &quot;image/vnd.radiance&quot;, 1, -1, -1, -1, -1, info.getWidth(), false, false,</span>
+                    false, ImageInfo.ColorType.RGB, ImageInfo.CompressionAlgorithm.ADAPTIVE_RLE);
+        }
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final RgbeImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L96">        try (RgbeInfo info = new RgbeInfo(byteSource)) {</span>
+<span class="nc" id="L97">            return new Dimension(info.getWidth(), info.getHeight());</span>
+        }
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final RgbeImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L103">        try (RgbeInfo info = new RgbeInfo(byteSource)) {</span>
+<span class="nc" id="L104">            return info.getMetadata();</span>
+        }
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L110">        return &quot;Radiance HDR&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

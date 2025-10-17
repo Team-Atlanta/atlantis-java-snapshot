@@ -1,0 +1,2213 @@
+{
+    "sinks": {
+        "OS Command Injection": [
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/sampler/plugins/LinuxCpuSamplerPlugin.java",
+                "line": 55,
+                "column": 55
+            }
+        ],
+        "Server Side Request Forgery (SSRF)": [
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/nio/NIOTransportFactory.java",
+                "line": 102,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/nio/NIOTransportFactory.java",
+                "line": 109,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/nio/NIOTransportFactory.java",
+                "line": 117,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/nio/NIOTransportFactory.java",
+                "line": 125,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/tcp/TcpTransport.java",
+                "line": 525,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/tcp/TcpTransport.java",
+                "line": 525,
+                "column": 51
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/tcp/TcpTransport.java",
+                "line": 527,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-stomp/src/main/java/org/apache/activemq/transport/stomp/StompConnection.java",
+                "line": 38,
+                "column": 25
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/blob/DefaultStrategy.java",
+                "line": 39,
+                "column": 24
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/discovery/http/HTTPDiscoveryAgent.java",
+                "line": 109,
+                "column": 54
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/discovery/http/HTTPDiscoveryAgent.java",
+                "line": 123,
+                "column": 54
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/discovery/http/HTTPDiscoveryAgent.java",
+                "line": 135,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/http/HttpClientTransport.java",
+                "line": 130,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/http/HttpClientTransport.java",
+                "line": 181,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/http/HttpClientTransport.java",
+                "line": 282,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/http/HttpClientTransport.java",
+                "line": 283,
+                "column": 32
+            }
+        ],
+        "Remote Code Execution": [
+            {
+                "path": "src/activemq/activemq-kahadb-store/src/main/java/org/apache/activemq/store/kahadb/MessageDatabase.java",
+                "line": 4146,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/plugin/SubQueueSelectorCacheBroker.java",
+                "line": 201,
+                "column": 85
+            },
+            {
+                "path": "src/activemq/activemq-kahadb-store/src/main/java/org/apache/activemq/store/kahadb/MessageDatabase.java",
+                "line": 830,
+                "column": 83
+            },
+            {
+                "path": "src/activemq/activemq-kahadb-store/src/main/java/org/apache/activemq/store/kahadb/MessageDatabase.java",
+                "line": 849,
+                "column": 75
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractAmqCommand.java",
+                "line": 252,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v1/BaseDataStreamMarshaller.java",
+                "line": 232,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractAmqCommand.java",
+                "line": 180,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/jndi/JNDIReferenceFactory.java",
+                "line": 130,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/AbstractJmsClientSystem.java",
+                "line": 239,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v9/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v4/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v5/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v11/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v10/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v7/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v3/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v6/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/DefaultAuthorizationMap.java",
+                "line": 235,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v8/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v12/BaseDataStreamMarshaller.java",
+                "line": 232,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v2/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/xstream/XStreamWireFormat.java",
+                "line": 65,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/xstream/XStreamWireFormat.java",
+                "line": 70,
+                "column": 43
+            }
+        ],
+        "SQL Injection": [
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/store/jdbc/AbstractJDBCLocker.java",
+                "line": 119,
+                "column": 43
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/store/jdbc/adapter/DefaultJDBCAdapter.java",
+                "line": 112,
+                "column": 31
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/store/jdbc/adapter/DefaultJDBCAdapter.java",
+                "line": 152,
+                "column": 31
+            }
+        ],
+        "Remote JNDI Lookup": [
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/network/LdapNetworkConnector.java",
+                "line": 257,
+                "column": 77
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/network/jms/JndiLookupFactory.java",
+                "line": 30,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 174,
+                "column": 66
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/jndi/ReadOnlyContext.java",
+                "line": 223,
+                "column": 35
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/jndi/ReadOnlyContext.java",
+                "line": 238,
+                "column": 49
+            },
+            {
+                "path": "src/activemq/activemq-jms-pool/src/main/java/org/apache/activemq/jms/pool/XaPooledConnectionFactory.java",
+                "line": 52,
+                "column": 87
+            },
+            {
+                "path": "src/activemq/activemq-log4j-appender/src/main/java/org/apache/activemq/util/JndiJmsLogAppender.java",
+                "line": 119,
+                "column": 71
+            },
+            {
+                "path": "src/activemq/activemq-ra/src/main/java/org/apache/activemq/ra/ActiveMQEndpointWorker.java",
+                "line": 207,
+                "column": 68
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/conform/message/headers/MessageHeaderTest.java",
+                "line": 202,
+                "column": 49
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PTPTestCase.java",
+                "line": 119,
+                "column": 57
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PTPTestCase.java",
+                "line": 120,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PTPTestCase.java",
+                "line": 125,
+                "column": 59
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PTPTestCase.java",
+                "line": 126,
+                "column": 44
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PubSubTestCase.java",
+                "line": 119,
+                "column": 60
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PubSubTestCase.java",
+                "line": 120,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PubSubTestCase.java",
+                "line": 126,
+                "column": 61
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/PubSubTestCase.java",
+                "line": 127,
+                "column": 46
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 169,
+                "column": 53
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 172,
+                "column": 56
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 177,
+                "column": 53
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 180,
+                "column": 56
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 185,
+                "column": 70
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 186,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 188,
+                "column": 70
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/framework/UnifiedTestCase.java",
+                "line": 189,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-web/src/main/java/org/apache/activemq/web/config/JNDIConfiguration.java",
+                "line": 56,
+                "column": 29
+            },
+            {
+                "path": "src/activemq/activemq-web/src/main/java/org/apache/activemq/web/config/JNDIConfiguration.java",
+                "line": 65,
+                "column": 58
+            },
+            {
+                "path": "src/activemq/activemq-web/src/main/java/org/apache/activemq/web/config/JNDIConfiguration.java",
+                "line": 85,
+                "column": 49
+            }
+        ],
+        "LDAP Injection": [
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/network/LdapNetworkConnector.java",
+                "line": 249,
+                "column": 66
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/network/LdapNetworkConnector.java",
+                "line": 249,
+                "column": 72
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/LDAPAuthorizationMap.java",
+                "line": 421,
+                "column": 59
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/LDAPAuthorizationMap.java",
+                "line": 421,
+                "column": 76
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 237,
+                "column": 43
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 237,
+                "column": 60
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 247,
+                "column": 43
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 247,
+                "column": 60
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 257,
+                "column": 43
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 257,
+                "column": 59
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 876,
+                "column": 78
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 876,
+                "column": 87
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginModule.java",
+                "line": 249,
+                "column": 70
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginModule.java",
+                "line": 249,
+                "column": 103
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginModule.java",
+                "line": 366,
+                "column": 66
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginModule.java",
+                "line": 366,
+                "column": 99
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginModule.java",
+                "line": 384,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/LDAPLoginModule.java",
+                "line": 384,
+                "column": 75
+            }
+        ],
+        "XPath Injection": [
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/filter/JAXPXPathEvaluator.java",
+                "line": 66,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/filter/JAXPXPathEvaluator.java",
+                "line": 66,
+                "column": 62
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/filter/JAXPXPathEvaluator.java",
+                "line": 66,
+                "column": 77
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/filter/JAXPXPathEvaluator.java",
+                "line": 76,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/filter/JAXPXPathEvaluator.java",
+                "line": 76,
+                "column": 62
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/filter/JAXPXPathEvaluator.java",
+                "line": 76,
+                "column": 77
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 169,
+                "column": 53
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 169,
+                "column": 79
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 169,
+                "column": 88
+            }
+        ],
+        "load arbitrary library": [
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/BrokerService.java",
+                "line": 277,
+                "column": 51
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/BrokerService.java",
+                "line": 1780,
+                "column": 89
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/BrokerService.java",
+                "line": 1967,
+                "column": 104
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/BrokerService.java",
+                "line": 2493,
+                "column": 108
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/AnnotatedMBean.java",
+                "line": 193,
+                "column": 53
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/AnnotatedMBean.java",
+                "line": 273,
+                "column": 47
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 270,
+                "column": 46
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 517,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 520,
+                "column": 81
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 551,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/DefaultAuthorizationMap.java",
+                "line": 235,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/util/LogWriterFinder.java",
+                "line": 100,
+                "column": 78
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/util/LogWriterFinder.java",
+                "line": 102,
+                "column": 70
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/TransportLoggerSupport.java",
+                "line": 45,
+                "column": 82
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/filter/XPathExpression.java",
+                "line": 100,
+                "column": 68
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/jndi/JNDIReferenceFactory.java",
+                "line": 126,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/jndi/JNDIReferenceFactory.java",
+                "line": 130,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java",
+                "line": 345,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v1/BaseDataStreamMarshaller.java",
+                "line": 232,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v10/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v11/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v12/BaseDataStreamMarshaller.java",
+                "line": 232,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v9/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/ClassLoadingAwareObjectInputStream.java",
+                "line": 132,
+                "column": 49
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/ClassLoadingAwareObjectInputStream.java",
+                "line": 144,
+                "column": 30
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/FactoryFinder.java",
+                "line": 82,
+                "column": 46
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/FactoryFinder.java",
+                "line": 88,
+                "column": 72
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/Main.java",
+                "line": 258,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/Main.java",
+                "line": 294,
+                "column": 51
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractAmqCommand.java",
+                "line": 180,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractAmqCommand.java",
+                "line": 252,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 97,
+                "column": 54
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 98,
+                "column": 64
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 153,
+                "column": 58
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 154,
+                "column": 68
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/discovery/http/HTTPDiscoveryAgent.java",
+                "line": 278,
+                "column": 78
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/http/HttpTransportServer.java",
+                "line": 152,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/http/HttpTransportServer.java",
+                "line": 158,
+                "column": 74
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v2/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v3/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v4/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v5/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v6/BaseDataStreamMarshaller.java",
+                "line": 231,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v7/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v8/BaseDataStreamMarshaller.java",
+                "line": 230,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-osgi/src/main/java/org/apache/activemq/osgi/ActiveMQServiceFactory.java",
+                "line": 156,
+                "column": 27
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/PropertiesPlaceHolderUtil.java",
+                "line": 140,
+                "column": 75
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-joram-jms-tests/src/main/java/org/objectweb/jtests/jms/admin/AdminFactory.java",
+                "line": 41,
+                "column": 43
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/AbstractJmsClientSystem.java",
+                "line": 239,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/spi/ReflectionSPIConnectionFactory.java",
+                "line": 28,
+                "column": 87
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/BrokerService.java",
+                "line": 915,
+                "column": 56
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/BrokerService.java",
+                "line": 950,
+                "column": 101
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/BrokerService.java",
+                "line": 1065,
+                "column": 44
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/TransportConnector.java",
+                "line": 504,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/DestinationView.java",
+                "line": 359,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/DestinationView.java",
+                "line": 362,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 192,
+                "column": 52
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 589,
+                "column": 78
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 589,
+                "column": 56
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/region/virtual/VirtualTopic.java",
+                "line": 70,
+                "column": 49
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/network/DemandForwardingBridgeSupport.java",
+                "line": 724,
+                "column": 75
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/network/DemandForwardingBridgeSupport.java",
+                "line": 737,
+                "column": 51
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/plugin/DiscardingDLQBrokerPlugin.java",
+                "line": 114,
+                "column": 74
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/plugin/SubQueueSelectorCacheBroker.java",
+                "line": 349,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 443,
+                "column": 53
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/SimpleCachedLDAPAuthorizationMap.java",
+                "line": 588,
+                "column": 65
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/transport/auto/AutoTransportUtils.java",
+                "line": 58,
+                "column": 67
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/ActiveMQConnectionMetaData.java",
+                "line": 50,
+                "column": 55
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/advisory/AdvisorySupport.java",
+                "line": 160,
+                "column": 106
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/blob/FileSystemBlobStrategy.java",
+                "line": 133,
+                "column": 64
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/command/ConsumerId.java",
+                "line": 40,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/filter/ComparisonExpression.java",
+                "line": 102,
+                "column": 43
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/filter/XPathExpression.java",
+                "line": 113,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/filter/function/regexMatchFunction.java",
+                "line": 157,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/filter/function/replaceFunction.java",
+                "line": 80,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/filter/function/splitFunction.java",
+                "line": 80,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/filter/function/splitFunction.java",
+                "line": 82,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/discovery/masterslave/MasterSlaveDiscoveryAgent.java",
+                "line": 41,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/discovery/simple/SimpleDiscoveryAgent.java",
+                "line": 116,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/ClassLoadingAwareObjectInputStream.java",
+                "line": 43,
+                "column": 189
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/StringToListOfActiveMQDestinationConverter.java",
+                "line": 50,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/URISupport.java",
+                "line": 124,
+                "column": 49
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 184,
+                "column": 97
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 185,
+                "column": 103
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 188,
+                "column": 97
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 189,
+                "column": 103
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 253,
+                "column": 34
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/PurgeCommand.java",
+                "line": 210,
+                "column": 31
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/PurgeCommand.java",
+                "line": 213,
+                "column": 39
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/QueryCommand.java",
+                "line": 303,
+                "column": 44
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/RegExQueryFilter.java",
+                "line": 99,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/WildcardToMsgSelectorTransformFilter.java",
+                "line": 67,
+                "column": 30
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/WildcardToMsgSelectorTransformFilter.java",
+                "line": 68,
+                "column": 30
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/WildcardToRegExTransformFilter.java",
+                "line": 67,
+                "column": 30
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/WildcardToRegExTransformFilter.java",
+                "line": 69,
+                "column": 30
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/WildcardToRegExTransformFilter.java",
+                "line": 70,
+                "column": 30
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/util/JmxMBeansUtil.java",
+                "line": 98,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/util/JmxMBeansUtil.java",
+                "line": 105,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/http/HttpClientTransport.java",
+                "line": 336,
+                "column": 85
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/ReloadableProperties.java",
+                "line": 89,
+                "column": 68
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/ReloadableProperties.java",
+                "line": 110,
+                "column": 53
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/store/jdbc/JDBCPersistenceAdapter.java",
+                "line": 466,
+                "column": 52
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/util/GenerateJDBCStatements.java",
+                "line": 49,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/util/GenerateJDBCStatements.java",
+                "line": 50,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/util/GenerateJDBCStatements.java",
+                "line": 63,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-mqtt/src/main/java/org/apache/activemq/transport/mqtt/strategy/AbstractMQTTSubscriptionStrategy.java",
+                "line": 280,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/AbstractRuntimeConfigurationBroker.java",
+                "line": 167,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/DefaultConfigurationProcessor.java",
+                "line": 39,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-stomp/src/main/java/org/apache/activemq/transport/stomp/LegacyFrameTranslator.java",
+                "line": 164,
+                "column": 44
+            },
+            {
+                "path": "src/activemq/activemq-stomp/src/main/java/org/apache/activemq/transport/stomp/ProtocolConverter.java",
+                "line": 953,
+                "column": 56
+            },
+            {
+                "path": "src/activemq/activemq-stomp/src/main/java/org/apache/activemq/transport/stomp/Stomp.java",
+                "line": 189,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-stomp/src/main/java/org/apache/activemq/transport/stomp/Stomp.java",
+                "line": 197,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-stomp/src/main/java/org/apache/activemq/transport/stomp/StompCodec.java",
+                "line": 147,
+                "column": 98
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/AbstractJmsClient.java",
+                "line": 123,
+                "column": 72
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/AbstractJmsClient.java",
+                "line": 133,
+                "column": 60
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/JmsClientSystemProperties.java",
+                "line": 79,
+                "column": 46
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/JmsProducerProperties.java",
+                "line": 130,
+                "column": 48
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/JmsProducerProperties.java",
+                "line": 134,
+                "column": 39
+            },
+            {
+                "path": "src/activemq/activemq-web/src/main/java/org/apache/activemq/web/WebClient.java",
+                "line": 386,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-web/src/main/java/org/apache/activemq/web/WebClient.java",
+                "line": 390,
+                "column": 52
+            },
+            {
+                "path": "src/activemq/activemq-web/src/main/java/org/apache/activemq/web/config/AbstractConfiguration.java",
+                "line": 78,
+                "column": 33
+            }
+        ],
+        "Script Engine Injection": [
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/DestinationsViewFilter.java",
+                "line": 196,
+                "column": 44
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/DestinationsViewFilter.java",
+                "line": 196,
+                "column": 58
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/DestinationsViewFilter.java",
+                "line": 197,
+                "column": 45
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/DestinationsViewFilter.java",
+                "line": 197,
+                "column": 59
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 51,
+                "column": 29
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 51,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 53,
+                "column": 16
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 53,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 74,
+                "column": 27
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 74,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 82,
+                "column": 13
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 82,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 103,
+                "column": 29
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 103,
+                "column": 47
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 105,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 105,
+                "column": 56
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 111,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 111,
+                "column": 68
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 115,
+                "column": 35
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 115,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 143,
+                "column": 29
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 143,
+                "column": 46
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 147,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 147,
+                "column": 48
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 152,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 152,
+                "column": 62
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 153,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 153,
+                "column": 48
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 191,
+                "column": 27
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 191,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 199,
+                "column": 13
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 199,
+                "column": 29
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 220,
+                "column": 33
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 220,
+                "column": 51
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 222,
+                "column": 13
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/Log4JConfigView.java",
+                "line": 222,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 494,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 494,
+                "column": 51
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 695,
+                "column": 32
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/jmx/ManagementContext.java",
+                "line": 695,
+                "column": 46
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/DefaultAuthorizationMap.java",
+                "line": 260,
+                "column": 17
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/DefaultAuthorizationMap.java",
+                "line": 260,
+                "column": 35
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/DefaultAuthorizationMap.java",
+                "line": 299,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/security/DefaultAuthorizationMap.java",
+                "line": 299,
+                "column": 80
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/command/DefaultUnresolvedDestinationTransformer.java",
+                "line": 38,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/command/DefaultUnresolvedDestinationTransformer.java",
+                "line": 38,
+                "column": 62
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/command/DefaultUnresolvedDestinationTransformer.java",
+                "line": 39,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/command/DefaultUnresolvedDestinationTransformer.java",
+                "line": 39,
+                "column": 62
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java",
+                "line": 353,
+                "column": 55
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java",
+                "line": 353,
+                "column": 69
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/IntrospectionSupport.java",
+                "line": 69,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/IntrospectionSupport.java",
+                "line": 69,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/IntrospectionSupport.java",
+                "line": 187,
+                "column": 17
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/IntrospectionSupport.java",
+                "line": 187,
+                "column": 31
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/IntrospectionSupport.java",
+                "line": 190,
+                "column": 17
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/IntrospectionSupport.java",
+                "line": 190,
+                "column": 31
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/Main.java",
+                "line": 262,
+                "column": 25
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/Main.java",
+                "line": 262,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 105,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 105,
+                "column": 54
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 108,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 108,
+                "column": 56
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 111,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 111,
+                "column": 55
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 113,
+                "column": 66
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 113,
+                "column": 92
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 162,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 162,
+                "column": 58
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 165,
+                "column": 54
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 165,
+                "column": 77
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 167,
+                "column": 49
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 167,
+                "column": 64
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 169,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 169,
+                "column": 59
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 171,
+                "column": 70
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/AbstractJmxCommand.java",
+                "line": 171,
+                "column": 96
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/MBeansRegExQueryFilter.java",
+                "line": 61,
+                "column": 30
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/MBeansRegExQueryFilter.java",
+                "line": 61,
+                "column": 44
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/MapTransformFilter.java",
+                "line": 68,
+                "column": 25
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/filter/MapTransformFilter.java",
+                "line": 68,
+                "column": 39
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/util/GenerateJDBCStatements.java",
+                "line": 59,
+                "column": 175
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/util/GenerateJDBCStatements.java",
+                "line": 59,
+                "column": 193
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/util/GenerateJDBCStatements.java",
+                "line": 66,
+                "column": 175
+            },
+            {
+                "path": "src/activemq/activemq-jdbc-store/src/main/java/org/apache/activemq/util/GenerateJDBCStatements.java",
+                "line": 66,
+                "column": 193
+            },
+            {
+                "path": "src/activemq/activemq-jms-pool/src/main/java/org/apache/activemq/jms/pool/IntrospectionSupport.java",
+                "line": 79,
+                "column": 17
+            },
+            {
+                "path": "src/activemq/activemq-jms-pool/src/main/java/org/apache/activemq/jms/pool/IntrospectionSupport.java",
+                "line": 79,
+                "column": 31
+            },
+            {
+                "path": "src/activemq/activemq-jms-pool/src/main/java/org/apache/activemq/jms/pool/IntrospectionSupport.java",
+                "line": 82,
+                "column": 17
+            },
+            {
+                "path": "src/activemq/activemq-jms-pool/src/main/java/org/apache/activemq/jms/pool/IntrospectionSupport.java",
+                "line": 82,
+                "column": 31
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/DefaultConfigurationProcessor.java",
+                "line": 152,
+                "column": 26
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/DefaultConfigurationProcessor.java",
+                "line": 152,
+                "column": 86
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/DefaultConfigurationProcessor.java",
+                "line": 206,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/DefaultConfigurationProcessor.java",
+                "line": 206,
+                "column": 35
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/DefaultConfigurationProcessor.java",
+                "line": 224,
+                "column": 25
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/DefaultConfigurationProcessor.java",
+                "line": 224,
+                "column": 34
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/PropertiesPlaceHolderUtil.java",
+                "line": 143,
+                "column": 59
+            },
+            {
+                "path": "src/activemq/activemq-runtime-config/src/main/java/org/apache/activemq/plugin/PropertiesPlaceHolderUtil.java",
+                "line": 143,
+                "column": 126
+            },
+            {
+                "path": "src/activemq/activemq-shiro/src/main/java/org/apache/activemq/shiro/authz/ActiveMQWildcardPermission.java",
+                "line": 261,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-shiro/src/main/java/org/apache/activemq/shiro/authz/ActiveMQWildcardPermission.java",
+                "line": 261,
+                "column": 52
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 74,
+                "column": 26
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 74,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 101,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 101,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 105,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 105,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 109,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 109,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 113,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 113,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 117,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 117,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 121,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 121,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 125,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 125,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 129,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 129,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 136,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 136,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 150,
+                "column": 21
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 150,
+                "column": 41
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 205,
+                "column": 39
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 205,
+                "column": 63
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 215,
+                "column": 42
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/properties/ReflectionUtil.java",
+                "line": 215,
+                "column": 66
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/util/IOHelper.java",
+                "line": 198,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/PropertiesBrokerFactory.java",
+                "line": 76,
+                "column": 47
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/util/DestinationsPlugin.java",
+                "line": 76,
+                "column": 60
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/util/DestinationsPlugin.java",
+                "line": 98,
+                "column": 57
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/broker/view/DotFileInterceptorSupport.java",
+                "line": 44,
+                "column": 61
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/plugin/SubQueueSelectorCacheBroker.java",
+                "line": 197,
+                "column": 64
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/plugin/SubQueueSelectorCacheBroker.java",
+                "line": 232,
+                "column": 57
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/util/IOHelper.java",
+                "line": 290,
+                "column": 55
+            },
+            {
+                "path": "src/activemq/activemq-broker/src/main/java/org/apache/activemq/util/IOHelper.java",
+                "line": 291,
+                "column": 58
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/ActiveMQSslConnectionFactory.java",
+                "line": 187,
+                "column": 44
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/blob/DefaultBlobUploadStrategy.java",
+                "line": 42,
+                "column": 55
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/blob/FileSystemBlobStrategy.java",
+                "line": 68,
+                "column": 55
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/blob/FileSystemBlobStrategy.java",
+                "line": 79,
+                "column": 57
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/blob/FileSystemBlobStrategy.java",
+                "line": 105,
+                "column": 36
+            },
+            {
+                "path": "src/activemq/activemq-client/src/main/java/org/apache/activemq/transport/failover/FailoverTransport.java",
+                "line": 1428,
+                "column": 37
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 198,
+                "column": 57
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 226,
+                "column": 55
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/CreateCommand.java",
+                "line": 228,
+                "column": 57
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/store/StoreBackup.java",
+                "line": 100,
+                "column": 86
+            },
+            {
+                "path": "src/activemq/activemq-console/src/main/java/org/apache/activemq/console/command/store/StoreExporter.java",
+                "line": 91,
+                "column": 86
+            },
+            {
+                "path": "src/activemq/activemq-jaas/src/main/java/org/apache/activemq/jaas/ReloadableProperties.java",
+                "line": 122,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-kahadb-store/src/main/java/org/apache/activemq/store/kahadb/disk/page/PageFile.java",
+                "line": 719,
+                "column": 52
+            },
+            {
+                "path": "src/activemq/activemq-kahadb-store/src/main/java/org/apache/activemq/store/kahadb/disk/page/PageFile.java",
+                "line": 727,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-openwire-generator/src/main/java/org/apache/activemq/openwire/tool/JavaMarshallingGenerator.java",
+                "line": 272,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-openwire-generator/src/main/java/org/apache/activemq/openwire/tool/MultiSourceGenerator.java",
+                "line": 110,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-openwire-generator/src/main/java/org/apache/activemq/openwire/tool/SingleSourceGenerator.java",
+                "line": 62,
+                "column": 50
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-memtest-maven-plugin/src/main/java/org/apache/activemq/tool/ReportGenerator.java",
+                "line": 61,
+                "column": 64
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/maven/ServerMojo.java",
+                "line": 126,
+                "column": 38
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/maven/ServerMojo.java",
+                "line": 127,
+                "column": 40
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/AbstractJmsClientSystem.java",
+                "line": 297,
+                "column": 71
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/JmsProducerClient.java",
+                "line": 380,
+                "column": 48
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/reports/XmlFilePerfReportWriter.java",
+                "line": 75,
+                "column": 95
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/reports/XmlFilePerfReportWriter.java",
+                "line": 154,
+                "column": 66
+            },
+            {
+                "path": "src/activemq/activemq-tooling/activemq-perf-maven-plugin/src/main/java/org/apache/activemq/tool/reports/XmlFilePerfReportWriter.java",
+                "line": 198,
+                "column": 68
+            },
+            {
+                "path": "src/activemq/activemq-http/src/main/java/org/apache/activemq/transport/discovery/http/HTTPDiscoveryAgent.java",
+                "line": 138,
+                "column": 43
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/activemq-harnesses/activemq-harness-one/src/main/java/com/aixcc/activemq/harnesses/one/ActivemqOne.java:\n18       public static void fuzzerTestOneInput(byte[] input) {\n19           if (input.length < 1) return;\n20   \n21           try {\n22               int version = (int) input[0];\n23               byte[] rest = new byte[input.length - 1];\n24               System.arraycopy(input, 1, rest, 0, rest.length);\n25   \n26               // Initialize the OpenWireFormat with the desired version\n27               OpenWireFormat format = new OpenWireFormat();\n28   \n29               // Set the version \n30               if (version < 1 || version > 12)\n31                   return;\n32               format.setVersion(version);\n33   \n34               // Create a DataInputStream from the fuzzed input bytes\n35               DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(rest));\n36   \n37               // Attempt to unmarshal the input\n38               Command command = (Command) format.unmarshal(dataIn);\n39   \n40               // Optionally, process the command or check its properties\n41               // For fuzzing, this may not be necessary\n42           } catch (Exception e) {\n43               // Catch and handle any exceptions to prevent the fuzzer from stopping\n44               // Log the exception if needed\n45               System.err.println(\"Exception during unmarshal: \" + e.getMessage());\n46           }\n47       }\n\nsrc/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:\n340       @Override\n341       public void setVersion(int version) {\n342           String mfName = \"org.apache.activemq.openwire.v\" + version + \".MarshallerFactory\";\n343           Class mfClass;\n344           try {\n345               mfClass = Class.forName(mfName, false, getClass().getClassLoader());\n346           } catch (ClassNotFoundException e) {\n347               throw (IllegalArgumentException)new IllegalArgumentException(\"Invalid version: \" + version\n348                                                                            + \", could not load \" + mfName)\n349                   .initCause(e);\n350           }\n351           try {\n352               Method method = mfClass.getMethod(\"createMarshallerMap\", new Class[] {OpenWireFormat.class});\n353               dataMarshallers = (DataStreamMarshaller[])method.invoke(null, new Object[] {this});\n354           } catch (Throwable e) {\n355               throw (IllegalArgumentException)new IllegalArgumentException(\n356                                                                            \"Invalid version: \"\n357                                                                                + version\n358                                                                                + \", \"\n359                                                                                + mfName\n360                                                                                + \" does not properly implement the createMarshallerMap method.\")\n361                   .initCause(e);\n362           }\n363           this.version = version;\n364       }\n",
+            "cost": 0.053305000000000005,
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:353:55",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 1
+        },
+        {
+            "blob": [
+                "CgABAgMEBQYHCAkKCwwNDg8="
+            ],
+            "code": "src/activemq-harnesses/activemq-harness-one/src/main/java/com/aixcc/activemq/harnesses/one/ActivemqOne.java:\n18       public static void fuzzerTestOneInput(byte[] input) {\n19           if (input.length < 1) return;\n20   \n21           try {\n22               int version = (int) input[0];\n23               byte[] rest = new byte[input.length - 1];\n24               System.arraycopy(input, 1, rest, 0, rest.length);\n25   \n26               // Initialize the OpenWireFormat with the desired version\n27               OpenWireFormat format = new OpenWireFormat();\n28   \n29               // Set the version \n30               if (version < 1 || version > 12)\n31                   return;\n32               format.setVersion(version);\n33   \n34               // Create a DataInputStream from the fuzzed input bytes\n35               DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(rest));\n36   \n37               // Attempt to unmarshal the input\n38               Command command = (Command) format.unmarshal(dataIn);\n39   \n40               // Optionally, process the command or check its properties\n41               // For fuzzing, this may not be necessary\n42           } catch (Exception e) {\n43               // Catch and handle any exceptions to prevent the fuzzer from stopping\n44               // Log the exception if needed\n45               System.err.println(\"Exception during unmarshal: \" + e.getMessage());\n46           }\n47       }\n\nsrc/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:\n340       @Override\n341       public void setVersion(int version) {\n342           String mfName = \"org.apache.activemq.openwire.v\" + version + \".MarshallerFactory\";\n343           Class mfClass;\n344           try {\n345               mfClass = Class.forName(mfName, false, getClass().getClassLoader());\n346           } catch (ClassNotFoundException e) {\n347               throw (IllegalArgumentException)new IllegalArgumentException(\"Invalid version: \" + version\n348                                                                            + \", could not load \" + mfName)\n349                   .initCause(e);\n350           }\n351           try {\n352               Method method = mfClass.getMethod(\"createMarshallerMap\", new Class[] {OpenWireFormat.class});\n353               dataMarshallers = (DataStreamMarshaller[])method.invoke(null, new Object[] {this});\n354           } catch (Throwable e) {\n355               throw (IllegalArgumentException)new IllegalArgumentException(\n356                                                                            \"Invalid version: \"\n357                                                                                + version\n358                                                                                + \", \"\n359                                                                                + mfName\n360                                                                                + \" does not properly implement the createMarshallerMap method.\")\n361                   .initCause(e);\n362           }\n363           this.version = version;\n364       }\n",
+            "cost": 0.3555,
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:345:37",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 2
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v6/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 3
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v11/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 4
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v4/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 5
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v10/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 6
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v7/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 7
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v2/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 8
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v12/BaseDataStreamMarshaller.java:232:41",
+            "status": "error",
+            "id": 9
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v1/BaseDataStreamMarshaller.java:232:41",
+            "status": "error",
+            "id": 10
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v9/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 11
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v3/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 12
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v8/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 13
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Remote Code Execution",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v5/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 14
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v6/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 15
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v11/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 16
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v10/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 17
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v5/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 18
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v7/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 19
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v2/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 20
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v12/BaseDataStreamMarshaller.java:232:41",
+            "status": "error",
+            "id": 21
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v1/BaseDataStreamMarshaller.java:232:41",
+            "status": "error",
+            "id": 22
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/v9/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 23
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v3/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 24
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v4/BaseDataStreamMarshaller.java:231:41",
+            "status": "error",
+            "id": 25
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-openwire-legacy/src/main/java/org/apache/activemq/openwire/v8/BaseDataStreamMarshaller.java:230:41",
+            "status": "error",
+            "id": 26
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Regular Expression Injection",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/util/URISupport.java:124:49",
+            "status": "error",
+            "id": 27
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/activemq-harnesses/activemq-harness-one/src/main/java/com/aixcc/activemq/harnesses/one/ActivemqOne.java:\n18       public static void fuzzerTestOneInput(byte[] input) {\n19           if (input.length < 1) return;\n20   \n21           try {\n22               int version = (int) input[0];\n23               byte[] rest = new byte[input.length - 1];\n24               System.arraycopy(input, 1, rest, 0, rest.length);\n25   \n26               // Initialize the OpenWireFormat with the desired version\n27               OpenWireFormat format = new OpenWireFormat();\n28   \n29               // Set the version \n30               if (version < 1 || version > 12)\n31                   return;\n32               format.setVersion(version);\n33   \n34               // Create a DataInputStream from the fuzzed input bytes\n35               DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(rest));\n36   \n37               // Attempt to unmarshal the input\n38               Command command = (Command) format.unmarshal(dataIn);\n39   \n40               // Optionally, process the command or check its properties\n41               // For fuzzing, this may not be necessary\n42           } catch (Exception e) {\n43               // Catch and handle any exceptions to prevent the fuzzer from stopping\n44               // Log the exception if needed\n45               System.err.println(\"Exception during unmarshal: \" + e.getMessage());\n46           }\n47       }\n\nsrc/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:\n340       @Override\n341       public void setVersion(int version) {\n342           String mfName = \"org.apache.activemq.openwire.v\" + version + \".MarshallerFactory\";\n343           Class mfClass;\n344           try {\n345               mfClass = Class.forName(mfName, false, getClass().getClassLoader());\n346           } catch (ClassNotFoundException e) {\n347               throw (IllegalArgumentException)new IllegalArgumentException(\"Invalid version: \" + version\n348                                                                            + \", could not load \" + mfName)\n349                   .initCause(e);\n350           }\n351           try {\n352               Method method = mfClass.getMethod(\"createMarshallerMap\", new Class[] {OpenWireFormat.class});\n353               dataMarshallers = (DataStreamMarshaller[])method.invoke(null, new Object[] {this});\n354           } catch (Throwable e) {\n355               throw (IllegalArgumentException)new IllegalArgumentException(\n356                                                                            \"Invalid version: \"\n357                                                                                + version\n358                                                                                + \", \"\n359                                                                                + mfName\n360                                                                                + \" does not properly implement the createMarshallerMap method.\")\n361                   .initCause(e);\n362           }\n363           this.version = version;\n364       }\n",
+            "cost": 0.037535,
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:353:69",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 28
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/activemq-harnesses/activemq-harness-one/src/main/java/com/aixcc/activemq/harnesses/one/ActivemqOne.java:\n18       public static void fuzzerTestOneInput(byte[] input) {\n19           if (input.length < 1) return;\n20   \n21           try {\n22               int version = (int) input[0];\n23               byte[] rest = new byte[input.length - 1];\n24               System.arraycopy(input, 1, rest, 0, rest.length);\n25   \n26               // Initialize the OpenWireFormat with the desired version\n27               OpenWireFormat format = new OpenWireFormat();\n28   \n29               // Set the version \n30               if (version < 1 || version > 12)\n31                   return;\n32               format.setVersion(version);\n33   \n34               // Create a DataInputStream from the fuzzed input bytes\n35               DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(rest));\n36   \n37               // Attempt to unmarshal the input\n38               Command command = (Command) format.unmarshal(dataIn);\n39   \n40               // Optionally, process the command or check its properties\n41               // For fuzzing, this may not be necessary\n42           } catch (Exception e) {\n43               // Catch and handle any exceptions to prevent the fuzzer from stopping\n44               // Log the exception if needed\n45               System.err.println(\"Exception during unmarshal: \" + e.getMessage());\n46           }\n47       }\n\nsrc/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:\n340       @Override\n341       public void setVersion(int version) {\n342           String mfName = \"org.apache.activemq.openwire.v\" + version + \".MarshallerFactory\";\n343           Class mfClass;\n344           try {\n345               mfClass = Class.forName(mfName, false, getClass().getClassLoader());\n346           } catch (ClassNotFoundException e) {\n347               throw (IllegalArgumentException)new IllegalArgumentException(\"Invalid version: \" + version\n348                                                                            + \", could not load \" + mfName)\n349                   .initCause(e);\n350           }\n351           try {\n352               Method method = mfClass.getMethod(\"createMarshallerMap\", new Class[] {OpenWireFormat.class});\n353               dataMarshallers = (DataStreamMarshaller[])method.invoke(null, new Object[] {this});\n354           } catch (Throwable e) {\n355               throw (IllegalArgumentException)new IllegalArgumentException(\n356                                                                            \"Invalid version: \"\n357                                                                                + version\n358                                                                                + \", \"\n359                                                                                + mfName\n360                                                                                + \" does not properly implement the createMarshallerMap method.\")\n361                   .initCause(e);\n362           }\n363           this.version = version;\n364       }\n",
+            "cost": 0.051250000000000004,
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:353:55",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 29
+        },
+        {
+            "msg": "Not sure it can happen in real, but handle later.",
+            "harness_id": "ActivemqOne",
+            "sanitizer": "load arbitrary library",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:345:37",
+            "status": "error",
+            "id": 30
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/activemq-harnesses/activemq-harness-one/src/main/java/com/aixcc/activemq/harnesses/one/ActivemqOne.java:\n18       public static void fuzzerTestOneInput(byte[] input) {\n19           if (input.length < 1) return;\n20   \n21           try {\n22               int version = (int) input[0];\n23               byte[] rest = new byte[input.length - 1];\n24               System.arraycopy(input, 1, rest, 0, rest.length);\n25   \n26               // Initialize the OpenWireFormat with the desired version\n27               OpenWireFormat format = new OpenWireFormat();\n28   \n29               // Set the version \n30               if (version < 1 || version > 12)\n31                   return;\n32               format.setVersion(version);\n33   \n34               // Create a DataInputStream from the fuzzed input bytes\n35               DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(rest));\n36   \n37               // Attempt to unmarshal the input\n38               Command command = (Command) format.unmarshal(dataIn);\n39   \n40               // Optionally, process the command or check its properties\n41               // For fuzzing, this may not be necessary\n42           } catch (Exception e) {\n43               // Catch and handle any exceptions to prevent the fuzzer from stopping\n44               // Log the exception if needed\n45               System.err.println(\"Exception during unmarshal: \" + e.getMessage());\n46           }\n47       }\n\nsrc/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:\n340       @Override\n341       public void setVersion(int version) {\n342           String mfName = \"org.apache.activemq.openwire.v\" + version + \".MarshallerFactory\";\n343           Class mfClass;\n344           try {\n345               mfClass = Class.forName(mfName, false, getClass().getClassLoader());\n346           } catch (ClassNotFoundException e) {\n347               throw (IllegalArgumentException)new IllegalArgumentException(\"Invalid version: \" + version\n348                                                                            + \", could not load \" + mfName)\n349                   .initCause(e);\n350           }\n351           try {\n352               Method method = mfClass.getMethod(\"createMarshallerMap\", new Class[] {OpenWireFormat.class});\n353               dataMarshallers = (DataStreamMarshaller[])method.invoke(null, new Object[] {this});\n354           } catch (Throwable e) {\n355               throw (IllegalArgumentException)new IllegalArgumentException(\n356                                                                            \"Invalid version: \"\n357                                                                                + version\n358                                                                                + \", \"\n359                                                                                + mfName\n360                                                                                + \" does not properly implement the createMarshallerMap method.\")\n361                   .initCause(e);\n362           }\n363           this.version = version;\n364       }\n",
+            "cost": 0.029235,
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:353:55",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 31
+        },
+        {
+            "blob": [
+                ""
+            ],
+            "code": "src/activemq-harnesses/activemq-harness-one/src/main/java/com/aixcc/activemq/harnesses/one/ActivemqOne.java:\n18       public static void fuzzerTestOneInput(byte[] input) {\n19           if (input.length < 1) return;\n20   \n21           try {\n22               int version = (int) input[0];\n23               byte[] rest = new byte[input.length - 1];\n24               System.arraycopy(input, 1, rest, 0, rest.length);\n25   \n26               // Initialize the OpenWireFormat with the desired version\n27               OpenWireFormat format = new OpenWireFormat();\n28   \n29               // Set the version \n30               if (version < 1 || version > 12)\n31                   return;\n32               format.setVersion(version);\n33   \n34               // Create a DataInputStream from the fuzzed input bytes\n35               DataInputStream dataIn = new DataInputStream(new ByteArrayInputStream(rest));\n36   \n37               // Attempt to unmarshal the input\n38               Command command = (Command) format.unmarshal(dataIn);\n39   \n40               // Optionally, process the command or check its properties\n41               // For fuzzing, this may not be necessary\n42           } catch (Exception e) {\n43               // Catch and handle any exceptions to prevent the fuzzer from stopping\n44               // Log the exception if needed\n45               System.err.println(\"Exception during unmarshal: \" + e.getMessage());\n46           }\n47       }\n\nsrc/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:\n340       @Override\n341       public void setVersion(int version) {\n342           String mfName = \"org.apache.activemq.openwire.v\" + version + \".MarshallerFactory\";\n343           Class mfClass;\n344           try {\n345               mfClass = Class.forName(mfName, false, getClass().getClassLoader());\n346           } catch (ClassNotFoundException e) {\n347               throw (IllegalArgumentException)new IllegalArgumentException(\"Invalid version: \" + version\n348                                                                            + \", could not load \" + mfName)\n349                   .initCause(e);\n350           }\n351           try {\n352               Method method = mfClass.getMethod(\"createMarshallerMap\", new Class[] {OpenWireFormat.class});\n353               dataMarshallers = (DataStreamMarshaller[])method.invoke(null, new Object[] {this});\n354           } catch (Throwable e) {\n355               throw (IllegalArgumentException)new IllegalArgumentException(\n356                                                                            \"Invalid version: \"\n357                                                                                + version\n358                                                                                + \", \"\n359                                                                                + mfName\n360                                                                                + \" does not properly implement the createMarshallerMap method.\")\n361                   .initCause(e);\n362           }\n363           this.version = version;\n364       }\n",
+            "cost": 0.029235,
+            "harness_id": "ActivemqOne",
+            "sanitizer": "Script Engine Injection",
+            "sink": "src/activemq/activemq-client/src/main/java/org/apache/activemq/openwire/OpenWireFormat.java:353:55",
+            "status": "corpus",
+            "valid_path": "NO",
+            "id": 32
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "ActivemqOne",
+            "blob": [
+                "",
+                "CgABAgMEBQYHCAkKCwwNDg8="
+            ]
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+rule com.github.** com.code_intelligence.jazzer.third_party.@0
+rule io.** com.code_intelligence.jazzer.third_party.@0
+rule kotlin.** com.code_intelligence.jazzer.third_party.@0
+rule net.** com.code_intelligence.jazzer.third_party.@0
+rule nonapi.** com.code_intelligence.jazzer.third_party.@0
+rule org.objectweb.** com.code_intelligence.jazzer.third_party.@0
+
+rule org.gts3.** com.code_intelligence.jazzer.third_party.@0
+rule jakarta.** com.code_intelligence.jazzer.third_party.@0
+rule org.eclipse.** com.code_intelligence.jazzer.third_party.@0
+rule org.apache.** com.code_intelligence.jazzer.third_party.@0
+rule soot.** com.code_intelligence.jazzer.third_party.@0

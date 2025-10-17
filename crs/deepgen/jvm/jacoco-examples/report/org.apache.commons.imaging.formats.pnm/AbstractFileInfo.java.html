@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractFileInfo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.pnm</a> &gt; <span class="el_source">AbstractFileInfo.java</span></div><h1>AbstractFileInfo.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.pnm;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.ImageBuilder;
+
+abstract class AbstractFileInfo {
+
+    static int readSample(final InputStream is, final int bytesPerSample) throws IOException {
+<span class="fc" id="L30">        int sample = 0;</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        for (int i = 0; i &lt; bytesPerSample; i++) {</span>
+<span class="fc" id="L32">            final int nextByte = is.read();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            if (nextByte &lt; 0) {</span>
+<span class="fc" id="L34">                throw new ImagingException(&quot;PNM: Unexpected EOF&quot;);</span>
+            }
+<span class="fc" id="L36">            sample &lt;&lt;= 8;</span>
+<span class="fc" id="L37">            sample |= nextByte;</span>
+        }
+<span class="fc" id="L39">        return sample;</span>
+    }
+
+    static int scaleSample(int sample, final float scale, final int max) throws ImagingException {
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (sample &lt; 0) {</span>
+            // Even netpbm tools break for files like this
+<span class="fc" id="L45">            throw new ImagingException(&quot;Negative pixel values are invalid in PNM files&quot;);</span>
+        }
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (sample &gt; max) {</span>
+            // invalid values -&gt; black
+<span class="fc" id="L49">            sample = 0;</span>
+        }
+<span class="fc" id="L51">        return (int) (sample * scale / max + 0.5f);</span>
+    }
+
+    final int width;
+
+    final int height;
+
+    final boolean rawBits;
+
+<span class="fc" id="L60">    AbstractFileInfo(final int width, final int height, final boolean rawBits) {</span>
+<span class="fc" id="L61">        this.width = width;</span>
+<span class="fc" id="L62">        this.height = height;</span>
+<span class="fc" id="L63">        this.rawBits = rawBits;</span>
+<span class="fc" id="L64">    }</span>
+
+    abstract int getBitDepth();
+
+    abstract ImageInfo.ColorType getColorType();
+
+    abstract ImageFormat getImageType();
+
+    abstract String getImageTypeDescription();
+
+    abstract String getMimeType();
+
+    abstract int getNumComponents();
+
+    abstract int getRgb(InputStream is) throws IOException;
+
+    abstract int getRgb(WhiteSpaceReader wsr) throws IOException;
+
+    abstract boolean hasAlpha();
+
+    void newline() {
+        // do nothing by default.
+<span class="fc" id="L86">    }</span>
+
+    void readImage(final ImageBuilder imageBuilder, final InputStream is) throws IOException {
+        // is = new BufferedInputStream(is);
+        // int count = 0;
+        //
+        // try
+        // {
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (!rawBits) {</span>
+<span class="fc" id="L96">            final WhiteSpaceReader wsr = new WhiteSpaceReader(is);</span>
+
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            for (int y = 0; y &lt; height; y++) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">                for (int x = 0; x &lt; width; x++) {</span>
+<span class="fc" id="L100">                    final int rgb = getRgb(wsr);</span>
+
+<span class="fc" id="L102">                    imageBuilder.setRgb(x, y, rgb);</span>
+                    // count++;
+                }
+<span class="fc" id="L105">                newline();</span>
+            }
+<span class="fc" id="L107">        } else {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            for (int y = 0; y &lt; height; y++) {</span>
+                // System.out.println(&quot;y: &quot; + y);
+<span class="fc bfc" id="L110" title="All 2 branches covered.">                for (int x = 0; x &lt; width; x++) {</span>
+<span class="fc" id="L111">                    final int rgb = getRgb(is);</span>
+<span class="fc" id="L112">                    imageBuilder.setRgb(x, y, rgb);</span>
+                    // count++;
+                }
+<span class="fc" id="L115">                newline();</span>
+            }
+        }
+        // }
+        // finally
+        // {
+        // System.out.println(&quot;count: &quot; + count);
+        // dump();
+        // }
+<span class="fc" id="L124">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

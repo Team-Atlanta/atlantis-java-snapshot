@@ -1,0 +1,5 @@
+__pycache__
+build
+*.egg-info
+code_browser_client/browser_pb2*.py
+code_browser_client/__init__.pyi

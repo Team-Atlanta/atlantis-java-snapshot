@@ -1,0 +1,828 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffDirectory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffDirectory.java</span></div><h1>TiffDirectory.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.ByteConversions;
+import org.apache.commons.imaging.common.RationalNumber;
+import org.apache.commons.imaging.formats.tiff.constants.TiffConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoByte;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoBytes;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoDouble;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoDoubles;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoFloat;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoFloats;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoGpsText;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLongs;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRational;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRationals;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSByte;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSBytes;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSLongs;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSRational;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSRationals;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSShort;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoSShorts;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShortOrLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShorts;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoXpString;
+
+/**
+ * Provides methods and elements for accessing an Image File Directory (IFD) from a TIFF file. In the TIFF specification, the IFD is the main container for
+ * individual images or sets of metadata. While not all Directories contain images, images are always stored in a Directory.
+ */
+public class TiffDirectory extends AbstractTiffElement implements Iterable&lt;TiffField&gt; {
+
+    public static final class ImageDataElement extends AbstractTiffElement {
+        public ImageDataElement(final long offset, final int length) {
+<span class="nc" id="L69">            super(offset, length);</span>
+<span class="nc" id="L70">        }</span>
+
+        @Override
+        public String getElementDescription() {
+<span class="nc" id="L74">            return &quot;ImageDataElement&quot;;</span>
+        }
+    }
+
+    public static String description(final int type) {
+<span class="nc bnc" id="L79" title="All 8 branches missed.">        switch (type) {</span>
+        case TiffDirectoryConstants.DIRECTORY_TYPE_UNKNOWN:
+<span class="nc" id="L81">            return &quot;Unknown&quot;;</span>
+        case TiffDirectoryConstants.DIRECTORY_TYPE_ROOT:
+<span class="nc" id="L83">            return &quot;Root&quot;;</span>
+        case TiffDirectoryConstants.DIRECTORY_TYPE_SUB:
+<span class="nc" id="L85">            return &quot;Sub&quot;;</span>
+        case TiffDirectoryConstants.DIRECTORY_TYPE_THUMBNAIL:
+<span class="nc" id="L87">            return &quot;Thumbnail&quot;;</span>
+        case TiffDirectoryConstants.DIRECTORY_TYPE_EXIF:
+<span class="nc" id="L89">            return &quot;Exif&quot;;</span>
+        case TiffDirectoryConstants.DIRECTORY_TYPE_GPS:
+<span class="nc" id="L91">            return &quot;Gps&quot;;</span>
+        case TiffDirectoryConstants.DIRECTORY_TYPE_INTEROPERABILITY:
+<span class="nc" id="L93">            return &quot;Interoperability&quot;;</span>
+        default:
+<span class="nc" id="L95">            return &quot;Bad Type&quot;;</span>
+        }
+    }
+
+    private final List&lt;TiffField&gt; entries;
+
+    /**
+     * Preserves the byte order derived from the TIFF file header. Some of the legacy methods in this class require byte order as an argument, though that use
+     * could be phased out eventually.
+     */
+    private final ByteOrder headerByteOrder;
+
+    private JpegImageData jpegImageData;
+
+    private final long nextDirectoryOffset;
+
+    private AbstractTiffImageData abstractTiffImageData;
+
+    public final int type;
+
+    public TiffDirectory(final int type, final List&lt;TiffField&gt; entries, final long offset, final long nextDirectoryOffset, final ByteOrder byteOrder) {
+<span class="fc" id="L116">        super(offset,</span>
+<span class="fc" id="L117">                TiffConstants.TIFF_DIRECTORY_HEADER_LENGTH + entries.size() * TiffConstants.TIFF_ENTRY_LENGTH + TiffConstants.TIFF_DIRECTORY_FOOTER_LENGTH);</span>
+
+<span class="fc" id="L119">        this.type = type;</span>
+<span class="fc" id="L120">        this.entries = Collections.unmodifiableList(entries);</span>
+<span class="fc" id="L121">        this.nextDirectoryOffset = nextDirectoryOffset;</span>
+<span class="fc" id="L122">        this.headerByteOrder = byteOrder;</span>
+<span class="fc" id="L123">    }</span>
+
+    public String description() {
+<span class="nc" id="L126">        return TiffDirectory.description(type);</span>
+    }
+
+    public void dump() {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        for (final TiffField entry : entries) {</span>
+<span class="nc" id="L131">            entry.dump();</span>
+<span class="nc" id="L132">        }</span>
+<span class="nc" id="L133">    }</span>
+
+    public TiffField findField(final TagInfo tag) throws ImagingException {
+<span class="fc" id="L136">        final boolean failIfMissing = false;</span>
+<span class="fc" id="L137">        return findField(tag, failIfMissing);</span>
+    }
+
+    public TiffField findField(final TagInfo tag, final boolean failIfMissing) throws ImagingException {
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        for (final TiffField field : entries) {</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">            if (field.getTag() == tag.tag) {</span>
+<span class="nc" id="L143">                return field;</span>
+            }
+<span class="fc" id="L145">        }</span>
+
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (failIfMissing) {</span>
+<span class="nc" id="L148">            throw new ImagingException(&quot;Missing expected field: &quot; + tag.getDescription());</span>
+        }
+
+<span class="fc" id="L151">        return null;</span>
+    }
+
+    /**
+     * Gets the byte order used by the source file for storing this directory and its content.
+     *
+     * @return A valid byte order instance.
+     */
+    public ByteOrder getByteOrder() {
+<span class="nc" id="L160">        return headerByteOrder;</span>
+    }
+
+    public List&lt;TiffField&gt; getDirectoryEntries() {
+<span class="nc" id="L164">        return new ArrayList&lt;&gt;(entries);</span>
+    }
+
+    @Override
+    public String getElementDescription() {
+<span class="nc" id="L169">        long entryOffset = offset + TiffConstants.TIFF_DIRECTORY_HEADER_LENGTH;</span>
+
+<span class="nc" id="L171">        final StringBuilder result = new StringBuilder();</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        for (final TiffField entry : entries) {</span>
+<span class="nc" id="L173">            result.append(String.format(&quot;\t[%d]: %s (%d, 0x%x), %s, %d: %s%n&quot;, entryOffset, entry.getTagInfo().name, entry.getTag(), entry.getTag(),</span>
+<span class="nc" id="L174">                    entry.getFieldType().getName(), entry.getBytesLength(), entry.getValueDescription()));</span>
+
+<span class="nc" id="L176">            entryOffset += TiffConstants.TIFF_ENTRY_LENGTH;</span>
+<span class="nc" id="L177">        }</span>
+<span class="nc" id="L178">        return result.toString();</span>
+    }
+
+    public Object getFieldValue(final TagInfo tag) throws ImagingException {
+<span class="nc" id="L182">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L184">            return null;</span>
+        }
+<span class="nc" id="L186">        return field.getValue();</span>
+    }
+
+    public String[] getFieldValue(final TagInfoAscii tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L190">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L193">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L195">            return null;</span>
+        }
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L199">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L201">            return null;</span>
+        }
+<span class="nc" id="L203">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L204">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public byte getFieldValue(final TagInfoByte tag) throws ImagingException {
+<span class="nc" id="L208">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L210">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L213">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L216">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L218">        return field.getByteArrayValue()[0];</span>
+    }
+
+    public byte[] getFieldValue(final TagInfoBytes tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L222">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L225">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L227">            return null;</span>
+        }
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L231">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L233">            return null;</span>
+        }
+<span class="nc" id="L235">        return field.getByteArrayValue();</span>
+    }
+
+    public double getFieldValue(final TagInfoDouble tag) throws ImagingException {
+<span class="nc" id="L239">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L241">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L244">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L246" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L247">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L249">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L250">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public double[] getFieldValue(final TagInfoDoubles tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L254">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L257">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L259">            return null;</span>
+        }
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L263">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L265">            return null;</span>
+        }
+<span class="nc" id="L267">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L268">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public float getFieldValue(final TagInfoFloat tag) throws ImagingException {
+<span class="nc" id="L272">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L274">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L277">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L280">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L282">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L283">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public float[] getFieldValue(final TagInfoFloats tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L287">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L290">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L292">            return null;</span>
+        }
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L296">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L298">            return null;</span>
+        }
+<span class="nc" id="L300">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L301">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public String getFieldValue(final TagInfoGpsText tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L305">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L308">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L310">            return null;</span>
+        }
+<span class="nc" id="L312">        return tag.getValue(field);</span>
+    }
+
+    public int getFieldValue(final TagInfoLong tag) throws ImagingException {
+<span class="nc" id="L316">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L318">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L321">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L324">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L326">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L327">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public int[] getFieldValue(final TagInfoLongs tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L331">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L334">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L336">            return null;</span>
+        }
+<span class="nc bnc" id="L338" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L340">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L342">            return null;</span>
+        }
+<span class="nc" id="L344">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L345">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public RationalNumber getFieldValue(final TagInfoRational tag) throws ImagingException {
+<span class="nc" id="L349">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L351">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L353" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L354">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L357">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L359">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L360">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public RationalNumber[] getFieldValue(final TagInfoRationals tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L364">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L367">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L369">            return null;</span>
+        }
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L373">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L375">            return null;</span>
+        }
+<span class="nc" id="L377">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L378">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public byte getFieldValue(final TagInfoSByte tag) throws ImagingException {
+<span class="nc" id="L382">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L384">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L386" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L387">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L390">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L392">        return field.getByteArrayValue()[0];</span>
+    }
+
+    public byte[] getFieldValue(final TagInfoSBytes tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L396">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L399">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L401">            return null;</span>
+        }
+<span class="nc bnc" id="L403" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L405">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L407">            return null;</span>
+        }
+<span class="nc" id="L409">        return field.getByteArrayValue();</span>
+    }
+
+    public short getFieldValue(final TagInfoShort tag) throws ImagingException {
+<span class="nc" id="L413">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L415">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L417" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L418">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L420" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L421">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L423">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L424">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public int[] getFieldValue(final TagInfoShortOrLong tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L428">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L431">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L433">            return null;</span>
+        }
+<span class="nc bnc" id="L435" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L436" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L437">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L439">            return null;</span>
+        }
+<span class="nc" id="L441">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">        if (field.getFieldType() == AbstractFieldType.SHORT) {</span>
+<span class="nc" id="L443">            return ByteConversions.toUInt16s(bytes, field.getByteOrder());</span>
+        }
+<span class="nc" id="L445">        return ByteConversions.toInts(bytes, field.getByteOrder());</span>
+    }
+
+    public short[] getFieldValue(final TagInfoShorts tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L449">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L450" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L452">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L454">            return null;</span>
+        }
+<span class="nc bnc" id="L456" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L458">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L460">            return null;</span>
+        }
+<span class="nc" id="L462">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L463">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public int getFieldValue(final TagInfoSLong tag) throws ImagingException {
+<span class="nc" id="L467">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L468" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L469">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L472">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L475">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L477">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L478">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public int[] getFieldValue(final TagInfoSLongs tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L482">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L483" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L485">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L487">            return null;</span>
+        }
+<span class="nc bnc" id="L489" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L490" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L491">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L493">            return null;</span>
+        }
+<span class="nc" id="L495">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L496">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public RationalNumber getFieldValue(final TagInfoSRational tag) throws ImagingException {
+<span class="nc" id="L500">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L501" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L502">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L504" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L505">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L507" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L508">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L510">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L511">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public RationalNumber[] getFieldValue(final TagInfoSRationals tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L515">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L517" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L518">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L520">            return null;</span>
+        }
+<span class="nc bnc" id="L522" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L523" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L524">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L526">            return null;</span>
+        }
+<span class="nc" id="L528">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L529">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public short getFieldValue(final TagInfoSShort tag) throws ImagingException {
+<span class="nc" id="L533">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L534" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc" id="L535">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+        }
+<span class="nc bnc" id="L537" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc" id="L538">            throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+        }
+<span class="nc bnc" id="L540" title="All 2 branches missed.">        if (field.getCount() != 1) {</span>
+<span class="nc" id="L541">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has wrong count &quot; + field.getCount());</span>
+        }
+<span class="nc" id="L543">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L544">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public short[] getFieldValue(final TagInfoSShorts tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L548">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L549" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L550" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L551">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L553">            return null;</span>
+        }
+<span class="nc bnc" id="L555" title="All 2 branches missed.">        if (!tag.dataTypes.contains(field.getFieldType())) {</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L557">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect type &quot; + field.getFieldType().getName());</span>
+            }
+<span class="nc" id="L559">            return null;</span>
+        }
+<span class="nc" id="L561">        final byte[] bytes = field.getByteArrayValue();</span>
+<span class="nc" id="L562">        return tag.getValue(field.getByteOrder(), bytes);</span>
+    }
+
+    public String getFieldValue(final TagInfoXpString tag, final boolean mustExist) throws ImagingException {
+<span class="nc" id="L566">        final TiffField field = findField(tag);</span>
+<span class="nc bnc" id="L567" title="All 2 branches missed.">        if (field == null) {</span>
+<span class="nc bnc" id="L568" title="All 2 branches missed.">            if (mustExist) {</span>
+<span class="nc" id="L569">                throw new ImagingException(&quot;Required field \&quot;&quot; + tag.name + &quot;\&quot; is missing&quot;);</span>
+            }
+<span class="nc" id="L571">            return null;</span>
+        }
+<span class="nc" id="L573">        return tag.getValue(field);</span>
+    }
+
+    public JpegImageData getJpegImageData() {
+<span class="nc" id="L577">        return jpegImageData;</span>
+    }
+
+    public ImageDataElement getJpegRawImageDataElement() throws ImagingException {
+<span class="nc" id="L581">        final TiffField jpegInterchangeFormat = findField(TiffTagConstants.TIFF_TAG_JPEG_INTERCHANGE_FORMAT);</span>
+<span class="nc" id="L582">        final TiffField jpegInterchangeFormatLength = findField(TiffTagConstants.TIFF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH);</span>
+
+<span class="nc bnc" id="L584" title="All 4 branches missed.">        if (jpegInterchangeFormat != null &amp;&amp; jpegInterchangeFormatLength != null) {</span>
+<span class="nc" id="L585">            final int offSet = jpegInterchangeFormat.getIntArrayValue()[0];</span>
+<span class="nc" id="L586">            final int byteCount = jpegInterchangeFormatLength.getIntArrayValue()[0];</span>
+
+<span class="nc" id="L588">            return new ImageDataElement(offSet, byteCount);</span>
+        }
+<span class="nc" id="L590">        throw new ImagingException(&quot;Couldn't find image data.&quot;);</span>
+    }
+
+    public long getNextDirectoryOffset() {
+<span class="nc" id="L594">        return nextDirectoryOffset;</span>
+    }
+
+    /**
+     * Reads the numerical data stored in this TIFF directory, if available. Note that this method is defined only for TIFF directories that contain
+     * floating-point data or two-byte signed integer data.
+     * &lt;p&gt;
+     * TIFF directories that provide numerical data do not directly specify images, though it is possible to interpret the data as an image using this library.
+     * TIFF files may contain multiple directories which are allowed to have different formats. Thus it is possible for a TIFF file to contain a mix of image
+     * and floating-point raster data.
+     * &lt;p&gt;
+     * If desired, sub-image data can be read from the file by using a Java Map instance to specify the subsection of the image that is required. The following
+     * code illustrates the approach:
+     *
+     * &lt;pre&gt;
+     * int x; // coordinate (column) of corner of sub-image
+     * int y; // coordinate (row) of corner of sub-image
+     * int width; // width of sub-image
+     * int height; // height of sub-image
+     *
+     * Map&amp;lt;String, Object&amp;gt; params = new HashMap&amp;lt;&amp;gt;();
+     * params.put(TiffConstants.PARAM_KEY_SUBIMAGE_X, x);
+     * params.put(TiffConstants.PARAM_KEY_SUBIMAGE_Y, y);
+     * params.put(TiffConstants.PARAM_KEY_SUBIMAGE_WIDTH, width);
+     * params.put(TiffConstants.PARAM_KEY_SUBIMAGE_HEIGHT, height);
+     * TiffRasterData raster = directory.readFloatingPointRasterData(params);
+     * &lt;/pre&gt;
+     *
+     * @param params an optional parameter map instance
+     * @return a valid instance
+     * @throws ImagingException in the event of incompatible or malformed data
+     * @throws IOException      in the event of an I/O error
+     */
+    public TiffRasterData getRasterData(final TiffImagingParameters params) throws ImagingException, IOException {
+
+<span class="nc" id="L629">        final TiffImageParser parser = new TiffImageParser();</span>
+<span class="nc" id="L630">        return parser.getRasterData(this, headerByteOrder, params);</span>
+    }
+
+    private List&lt;ImageDataElement&gt; getRawImageDataElements(final TiffField offsetsField, final TiffField byteCountsField) throws ImagingException {
+<span class="nc" id="L634">        final long[] offsets = offsetsField.getLongArrayValue();</span>
+<span class="nc" id="L635">        final int[] byteCounts = byteCountsField.getIntArrayValue();</span>
+
+<span class="nc bnc" id="L637" title="All 2 branches missed.">        if (offsets.length != byteCounts.length) {</span>
+<span class="nc" id="L638">            throw new ImagingException(&quot;offsets.length(&quot; + offsets.length + &quot;) != byteCounts.length(&quot; + byteCounts.length + &quot;)&quot;);</span>
+        }
+
+<span class="nc" id="L641">        final List&lt;ImageDataElement&gt; result = Allocator.arrayList(offsets.length);</span>
+<span class="nc bnc" id="L642" title="All 2 branches missed.">        for (int i = 0; i &lt; offsets.length; i++) {</span>
+<span class="nc" id="L643">            result.add(new ImageDataElement(offsets[i], byteCounts[i]));</span>
+        }
+<span class="nc" id="L645">        return result;</span>
+    }
+
+    public String getSingleFieldValue(final TagInfoAscii tag) throws ImagingException {
+<span class="nc" id="L649">        final String[] result = getFieldValue(tag, true);</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">        if (result.length != 1) {</span>
+<span class="nc" id="L651">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect length &quot; + result.length);</span>
+        }
+<span class="nc" id="L653">        return result[0];</span>
+    }
+
+    public int getSingleFieldValue(final TagInfoShortOrLong tag) throws ImagingException {
+<span class="nc" id="L657">        final int[] result = getFieldValue(tag, true);</span>
+<span class="nc bnc" id="L658" title="All 2 branches missed.">        if (result.length != 1) {</span>
+<span class="nc" id="L659">            throw new ImagingException(&quot;Field \&quot;&quot; + tag.name + &quot;\&quot; has incorrect length &quot; + result.length);</span>
+        }
+<span class="nc" id="L661">        return result[0];</span>
+    }
+
+    /**
+     * Gets the image associated with the directory, if any. Note that not all directories contain images.
+     *
+     * @return if successful, a valid BufferedImage instance.
+     * @throws ImagingException in the event of an invalid or incompatible data format.
+     * @throws IOException      in the event of an I/O error.
+     */
+    public BufferedImage getTiffImage() throws ImagingException, IOException {
+<span class="nc bnc" id="L672" title="All 2 branches missed.">        if (null == abstractTiffImageData) {</span>
+<span class="nc" id="L673">            return null;</span>
+        }
+
+<span class="nc" id="L676">        return new TiffImageParser().getBufferedImage(this, headerByteOrder, null);</span>
+    }
+
+    /**
+     * Gets the image associated with the directory, if any. Note that not all directories contain images.
+     * &lt;p&gt;
+     * This method comes from an older version of this class in which byte order was required from an external source. Developers are encouraged to use the
+     * simpler version of getTiffImage that does not require the byte-order argument.
+     *
+     * @param byteOrder byte-order obtained from the containing TIFF file
+     * @return if successful, a valid BufferedImage instance.
+     * @throws ImagingException in the event of an invalid or incompatible data format.
+     * @throws IOException      in the event of an I/O error.
+     */
+    public BufferedImage getTiffImage(final ByteOrder byteOrder) throws ImagingException, IOException {
+<span class="nc" id="L691">        return getTiffImage(byteOrder, new TiffImagingParameters());</span>
+    }
+
+    /**
+     * Gets the image associated with the directory, if any. Note that not all directories contain images.
+     * &lt;p&gt;
+     * This method comes from an older version of this class in which byte order was required from an external source. Developers are encouraged to use the
+     * simpler version of getTiffImage that does not require the byte-order argument.
+     *
+     * @param byteOrder byte-order obtained from the containing TIFF file
+     * @param params    an object containing optional parameters to be applied to the read operation.
+     * @return if successful, a valid BufferedImage instance.
+     * @throws ImagingException in the event of an invalid or incompatible data format.
+     * @throws IOException      in the event of an I/O error.
+     */
+    public BufferedImage getTiffImage(final ByteOrder byteOrder, final TiffImagingParameters params) throws ImagingException, IOException {
+<span class="pc bpc" id="L707" title="1 of 2 branches missed.">        if (null == abstractTiffImageData) {</span>
+<span class="fc" id="L708">            return null;</span>
+        }
+
+<span class="nc" id="L711">        return new TiffImageParser().getBufferedImage(this, byteOrder, params);</span>
+    }
+
+    /**
+     * Gets the image associated with the directory, if any. Note that not all directories contain images.
+     * &lt;p&gt;
+     * The optional parameters object can be used to specify image access or rendering options such as reading only a part of the overall image (i.e. reading a
+     * sub-image) or applying a custom photometric interpreter.
+     *
+     * @param params an object containing optional parameters to be applied to the read operation.
+     * @return if successful, a valid BufferedImage instance.
+     * @throws ImagingException in the event of an invalid or incompatible data format.
+     * @throws IOException      in the event of an I/O error.
+     */
+    public BufferedImage getTiffImage(final TiffImagingParameters params) throws ImagingException, IOException {
+<span class="nc bnc" id="L726" title="All 2 branches missed.">        if (null == abstractTiffImageData) {</span>
+<span class="nc" id="L727">            return null;</span>
+        }
+
+<span class="nc" id="L730">        return new TiffImageParser().getBufferedImage(this, headerByteOrder, params);</span>
+    }
+
+    public AbstractTiffImageData getTiffImageData() {
+<span class="nc" id="L734">        return abstractTiffImageData;</span>
+    }
+
+    public List&lt;ImageDataElement&gt; getTiffRawImageDataElements() throws ImagingException {
+<span class="nc" id="L738">        final TiffField tileOffsets = findField(TiffTagConstants.TIFF_TAG_TILE_OFFSETS);</span>
+<span class="nc" id="L739">        final TiffField tileByteCounts = findField(TiffTagConstants.TIFF_TAG_TILE_BYTE_COUNTS);</span>
+<span class="nc" id="L740">        final TiffField stripOffsets = findField(TiffTagConstants.TIFF_TAG_STRIP_OFFSETS);</span>
+<span class="nc" id="L741">        final TiffField stripByteCounts = findField(TiffTagConstants.TIFF_TAG_STRIP_BYTE_COUNTS);</span>
+
+<span class="nc bnc" id="L743" title="All 4 branches missed.">        if (tileOffsets != null &amp;&amp; tileByteCounts != null) {</span>
+<span class="nc" id="L744">            return getRawImageDataElements(tileOffsets, tileByteCounts);</span>
+        }
+<span class="nc bnc" id="L746" title="All 4 branches missed.">        if (stripOffsets != null &amp;&amp; stripByteCounts != null) {</span>
+<span class="nc" id="L747">            return getRawImageDataElements(stripOffsets, stripByteCounts);</span>
+        }
+<span class="nc" id="L749">        throw new ImagingException(&quot;Couldn't find image data.&quot;);</span>
+    }
+
+    public boolean hasJpegImageData() throws ImagingException {
+<span class="pc bpc" id="L753" title="1 of 2 branches missed.">        return null != findField(TiffTagConstants.TIFF_TAG_JPEG_INTERCHANGE_FORMAT);</span>
+    }
+
+    /**
+     * Indicates whether the directory definition specifies a float-point data format.
+     *
+     * @return {@code true} if the directory contains floating point data; otherwise, {@code false}
+     *
+     * @throws ImagingException in the event of an invalid or malformed specification.
+     */
+    public boolean hasTiffFloatingPointRasterData() throws ImagingException {
+<span class="nc bnc" id="L764" title="All 2 branches missed.">        if (!this.hasTiffImageData()) {</span>
+<span class="nc" id="L765">            return false;</span>
+        }
+<span class="nc" id="L767">        final short[] s = getFieldValue(TiffTagConstants.TIFF_TAG_SAMPLE_FORMAT, false);</span>
+<span class="nc bnc" id="L768" title="All 6 branches missed.">        return s != null &amp;&amp; s.length &gt; 0 &amp;&amp; s[0] == TiffTagConstants.SAMPLE_FORMAT_VALUE_IEEE_FLOATING_POINT;</span>
+
+    }
+
+    public boolean hasTiffImageData() throws ImagingException {
+<span class="pc bpc" id="L773" title="1 of 2 branches missed.">        if (null != findField(TiffTagConstants.TIFF_TAG_TILE_OFFSETS)) {</span>
+<span class="nc" id="L774">            return true;</span>
+        }
+
+<span class="pc bpc" id="L777" title="1 of 2 branches missed.">        return null != findField(TiffTagConstants.TIFF_TAG_STRIP_OFFSETS);</span>
+    }
+
+    /**
+     * Indicates whether the content associated with the directory is given in a supported numerical-data format. If this method returns {@code true}, the
+     * Imaging API will be able to extract a TiffRasterData instance from the associated TIFF file using this directory.
+     *
+     * @return {@code true} if the directory contains a supported raster data format; otherwise, {@code false}.
+     * @throws ImagingException in the event of an invalid or malformed specification.
+     */
+    public boolean hasTiffRasterData() throws ImagingException {
+<span class="nc bnc" id="L788" title="All 2 branches missed.">        if (!this.hasTiffImageData()) {</span>
+<span class="nc" id="L789">            return false;</span>
+        }
+<span class="nc" id="L791">        final short[] s = getFieldValue(TiffTagConstants.TIFF_TAG_SAMPLE_FORMAT, false);</span>
+<span class="nc bnc" id="L792" title="All 8 branches missed.">        return s != null &amp;&amp; s.length &gt; 0 &amp;&amp; (s[0] == TiffTagConstants.SAMPLE_FORMAT_VALUE_IEEE_FLOATING_POINT</span>
+                || s[0] == TiffTagConstants.SAMPLE_FORMAT_VALUE_TWOS_COMPLEMENT_SIGNED_INTEGER);
+    }
+
+    public boolean imageDataInStrips() throws ImagingException {
+<span class="nc" id="L797">        final TiffField tileOffsets = findField(TiffTagConstants.TIFF_TAG_TILE_OFFSETS);</span>
+<span class="nc" id="L798">        final TiffField tileByteCounts = findField(TiffTagConstants.TIFF_TAG_TILE_BYTE_COUNTS);</span>
+<span class="nc" id="L799">        final TiffField stripOffsets = findField(TiffTagConstants.TIFF_TAG_STRIP_OFFSETS);</span>
+<span class="nc" id="L800">        final TiffField stripByteCounts = findField(TiffTagConstants.TIFF_TAG_STRIP_BYTE_COUNTS);</span>
+
+<span class="nc bnc" id="L802" title="All 4 branches missed.">        if (tileOffsets != null &amp;&amp; tileByteCounts != null) {</span>
+<span class="nc" id="L803">            return false;</span>
+        }
+<span class="nc bnc" id="L805" title="All 4 branches missed.">        if (stripOffsets != null &amp;&amp; stripByteCounts != null) {</span>
+<span class="nc" id="L806">            return true;</span>
+        }
+<span class="nc" id="L808">        throw new ImagingException(&quot;Couldn't find image data.&quot;);</span>
+    }
+
+    @Override
+    public Iterator&lt;TiffField&gt; iterator() {
+<span class="nc" id="L813">        return entries.iterator();</span>
+    }
+
+    public void setJpegImageData(final JpegImageData value) {
+<span class="nc" id="L817">        this.jpegImageData = value;</span>
+<span class="nc" id="L818">    }</span>
+
+    public void setTiffImageData(final AbstractTiffImageData rawImageData) {
+<span class="nc" id="L821">        this.abstractTiffImageData = rawImageData;</span>
+<span class="nc" id="L822">    }</span>
+
+    public int size() {
+<span class="nc" id="L825">        return entries.size();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

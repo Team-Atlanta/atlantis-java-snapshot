@@ -1,0 +1,207 @@
+{
+    "sinks": {
+        "Server Side Request Forgery (SSRF)": [
+            {
+                "path": "src/widoco/src/main/java/licensius/GetLicense.java",
+                "line": 84,
+                "column": 22
+            },
+            {
+                "path": "src/widoco/src/main/java/licensius/GetLicense.java",
+                "line": 49,
+                "column": 22
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 107,
+                "column": 47
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 91,
+                "column": 23
+            },
+            {
+                "path": "src/widoco/src/main/java/oops/OOPSevaluation.java",
+                "line": 73,
+                "column": 31
+            }
+        ],
+        "Regular Expression Injection": [
+            {
+                "path": "src/widoco/src/main/java/widoco/CatalogIRIMapper.java",
+                "line": 191,
+                "column": 32
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 256,
+                "column": 23
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 258,
+                "column": 22
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 260,
+                "column": 28
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 262,
+                "column": 31
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 286,
+                "column": 23
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 288,
+                "column": 22
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 290,
+                "column": 28
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 292,
+                "column": 31
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 315,
+                "column": 22
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 317,
+                "column": 21
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 331,
+                "column": 22
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 333,
+                "column": 21
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/gui/GuiController.java",
+                "line": 138,
+                "column": 52
+            }
+        ],
+        "File read/write hook path": [
+            {
+                "path": "src/widoco/src/main/java/widoco/CreateOOPSEvalInThread.java",
+                "line": 112,
+                "column": 84
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/CreateOOPSEvalInThread.java",
+                "line": 115,
+                "column": 45
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 235,
+                "column": 60
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 115,
+                "column": 20
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/Configuration.java",
+                "line": 233,
+                "column": 64
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/CreateOOPSEvalInThread.java",
+                "line": 72,
+                "column": 58
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/CreateResources.java",
+                "line": 407,
+                "column": 73
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/CreateResources.java",
+                "line": 627,
+                "column": 76
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 141,
+                "column": 31
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 225,
+                "column": 41
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 269,
+                "column": 50
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 294,
+                "column": 30
+            },
+            {
+                "path": "src/widoco/src/main/java/widoco/WidocoUtils.java",
+                "line": 115,
+                "column": 16
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "blob": [
+                "UEsDBBQAAAAIAJamK1pVL6r+GAAAABgAAAATAAAALi4vamF6emVyLXRyYXZlcnNhbAvJyCxWAKLEPIXUioKc/MwShbTMnFQ9AFBLAQIUAxQAAAAIAJamK1pVL6r+GAAAABgAAAATAAAAAAAAAAAAAACAAQAAAAAuLi9qYXp6ZXItdHJhdmVyc2FsUEsFBgAAAAABAAEAQQAAAEkAAAAAAA=="
+            ],
+            "code": "src/widoco-harnesses/widoco-harness-one/src/main/java/com/aixcc/widoco/harnesses/one/WidocoOne.java:\n17       public static void fuzzerTestOneInput(byte[] b) {\n18           new WidocoOne().fuzz(b);\n19       }\n21       public void fuzz(byte[] b) {\n22           Path dir = null;\n23           try {\n24               dir = Files.createTempDirectory(\"WidocoOne\");\n25               System.setProperty(\"jazzer.fs_allowed_dirs\", dir.toString());\n26               try (ByteArrayInputStream bais = new ByteArrayInputStream(b)) {\n27                   ZipInputStream zis = new ZipInputStream(bais);\n28                   WidocoUtils.unZipIt(zis, dir.toString());\n29               } catch (IOException e) {\n30                   e.printStackTrace();\n31               }\n32           } catch (IOException e) {\n33           } finally {\n34               if (dir != null) {\n35                   try {\n36                       Files.delete(dir);\n37                   } catch (IOException e) {}\n38               }\n39           }\n40       }\n\nsrc/widoco/src/main/java/widoco/WidocoUtils.java:\n249   \tpublic static void unZipIt(ZipInputStream zis, String outputFolder) {\n250   \t\tbyte[] buffer = new byte[1024];\n251   \t\ttry {\n252   \t\t\tZipEntry ze = zis.getNextEntry();\n253   \n254   \t\t\twhile (ze != null) {\n255   \t\t\t\tString fileName = ze.getName();\n256   \t\t\t\tFile newFile = new File(outputFolder + File.separator + fileName);\n257   \t\t\t\t// System.out.println(\"file unzip : \"+ newFile.getAbsoluteFile());\n258   \t\t\t\tif (ze.isDirectory()) {\n259   \t\t\t\t\tString temp = newFile.getAbsolutePath();\n260   \t\t\t\t\tnew File(temp).mkdirs();\n261   \t\t\t\t} else {\n262   \t\t\t\t\tString directory = newFile.getParent();\n263   \t\t\t\t\tif (directory != null) {\n264   \t\t\t\t\t\tFile d = new File(directory);\n265   \t\t\t\t\t\tif (!d.exists()) {\n266   \t\t\t\t\t\t\td.mkdirs();\n267   \t\t\t\t\t\t}\n268   \t\t\t\t\t}\n269   \t\t\t\t\tFileOutputStream fos = new FileOutputStream(newFile);\n270   \t\t\t\t\tint len;\n271   \t\t\t\t\twhile ((len = zis.read(buffer)) > 0) {\n272   \t\t\t\t\t\tfos.write(buffer, 0, len);\n273   \t\t\t\t\t}\n274   \t\t\t\t\tfos.close();\n275   \t\t\t\t}\n276   \t\t\t\tze = zis.getNextEntry();\n277   \t\t\t}\n278   \n279   \t\t\tzis.closeEntry();\n280   \t\t\tzis.close();\n281   \n282   \t\t} catch (IOException ex) {\n283   \t\t\tlogger.error(\"Error while extracting the reosurces: \" + ex.getMessage());\n284   \t\t}\n285   \t}\n",
+            "cost": 0.360035,
+            "harness_id": "WidocoOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/widoco/src/main/java/widoco/WidocoUtils.java:269:50",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 1
+        },
+        {
+            "blob": [
+                "UEsDBBQAAAAIALOmK1pVL6r+GAAAABgAAAAWAAAALi4vLi4vamF6emVyLXRyYXZlcnNhbAvJyCxWAKLEPIXUioKc/MwShbTMnFQ9AFBLAQIUAxQAAAAIALOmK1pVL6r+GAAAABgAAAAWAAAAAAAAAAAAAACAAQAAAAAuLi8uLi9qYXp6ZXItdHJhdmVyc2FsUEsFBgAAAAABAAEARAAAAEwAAAAAAA=="
+            ],
+            "code": "src/widoco-harnesses/widoco-harness-one/src/main/java/com/aixcc/widoco/harnesses/one/WidocoOne.java:\n17       public static void fuzzerTestOneInput(byte[] b) {\n18           new WidocoOne().fuzz(b);\n19       }\n21       public void fuzz(byte[] b) {\n22           Path dir = null;\n23           try {\n24               dir = Files.createTempDirectory(\"WidocoOne\");\n25               System.setProperty(\"jazzer.fs_allowed_dirs\", dir.toString());\n26               try (ByteArrayInputStream bais = new ByteArrayInputStream(b)) {\n27                   ZipInputStream zis = new ZipInputStream(bais);\n28                   WidocoUtils.unZipIt(zis, dir.toString());\n29               } catch (IOException e) {\n30                   e.printStackTrace();\n31               }\n32           } catch (IOException e) {\n33           } finally {\n34               if (dir != null) {\n35                   try {\n36                       Files.delete(dir);\n37                   } catch (IOException e) {}\n38               }\n39           }\n40       }\n\nsrc/widoco/src/main/java/widoco/WidocoUtils.java:\n249   \tpublic static void unZipIt(ZipInputStream zis, String outputFolder) {\n250   \t\tbyte[] buffer = new byte[1024];\n251   \t\ttry {\n252   \t\t\tZipEntry ze = zis.getNextEntry();\n253   \n254   \t\t\twhile (ze != null) {\n255   \t\t\t\tString fileName = ze.getName();\n256   \t\t\t\tFile newFile = new File(outputFolder + File.separator + fileName);\n257   \t\t\t\t// System.out.println(\"file unzip : \"+ newFile.getAbsoluteFile());\n258   \t\t\t\tif (ze.isDirectory()) {\n259   \t\t\t\t\tString temp = newFile.getAbsolutePath();\n260   \t\t\t\t\tnew File(temp).mkdirs();\n261   \t\t\t\t} else {\n262   \t\t\t\t\tString directory = newFile.getParent();\n263   \t\t\t\t\tif (directory != null) {\n264   \t\t\t\t\t\tFile d = new File(directory);\n265   \t\t\t\t\t\tif (!d.exists()) {\n266   \t\t\t\t\t\t\td.mkdirs();\n267   \t\t\t\t\t\t}\n268   \t\t\t\t\t}\n269   \t\t\t\t\tFileOutputStream fos = new FileOutputStream(newFile);\n270   \t\t\t\t\tint len;\n271   \t\t\t\t\twhile ((len = zis.read(buffer)) > 0) {\n272   \t\t\t\t\t\tfos.write(buffer, 0, len);\n273   \t\t\t\t\t}\n274   \t\t\t\t\tfos.close();\n275   \t\t\t\t}\n276   \t\t\t\tze = zis.getNextEntry();\n277   \t\t\t}\n278   \n279   \t\t\tzis.closeEntry();\n280   \t\t\tzis.close();\n281   \n282   \t\t} catch (IOException ex) {\n283   \t\t\tlogger.error(\"Error while extracting the reosurces: \" + ex.getMessage());\n284   \t\t}\n285   \t}\n",
+            "cost": 0.33175,
+            "harness_id": "WidocoOne",
+            "sanitizer": "File read/write hook path",
+            "sink": "src/widoco/src/main/java/widoco/WidocoUtils.java:269:50",
+            "status": "corpus",
+            "valid_path": "YES",
+            "id": 2
+        }
+    ],
+    "result": [
+        {
+            "harness_id": "WidocoOne",
+            "blob": [
+                "UEsDBBQAAAAIAJamK1pVL6r+GAAAABgAAAATAAAALi4vamF6emVyLXRyYXZlcnNhbAvJyCxWAKLEPIXUioKc/MwShbTMnFQ9AFBLAQIUAxQAAAAIAJamK1pVL6r+GAAAABgAAAATAAAAAAAAAAAAAACAAQAAAAAuLi9qYXp6ZXItdHJhdmVyc2FsUEsFBgAAAAABAAEAQQAAAEkAAAAAAA==",
+                "UEsDBBQAAAAIALOmK1pVL6r+GAAAABgAAAAWAAAALi4vLi4vamF6emVyLXRyYXZlcnNhbAvJyCxWAKLEPIXUioKc/MwShbTMnFQ9AFBLAQIUAxQAAAAIALOmK1pVL6r+GAAAABgAAAAWAAAAAAAAAAAAAACAAQAAAAAuLi8uLi9qYXp6ZXItdHJhdmVyc2FsUEsFBgAAAAABAAEARAAAAEwAAAAAAA=="
+            ]
+        }
+    ]
+}

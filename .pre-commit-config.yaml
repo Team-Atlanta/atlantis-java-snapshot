@@ -1,0 +1,63 @@
+---
+# Feel free to add your own linters here to your code
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/llm-poc-gen/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+      - id: check-yaml
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+      - id: end-of-file-fixer
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+      - id: mixed-line-ending
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+      - id: trailing-whitespace
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.19.1
+    hooks:
+      - id: pyupgrade
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [ "--profile", "black" ]
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+        args: [ "--max-line-length=88", "--ignore=E501,E203,W503,F722" ]
+
+  - repo: https://github.com/markdownlint/markdownlint
+    rev: v0.12.0
+    hooks:
+      - id: markdownlint
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+        args:
+          - -r ~MD007
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.21
+    hooks:
+      - id: mdformat
+        exclude: '^(crs/jazzer-llm-augmented/|crs/dictgen/|crs/joern/|crs/verifier/|crs/fuzzers/|crs/SWAT/|crs/cache/|misc/|crs/prebuilt/)'
+        # Optionally add plugins
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-black
+          - mdformat-toc
+          - mdformat-tables

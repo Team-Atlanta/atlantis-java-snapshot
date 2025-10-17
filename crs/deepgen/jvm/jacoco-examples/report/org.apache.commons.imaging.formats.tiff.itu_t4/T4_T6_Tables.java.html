@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>T4_T6_Tables.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.itu_t4</a> &gt; <span class="el_source">T4_T6_Tables.java</span></div><h1>T4_T6_Tables.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.itu_t4;
+
+<span class="nc" id="L19">final class T4_T6_Tables {</span>
+    public static class Entry {
+        final String bitString;
+        final Integer value;
+
+<span class="nc" id="L24">        Entry(final String bitString, final int value) {</span>
+<span class="nc" id="L25">            this.bitString = bitString;</span>
+<span class="nc" id="L26">            this.value = value;</span>
+<span class="nc" id="L27">        }</span>
+
+        public void writeBits(final BitArrayOutputStream outputStream) {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">            for (int i = 0; i &lt; bitString.length(); i++) {</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">                if (bitString.charAt(i) == '0') {</span>
+<span class="nc" id="L32">                    outputStream.writeBit(0);</span>
+                } else {
+<span class="nc" id="L34">                    outputStream.writeBit(1);</span>
+                }
+            }
+<span class="nc" id="L37">        }</span>
+    }
+
+<span class="nc" id="L40">    public static final Entry[] WHITE_TERMINATING_CODES = { new Entry(&quot;00110101&quot;, 0), new Entry(&quot;000111&quot;, 1), new Entry(&quot;0111&quot;, 2), new Entry(&quot;1000&quot;, 3),</span>
+            new Entry(&quot;1011&quot;, 4), new Entry(&quot;1100&quot;, 5), new Entry(&quot;1110&quot;, 6), new Entry(&quot;1111&quot;, 7), new Entry(&quot;10011&quot;, 8), new Entry(&quot;10100&quot;, 9),
+            new Entry(&quot;00111&quot;, 10), new Entry(&quot;01000&quot;, 11), new Entry(&quot;001000&quot;, 12), new Entry(&quot;000011&quot;, 13), new Entry(&quot;110100&quot;, 14), new Entry(&quot;110101&quot;, 15),
+            new Entry(&quot;101010&quot;, 16), new Entry(&quot;101011&quot;, 17), new Entry(&quot;0100111&quot;, 18), new Entry(&quot;0001100&quot;, 19), new Entry(&quot;0001000&quot;, 20),
+            new Entry(&quot;0010111&quot;, 21), new Entry(&quot;0000011&quot;, 22), new Entry(&quot;0000100&quot;, 23), new Entry(&quot;0101000&quot;, 24), new Entry(&quot;0101011&quot;, 25),
+            new Entry(&quot;0010011&quot;, 26), new Entry(&quot;0100100&quot;, 27), new Entry(&quot;0011000&quot;, 28), new Entry(&quot;00000010&quot;, 29), new Entry(&quot;00000011&quot;, 30),
+            new Entry(&quot;00011010&quot;, 31), new Entry(&quot;00011011&quot;, 32), new Entry(&quot;00010010&quot;, 33), new Entry(&quot;00010011&quot;, 34), new Entry(&quot;00010100&quot;, 35),
+            new Entry(&quot;00010101&quot;, 36), new Entry(&quot;00010110&quot;, 37), new Entry(&quot;00010111&quot;, 38), new Entry(&quot;00101000&quot;, 39), new Entry(&quot;00101001&quot;, 40),
+            new Entry(&quot;00101010&quot;, 41), new Entry(&quot;00101011&quot;, 42), new Entry(&quot;00101100&quot;, 43), new Entry(&quot;00101101&quot;, 44), new Entry(&quot;00000100&quot;, 45),
+            new Entry(&quot;00000101&quot;, 46), new Entry(&quot;00001010&quot;, 47), new Entry(&quot;00001011&quot;, 48), new Entry(&quot;01010010&quot;, 49), new Entry(&quot;01010011&quot;, 50),
+            new Entry(&quot;01010100&quot;, 51), new Entry(&quot;01010101&quot;, 52), new Entry(&quot;00100100&quot;, 53), new Entry(&quot;00100101&quot;, 54), new Entry(&quot;01011000&quot;, 55),
+            new Entry(&quot;01011001&quot;, 56), new Entry(&quot;01011010&quot;, 57), new Entry(&quot;01011011&quot;, 58), new Entry(&quot;01001010&quot;, 59), new Entry(&quot;01001011&quot;, 60),
+            new Entry(&quot;00110010&quot;, 61), new Entry(&quot;00110011&quot;, 62), new Entry(&quot;00110100&quot;, 63), };
+
+<span class="nc" id="L54">    public static final Entry[] BLACK_TERMINATING_CODES = { new Entry(&quot;0000110111&quot;, 0), new Entry(&quot;010&quot;, 1), new Entry(&quot;11&quot;, 2), new Entry(&quot;10&quot;, 3),</span>
+            new Entry(&quot;011&quot;, 4), new Entry(&quot;0011&quot;, 5), new Entry(&quot;0010&quot;, 6), new Entry(&quot;00011&quot;, 7), new Entry(&quot;000101&quot;, 8), new Entry(&quot;000100&quot;, 9),
+            new Entry(&quot;0000100&quot;, 10), new Entry(&quot;0000101&quot;, 11), new Entry(&quot;0000111&quot;, 12), new Entry(&quot;00000100&quot;, 13), new Entry(&quot;00000111&quot;, 14),
+            new Entry(&quot;000011000&quot;, 15), new Entry(&quot;0000010111&quot;, 16), new Entry(&quot;0000011000&quot;, 17), new Entry(&quot;0000001000&quot;, 18), new Entry(&quot;00001100111&quot;, 19),
+            new Entry(&quot;00001101000&quot;, 20), new Entry(&quot;00001101100&quot;, 21), new Entry(&quot;00000110111&quot;, 22), new Entry(&quot;00000101000&quot;, 23),
+            new Entry(&quot;00000010111&quot;, 24), new Entry(&quot;00000011000&quot;, 25), new Entry(&quot;000011001010&quot;, 26), new Entry(&quot;000011001011&quot;, 27),
+            new Entry(&quot;000011001100&quot;, 28), new Entry(&quot;000011001101&quot;, 29), new Entry(&quot;000001101000&quot;, 30), new Entry(&quot;000001101001&quot;, 31),
+            new Entry(&quot;000001101010&quot;, 32), new Entry(&quot;000001101011&quot;, 33), new Entry(&quot;000011010010&quot;, 34), new Entry(&quot;000011010011&quot;, 35),
+            new Entry(&quot;000011010100&quot;, 36), new Entry(&quot;000011010101&quot;, 37), new Entry(&quot;000011010110&quot;, 38), new Entry(&quot;000011010111&quot;, 39),
+            new Entry(&quot;000001101100&quot;, 40), new Entry(&quot;000001101101&quot;, 41), new Entry(&quot;000011011010&quot;, 42), new Entry(&quot;000011011011&quot;, 43),
+            new Entry(&quot;000001010100&quot;, 44), new Entry(&quot;000001010101&quot;, 45), new Entry(&quot;000001010110&quot;, 46), new Entry(&quot;000001010111&quot;, 47),
+            new Entry(&quot;000001100100&quot;, 48), new Entry(&quot;000001100101&quot;, 49), new Entry(&quot;000001010010&quot;, 50), new Entry(&quot;000001010011&quot;, 51),
+            new Entry(&quot;000000100100&quot;, 52), new Entry(&quot;000000110111&quot;, 53), new Entry(&quot;000000111000&quot;, 54), new Entry(&quot;000000100111&quot;, 55),
+            new Entry(&quot;000000101000&quot;, 56), new Entry(&quot;000001011000&quot;, 57), new Entry(&quot;000001011001&quot;, 58), new Entry(&quot;000000101011&quot;, 59),
+            new Entry(&quot;000000101100&quot;, 60), new Entry(&quot;000001011010&quot;, 61), new Entry(&quot;000001100110&quot;, 62), new Entry(&quot;000001100111&quot;, 63), };
+
+<span class="nc" id="L70">    public static final Entry[] WHITE_MAKE_UP_CODES = { new Entry(&quot;11011&quot;, 64), new Entry(&quot;10010&quot;, 128), new Entry(&quot;010111&quot;, 192), new Entry(&quot;0110111&quot;, 256),</span>
+            new Entry(&quot;00110110&quot;, 320), new Entry(&quot;00110111&quot;, 384), new Entry(&quot;01100100&quot;, 448), new Entry(&quot;01100101&quot;, 512), new Entry(&quot;01101000&quot;, 576),
+            new Entry(&quot;01100111&quot;, 640), new Entry(&quot;011001100&quot;, 704), new Entry(&quot;011001101&quot;, 768), new Entry(&quot;011010010&quot;, 832), new Entry(&quot;011010011&quot;, 896),
+            new Entry(&quot;011010100&quot;, 960), new Entry(&quot;011010101&quot;, 1024), new Entry(&quot;011010110&quot;, 1088), new Entry(&quot;011010111&quot;, 1152), new Entry(&quot;011011000&quot;, 1216),
+            new Entry(&quot;011011001&quot;, 1280), new Entry(&quot;011011010&quot;, 1344), new Entry(&quot;011011011&quot;, 1408), new Entry(&quot;010011000&quot;, 1472),
+            new Entry(&quot;010011001&quot;, 1536), new Entry(&quot;010011010&quot;, 1600), new Entry(&quot;011000&quot;, 1664), new Entry(&quot;010011011&quot;, 1728), };
+
+<span class="nc" id="L77">    public static final Entry[] BLACK_MAKE_UP_CODES = { new Entry(&quot;0000001111&quot;, 64), new Entry(&quot;000011001000&quot;, 128), new Entry(&quot;000011001001&quot;, 192),</span>
+            new Entry(&quot;000001011011&quot;, 256), new Entry(&quot;000000110011&quot;, 320), new Entry(&quot;000000110100&quot;, 384), new Entry(&quot;000000110101&quot;, 448),
+            new Entry(&quot;0000001101100&quot;, 512), new Entry(&quot;0000001101101&quot;, 576), new Entry(&quot;0000001001010&quot;, 640), new Entry(&quot;0000001001011&quot;, 704),
+            new Entry(&quot;0000001001100&quot;, 768), new Entry(&quot;0000001001101&quot;, 832), new Entry(&quot;0000001110010&quot;, 896), new Entry(&quot;0000001110011&quot;, 960),
+            new Entry(&quot;0000001110100&quot;, 1024), new Entry(&quot;0000001110101&quot;, 1088), new Entry(&quot;0000001110110&quot;, 1152), new Entry(&quot;0000001110111&quot;, 1216),
+            new Entry(&quot;0000001010010&quot;, 1280), new Entry(&quot;0000001010011&quot;, 1344), new Entry(&quot;0000001010100&quot;, 1408), new Entry(&quot;0000001010101&quot;, 1472),
+            new Entry(&quot;0000001011010&quot;, 1536), new Entry(&quot;0000001011011&quot;, 1600), new Entry(&quot;0000001100100&quot;, 1664), new Entry(&quot;0000001100101&quot;, 1728), };
+
+<span class="nc" id="L85">    public static final Entry[] ADDITIONAL_MAKE_UP_CODES = { new Entry(&quot;00000001000&quot;, 1792), new Entry(&quot;00000001100&quot;, 1856), new Entry(&quot;00000001101&quot;, 1920),</span>
+            new Entry(&quot;000000010010&quot;, 1984), new Entry(&quot;000000010011&quot;, 2048), new Entry(&quot;000000010100&quot;, 2112), new Entry(&quot;000000010101&quot;, 2176),
+            new Entry(&quot;000000010110&quot;, 2240), new Entry(&quot;000000010111&quot;, 2304), new Entry(&quot;000000011100&quot;, 2368), new Entry(&quot;000000011101&quot;, 2432),
+            new Entry(&quot;000000011110&quot;, 2496), new Entry(&quot;000000011111&quot;, 2560), };
+<span class="nc" id="L89">    public static final Entry EOL = new Entry(&quot;000000000001&quot;, 0);</span>
+<span class="nc" id="L90">    public static final Entry EOL13 = new Entry(&quot;0000000000001&quot;, 0);</span>
+<span class="nc" id="L91">    public static final Entry EOL14 = new Entry(&quot;00000000000001&quot;, 0);</span>
+<span class="nc" id="L92">    public static final Entry EOL15 = new Entry(&quot;000000000000001&quot;, 0);</span>
+<span class="nc" id="L93">    public static final Entry EOL16 = new Entry(&quot;0000000000000001&quot;, 0);</span>
+<span class="nc" id="L94">    public static final Entry EOL17 = new Entry(&quot;00000000000000001&quot;, 0);</span>
+<span class="nc" id="L95">    public static final Entry EOL18 = new Entry(&quot;000000000000000001&quot;, 0);</span>
+<span class="nc" id="L96">    public static final Entry EOL19 = new Entry(&quot;0000000000000000001&quot;, 0);</span>
+<span class="nc" id="L97">    public static final Entry P = new Entry(&quot;0001&quot;, 0);</span>
+<span class="nc" id="L98">    public static final Entry H = new Entry(&quot;001&quot;, 0);</span>
+<span class="nc" id="L99">    public static final Entry V0 = new Entry(&quot;1&quot;, 0);</span>
+<span class="nc" id="L100">    public static final Entry VR1 = new Entry(&quot;011&quot;, 0);</span>
+<span class="nc" id="L101">    public static final Entry VR2 = new Entry(&quot;000011&quot;, 0);</span>
+<span class="nc" id="L102">    public static final Entry VR3 = new Entry(&quot;0000011&quot;, 0);</span>
+<span class="nc" id="L103">    public static final Entry VL1 = new Entry(&quot;010&quot;, 0);</span>
+<span class="nc" id="L104">    public static final Entry VL2 = new Entry(&quot;000010&quot;, 0);</span>
+
+<span class="nc" id="L106">    public static final Entry VL3 = new Entry(&quot;0000010&quot;, 0);</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

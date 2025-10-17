@@ -1,0 +1,84 @@
+[activemq.cpv_0]
+path = "repo/src/main/java/org/apache/activemq/openwire/v1/BaseDataStreamMarshaller.java"
+line = 234
+class_name = "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+harness = ["ActivemqOne", "ActivemqOneFDP"]
+
+[feign.cpv_2]
+path = "repo/src/main/java/feign/template/Expression.java"
+line = 35
+class_name = "feign.template.Expression"
+harness = "BodyTemplateFuzzer"
+
+[imaging.cpv_1]
+path = "repo/src/main/java/org/apache/commons/imaging/formats/gif/ApplicationExtension.java"
+line = 34
+class_name = "org.apache.commons.imaging.formats.gif.ApplicationExtension"
+harness = ["ImagingOne", "ImagingOneFDP"]
+
+[jackson-databind.cpv_0]
+path = "repo/src/main/java/com/fasterxml/jackson/databind/introspect/AnnotatedConstructor.java"
+line = 129
+class_name = "com.fasterxml.jackson.databind.introspect.AnnotatedConstructor"
+harness = ["JacksonDatabindOne", "JacksonDatabindOneFDP"]
+
+[jenkins.cpv_1]
+path = "repo/src/main/java/io/jenkins/plugins/toyplugin/Script.java"
+line = 84
+class_name = "io.jenkins.plugins.toyplugin.Script"
+harness = ["JenkinsThree", "JenkinsThreeFDP"]
+
+[jenkins.cpv_9]
+path = "repo/src/main/java/jenkins/util/xml/XMLUtils.java"
+line = 236
+class_name = "jenkins.util.xml.XMLUtils"
+harness = ["JenkinsThree", "JenkinsThreeFDP"]
+
+[kylin.cpv_0]
+path = "repo/src/main/java/org/apache/kylin/common/util/CliCommandExecutor.java"
+line = 126
+class_name = "org.apache.kylin.common.util.CliCommandExecutor"
+harness = ["KylinOne", "KylinOneFDP"]
+
+[netty.cpv_1]
+path = "repo/src/main/java//HttpRequestDecoder.java"
+line = 265
+class_name = "HttpRequestDecoder"
+harness = "HttpRequestDecoderFuzzer"
+
+[olingo.cpv_0]
+path = "repo/src/main/java/org/apache/olingo/client/core/communication/request/v4/AsyncRequestWrapperImpl.java"
+line = 303
+class_name = "org.apache.olingo.client.core.communication.request.v4.AsyncRequestWrapperImpl"
+harness = ["OlingoOne", "OlingoOneFDP"]
+
+[r1-zookeeper.cpv_2]
+path = "repo/src/main/java/org/apache/zookeeper/server/DataTree.java"
+line = 2178
+class_name = "org.apache.zookeeper.server.DataTree"
+harness = "DataTreeFuzzer"
+
+[r2-apache-commons-compress.cpv_1]
+path = "repo/src/main/java/org/apache/commons/compress/compressors/gzip/GzipCompressorInputStream.java"
+line = 399
+class_name = "org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream"
+harness = "CompressorGzipFuzzer"
+
+[r3-tika-delta-02.cpv_0]
+path = "repo/src/main/java/org/apache/tika/io/TikaInputStream.java"
+line = 606
+class_name = "org.apache.tika.io.TikaInputStream"
+harness = "M3U8ParserFuzzer"
+
+[r3-tika.cpv_3]
+path = "repo/src/main/java/org/apache/tika/parser/csv/TextAndCSVParser.java"
+line = 278
+class_name = "org.apache.tika.parser.csv.TextAndCSVParser"
+harness = "TextAndCSVParserFuzzer"
+
+[struts.cpv_0]
+path = "repo/src/main/java/org/apache/tiles/el/ELAttributeEvaluator.java"
+line = 90
+class_name = "org.apache.tiles.el.ELAttributeEvaluator"
+harness = "StrutsOne"
+

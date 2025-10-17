@@ -1,0 +1,41 @@
+Target project:
+
+PROMPT_CP_NAME
+
+Relevant code files:
+
+PROMPT_CODE_FILES
+
+Potential vulnerable target (refer as sinkpoint in following) basics:
+
+```java
+// PROMPT_SINKPOINT_FILE_PATH, PROMPT_SINKPOINT_LINENO
+...
+PROMPT_SINKPOINT_LINE_CONTENT
+// PROMPT_SINKPOINT_VULN_DESC
+...
+```
+
+Input whose execution reaches the sinkpoint but not poc:
+
+```bash
+# hexdump
+PROMPT_BEEPSEED_HEXDUMP
+
+# stacktrace at reaching point
+PROMPT_BEEPSEED_STACKTRACE
+```
+
+Task:
+
+We are conducting AI-driven security testing, our Jazzer fuzzer has produced an input that leads the execution to reach the sinkpoint shown above. 
+
+Follow the steps below and generate the poc:
+
+- analyze why and how the sinkpoint is potentially vulnerable to that kind of vulnerability
+- infer what kind of input can leads the execution to an exploitation stage
+- considering the conditions/constraints along the execution path, construct the actual poc
+
+Note that:
+- the focus of the poc is to trigger the targeted Jazzer sanitizer
+- in your response, the generated poc content should be wrapped by ``` and in hex string format, e.g., ```000102...```, so I can extract it and directly pass to bytes.fromhex

@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebPImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.webp</a> &gt; <span class="el_source">WebPImageParser.java</span></div><h1>WebPImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.webp;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read4Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readBytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.skipBytes;
+
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.XmpEmbeddable;
+import org.apache.commons.imaging.common.XmpImagingParameters;
+import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
+import org.apache.commons.imaging.formats.tiff.TiffImageParser;
+import org.apache.commons.imaging.formats.webp.chunks.WebPChunk;
+import org.apache.commons.imaging.formats.webp.chunks.WebPChunkVp8;
+import org.apache.commons.imaging.formats.webp.chunks.WebPChunkVp8l;
+import org.apache.commons.imaging.formats.webp.chunks.WebPChunkVp8x;
+import org.apache.commons.imaging.formats.webp.chunks.WebPChunkXml;
+import org.apache.commons.imaging.internal.SafeOperations;
+
+/**
+ * WebP image parser.
+ *
+ * @since 1.0-alpha4
+ */
+<span class="fc" id="L54">public class WebPImageParser extends AbstractImageParser&lt;WebPImagingParameters&gt; implements XmpEmbeddable&lt;WebPImagingParameters&gt; {</span>
+
+    private static final class ChunksReader implements Closeable {
+        private final InputStream is;
+        private final WebPChunkType[] chunkTypes;
+<span class="nc" id="L59">        private int sizeCount = 4;</span>
+<span class="nc" id="L60">        private boolean firstChunk = true;</span>
+
+        final int fileSize;
+
+        ChunksReader(final ByteSource byteSource) throws IOException, ImagingException {
+<span class="nc" id="L65">            this(byteSource, (WebPChunkType[]) null);</span>
+<span class="nc" id="L66">        }</span>
+
+<span class="nc" id="L68">        ChunksReader(final ByteSource byteSource, final WebPChunkType... chunkTypes) throws ImagingException, IOException {</span>
+<span class="nc" id="L69">            this.is = byteSource.getInputStream();</span>
+<span class="nc" id="L70">            this.chunkTypes = chunkTypes;</span>
+<span class="nc" id="L71">            this.fileSize = readFileHeader(is);</span>
+<span class="nc" id="L72">        }</span>
+
+        @Override
+        public void close() throws IOException {
+<span class="nc" id="L76">            is.close();</span>
+<span class="nc" id="L77">        }</span>
+
+        int getOffset() {
+<span class="nc" id="L80">            return SafeOperations.add(sizeCount, 8); // File Header</span>
+        }
+
+        WebPChunk readChunk() throws ImagingException, IOException {
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            while (sizeCount &lt; fileSize) {</span>
+<span class="nc" id="L85">                final int type = read4Bytes(&quot;Chunk Type&quot;, is, &quot;Not a valid WebP file&quot;, ByteOrder.LITTLE_ENDIAN);</span>
+<span class="nc" id="L86">                final int payloadSize = read4Bytes(&quot;Chunk Size&quot;, is, &quot;Not a valid WebP file&quot;, ByteOrder.LITTLE_ENDIAN);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                if (payloadSize &lt; 0) {</span>
+<span class="nc" id="L88">                    throw new ImagingException(&quot;Chunk Payload is too long:&quot; + payloadSize);</span>
+                }
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                final boolean padding = payloadSize % 2 != 0;</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                final int chunkSize = SafeOperations.add(8, padding ? 1 : 0, payloadSize);</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                if (firstChunk) {</span>
+<span class="nc" id="L94">                    firstChunk = false;</span>
+<span class="nc bnc" id="L95" title="All 6 branches missed.">                    if (type != WebPChunkType.VP8.value &amp;&amp; type != WebPChunkType.VP8L.value &amp;&amp; type != WebPChunkType.VP8X.value) {</span>
+<span class="nc" id="L96">                        throw new ImagingException(&quot;First Chunk must be VP8, VP8L or VP8X&quot;);</span>
+                    }
+                }
+
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                if (chunkTypes != null) {</span>
+<span class="nc" id="L101">                    boolean skip = true;</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                    for (final WebPChunkType t : chunkTypes) {</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                        if (t.value == type) {</span>
+<span class="nc" id="L104">                            skip = false;</span>
+<span class="nc" id="L105">                            break;</span>
+                        }
+                    }
+<span class="nc bnc" id="L108" title="All 2 branches missed.">                    if (skip) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                        skipBytes(is, payloadSize + (padding ? 1 : 0));</span>
+<span class="nc" id="L110">                        sizeCount = SafeOperations.add(sizeCount, chunkSize);</span>
+<span class="nc" id="L111">                        continue;</span>
+                    }
+                }
+
+<span class="nc" id="L115">                final byte[] bytes = readBytes(&quot;Chunk Payload&quot;, is, payloadSize);</span>
+<span class="nc" id="L116">                final WebPChunk chunk = WebPChunkType.makeChunk(type, payloadSize, bytes);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                if (padding) {</span>
+<span class="nc" id="L118">                    skipBytes(is, 1);</span>
+                }
+
+<span class="nc" id="L121">                sizeCount = SafeOperations.add(sizeCount, chunkSize);</span>
+<span class="nc" id="L122">                return chunk;</span>
+            }
+
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            if (firstChunk) {</span>
+<span class="nc" id="L126">                throw new ImagingException(&quot;No WebP chunks found&quot;);</span>
+            }
+<span class="nc" id="L128">            return null;</span>
+        }
+    }
+
+<span class="fc" id="L132">    private static final String DEFAULT_EXTENSION = ImageFormats.WEBP.getDefaultExtension();</span>
+
+<span class="fc" id="L134">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.WEBP.getExtensions();</span>
+
+    /**
+     * Read the file header of WebP file.
+     *
+     * @return file size in file header (including the WebP signature, excluding the TIFF signature and the file size field).
+     */
+    private static int readFileHeader(final InputStream is) throws IOException, ImagingException {
+<span class="nc" id="L142">        final byte[] buffer = new byte[4];</span>
+<span class="nc bnc" id="L143" title="All 4 branches missed.">        if (is.read(buffer) &lt; 4 || !WebPConstants.RIFF_SIGNATURE.equals(buffer)) {</span>
+<span class="nc" id="L144">            throw new ImagingException(&quot;Not a valid WebP file&quot;);</span>
+        }
+
+<span class="nc" id="L147">        final int fileSize = read4Bytes(&quot;File Size&quot;, is, &quot;Not a valid WebP file&quot;, ByteOrder.LITTLE_ENDIAN);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (fileSize &lt; 0) {</span>
+<span class="nc" id="L149">            throw new ImagingException(&quot;File size is too long:&quot; + fileSize);</span>
+        }
+
+<span class="nc bnc" id="L152" title="All 4 branches missed.">        if (is.read(buffer) &lt; 4 || !WebPConstants.WEBP_SIGNATURE.equals(buffer)) {</span>
+<span class="nc" id="L153">            throw new ImagingException(&quot;Not a valid WebP file&quot;);</span>
+        }
+
+<span class="nc" id="L156">        return fileSize;</span>
+    }
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L161">        pw.println(&quot;webp.dumpImageFile&quot;);</span>
+<span class="nc" id="L162">        try (ChunksReader reader = new ChunksReader(byteSource)) {</span>
+<span class="nc" id="L163">            int offset = reader.getOffset();</span>
+<span class="nc" id="L164">            WebPChunk chunk = reader.readChunk();</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">            if (chunk == null) {</span>
+<span class="nc" id="L166">                throw new ImagingException(&quot;No WebP chunks found&quot;);</span>
+            }
+
+            // TODO: this does not look too risky; a user could craft an image
+            // with millions of chunks, that are really expensive to dump,
+            // but that should result in a large image, where we can short-
+            // -circuit the operation somewhere else - if needed.
+            do {
+<span class="nc" id="L174">                chunk.dump(pw, offset);</span>
+
+<span class="nc" id="L176">                offset = reader.getOffset();</span>
+<span class="nc" id="L177">                chunk = reader.readChunk();</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            } while (chunk != null);</span>
+        }
+<span class="nc" id="L180">        return true;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L185">        return ACCEPTED_EXTENSIONS;</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="nc" id="L190">        return new ImageFormat[] { ImageFormats.WEBP };</span>
+    }
+
+    @Override
+    public BufferedImage getBufferedImage(final ByteSource byteSource, final WebPImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L195">        throw new ImagingException(&quot;Reading WebP files is currently not supported&quot;);</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L200">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public WebPImagingParameters getDefaultParameters() {
+<span class="nc" id="L205">        return new WebPImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final WebPImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L210">        try (ChunksReader reader = new ChunksReader(byteSource, WebPChunkType.ICCP)) {</span>
+<span class="nc" id="L211">            final WebPChunk chunk = reader.readChunk();</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">            return chunk == null ? null : chunk.getBytes();</span>
+        }
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final WebPImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L218">        try (ChunksReader reader = new ChunksReader(byteSource, WebPChunkType.VP8, WebPChunkType.VP8L, WebPChunkType.VP8X, WebPChunkType.ANMF)) {</span>
+            String formatDetails;
+            int width;
+            int height;
+            int numberOfImages;
+<span class="nc" id="L223">            boolean hasAlpha = false;</span>
+<span class="nc" id="L224">            ImageInfo.ColorType colorType = ImageInfo.ColorType.RGB;</span>
+
+<span class="nc" id="L226">            WebPChunk chunk = reader.readChunk();</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            if (chunk instanceof WebPChunkVp8) {</span>
+<span class="nc" id="L228">                formatDetails = &quot;WebP/Lossy&quot;;</span>
+<span class="nc" id="L229">                numberOfImages = 1;</span>
+
+<span class="nc" id="L231">                final WebPChunkVp8 vp8 = (WebPChunkVp8) chunk;</span>
+<span class="nc" id="L232">                width = vp8.getWidth();</span>
+<span class="nc" id="L233">                height = vp8.getHeight();</span>
+<span class="nc" id="L234">                colorType = ImageInfo.ColorType.YCbCr;</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            } else if (chunk instanceof WebPChunkVp8l) {</span>
+<span class="nc" id="L236">                formatDetails = &quot;WebP/Lossless&quot;;</span>
+<span class="nc" id="L237">                numberOfImages = 1;</span>
+
+<span class="nc" id="L239">                final WebPChunkVp8l vp8l = (WebPChunkVp8l) chunk;</span>
+<span class="nc" id="L240">                width = vp8l.getImageWidth();</span>
+<span class="nc" id="L241">                height = vp8l.getImageHeight();</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">            } else if (chunk instanceof WebPChunkVp8x) {</span>
+<span class="nc" id="L243">                final WebPChunkVp8x vp8x = (WebPChunkVp8x) chunk;</span>
+<span class="nc" id="L244">                width = vp8x.getCanvasWidth();</span>
+<span class="nc" id="L245">                height = vp8x.getCanvasHeight();</span>
+<span class="nc" id="L246">                hasAlpha = ((WebPChunkVp8x) chunk).hasAlpha();</span>
+
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                if (vp8x.hasAnimation()) {</span>
+<span class="nc" id="L249">                    formatDetails = &quot;WebP/Animation&quot;;</span>
+
+<span class="nc" id="L251">                    numberOfImages = 0;</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                    while ((chunk = reader.readChunk()) != null) {</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                        if (chunk.getType() == WebPChunkType.ANMF.value) {</span>
+<span class="nc" id="L254">                            numberOfImages++;</span>
+                        }
+                    }
+
+                } else {
+<span class="nc" id="L259">                    numberOfImages = 1;</span>
+<span class="nc" id="L260">                    chunk = reader.readChunk();</span>
+
+<span class="nc bnc" id="L262" title="All 2 branches missed.">                    if (chunk == null) {</span>
+<span class="nc" id="L263">                        throw new ImagingException(&quot;Image has no content&quot;);</span>
+                    }
+
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                    if (chunk.getType() == WebPChunkType.ANMF.value) {</span>
+<span class="nc" id="L267">                        throw new ImagingException(&quot;Non animated image should not contain ANMF chunks&quot;);</span>
+                    }
+
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                    if (chunk.getType() == WebPChunkType.VP8.value) {</span>
+<span class="nc" id="L271">                        formatDetails = &quot;WebP/Lossy (Extended)&quot;;</span>
+<span class="nc" id="L272">                        colorType = ImageInfo.ColorType.YCbCr;</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">                    } else if (chunk.getType() == WebPChunkType.VP8L.value) {</span>
+<span class="nc" id="L274">                        formatDetails = &quot;WebP/Lossless (Extended)&quot;;</span>
+                    } else {
+<span class="nc" id="L276">                        throw new ImagingException(&quot;Unknown WebP chunk type: &quot; + chunk);</span>
+                    }
+                }
+<span class="nc" id="L279">            } else {</span>
+<span class="nc" id="L280">                throw new ImagingException(&quot;Unknown WebP chunk type: &quot; + chunk);</span>
+            }
+
+<span class="nc" id="L283">            return new ImageInfo(formatDetails, 32, new ArrayList&lt;&gt;(), ImageFormats.WEBP, &quot;webp&quot;, height, &quot;image/webp&quot;, numberOfImages, -1, -1, -1, -1, width,</span>
+                    false, hasAlpha, false, colorType, ImageInfo.CompressionAlgorithm.UNKNOWN);
+        }
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final WebPImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L290">        try (ChunksReader reader = new ChunksReader(byteSource)) {</span>
+<span class="nc" id="L291">            final WebPChunk chunk = reader.readChunk();</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">            if (chunk instanceof WebPChunkVp8) {</span>
+<span class="nc" id="L293">                final WebPChunkVp8 vp8 = (WebPChunkVp8) chunk;</span>
+<span class="nc" id="L294">                return new Dimension(vp8.getWidth(), vp8.getHeight());</span>
+            }
+<span class="nc bnc" id="L296" title="All 2 branches missed.">            if (chunk instanceof WebPChunkVp8l) {</span>
+<span class="nc" id="L297">                final WebPChunkVp8l vp8l = (WebPChunkVp8l) chunk;</span>
+<span class="nc" id="L298">                return new Dimension(vp8l.getImageWidth(), vp8l.getImageHeight());</span>
+            }
+<span class="nc bnc" id="L300" title="All 2 branches missed.">            if (chunk instanceof WebPChunkVp8x) {</span>
+<span class="nc" id="L301">                final WebPChunkVp8x vp8x = (WebPChunkVp8x) chunk;</span>
+<span class="nc" id="L302">                return new Dimension(vp8x.getCanvasWidth(), vp8x.getCanvasHeight());</span>
+            }
+<span class="nc" id="L304">            throw new ImagingException(&quot;Unknown WebP chunk type: &quot; + chunk);</span>
+<span class="nc" id="L305">        }</span>
+    }
+
+    @Override
+    public WebPImageMetadata getMetadata(final ByteSource byteSource, final WebPImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L310">        try (ChunksReader reader = new ChunksReader(byteSource, WebPChunkType.EXIF)) {</span>
+<span class="nc" id="L311">            final WebPChunk chunk = reader.readChunk();</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">            return chunk == null ? null : new WebPImageMetadata((TiffImageMetadata) new TiffImageParser().getMetadata(chunk.getBytes()));</span>
+        }
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L318">        return &quot;WebP-Custom&quot;;</span>
+    }
+
+    @Override
+    public String getXmpXml(final ByteSource byteSource, final XmpImagingParameters&lt;WebPImagingParameters&gt; params) throws ImagingException, IOException {
+<span class="nc" id="L323">        try (ChunksReader reader = new ChunksReader(byteSource, WebPChunkType.XMP)) {</span>
+<span class="nc" id="L324">            final WebPChunkXml chunk = (WebPChunkXml) reader.readChunk();</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">            return chunk == null ? null : chunk.getXml();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

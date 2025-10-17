@@ -1,0 +1,45 @@
+One or several (comma-separated) paths to JSON files that specify which program elements should be made available via reflection.
+
+The JSON object schema is described at:
+
+   https://github.com/oracle/graal/blob/master/docs/reference-manual/native-image/assets/reflect-config-schema-v1.1.0.json
+
+Example:
+
+	[
+	  {
+	    "condition" : {
+          "typeReachable" : "org.example.CallingClass"
+        },
+	    "name" : "java.lang.Class",
+	    "allDeclaredConstructors" : "true",
+	    "allPublicConstructors" : "true",
+	    "allDeclaredMethods" : "true",
+	    "allPublicMethods" : "true"
+	  },
+	  {
+	    "condition" : {
+          "typeReachable" : "org.example.CallingClass"
+        },
+	    "name" : "java.lang.String",
+	    "fields" : [
+	      { "name" : "value" },
+	      { "name" : "hash" }
+	    ],
+	    "methods" : [
+	      { "name" : "<init>", "parameterTypes" : [] },
+	      { "name" : "<init>", "parameterTypes" : ["char[]"] },
+	      { "name" : "charAt" },
+	      { "name" : "format", "parameterTypes" : ["java.lang.String", "java.lang.Object[]"] },
+	    ]
+	  },
+      {
+        "condition" : {
+          "typeReachable" : "org.example.CallingClass"
+        },
+        "name" : "java.lang.String$CaseInsensitiveComparator",
+        "methods" : [
+          { "name" : "compare" }
+        ]
+      }
+	]

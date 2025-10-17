@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DhtSegment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.segments</a> &gt; <span class="el_source">DhtSegment.java</span></div><h1>DhtSegment.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+
+package org.apache.commons.imaging.formats.jpeg.segments;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.imaging.common.Allocator;
+
+public class DhtSegment extends AbstractSegment {
+    public static class HuffmanTable {
+        // some arrays are better off one-based
+        // to avoid subtractions by one later when indexing them
+        public final int tableClass;
+        public final int destinationIdentifier;
+        private final int[] huffVal; // 0-based
+
+        // derived properties:
+<span class="nc" id="L38">        private final int[] huffSize = new int[16 * 256]; // 0-based</span>
+        private final int[] huffCode; // 0-based
+<span class="nc" id="L40">        private final int[] minCode = new int[1 + 16]; // 1-based</span>
+<span class="nc" id="L41">        private final int[] maxCode = new int[1 + 16]; // 1-based</span>
+<span class="nc" id="L42">        private final int[] valPtr = new int[1 + 16]; // 1-based</span>
+
+<span class="nc" id="L44">        HuffmanTable(final int tableClass, final int destinationIdentifier, final int[] bits, final int[] huffVal) {</span>
+<span class="nc" id="L45">            this.tableClass = tableClass;</span>
+<span class="nc" id="L46">            this.destinationIdentifier = destinationIdentifier;</span>
+//            this.bits = bits; // 1-based; not used outside the ctor
+<span class="nc" id="L48">            this.huffVal = huffVal;</span>
+
+            // &quot;generate_size_table&quot;, section C.2, figure C.1, page 51 of ITU-T
+            // T.81:
+<span class="nc" id="L52">            int k = 0;</span>
+<span class="nc" id="L53">            int i = 1;</span>
+<span class="nc" id="L54">            int j = 1;</span>
+<span class="nc" id="L55">            int lastK = -1;</span>
+            while (true) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                if (j &gt; bits[i]) {</span>
+<span class="nc" id="L58">                    i++;</span>
+<span class="nc" id="L59">                    j = 1;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                    if (i &gt; 16) {</span>
+<span class="nc" id="L61">                        huffSize[k] = 0;</span>
+<span class="nc" id="L62">                        lastK = k;</span>
+<span class="nc" id="L63">                        break;</span>
+                    }
+                } else {
+<span class="nc" id="L66">                    huffSize[k] = i;</span>
+<span class="nc" id="L67">                    k++;</span>
+<span class="nc" id="L68">                    j++;</span>
+                }
+            }
+
+            // &quot;generate_code_table&quot;, section C.2, figure C.2, page 52 of ITU-T
+            // T.81:
+<span class="nc" id="L74">            k = 0;</span>
+<span class="nc" id="L75">            int code = 0;</span>
+<span class="nc" id="L76">            int si = huffSize[0];</span>
+<span class="nc" id="L77">            huffCode = Allocator.intArray(lastK);</span>
+            while (true) {
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                if (k &gt;= lastK) {</span>
+<span class="nc" id="L80">                    break;</span>
+                }
+<span class="nc" id="L82">                huffCode[k] = code;</span>
+<span class="nc" id="L83">                code++;</span>
+<span class="nc" id="L84">                k++;</span>
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                if (huffSize[k] == si) {</span>
+<span class="nc" id="L87">                    continue;</span>
+                }
+<span class="nc bnc" id="L89" title="All 2 branches missed.">                if (huffSize[k] == 0) {</span>
+<span class="nc" id="L90">                    break;</span>
+                }
+                do {
+<span class="nc" id="L93">                    code &lt;&lt;= 1;</span>
+<span class="nc" id="L94">                    si++;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                } while (huffSize[k] != si);</span>
+            }
+
+            // &quot;Decoder_tables&quot;, section F.2.2.3, figure F.15, page 108 of T.81:
+<span class="nc" id="L99">            i = 0;</span>
+<span class="nc" id="L100">            j = 0;</span>
+            while (true) {
+<span class="nc" id="L102">                i++;</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                if (i &gt; 16) {</span>
+<span class="nc" id="L104">                    break;</span>
+                }
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                if (bits[i] == 0) {</span>
+<span class="nc" id="L107">                    maxCode[i] = -1;</span>
+                } else {
+<span class="nc" id="L109">                    valPtr[i] = j;</span>
+<span class="nc" id="L110">                    minCode[i] = huffCode[j];</span>
+<span class="nc" id="L111">                    j += bits[i] - 1;</span>
+<span class="nc" id="L112">                    maxCode[i] = huffCode[j];</span>
+<span class="nc" id="L113">                    j++;</span>
+                }
+            }
+
+<span class="nc" id="L117">        }</span>
+
+        public int getHuffVal(final int i) {
+<span class="nc" id="L120">            return huffVal[i];</span>
+        }
+
+        public int getMaxCode(final int i) {
+<span class="nc" id="L124">            return maxCode[i];</span>
+        }
+
+        public int getMinCode(final int i) {
+<span class="nc" id="L128">            return minCode[i];</span>
+        }
+
+        public int getValPtr(final int i) {
+<span class="nc" id="L132">            return valPtr[i];</span>
+        }
+    }
+
+    public final List&lt;HuffmanTable&gt; huffmanTables;
+
+    public DhtSegment(final int marker, final byte[] segmentData) throws IOException {
+<span class="nc" id="L139">        this(marker, segmentData.length, new ByteArrayInputStream(segmentData));</span>
+<span class="nc" id="L140">    }</span>
+
+    public DhtSegment(final int marker, int length, final InputStream is) throws IOException {
+<span class="nc" id="L143">        super(marker, length);</span>
+
+<span class="nc" id="L145">        final ArrayList&lt;HuffmanTable&gt; huffmanTables = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        while (length &gt; 0) {</span>
+<span class="nc" id="L147">            final int tableClassAndDestinationId = 0xff &amp; readByte(&quot;TableClassAndDestinationId&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L148">            length--;</span>
+<span class="nc" id="L149">            final int tableClass = tableClassAndDestinationId &gt;&gt; 4 &amp; 0xf;</span>
+<span class="nc" id="L150">            final int destinationIdentifier = tableClassAndDestinationId &amp; 0xf;</span>
+<span class="nc" id="L151">            final int[] bits = new int[1 + 16];</span>
+<span class="nc" id="L152">            int bitsSum = 0;</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            for (int i = 1; i &lt; bits.length; i++) {</span>
+<span class="nc" id="L154">                bits[i] = 0xff &amp; readByte(&quot;Li&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L155">                length--;</span>
+<span class="nc" id="L156">                bitsSum += bits[i];</span>
+            }
+<span class="nc" id="L158">            final int[] huffVal = Allocator.intArray(bitsSum);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">            for (int i = 0; i &lt; bitsSum; i++) {</span>
+<span class="nc" id="L160">                huffVal[i] = 0xff &amp; readByte(&quot;Vij&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="nc" id="L161">                length--;</span>
+            }
+
+<span class="nc" id="L164">            huffmanTables.add(new HuffmanTable(tableClass, destinationIdentifier, bits, huffVal));</span>
+<span class="nc" id="L165">        }</span>
+<span class="nc" id="L166">        this.huffmanTables = Collections.unmodifiableList(huffmanTables);</span>
+<span class="nc" id="L167">    }</span>
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L171">        return &quot;DHT (&quot; + getSegmentType() + &quot;)&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

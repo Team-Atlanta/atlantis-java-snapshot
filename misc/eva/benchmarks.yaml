@@ -1,0 +1,2719 @@
+cps:
+  aixcc/jvm/activemq:
+    repo: git@github.com:Team-Atlanta/cp-java-activemq-source.git
+    harnesses:
+      com.aixcc.activemq.harnesses.one.ActivemqOne:
+        classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+        cpvs:
+          cpv_0:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            sinkpoint_coords:
+              - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 234
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 234
+                comment: "trigger"
+      com.aixcc.activemq.harnesses.one.ActivemqOneFDP:
+        classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+        cpvs:
+          cpv_0:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            sinkpoint_coords:
+              - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 234
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 231
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 233
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 230
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "trigger"
+              - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 232
+                comment: "init"
+              - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+                method_name: "createThrowable"
+                file_name: "BaseDataStreamMarshaller.java"
+                line_num: 234
+                comment: "trigger"
+  aixcc/jvm/batik:
+    repo: git@github.com:Team-Atlanta/cp-java-batik-source.git
+    harnesses:
+      com.aixcc.batik.harnesses.one.BatikOne:
+        classpath_dir: build/out/aixcc/jvm/batik/jars/one
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.batik.util.ParsedURLData"
+                method_name: "openStreamInternal"
+                file_name: "ParsedURLData.java"
+                line_num: 554
+                comment: "trigger"
+      com.aixcc.batik.harnesses.one.BatikOneFDP:
+        classpath_dir: build/out/aixcc/jvm/batik/jars/one
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.batik.util.ParsedURLData"
+                method_name: "openStreamInternal"
+                file_name: "ParsedURLData.java"
+                line_num: 554
+                comment: "trigger"
+  aixcc/jvm/bcel:
+    repo: git@github.com:Team-Atlanta/cp-java-bcel-source.git
+    harnesses:
+      com.aixcc.bcel.harnesses.one.BCELOne:
+        classpath_dir: build/out/aixcc/jvm/bcel/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.bcel.verifier.statics.Pass2Verifier$CPESSC_Visitor"
+                method_name: "visitSourceFile"
+                file_name: "Pass2Verifier.java"
+                line_num: 973
+                comment: "trigger"
+      com.aixcc.bcel.harnesses.one.BCELOneFDP:
+        classpath_dir: build/out/aixcc/jvm/bcel/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.bcel.verifier.statics.Pass2Verifier$CPESSC_Visitor"
+                method_name: "visitSourceFile"
+                file_name: "Pass2Verifier.java"
+                line_num: 973
+                comment: "trigger"
+  aixcc/jvm/beanutils:
+    repo: git@github.com:Team-Atlanta/cp-java-beanutils-source.git
+    harnesses:
+      com.aixcc.beanutils.harnesses.one.BeanUtilsOne:
+        classpath_dir: build/out/aixcc/jvm/beanutils/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "com.aixcc.beanutils.harnesses.one.BeanUtilsOne"
+                method_name: "fuzz"
+                file_name: "BeanUtilsOne.java"
+                line_num: 79
+                comment: "trigger"
+  aixcc/jvm/cron-utils:
+    repo: git@github.com:Team-Atlanta/cp-cron-utils-source.git
+    harnesses:
+      com.aixcc.cronutils.harnesses.one.CronUtilsOne:
+        classpath_dir: build/out/aixcc/jvm/cron-utils/jars/one
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "com.aixcc.cronutils.harnesses.one.CronUtilsOne"
+                method_name: "fuzzerTestOneInput"
+                file_name: "CronUtilsOne.java"
+                line_num: 35
+                comment: "trigger"
+      com.aixcc.cronutils.harnesses.one.CronUtilsOneFDP:
+        classpath_dir: build/out/aixcc/jvm/cron-utils/jars/one
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "com.aixcc.cronutils.harnesses.one.CronUtilsOneFDP"
+                method_name: "fuzzerTestOneInput"
+                file_name: "CronUtilsOneFDP.java"
+                line_num: 37
+                comment: "trigger"
+  aixcc/jvm/cxf:
+    repo: git@github.com:Team-Atlanta/cp-java-cxf-src.git
+    harnesses:
+      com.aixcc.cxf.harnesses.one.CXFOne:
+        classpath_dir: build/out/aixcc/jvm/cxf/jars/one
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "com.aixcc.cxf.harnesses.one.CXFOne"
+                method_name: "fuzzerTestOneInput"
+                file_name: "CXFOne.java"
+                line_num: 35
+                comment: "trigger"
+      com.aixcc.cxf.harnesses.two.CXFTwo:
+        classpath_dir: build/out/aixcc/jvm/cxf/jars/two
+        cpvs:
+          cpv_1:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "com.aixcc.cxf.harnesses.two.CXFTwo"
+                method_name: "fuzzerTestOneInput"
+                file_name: "CXFTwo.java"
+                line_num: 36
+                comment: "trigger"
+      com.aixcc.cxf.harnesses.three.CXFThree:
+        classpath_dir: build/out/aixcc/jvm/cxf/jars/three
+        cpvs:
+          cpv_2:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.cxf.jaxrs.utils.ResourceUtils"
+                method_name: "getResourceStream"
+                file_name: "ResourceUtils.java"
+                line_num: 577
+                comment: "trigger"
+      com.aixcc.cxf.harnesses.three.CXFThreeFDP:
+        classpath_dir: build/out/aixcc/jvm/cxf/jars/three
+        cpvs:
+          cpv_2:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.cxf.jaxrs.utils.ResourceUtils"
+                method_name: "getResourceStream"
+                file_name: "ResourceUtils.java"
+                line_num: 577
+                comment: "trigger"
+  aixcc/jvm/feign:
+    repo: git@github.com:Team-Atlanta/cp-java-feign-src.git
+    harnesses:
+      BodyTemplateFuzzer:
+        classpath_dir: build/out/aixcc/jvm/feign
+        cpvs:
+          cpv_2:
+            type: "Regular Expression Injection"
+            pov_sanitizer: "FuzzerSecurityIssueLow: Regular Expression Injection"
+            sinkpoint_coords:
+              - class_name: "feign.template.Expression"
+                method_name: "<init>"
+                file_name: "Expression.java"
+                line_num: 35
+                comment: "trigger"
+  aixcc/jvm/fuzzy:
+    repo: git@github.com:Team-Atlanta/cp-java-fuzzy-source.git
+    harnesses:
+      com.aixcc.fuzzy.harnesses.one.FuzzyOne:
+        classpath_dir: build/out/aixcc/jvm/fuzzy/jars/one
+        cpvs:
+          cpv_0:
+            type: "XPath Injection (Improper Neutralization of Data within XPath Expressions)"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: XPath Injection"
+            sinkpoint_coords:
+              - class_name: "me.xdrop.fuzzywuzzy.Config"
+                method_name: "getTagXPath"
+                file_name: "Config.java"
+                line_num: 84
+                comment: "trigger"
+      com.aixcc.fuzzy.harnesses.one.FuzzyOneFDP:
+        classpath_dir: build/out/aixcc/jvm/fuzzy/jars/one
+        cpvs:
+          cpv_0:
+            type: "XPath Injection (Improper Neutralization of Data within XPath Expressions)"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: XPath Injection"
+            sinkpoint_coords:
+              - class_name: "me.xdrop.fuzzywuzzy.Config"
+                method_name: "getTagXPath"
+                file_name: "Config.java"
+                line_num: 84
+                comment: "trigger"
+  aixcc/jvm/geonetwork:
+    repo: git@github.com:Team-Atlanta/cp-java-geonetwork-source.git
+    harnesses:
+      com.aixcc.geonetwork.harnesses.one.GeonetworkOne:
+        classpath_dir: build/out/aixcc/jvm/geonetwork/jars/one
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.fao.geonet.kernel.harvest.harvester.localfilesystem.LocalFilesystemHarvester"
+                method_name: "runBeforeScript"
+                file_name: "LocalFilesystemHarvester.java"
+                line_num: 239
+                comment: "init"
+              - class_name: "org.fao.geonet.kernel.harvest.harvester.localfilesystem.LocalFilesystemHarvester"
+                method_name: "runBeforeScript"
+                file_name: "LocalFilesystemHarvester.java"
+                line_num: 242
+                comment: "trigger"
+      com.aixcc.geonetwork.harnesses.one.GeonetworkOneFDP:
+        classpath_dir: build/out/aixcc/jvm/geonetwork/jars/one
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.fao.geonet.kernel.harvest.harvester.localfilesystem.LocalFilesystemHarvester"
+                method_name: "runBeforeScript"
+                file_name: "LocalFilesystemHarvester.java"
+                line_num: 239
+                comment: "init"
+              - class_name: "org.fao.geonet.kernel.harvest.harvester.localfilesystem.LocalFilesystemHarvester"
+                method_name: "runBeforeScript"
+                file_name: "LocalFilesystemHarvester.java"
+                line_num: 242
+                comment: "trigger"
+  aixcc/jvm/htmlunit:
+    repo: git@github.com:Team-Atlanta/cp-java-htmlunit-source.git
+    harnesses:
+      com.aixcc.htmlunit.harnesses.one.HtmlunitOne:
+        classpath_dir: build/out/aixcc/jvm/htmlunit/jars/one
+        cpvs:
+          cpv_0:
+            type: "XSLT Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.htmlunit.javascript.host.xml.XSLTProcessor"
+                method_name: "transform"
+                file_name: "XSLTProcessor.java"
+                line_num: 262
+                comment: "trigger"
+      com.aixcc.htmlunit.harnesses.one.HtmlunitOneFDP:
+        classpath_dir: build/out/aixcc/jvm/htmlunit/jars/one
+        cpvs:
+          cpv_0:
+            type: "XSLT Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.htmlunit.javascript.host.xml.XSLTProcessor"
+                method_name: "transform"
+                file_name: "XSLTProcessor.java"
+                line_num: 262
+                comment: "trigger"
+  aixcc/jvm/imaging:
+    repo: git@github.com:Team-Atlanta/cp-java-imaging-source.git
+    harnesses:
+      com.aixcc.imaging.harnesses.one.ImagingOne:
+        classpath_dir: build/out/aixcc/jvm/imaging/jars/one
+        cpvs:
+          cpv_0:
+            type: "Improper Neutralization of Special Elements used in an OS Command (OS Command Injection)"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.imaging.formats.png.chunks.PngChunkZtxt"
+                method_name: "<init>"
+                file_name: "PngChunkZtxt.java"
+                line_num: 61
+                comment: "init"
+              - class_name: "org.apache.commons.imaging.formats.png.chunks.PngChunkZtxt"
+                method_name: "<init>"
+                file_name: "PngChunkZtxt.java"
+                line_num: 62
+                comment: "trigger"
+          cpv_1:
+            type: "Improper Input Validation (XPath Injection)"
+            pov_sanitizer: "FuzzerSecurityIssueLow: Regular Expression Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.imaging.formats.gif.ApplicationExtension"
+                method_name: "<init>"
+                file_name: "ApplicationExtension.java"
+                line_num: 34
+                comment: "trigger"
+      com.aixcc.imaging.harnesses.one.ImagingOneFDP:
+        classpath_dir: build/out/aixcc/jvm/imaging/jars/one
+        cpvs:
+          cpv_0:
+            type: "Improper Neutralization of Special Elements used in an OS Command (OS Command Injection)"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.imaging.formats.png.chunks.PngChunkZtxt"
+                method_name: "<init>"
+                file_name: "PngChunkZtxt.java"
+                line_num: 61
+                comment: "init"
+              - class_name: "org.apache.commons.imaging.formats.png.chunks.PngChunkZtxt"
+                method_name: "<init>"
+                file_name: "PngChunkZtxt.java"
+                line_num: 62
+                comment: "trigger"
+          cpv_1:
+            type: "Improper Input Validation (XPath Injection)"
+            pov_sanitizer: "FuzzerSecurityIssueLow: Regular Expression Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.imaging.formats.gif.ApplicationExtension"
+                method_name: "<init>"
+                file_name: "ApplicationExtension.java"
+                line_num: 34
+                comment: "trigger"
+      com.aixcc.imaging.harnesses.two.ImagingTwo:
+        classpath_dir: build/out/aixcc/jvm/imaging/jars/two
+        cpvs:
+          cpv_2:
+            type: "Improper Neutralization of Data within XPath Expressions (XPath Injection)"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: XPath Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.imaging.formats.jpeg.segments.PatSegment"
+                method_name: "getEntryPointFromSegmentData"
+                file_name: "PatSegment.java"
+                line_num: 93
+                comment: "trigger"
+      com.aixcc.imaging.harnesses.two.ImagingTwoFDP:
+        classpath_dir: build/out/aixcc/jvm/imaging/jars/two
+        cpvs:
+          cpv_2:
+            type: "Improper Neutralization of Data within XPath Expressions (XPath Injection)"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: XPath Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.imaging.formats.jpeg.segments.PatSegment"
+                method_name: "getEntryPointFromSegmentData"
+                file_name: "PatSegment.java"
+                line_num: 93
+                comment: "trigger"
+  aixcc/jvm/jackson-databind:
+    repo: git@github.com:Team-Atlanta/cp-java-jackson-databind-source.git
+    harnesses:
+      com.aixcc.jackson.databind.harnesses.one.JacksonDatabindOne:
+        classpath_dir: build/out/aixcc/jvm/jackson-databind/jars/one
+        cpvs:
+          cpv_0:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "com.fasterxml.jackson.databind.introspect.AnnotatedConstructor"
+                method_name: "call1"
+                file_name: "AnnotatedConstructor.java"
+                line_num: 129
+                comment: "trigger"
+      com.aixcc.jackson.databind.harnesses.one.JacksonDatabindOneFDP:
+        classpath_dir: build/out/aixcc/jvm/jackson-databind/jars/one
+        cpvs:
+          cpv_0:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "com.fasterxml.jackson.databind.introspect.AnnotatedConstructor"
+                method_name: "call1"
+                file_name: "AnnotatedConstructor.java"
+                line_num: 129
+                comment: "trigger"
+  aixcc/jvm/jenkins:
+    repo: git@github.com:Team-Atlanta/cp-java-jenkins-source.git
+    harnesses:
+      com.aixcc.jenkins.harnesses.two.JenkinsTwo:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/two
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.UtilPlug.UtilMain"
+                method_name: "createUtils"
+                file_name: "UtilMain.java"
+                line_num: 191
+                comment: "init"
+              - class_name: "io.jenkins.plugins.UtilPlug.UtilMain"
+                method_name: "createUtils"
+                file_name: "UtilMain.java"
+                line_num: 194
+                comment: "trigger"
+      com.aixcc.jenkins.harnesses.two.JenkinsTwoFDP:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/two
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.UtilPlug.UtilMain"
+                method_name: "createUtils"
+                file_name: "UtilMain.java"
+                line_num: 191
+                comment: "init"
+              - class_name: "io.jenkins.plugins.UtilPlug.UtilMain"
+                method_name: "createUtils"
+                file_name: "UtilMain.java"
+                line_num: 194
+                comment: "trigger"
+      com.aixcc.jenkins.harnesses.three.JenkinsThree:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/three
+        cpvs:
+          cpv_1:
+            type: "Script Engine Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: Script Engine Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.Script"
+                method_name: "secureEval"
+                file_name: "Script.java"
+                line_num: 84
+                comment: "trigger"
+          cpv_2:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "hudson.PluginManager"
+                method_name: "doPerformUpload"
+                file_name: "PluginManager.java"
+                line_num: 1640
+                comment: "trigger"
+          cpv_3:
+            type: "Server Side Request Forgery (SSRF)"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "hudson.ProxyConfiguration$DescriptorImpl2"
+                method_name: "doValidateProxy"
+                file_name: "ProxyConfiguration.java"
+                line_num: 540
+                comment: "init"
+              - class_name: "hudson.ProxyConfiguration$DescriptorImpl2"
+                method_name: "doValidateProxy"
+                file_name: "ProxyConfiguration.java"
+                line_num: 593
+                comment: "trigger"
+          cpv_4:
+            type: "Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.coverage.CoverageProcessor"
+                method_name: "recoverCoverageResult"
+                file_name: "CoverageProcessor.java"
+                line_num: 732
+                comment: "init"
+              - class_name: "io.jenkins.plugins.coverage.CoverageProcessor"
+                method_name: "recoverCoverageResult"
+                file_name: "CoverageProcessor.java"
+                line_num: 733
+                comment: "trigger"
+          cpv_5:
+            type: "SQL Injection"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: SQL Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.UserNameAction"
+                method_name: "doGetName"
+                file_name: "UserNameAction.java"
+                line_num: 74
+                comment: "trigger"
+          cpv_6:
+            type: "LDAP Injection (Deserialization of Untrusted Data, JNDI+LDAP)"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: Remote JNDI Lookup"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.StateMonitor"
+                method_name: "doCheck"
+                file_name: "StateMonitor.java"
+                line_num: 58
+                comment: "trigger"
+          cpv_7:
+            type: "Unsafe Reflection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "hudson.Proc$LocalProc"
+                method_name: "<init>"
+                file_name: "Proc.java"
+                line_num: 252
+                comment: "trigger"
+          cpv_8:
+            type: "SQL Injection (Improper Neutralization of Special Elements in an SQL Command)"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: LDAP Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.AuthAction"
+                method_name: "authenticateAsAdmin"
+                file_name: "AuthAction.java"
+                line_num: 228
+                comment: "init"
+              - class_name: "io.jenkins.plugins.toyplugin.AuthAction"
+                method_name: "authenticateAsAdmin"
+                file_name: "AuthAction.java"
+                line_num: 229
+                comment: "trigger"
+          cpv_9:
+            type: "XPath Injection (Improper Neutralization of Data within XPath Expressions)"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: XPath Injection"
+            sinkpoint_coords:
+              - class_name: "jenkins.util.xml.XMLUtils"
+                method_name: "getValue"
+                file_name: "XMLUtils.java"
+                line_num: 236
+                comment: "trigger"
+          cpv_10:
+            type: "Process Control"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: load arbitrary library"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.SecretMessage"
+                method_name: "doPerform"
+                file_name: "SecretMessage.java"
+                line_num: 98
+                comment: "trigger"
+          cpv_11:
+            type: "RegexInjection"
+            pov_sanitizer: "FuzzerSecurityIssueLow: Regular Expression Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.AccessFilter"
+                method_name: "doGet"
+                file_name: "AccessFilter.java"
+                line_num: 87
+                comment: "trigger"
+      com.aixcc.jenkins.harnesses.three.JenkinsThreeFDP:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/three
+        cpvs:
+          cpv_1:
+            type: "Script Engine Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: Script Engine Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.Script"
+                method_name: "secureEval"
+                file_name: "Script.java"
+                line_num: 84
+                comment: "trigger"
+          cpv_2:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "hudson.PluginManager"
+                method_name: "doPerformUpload"
+                file_name: "PluginManager.java"
+                line_num: 1640
+                comment: "trigger"
+          cpv_3:
+            type: "Server Side Request Forgery (SSRF)"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "hudson.ProxyConfiguration$DescriptorImpl2"
+                method_name: "doValidateProxy"
+                file_name: "ProxyConfiguration.java"
+                line_num: 540
+                comment: "init"
+              - class_name: "hudson.ProxyConfiguration$DescriptorImpl2"
+                method_name: "doValidateProxy"
+                file_name: "ProxyConfiguration.java"
+                line_num: 593
+                comment: "trigger"
+          cpv_4:
+            type: "Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.coverage.CoverageProcessor"
+                method_name: "recoverCoverageResult"
+                file_name: "CoverageProcessor.java"
+                line_num: 732
+                comment: "init"
+              - class_name: "io.jenkins.plugins.coverage.CoverageProcessor"
+                method_name: "recoverCoverageResult"
+                file_name: "CoverageProcessor.java"
+                line_num: 733
+                comment: "trigger"
+          cpv_5:
+            type: "SQL Injection"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: SQL Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.UserNameAction"
+                method_name: "doGetName"
+                file_name: "UserNameAction.java"
+                line_num: 74
+                comment: "trigger"
+          cpv_6:
+            type: "LDAP Injection (Deserialization of Untrusted Data, JNDI+LDAP)"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: Remote JNDI Lookup"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.StateMonitor"
+                method_name: "doCheck"
+                file_name: "StateMonitor.java"
+                line_num: 58
+                comment: "trigger"
+          cpv_7:
+            type: "Unsafe Reflection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "hudson.Proc$LocalProc"
+                method_name: "<init>"
+                file_name: "Proc.java"
+                line_num: 252
+                comment: "trigger"
+          cpv_8:
+            type: "SQL Injection (Improper Neutralization of Special Elements in an SQL Command)"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: LDAP Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.AuthAction"
+                method_name: "authenticateAsAdmin"
+                file_name: "AuthAction.java"
+                line_num: 228
+                comment: "init"
+              - class_name: "io.jenkins.plugins.toyplugin.AuthAction"
+                method_name: "authenticateAsAdmin"
+                file_name: "AuthAction.java"
+                line_num: 229
+                comment: "trigger"
+          cpv_9:
+            type: "XPath Injection (Improper Neutralization of Data within XPath Expressions)"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: XPath Injection"
+            sinkpoint_coords:
+              - class_name: "jenkins.util.xml.XMLUtils"
+                method_name: "getValue"
+                file_name: "XMLUtils.java"
+                line_num: 236
+                comment: "trigger"
+          cpv_10:
+            type: "Process Control"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: load arbitrary library"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.SecretMessage"
+                method_name: "doPerform"
+                file_name: "SecretMessage.java"
+                line_num: 98
+                comment: "trigger"
+          cpv_11:
+            type: "RegexInjection"
+            pov_sanitizer: "FuzzerSecurityIssueLow: Regular Expression Injection"
+            sinkpoint_coords:
+              - class_name: "io.jenkins.plugins.toyplugin.AccessFilter"
+                method_name: "doGet"
+                file_name: "AccessFilter.java"
+                line_num: 87
+                comment: "trigger"
+      com.aixcc.jenkins.harnesses.four.JenkinsFour:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/four
+        cpvs:
+          cpv_12:
+            type: "Server Side Request Forgery (SSRF)"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.CauseManagement"
+                method_name: "doRemoveConfirm"
+                file_name: "CauseManagement.java"
+                line_num: 242
+                comment: "init"
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.CauseManagement"
+                method_name: "doRemoveConfirm"
+                file_name: "CauseManagement.java"
+                line_num: 245
+                comment: "trigger"
+          cpv_13:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            pov: .aixcc/povs/JenkinsFour/cpv_13
+            sinkpoint_coords:
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.db.LocalFileKnowledgeBase"
+                method_name: "lambda$load$1"
+                file_name: "LocalFileKnowledgeBase.java"
+                line_num: 130
+                comment: "trigger"
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.db.LocalFileKnowledgeBase"
+                method_name: "lambda$load$1"
+                file_name: "LocalFileKnowledgeBase.java"
+                line_num: 131
+                comment: "trigger"
+      com.aixcc.jenkins.harnesses.four.JenkinsFourFDP:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/four
+        cpvs:
+          cpv_12:
+            type: "Server Side Request Forgery (SSRF)"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.CauseManagement"
+                method_name: "doRemoveConfirm"
+                file_name: "CauseManagement.java"
+                line_num: 242
+                comment: "init"
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.CauseManagement"
+                method_name: "doRemoveConfirm"
+                file_name: "CauseManagement.java"
+                line_num: 245
+                comment: "trigger"
+          cpv_13:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            pov: .aixcc/povs/JenkinsFour/cpv_13
+            sinkpoint_coords:
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.db.LocalFileKnowledgeBase"
+                method_name: "lambda$load$1"
+                file_name: "LocalFileKnowledgeBase.java"
+                line_num: 130
+                comment: "init"
+              - class_name: "com.sonyericsson.jenkins.plugins.bfa.db.LocalFileKnowledgeBase"
+                method_name: "lambda$load$1"
+                file_name: "LocalFileKnowledgeBase.java"
+                line_num: 131
+                comment: "trigger"
+      com.aixcc.jenkins.harnesses.five.JenkinsFive:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/five
+        cpvs:
+          cpv_14:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "hudson.plugins.emailext.EmailConfig"
+                method_name: "constructor"
+                file_name: "EmailConfig.java"
+                line_num: 102
+                comment: "trigger"
+      com.aixcc.jenkins.harnesses.five.JenkinsFiveFDP:
+        classpath_dir: build/out/aixcc/jvm/jenkins/jars/five
+        cpvs:
+          cpv_14:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "hudson.plugins.emailext.EmailConfig"
+                method_name: "constructor"
+                file_name: "EmailConfig.java"
+                line_num: 102
+                comment: "trigger"
+  aixcc/jvm/kylin:
+    repo: git@github.com:Team-Atlanta/cp-java-kylin-src.git
+    harnesses:
+      com.aixcc.kylin.harnesses.one.KylinOne:
+        classpath_dir: build/out/aixcc/jvm/kylin/jars/one
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.kylin.common.util.CliCommandExecutor"
+                method_name: "runNativeCommand"
+                file_name: "CliCommandExecutor.java"
+                line_num: 124
+                comment: "init"
+              - class_name: "org.apache.kylin.common.util.CliCommandExecutor"
+                method_name: "runNativeCommand"
+                file_name: "CliCommandExecutor.java"
+                line_num: 126
+                comment: "trigger"
+      com.aixcc.kylin.harnesses.one.KylinOneFDP:
+        classpath_dir: build/out/aixcc/jvm/kylin/jars/one
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.kylin.common.util.CliCommandExecutor"
+                method_name: "runNativeCommand"
+                file_name: "CliCommandExecutor.java"
+                line_num: 124
+                comment: "init"
+              - class_name: "org.apache.kylin.common.util.CliCommandExecutor"
+                method_name: "runNativeCommand"
+                file_name: "CliCommandExecutor.java"
+                line_num: 126
+                comment: "trigger"
+  aixcc/jvm/jakarta-mail-api:
+    repo: git@github.com:Team-Atlanta/cp-java-jakarta-mail-api-source.git
+    harnesses:
+      com.aixcc.mailapi.harnesses.one.MailApiHarnessOne:
+        classpath_dir: build/out/aixcc/jvm/jakarta-mail-api/jars/one
+        cpvs:
+          cpv_0:
+            type: "XML External Entity Reference"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.angus.mail.handlers.text_xml"
+                method_name: "writeTo"
+                file_name: "text_xml.java"
+                line_num: 95
+                comment: "trigger"
+      com.aixcc.mailapi.harnesses.one.MailApiHarnessOneFDP:
+        classpath_dir: build/out/aixcc/jvm/jakarta-mail-api/jars/one
+        cpvs:
+          cpv_0:
+            type: "XML External Entity Reference"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.angus.mail.handlers.text_xml"
+                method_name: "writeTo"
+                file_name: "text_xml.java"
+                line_num: 95
+                comment: "trigger"
+  aixcc/jvm/netty:
+    repo: git@github.com:Team-Atlanta/cp-java-netty.git
+    harnesses:
+      io.netty.handler.codec.http.HttpRequestDecoderFuzzer:
+        classpath_dir: build/out/aixcc/jvm/netty
+        cpvs:
+          cpv_1:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "HttpRequestDecoder"
+                method_name: "splitHeaderName"
+                file_name: "HttpRequestDecoder.java"
+                line_num: 262
+                comment: "init"
+              - class_name: "HttpRequestDecoder"
+                method_name: "splitHeaderName"
+                file_name: "HttpRequestDecoder.java"
+                line_num: 265
+                comment: "trigger"
+  aixcc/jvm/olingo:
+    repo: git@github.com:Team-Atlanta/cp-java-olingo-src.git
+    harnesses:
+      com.aixcc.olingo.harnesses.one.OlingoOne:
+        classpath_dir: build/out/aixcc/jvm/olingo/jars/one
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.olingo.client.core.communication.request.v4.AsyncRequestWrapperImpl"
+                method_name: "executeHttpRequest"
+                file_name: "AsyncRequestWrapperImpl.java"
+                line_num: 303
+                comment: "trigger"
+      com.aixcc.olingo.harnesses.one.OlingoOneFDP:
+        classpath_dir: build/out/aixcc/jvm/olingo/jars/one
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.olingo.client.core.communication.request.v4.AsyncRequestWrapperImpl"
+                method_name: "executeHttpRequest"
+                file_name: "AsyncRequestWrapperImpl.java"
+                line_num: 303
+                comment: "trigger"
+  aixcc/jvm/oripa:
+    repo: git@github.com:Team-Atlanta/cp-java-oripa-src.git
+    harnesses:
+      com.aixcc.oripa.harnesses.one.OripaOne:
+        classpath_dir: build/out/aixcc/jvm/oripa/jars/one
+        cpvs:
+          cpv_0:
+            type: "Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "oripa.persistence.doc.loader.LoaderXML"
+                method_name: "loadAsDataSet"
+                file_name: "LoaderXML.java"
+                line_num: 43
+                comment: "init"
+              - class_name: "oripa.persistence.doc.loader.LoaderXML"
+                method_name: "loadAsDataSet"
+                file_name: "LoaderXML.java"
+                line_num: 44
+                comment: "trigger"
+      com.aixcc.oripa.harnesses.one.OripaOneFDP:
+        classpath_dir: build/out/aixcc/jvm/oripa/jars/one
+        cpvs:
+          cpv_0:
+            type: "Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "oripa.persistence.doc.loader.LoaderXML"
+                method_name: "loadAsDataSet"
+                file_name: "LoaderXML.java"
+                line_num: 43
+                comment: "init"
+              - class_name: "oripa.persistence.doc.loader.LoaderXML"
+                method_name: "loadAsDataSet"
+                file_name: "LoaderXML.java"
+                line_num: 44
+                comment: "trigger"
+  aixcc/jvm/pac4j:
+    repo: git@github.com:Team-Atlanta/cp-java-pac4j-source.git
+    harnesses:
+      com.aixcc.pac4j.harnesses.one.Pac4jOne:
+        classpath_dir: build/out/aixcc/jvm/pac4j/jars/one
+        cpvs:
+          cpv_0:
+            type: "Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.pac4j.core.util.JavaSerializationHelper$RestrictedObjectInputStream"
+                method_name: "<init>"
+                file_name: "JavaSerializationHelper.java"
+                line_num: 147
+                comment: "init"
+              - class_name: "org.pac4j.core.util.JavaSerializationHelper"
+                method_name: "deserializeFromBytes"
+                file_name: "JavaSerializationHelper.java"
+                line_num: 82
+                comment: "trigger"
+      com.aixcc.pac4j.harnesses.one.Pac4jOneFDP:
+        classpath_dir: build/out/aixcc/jvm/pac4j/jars/one
+        cpvs:
+          cpv_0:
+            type: "Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.pac4j.core.util.JavaSerializationHelper$RestrictedObjectInputStream"
+                method_name: "<init>"
+                file_name: "JavaSerializationHelper.java"
+                line_num: 147
+                comment: "init"
+              - class_name: "org.pac4j.core.util.JavaSerializationHelper"
+                method_name: "deserializeFromBytes"
+                file_name: "JavaSerializationHelper.java"
+                line_num: 82
+                comment: "trigger"
+  aixcc/jvm/r2-apache-commons-compress:
+    repo: git@github.com:Team-Atlanta/r2-afc-commons-compress.git
+    harnesses:
+      CompressorGzipFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r2-apache-commons-compress
+        cpvs:
+          cpv_1:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream"
+                method_name: "init"
+                file_name: "GzipCompressorInputStream.java"
+                line_num: 399
+                comment: "trigger"
+      CompressTarFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r2-apache-commons-compress
+        cpvs:
+          cpv_2:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            pov: .aixcc/povs/CompressTarFuzzer/cpv_2
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.compress.archivers.tar.TarArchiveEntry"
+                method_name: "updateName"
+                file_name: "TarArchiveEntry.java"
+                line_num: 1557
+                comment: "init"
+              - class_name: "org.apache.commons.compress.archivers.tar.TarArchiveEntry"
+                method_name: "updateName"
+                file_name: "TarArchiveEntry.java"
+                line_num: 1559
+                comment: "trigger"
+      CompressZipFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r2-apache-commons-compress
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            pov: .aixcc/povs/CompressZipFuzzer/cpv_0
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.compress.archivers.zip.ZipFile"
+                method_name: "readCentralDirectoryEntry"
+                file_name: "ZipFile.java"
+                line_num: 1552
+                comment: "trigger"
+      ExpanderFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r2-apache-commons-compress
+        cpvs:
+          cpv_3:
+            type: "File path traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            pov: .aixcc/povs/ExpanderFuzzer/cpv_3
+            sinkpoint_coords:
+              - class_name: "org.apache.commons.compress.archivers.examples.Expander"
+                method_name: "expand"
+                file_name: "Expander.java"
+                line_num: 86
+                comment: "trigger"
+  aixcc/jvm/rdf4j:
+    repo: git@github.com:Team-Atlanta/cp-java-rdf4j-source.git
+    harnesses:
+      com.aixcc.rdf4j.harnesses.one.Rdf4jOne:
+        classpath_dir: build/out/aixcc/jvm/rdf4j/jars/one
+        cpvs:
+          cpv_0:
+            type: "XML External Entity Reference"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.rdf4j.common.xml.SimpleSAXParser"
+                method_name: "parse"
+                file_name: "SimpleSAXParser.java"
+                line_num: 221
+                comment: "trigger"
+          cpv_1:
+            type: "XML External Entity Reference"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.rdf4j.rio.rdfxml.RDFXMLParser"
+                method_name: "parse"
+                file_name: "RDFXMLParser.java"
+                line_num: 328
+                comment: "trigger"
+          cpv_2:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.rdf4j.common.io.IOUtil"
+                method_name: "writeStream"
+                file_name: "IOUtil.java"
+                line_num: 387
+                comment: "trigger"
+      com.aixcc.rdf4j.harnesses.one.Rdf4jOneFDP:
+        classpath_dir: build/out/aixcc/jvm/rdf4j/jars/one
+        cpvs:
+          cpv_0:
+            type: "XML External Entity Reference"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.rdf4j.common.xml.SimpleSAXParser"
+                method_name: "parse"
+                file_name: "SimpleSAXParser.java"
+                line_num: 221
+                comment: "trigger"
+          cpv_1:
+            type: "XML External Entity Reference"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.rdf4j.rio.rdfxml.RDFXMLParser"
+                method_name: "parse"
+                file_name: "RDFXMLParser.java"
+                line_num: 328
+                comment: "trigger"
+          cpv_2:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.eclipse.rdf4j.common.io.IOUtil"
+                method_name: "writeStream"
+                file_name: "IOUtil.java"
+                line_num: 387
+                comment: "trigger"
+  aixcc/jvm/tika:
+    repo: git@github.com:Team-Atlanta/cp-java-tika-source.git
+    harnesses:
+      com.aixcc.tika.harnesses.one.TikaOne:
+        classpath_dir: build/out/aixcc/jvm/tika/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.cli.TikaCLI$FileEmbeddedDocumentExtractor"
+                method_name: "parseEmbedded"
+                file_name: "TikaCLI.java"
+                line_num: 1103
+                comment: "trigger"
+      com.aixcc.tika.harnesses.one.TikaOneFDP:
+        classpath_dir: build/out/aixcc/jvm/tika/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.cli.TikaCLI$FileEmbeddedDocumentExtractor"
+                method_name: "parseEmbedded"
+                file_name: "TikaCLI.java"
+                line_num: 1103
+                comment: "trigger"
+      com.aixcc.tika.harnesses.two.TikaTwo:
+        classpath_dir: build/out/aixcc/jvm/tika/jars/two
+        cpvs:
+          cpv_1:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.parser.external.ExternalParser"
+                method_name: "check"
+                file_name: "ExternalParser.java"
+                line_num: 161
+                comment: "trigger"
+      com.aixcc.tika.harnesses.two.TikaTwoFDP:
+        classpath_dir: build/out/aixcc/jvm/tika/jars/two
+        cpvs:
+          cpv_1:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.parser.external.ExternalParser"
+                method_name: "check"
+                file_name: "ExternalParser.java"
+                line_num: 161
+                comment: "trigger"
+  aixcc/jvm/widoco:
+    repo: git@github.com:Team-Atlanta/cp-java-widoco-source.git
+    harnesses:
+      com.aixcc.widoco.harnesses.one.WidocoOne:
+        classpath_dir: build/out/aixcc/jvm/widoco/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "widoco.WidocoUtils"
+                method_name: "unZipIt"
+                file_name: "WidocoUtils.java"
+                line_num: 269
+                comment: "trigger"
+      com.aixcc.widoco.harnesses.one.WidocoOneFDP:
+        classpath_dir: build/out/aixcc/jvm/widoco/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "widoco.WidocoUtils"
+                method_name: "unZipIt"
+                file_name: "WidocoUtils.java"
+                line_num: 269
+                comment: "trigger"
+  aixcc/jvm/r1-zookeeper:
+    repo: git@github.com:Team-Atlanta/afc-zookeeper.git
+    harnesses:
+      DataTreeFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r1-zookeeper
+        cpvs:
+          cpv_2:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.zookeeper.server.DataTree"
+                method_name: "executeCommand"
+                file_name: "DataTree.java"
+                line_num: 2178
+                comment: "trigger"
+      MultiProcessTxnFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r1-zookeeper
+        cpvs:
+          cpv_3:
+            type: "File Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.zookeeper.server.DataTree"
+                method_name: "processTxn"
+                file_name: "DataTree.java"
+                line_num: 1077
+                comment: "trigger"
+          cpv_4:
+            type: "Process Control"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: load arbitrary library"
+            sinkpoint_coords:
+              - class_name: "org.apache.zookeeper.server.DataTree"
+                method_name: "doLoadLibrary"
+                file_name: "DataTree.java"
+                line_num: 2182
+                comment: "trigger"
+  aixcc/jvm/r2-zookeeper:
+    repo: git@github.com:Team-Atlanta/r2-afc-zookeeper.git
+    harnesses:
+      MultiProcessTxnFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r2-zookeeper
+        cpvs:
+          cpv_0:
+            type: "Remote Code Execution"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            sinkpoint_coords:
+              - class_name: "org.apache.zookeeper.server.DataTree"
+                method_name: "verifyDataIntegrity"
+                file_name: "DataTree.java"
+                line_num: 555
+                comment: "trigger"
+  aixcc/jvm/r3-tika-delta-01:
+    repo: git@github.com:Team-Atlanta/r3-afc-tika.git
+    harnesses:
+      HtmlParserFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika-delta-01
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.parser.external.ExternalParser"
+                method_name: "parse"
+                file_name: "ExternalParser.java"
+                line_num: 314
+                comment: "trigger"
+  aixcc/jvm/r3-tika-delta-02:
+    repo: git@github.com:Team-Atlanta/r3-afc-tika.git
+    harnesses:
+      M3U8ParserFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika-delta-02
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.io.TikaInputStream"
+                method_name: "get"
+                file_name: "TikaInputStream.java"
+                line_num: 606 # NOTE: more than one place? The url assign line & trigger line
+                comment: "trigger"
+  aixcc/jvm/r3-tika-delta-03:
+    repo: git@github.com:Team-Atlanta/r3-afc-tika.git
+    harnesses:
+      ThreeDXMLParserFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika-delta-03
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.parser.threedxml.ThreeDXMLParser"
+                method_name: "parseRoot"
+                file_name: "ThreeDXMLParser.java"
+                line_num: 141
+                comment: "trigger"
+  aixcc/jvm/r3-tika-delta-04:
+    repo: git@github.com:Team-Atlanta/r3-afc-tika.git
+    harnesses:
+      TikaAppRUnpackerFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika-delta-04
+        cpvs:
+          cpv_0:
+            type: "File Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.pipes.emitter.fs.FileSystemEmitter"
+                method_name: "emit"
+                file_name: "FileSystemEmitter.java"
+                line_num: 155
+                comment: "trigger"
+  aixcc/jvm/r3-tika-delta-05:
+    repo: git@github.com:Team-Atlanta/r3-afc-tika.git
+    harnesses:
+      TikaAppUnpackerFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika-delta-05
+        cpvs:
+          cpv_0:
+            type: "File Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.cli.TikaCLI$FileEmbeddedDocumentExtractor"
+                method_name: "parseEmbedded"
+                file_name: "TikaCLI.java"
+                line_num: 1111
+                comment: "trigger"
+  aixcc/jvm/r3-tika:
+    repo: git@github.com:Team-Atlanta/r3-afc-tika.git
+    harnesses:
+      RTFParserFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika
+        cpvs:
+          cpv_1:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.parser.microsoft.rtf.RTFEmbObjHandler"
+                method_name: "handleCompletedObject"
+                file_name: "RTFEmbObjHandler.java"
+                line_num: 215
+                comment: "init"
+              - class_name: "org.apache.tika.parser.microsoft.rtf.RTFEmbObjHandler"
+                method_name: "handleCompletedObject"
+                file_name: "RTFEmbObjHandler.java"
+                line_num: 217
+                comment: "trigger"
+      TextAndCSVParserFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika
+        cpvs:
+          cpv_3:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.parser.csv.TextAndCSVParser"
+                method_name: "processURL"
+                file_name: "TextAndCSVParser.java"
+                line_num: 275
+                comment: "init"
+              - class_name: "org.apache.tika.parser.csv.TextAndCSVParser"
+                method_name: "processURL"
+                file_name: "TextAndCSVParser.java"
+                line_num: 278
+                comment: "trigger"
+      TikaAppUnpackerFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika
+        cpvs:
+          cpv_4:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.utils.ProcessUtils"
+                method_name: "execute"
+                file_name: "ProcessUtils.java"
+                line_num: 94 # Note: this is the trigger line, there should have an assign line
+                comment: "trigger"
+      TikaAppUntarringFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika
+        cpvs:
+          cpv_2:
+            type: "File Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.cli.TikaUntar"
+                method_name: "main"
+                file_name: "TikaUntar.java"
+                line_num: 47
+                comment: "trigger"
+      XliffParserFuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3-tika
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "org.apache.tika.parser.xliff.XLIFF12Parser"
+                method_name: "_parse"
+                file_name: "XLIFF12Parser.java"
+                line_num: 88
+                comment: "trigger"
+  aixcc/jvm/r3_5-jackson-databind:
+    repo: git@github.com:Team-Atlanta/cp-java-jackon-databind-src.git
+    harnesses:
+      AdaLObjectReader3Fuzzer:
+        classpath_dir: build/out/aixcc/jvm/r3_5-jackson-databind
+        cpvs:
+          cpv_0:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "com.fasterxml.jackson.databind.ser.BeanPropertyWriter"
+                method_name: "serializeAsField"
+                file_name: "BeanPropertyWriter.java"
+                line_num: 688
+                comment: "trigger"
+  aixcc/jvm/shiro:
+    repo: git@github.com:Team-Atlanta/cp-java-shiro-src.git
+    harnesses:
+      com.aixcc.shiro.harnesses.one.ShiroOne:
+        classpath_dir: build/out/aixcc/jvm/shiro/jars/one
+        cpvs:
+          cpv_0:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "org.apache.shiro.io.ClassResolvingObjectInputStream"
+                method_name: "<init>"
+                file_name: "ClassResolvingObjectInputStream.java"
+                line_num: 38 # NOTE: this is the assign line, there is a trigger line
+                comment: "init"
+              - class_name: "org.apache.shiro.io.DefaultSerializer"
+                method_name: "deserialize"
+                file_name: "DefaultSerializer.java"
+                line_num: 77
+                comment: "trigger"
+  aixcc/jvm/struts:
+    repo: git@github.com:Team-Atlanta/cp-java-struts-source.git
+    harnesses:
+      com.aixcc.struts.harnesses.one.StrutsOne:
+        classpath_dir: build/out/aixcc/jvm/struts/jars/one
+        cpvs:
+          cpv_0:
+            type: "Unsafe Deserialization"
+            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+            sinkpoint_coords:
+              - class_name: "org.apache.tiles.el.ELAttributeEvaluator"
+                method_name: "evaluate"
+                file_name: "ELAttributeEvaluator.java"
+                line_num: 90
+                comment: "trigger"
+  aixcc/jvm/xstream:
+    repo: git@github.com:Team-Atlanta/cp-java-xstream-src.git
+    harnesses:
+      XmlFuzzer:
+        classpath_dir: build/out/aixcc/jvm/xstream
+        cpvs:
+          cpv_2:
+            type: "SSRF"
+            pov_sanitizer: "FuzzerSecurityIssueMedium: Server Side Request Forgery (SSRF)"
+            sinkpoint_coords:
+              - class_name: "com.thoughtworks.xstream.io.xml.DomDriver"
+                method_name: "createReader"
+                file_name: "DomDriver.java"
+                line_num: 108
+                comment: "trigger"
+          cpv_4:
+            type: "OS Command Injection"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+            sinkpoint_coords:
+              - class_name: "com.thoughtworks.xstream.converters.extended.StringInterpolationConverter"
+                method_name: "resolveVariable"
+                file_name: "StringInterpolationConverter.java"
+                line_num: 195
+                comment: "trigger"
+  aixcc/jvm/ztzip:
+    repo: git@github.com:Team-Atlanta/cp-java-ztzip-source.git
+    harnesses:
+      com.aixcc.ztzip.harnesses.one.ZTZIPOne:
+        classpath_dir: build/out/aixcc/jvm/ztzip/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.zeroturnaround.zip.commons.FileUtils"
+                method_name: "copy"
+                file_name: "FileUtils.java"
+                line_num: 54
+                comment: "trigger"
+      com.aixcc.ztzip.harnesses.one.ZTZIPOneFDP:
+        classpath_dir: build/out/aixcc/jvm/ztzip/jars/one
+        cpvs:
+          cpv_0:
+            type: "Path Traversal"
+            pov_sanitizer: "FuzzerSecurityIssueCritical: File path traversal"
+            sinkpoint_coords:
+              - class_name: "org.zeroturnaround.zip.commons.FileUtils"
+                method_name: "copy"
+                file_name: "FileUtils.java"
+                line_num: 54
+                comment: "trigger"
+
+  # Skipped CPs
+  # aixcc/jvm/apache-commons-validator-diff, timeout bug
+  # aixcc/jvm/apache-commons-validator, stack overflow bug
+  # aixcc/jvm/apache-poi, OOM bug
+  # aixcc/jvm/brotli-java, no bug
+  # aixcc/jvm/fastjson2, no bug
+  # aixcc/jvm/hadoop, no bug
+  # aixcc/jvm/json-java, OOM bug
+  # aixcc/jvm/jsoup, stack overflow bug
+  # aixcc/jvm/keycloak, stack overflow bug
+  # aixcc/jvm/logback, no bug
+  # aixcc/jvm/lucene, stack overflow bug
+  # aixcc/jvm/mock-java-spam, too simple mock project
+  # aixcc/jvm/mock-java, too simple mock project
+  # aixcc/jvm/pdfbox, OOM bug
+  # aixcc/jvm/protobuf-java, no bug
+  # aixcc/jvm/snappy-java, sinkpoint irrelevant bug
+  # aixcc/jvm/spring-framework, oom bug
+  # aixcc/jvm/sqlite-jdbc, sinkpoint irrelevant bug
+  # aixcc/jvm/r2-zookeeper-diff-1, timeout bug
+  # aixcc/jvm/r2-apache-commons-compress-diff-1, timeout bug
+  # aixcc/jvm/r2-apache-commons-compress-diff-2, oom bug
+  # aixcc/jvm/r3-apache-commons-compress-delta-01, timeout bug
+  # aixcc/jvm/r3-apache-commons-compress-delta-02, oom bug
+  # aixcc/jvm/r3-apache-commons-compress, exactly same bugs as r2-apache-commons-compress
+  # aixcc/jvm/r3-zookeeper, exactly same bugs as r2-zookeeper
+  # aixcc/jvm/r3-zookeeper-delta-01, timeout bug
+  # aixcc/jvm/r3-zookeeper-delta-02, oom bug
+  # aixcc/jvm/aerospike, designed as fuzzer unfriendly (cannot be fuzzed at all)
+  ##############
+  #  aixcc/jvm/aerospike:
+  #    repo: git@github.com:Team-Atlanta/cp-java-aerospike-src.git
+  #    harnesses:
+  #      com.aixcc.aerospike.harnesses.one.AerospikeOne:
+  #        comment: |
+  #          This is intentionally designed as a fuzzing unfriendly harness where the testing involves a socket communication and testing speed is pretty slow.
+  #        classpath_dir: build/out/aixcc/jvm/aerospike/jars/one
+  #        cpvs:
+  #          cpv_0:
+  #            type: "Unsafe Deserialization"
+  #            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #            pov: .aixcc/povs/AerospikeOne/cpv_0
+  #            patch: .aixcc/patches/AerospikeOne/cpv_0.diff
+  #            patch_dir: .
+  #            sinkpoint_coord:
+  #              class_name: "com.aerospike.client.command.Buffer"
+  #              method_name: "bytesToObject"
+  #              file_name: "Buffer.java"
+  #              line_num: 311
+  #      com.aixcc.aerospike.harnesses.one.AerospikeOneFDP:
+  #        comment: |
+  #          This is intentionally designed as a fuzzing unfriendly harness where the testing involves a socket communication and testing speed is pretty slow.
+  #        classpath_dir: build/out/aixcc/jvm/aerospike/jars/one
+  #        cpvs:
+  #          cpv_0:
+  #            type: "Unsafe Deserialization"
+  #            pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #            pov: .aixcc/povs/AerospikeOneFDP/cpv_0
+  #            patch: .aixcc/patches/AerospikeOneFDP/cpv_0.diff
+  #            patch_dir: .
+  #            sinkpoint_coord:
+  #              class_name: "com.aerospike.client.command.Buffer"
+  #              method_name: "bytesToObject"
+  #              file_name: "Buffer.java"
+  #              line_num: 311
+  ###########
+  #aixcc/jvm/mock-java:
+  #  repo: git@github.com:Team-Atlanta/mock-java.git
+  #  harnesses:
+  #    OssFuzz1:
+  #      classpath_dir: build/out/aixcc/jvm/mock-java
+  #      cpvs:
+  #        cpv_0:
+  #          type: "OS Command Injection"
+  #          pov_sanitizer: "FuzzerSecurityIssueCritical: OS Command Injection"
+  #          pov: .aixcc/povs/OssFuzz1/cpv_0
+  #          sinkpoint_coord:
+  #            class_name: "OssFuzz1"
+  #            method_name: "executeCommand"
+  #            file_name: "App.java"
+  #            line_num: 16
+  ###########
+  #    #      com.aixcc.jenkins.harnesses.one.JenkinsOne:
+  #    #        classpath_dir: build/out/aixcc/jvm/jenkins/jars/one
+  #    #        cpvs:
+  #    #          CPVOne:
+  #    #            type: "Integer Overflow"
+  #    #            pov_sanitizer: "FuzzerSecurityIssueCritical: Integer Overflow"
+  #    #            pov: .aixcc/povs/JenkinsOne/JenkinsOneCPVOne
+  #    #          CPVTwo:
+  #    #            type: "Integer Overflow"
+  #    #            pov_sanitizer: "FuzzerSecurityIssueCritical: Integer Overflow"
+  #    #            pov: .aixcc/povs/JenkinsOne/JenkinsOneCPVTwo
+  #    #      com.aixcc.jenkins.harnesses.one.JenkinsOneFDP:
+  #    #        classpath_dir: build/out/aixcc/jvm/jenkins/jars/one
+  #    #        cpvs:
+  #    #          CPVOne:
+  #    #            type: "Integer Overflow"
+  #    #            pov_sanitizer: "FuzzerSecurityIssueCritical: Integer Overflow"
+  #    #            pov: .aixcc/povs/JenkinsOneFDP/JenkinsOneCPVOne
+  #    #          CPVTwo:
+  #    #            type: "Integer Overflow"
+  #    #            pov_sanitizer: "FuzzerSecurityIssueCritical: Integer Overflow"
+  #    #            pov: .aixcc/povs/JenkinsOneFDP/JenkinsOneCPVTwo
+  ###############
+  # Splitted sinks for cpv 
+  ###############
+  #aixcc/jvm/activemq:
+  #  repo: git@github.com:Team-Atlanta/cp-java-activemq-source.git
+  #  harnesses:
+  #    com.aixcc.activemq.harnesses.one.ActivemqOne:
+  #      classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+  #      cpvs:
+  #        cpv_0:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_1:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_2:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_3:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_4:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_5:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_6:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_7:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_8:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_9:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_10:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_11:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #    com.aixcc.activemq.harnesses.one.ActivemqOneFDP:
+  #      classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+  #      cpvs:
+  #        cpv_0:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_1:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_2:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_3:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_4:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_5:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_6:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_7:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_8:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_9:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_10:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 230
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "trigger"
+  #        cpv_11:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #aixcc/jvm/activemq-var:
+  #  repo: git@github.com:Team-Atlanta/cp-java-activemq-variant-source.git
+  #  harnesses:
+  #    com.aixcc.activemq.harnesses.one.ActivemqVariantOne:
+  #      classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+  #      cpvs:
+  #        cpv_0:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"
+  #        cpv_1:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_2:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_3:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_4:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_5:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_6:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_7:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_8:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_9:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_10:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_11:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"
+  #    com.aixcc.activemq.harnesses.one.ActivemqVariantOneFDP:
+  #      classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+  #      cpvs:
+  #        cpv_0:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"
+  #        cpv_1:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_2:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_3:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_4:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_5:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_6:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_7:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_8:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_9:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #        cpv_10:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #        cpv_11:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"
+  ###############
+  # Merged sinks for cpv 
+  ###############
+  #aixcc/jvm/activemq-var:
+  #  repo: git@github.com:Team-Atlanta/cp-java-activemq-variant-source.git
+  #  harnesses:
+  #    com.aixcc.activemq.harnesses.one.ActivemqVariantOne:
+  #      classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+  #      cpvs:
+  #        cpv_0:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"
+  #    com.aixcc.activemq.harnesses.one.ActivemqVariantOneFDP:
+  #      classpath_dir: build/out/aixcc/jvm/activemq/jars/one
+  #      cpvs:
+  #        cpv_0:
+  #          type: "Unsafe Deserialization"
+  #          pov_sanitizer: "FuzzerSecurityIssueHigh: Remote Code Execution"
+  #          sinkpoint_coords:
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v1.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v2.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v3.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v4.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v5.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v6.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v7.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v8.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v9.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 232
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v10.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 234
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 231
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v11.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "trigger"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 233
+  #              comment: "init"
+  #            - class_name: "org.apache.activemq.openwire.v12.BaseDataStreamMarshaller"
+  #              method_name: "createThrowable"
+  #              file_name: "BaseDataStreamMarshaller.java"
+  #              line_num: 235
+  #              comment: "trigger"

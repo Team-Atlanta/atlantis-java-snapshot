@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractTiffImageWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.write</a> &gt; <span class="el_source">AbstractTiffImageWriter.java</span></div><h1>AbstractTiffImageWriter.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.write;
+
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.DEFAULT_TIFF_BYTE_ORDER;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_CCITT_1D;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_CCITT_GROUP_3;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_CCITT_GROUP_4;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_DEFLATE_ADOBE;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_LZW;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_PACKBITS;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_UNCOMPRESSED;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_FLAG_T6_OPTIONS_UNCOMPRESSED_MODE;
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_HEADER_SIZE;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.PixelDensity;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.common.PackBits;
+import org.apache.commons.imaging.common.RationalNumber;
+import org.apache.commons.imaging.common.ZlibDeflate;
+import org.apache.commons.imaging.formats.tiff.AbstractTiffElement;
+import org.apache.commons.imaging.formats.tiff.AbstractTiffImageData;
+import org.apache.commons.imaging.formats.tiff.TiffImagingParameters;
+import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryConstants;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.itu_t4.T4AndT6Compression;
+import org.apache.commons.imaging.mylzw.MyLzwCompressor;
+
+public abstract class AbstractTiffImageWriter {
+
+    private static final int MAX_PIXELS_FOR_RGB = 1024 * 1024;
+
+    protected static int imageDataPaddingLength(final int dataLength) {
+<span class="nc" id="L65">        return (4 - dataLength % 4) % 4;</span>
+    }
+
+    protected final ByteOrder byteOrder;
+
+<span class="nc" id="L70">    public AbstractTiffImageWriter() {</span>
+<span class="nc" id="L71">        this.byteOrder = DEFAULT_TIFF_BYTE_ORDER;</span>
+<span class="nc" id="L72">    }</span>
+
+<span class="nc" id="L74">    public AbstractTiffImageWriter(final ByteOrder byteOrder) {</span>
+<span class="nc" id="L75">        this.byteOrder = byteOrder;</span>
+<span class="nc" id="L76">    }</span>
+
+    private void applyPredictor(final int width, final int bytesPerSample, final byte[] b) {
+<span class="nc" id="L79">        final int nBytesPerRow = bytesPerSample * width;</span>
+<span class="nc" id="L80">        final int nRows = b.length / nBytesPerRow;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        for (int iRow = 0; iRow &lt; nRows; iRow++) {</span>
+<span class="nc" id="L82">            final int offset = iRow * nBytesPerRow;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            for (int i = nBytesPerRow - 1; i &gt;= bytesPerSample; i--) {</span>
+<span class="nc" id="L84">                b[offset + i] -= b[offset + i - bytesPerSample];</span>
+            }
+        }
+<span class="nc" id="L87">    }</span>
+
+    /**
+     * Check an image to see if any of its pixels are non-opaque.
+     *
+     * @param src a valid image
+     * @return true if at least one non-opaque pixel is found.
+     */
+    private boolean checkForActualAlpha(final BufferedImage src) {
+        // to conserve memory, very large images may be read
+        // in pieces.
+<span class="nc" id="L98">        final int width = src.getWidth();</span>
+<span class="nc" id="L99">        final int height = src.getHeight();</span>
+<span class="nc" id="L100">        int nRowsPerRead = MAX_PIXELS_FOR_RGB / width;</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (nRowsPerRead &lt; 1) {</span>
+<span class="nc" id="L102">            nRowsPerRead = 1;</span>
+        }
+<span class="nc" id="L104">        final int nReads = (height + nRowsPerRead - 1) / nRowsPerRead;</span>
+<span class="nc" id="L105">        final int[] argb = Allocator.intArray(nRowsPerRead * width);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        for (int iRead = 0; iRead &lt; nReads; iRead++) {</span>
+<span class="nc" id="L107">            final int i0 = iRead * nRowsPerRead;</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            final int i1 = i0 + nRowsPerRead &gt; height ? height : i0 + nRowsPerRead;</span>
+<span class="nc" id="L109">            src.getRGB(0, i0, width, i1 - i0, argb, 0, width);</span>
+<span class="nc" id="L110">            final int n = (i1 - i0) * width;</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">                if ((argb[i] &amp; 0xff000000) != 0xff000000) {</span>
+<span class="nc" id="L113">                    return true;</span>
+                }
+            }
+        }
+<span class="nc" id="L117">        return false;</span>
+    }
+
+    private void combineUserExifIntoFinalExif(final TiffOutputSet userExif, final TiffOutputSet outputSet) throws ImagingException {
+<span class="nc" id="L121">        final List&lt;TiffOutputDirectory&gt; outputDirectories = outputSet.getDirectories();</span>
+<span class="nc" id="L122">        outputDirectories.sort(TiffOutputDirectory.COMPARATOR);</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        for (final TiffOutputDirectory userDirectory : userExif.getDirectories()) {</span>
+<span class="nc" id="L124">            final int location = Collections.binarySearch(outputDirectories, userDirectory, TiffOutputDirectory.COMPARATOR);</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            if (location &lt; 0) {</span>
+<span class="nc" id="L126">                outputSet.addDirectory(userDirectory);</span>
+            } else {
+<span class="nc" id="L128">                final TiffOutputDirectory outputDirectory = outputDirectories.get(location);</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">                for (final TiffOutputField userField : userDirectory) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">                    if (outputDirectory.findField(userField.tagInfo) == null) {</span>
+<span class="nc" id="L131">                        outputDirectory.add(userField);</span>
+                    }
+<span class="nc" id="L133">                }</span>
+            }
+<span class="nc" id="L135">        }</span>
+<span class="nc" id="L136">    }</span>
+
+    private byte[][] getStrips(final BufferedImage src, final int samplesPerPixel, final int bitsPerSample, final int rowsPerStrip) {
+<span class="nc" id="L139">        final int width = src.getWidth();</span>
+<span class="nc" id="L140">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L142">        final int stripCount = (height + rowsPerStrip - 1) / rowsPerStrip;</span>
+
+        // Write Strips
+<span class="nc" id="L145">        final byte[][] result = new byte[Allocator.check(stripCount)][];</span>
+
+<span class="nc" id="L147">        int remainingRows = height;</span>
+
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        for (int i = 0; i &lt; stripCount; i++) {</span>
+<span class="nc" id="L150">            final int rowsInStrip = Math.min(rowsPerStrip, remainingRows);</span>
+<span class="nc" id="L151">            remainingRows -= rowsInStrip;</span>
+
+<span class="nc" id="L153">            final int bitsInRow = bitsPerSample * samplesPerPixel * width;</span>
+<span class="nc" id="L154">            final int bytesPerRow = (bitsInRow + 7) / 8;</span>
+<span class="nc" id="L155">            final int bytesInStrip = rowsInStrip * bytesPerRow;</span>
+
+<span class="nc" id="L157">            final byte[] uncompressed = Allocator.byteArray(bytesInStrip);</span>
+
+<span class="nc" id="L159">            int counter = 0;</span>
+<span class="nc" id="L160">            int y = i * rowsPerStrip;</span>
+<span class="nc" id="L161">            final int stop = i * rowsPerStrip + rowsPerStrip;</span>
+
+<span class="nc bnc" id="L163" title="All 4 branches missed.">            for (; y &lt; height &amp;&amp; y &lt; stop; y++) {</span>
+<span class="nc" id="L164">                int bitCache = 0;</span>
+<span class="nc" id="L165">                int bitsInCache = 0;</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L167">                    final int rgb = src.getRGB(x, y);</span>
+<span class="nc" id="L168">                    final int red = 0xff &amp; rgb &gt;&gt; 16;</span>
+<span class="nc" id="L169">                    final int green = 0xff &amp; rgb &gt;&gt; 8;</span>
+<span class="nc" id="L170">                    final int blue = 0xff &amp; rgb &gt;&gt; 0;</span>
+
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                    if (bitsPerSample == 1) {</span>
+<span class="nc" id="L173">                        int sample = (red + green + blue) / 3;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                        if (sample &gt; 127) {</span>
+<span class="nc" id="L175">                            sample = 0;</span>
+                        } else {
+<span class="nc" id="L177">                            sample = 1;</span>
+                        }
+<span class="nc" id="L179">                        bitCache &lt;&lt;= 1;</span>
+<span class="nc" id="L180">                        bitCache |= sample;</span>
+<span class="nc" id="L181">                        bitsInCache++;</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                        if (bitsInCache == 8) {</span>
+<span class="nc" id="L183">                            uncompressed[counter++] = (byte) bitCache;</span>
+<span class="nc" id="L184">                            bitCache = 0;</span>
+<span class="nc" id="L185">                            bitsInCache = 0;</span>
+                        }
+<span class="nc bnc" id="L187" title="All 2 branches missed.">                    } else if (samplesPerPixel == 4) {</span>
+<span class="nc" id="L188">                        uncompressed[counter++] = (byte) red;</span>
+<span class="nc" id="L189">                        uncompressed[counter++] = (byte) green;</span>
+<span class="nc" id="L190">                        uncompressed[counter++] = (byte) blue;</span>
+<span class="nc" id="L191">                        uncompressed[counter++] = (byte) (rgb &gt;&gt; 24);</span>
+                    } else {
+                        // samples per pixel is 3
+<span class="nc" id="L194">                        uncompressed[counter++] = (byte) red;</span>
+<span class="nc" id="L195">                        uncompressed[counter++] = (byte) green;</span>
+<span class="nc" id="L196">                        uncompressed[counter++] = (byte) blue;</span>
+                    }
+                }
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                if (bitsInCache &gt; 0) {</span>
+<span class="nc" id="L200">                    bitCache &lt;&lt;= 8 - bitsInCache;</span>
+<span class="nc" id="L201">                    uncompressed[counter++] = (byte) bitCache;</span>
+                }
+            }
+
+<span class="nc" id="L205">            result[i] = uncompressed;</span>
+        }
+
+<span class="nc" id="L208">        return result;</span>
+    }
+
+    protected TiffOutputSummary validateDirectories(final TiffOutputSet outputSet) throws ImagingException {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (outputSet.isEmpty()) {</span>
+<span class="nc" id="L213">            throw new ImagingException(&quot;No directories.&quot;);</span>
+        }
+
+<span class="nc" id="L216">        TiffOutputDirectory exifDirectory = null;</span>
+<span class="nc" id="L217">        TiffOutputDirectory gpsDirectory = null;</span>
+<span class="nc" id="L218">        TiffOutputDirectory interoperabilityDirectory = null;</span>
+<span class="nc" id="L219">        TiffOutputField exifDirectoryOffsetField = null;</span>
+<span class="nc" id="L220">        TiffOutputField gpsDirectoryOffsetField = null;</span>
+<span class="nc" id="L221">        TiffOutputField interoperabilityDirectoryOffsetField = null;</span>
+
+<span class="nc" id="L223">        final List&lt;Integer&gt; directoryIndices = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L224">        final Map&lt;Integer, TiffOutputDirectory&gt; directoryTypeMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        for (final TiffOutputDirectory directory : outputSet) {</span>
+<span class="nc" id="L226">            final int dirType = directory.getType();</span>
+<span class="nc" id="L227">            directoryTypeMap.put(dirType, directory);</span>
+            // Debug.debug(&quot;validating dirType&quot;, dirType + &quot; (&quot;
+            // + directory.getFields().size() + &quot; fields)&quot;);
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            if (dirType &lt; 0) {</span>
+<span class="nc bnc" id="L232" title="All 4 branches missed.">                switch (dirType) {</span>
+                case TiffDirectoryConstants.DIRECTORY_TYPE_EXIF:
+<span class="nc bnc" id="L234" title="All 2 branches missed.">                    if (exifDirectory != null) {</span>
+<span class="nc" id="L235">                        throw new ImagingException(&quot;More than one EXIF directory.&quot;);</span>
+                    }
+<span class="nc" id="L237">                    exifDirectory = directory;</span>
+<span class="nc" id="L238">                    break;</span>
+
+                case TiffDirectoryConstants.DIRECTORY_TYPE_GPS:
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                    if (gpsDirectory != null) {</span>
+<span class="nc" id="L242">                        throw new ImagingException(&quot;More than one GPS directory.&quot;);</span>
+                    }
+<span class="nc" id="L244">                    gpsDirectory = directory;</span>
+<span class="nc" id="L245">                    break;</span>
+
+                case TiffDirectoryConstants.DIRECTORY_TYPE_INTEROPERABILITY:
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                    if (interoperabilityDirectory != null) {</span>
+<span class="nc" id="L249">                        throw new ImagingException(&quot;More than one Interoperability directory.&quot;);</span>
+                    }
+<span class="nc" id="L251">                    interoperabilityDirectory = directory;</span>
+<span class="nc" id="L252">                    break;</span>
+                default:
+<span class="nc" id="L254">                    throw new ImagingException(&quot;Unknown directory: &quot; + dirType);</span>
+                }
+            } else {
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                if (directoryIndices.contains(dirType)) {</span>
+<span class="nc" id="L258">                    throw new ImagingException(&quot;More than one directory with index: &quot; + dirType + &quot;.&quot;);</span>
+                }
+<span class="nc" id="L260">                directoryIndices.add(dirType);</span>
+                // dirMap.put(arg0, arg1)
+            }
+
+<span class="nc" id="L264">            final HashSet&lt;Integer&gt; fieldTags = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">            for (final TiffOutputField field : directory) {</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                if (fieldTags.contains(field.tag)) {</span>
+<span class="nc" id="L267">                    throw new ImagingException(&quot;Tag (&quot; + field.tagInfo.getDescription() + &quot;) appears twice in directory.&quot;);</span>
+                }
+<span class="nc" id="L269">                fieldTags.add(field.tag);</span>
+
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                if (field.tag == ExifTagConstants.EXIF_TAG_EXIF_OFFSET.tag) {</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                    if (exifDirectoryOffsetField != null) {</span>
+<span class="nc" id="L273">                        throw new ImagingException(&quot;More than one Exif directory offset field.&quot;);</span>
+                    }
+<span class="nc" id="L275">                    exifDirectoryOffsetField = field;</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">                } else if (field.tag == ExifTagConstants.EXIF_TAG_INTEROP_OFFSET.tag) {</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">                    if (interoperabilityDirectoryOffsetField != null) {</span>
+<span class="nc" id="L278">                        throw new ImagingException(&quot;More than one Interoperability directory offset field.&quot;);</span>
+                    }
+<span class="nc" id="L280">                    interoperabilityDirectoryOffsetField = field;</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                } else if (field.tag == ExifTagConstants.EXIF_TAG_GPSINFO.tag) {</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                    if (gpsDirectoryOffsetField != null) {</span>
+<span class="nc" id="L283">                        throw new ImagingException(&quot;More than one GPS directory offset field.&quot;);</span>
+                    }
+<span class="nc" id="L285">                    gpsDirectoryOffsetField = field;</span>
+                }
+<span class="nc" id="L287">            }</span>
+            // directory.
+<span class="nc" id="L289">        }</span>
+
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        if (directoryIndices.isEmpty()) {</span>
+<span class="nc" id="L292">            throw new ImagingException(&quot;Missing root directory.&quot;);</span>
+        }
+
+        // &quot;normal&quot; TIFF directories should have continous indices starting with
+        // 0, ie. 0, 1, 2...
+<span class="nc" id="L297">        directoryIndices.sort(null);</span>
+
+<span class="nc" id="L299">        TiffOutputDirectory previousDirectory = null;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">        for (int i = 0; i &lt; directoryIndices.size(); i++) {</span>
+<span class="nc" id="L301">            final Integer index = directoryIndices.get(i);</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">            if (index != i) {</span>
+<span class="nc" id="L303">                throw new ImagingException(&quot;Missing directory: &quot; + i + &quot;.&quot;);</span>
+            }
+
+            // set up chain of directory references for &quot;normal&quot; directories.
+<span class="nc" id="L307">            final TiffOutputDirectory directory = directoryTypeMap.get(index);</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            if (null != previousDirectory) {</span>
+<span class="nc" id="L309">                previousDirectory.setNextDirectory(directory);</span>
+            }
+<span class="nc" id="L311">            previousDirectory = directory;</span>
+        }
+
+<span class="nc" id="L314">        final TiffOutputDirectory rootDirectory = directoryTypeMap.get(TiffDirectoryConstants.DIRECTORY_TYPE_ROOT);</span>
+
+        // prepare results
+<span class="nc" id="L317">        final TiffOutputSummary result = new TiffOutputSummary(byteOrder, rootDirectory, directoryTypeMap);</span>
+
+<span class="nc bnc" id="L319" title="All 4 branches missed.">        if (interoperabilityDirectory == null &amp;&amp; interoperabilityDirectoryOffsetField != null) {</span>
+            // perhaps we should just discard field?
+<span class="nc" id="L321">            throw new ImagingException(&quot;Output set has Interoperability Directory Offset field, but no Interoperability Directory&quot;);</span>
+        }
+<span class="nc bnc" id="L323" title="All 2 branches missed.">        if (interoperabilityDirectory != null) {</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">            if (exifDirectory == null) {</span>
+<span class="nc" id="L325">                exifDirectory = outputSet.addExifDirectory();</span>
+            }
+
+<span class="nc bnc" id="L328" title="All 2 branches missed.">            if (interoperabilityDirectoryOffsetField == null) {</span>
+<span class="nc" id="L329">                interoperabilityDirectoryOffsetField = TiffOutputField.createOffsetField(ExifTagConstants.EXIF_TAG_INTEROP_OFFSET, byteOrder);</span>
+<span class="nc" id="L330">                exifDirectory.add(interoperabilityDirectoryOffsetField);</span>
+            }
+
+<span class="nc" id="L333">            result.add(interoperabilityDirectory, interoperabilityDirectoryOffsetField);</span>
+        }
+
+        // make sure offset fields and offset'd directories correspond.
+<span class="nc bnc" id="L337" title="All 4 branches missed.">        if (exifDirectory == null &amp;&amp; exifDirectoryOffsetField != null) {</span>
+            // perhaps we should just discard field?
+<span class="nc" id="L339">            throw new ImagingException(&quot;Output set has Exif Directory Offset field, but no Exif Directory&quot;);</span>
+        }
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (exifDirectory != null) {</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">            if (exifDirectoryOffsetField == null) {</span>
+<span class="nc" id="L343">                exifDirectoryOffsetField = TiffOutputField.createOffsetField(ExifTagConstants.EXIF_TAG_EXIF_OFFSET, byteOrder);</span>
+<span class="nc" id="L344">                rootDirectory.add(exifDirectoryOffsetField);</span>
+            }
+
+<span class="nc" id="L347">            result.add(exifDirectory, exifDirectoryOffsetField);</span>
+        }
+
+<span class="nc bnc" id="L350" title="All 4 branches missed.">        if (gpsDirectory == null &amp;&amp; gpsDirectoryOffsetField != null) {</span>
+            // perhaps we should just discard field?
+<span class="nc" id="L352">            throw new ImagingException(&quot;Output set has GPS Directory Offset field, but no GPS Directory&quot;);</span>
+        }
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        if (gpsDirectory != null) {</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">            if (gpsDirectoryOffsetField == null) {</span>
+<span class="nc" id="L356">                gpsDirectoryOffsetField = TiffOutputField.createOffsetField(ExifTagConstants.EXIF_TAG_GPSINFO, byteOrder);</span>
+<span class="nc" id="L357">                rootDirectory.add(gpsDirectoryOffsetField);</span>
+            }
+
+<span class="nc" id="L360">            result.add(gpsDirectory, gpsDirectoryOffsetField);</span>
+        }
+
+<span class="nc" id="L363">        return result;</span>
+
+        // Debug.debug();
+    }
+
+    public abstract void write(OutputStream os, TiffOutputSet outputSet) throws IOException, ImagingException;
+
+    public void writeImage(final BufferedImage src, final OutputStream os, final TiffImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L371">        final TiffOutputSet userExif = params.getOutputSet();</span>
+
+<span class="nc" id="L373">        final String xmpXml = params.getXmpXml();</span>
+
+<span class="nc" id="L375">        PixelDensity pixelDensity = params.getPixelDensity();</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">        if (pixelDensity == null) {</span>
+<span class="nc" id="L377">            pixelDensity = PixelDensity.createFromPixelsPerInch(72, 72);</span>
+        }
+
+<span class="nc" id="L380">        final int width = src.getWidth();</span>
+<span class="nc" id="L381">        final int height = src.getHeight();</span>
+
+        // If the source image has a color model that supports alpha,
+        // this module performs a call to checkForActualAlpha() to see whether
+        // the image that was supplied to the API actually contains
+        // non-opaque data in its alpha channel. It is common for applications
+        // to create a BufferedImage using TYPE_INT_ARGB, and fill the entire
+        // image with opaque pixels. In such a case, the file size of the output
+        // can be reduced by 25 percent by storing the image in an 3-byte RGB
+        // format. This approach will also make a small reduction in the runtime
+        // to read the resulting file when it is accessed by an application.
+<span class="nc" id="L392">        final ColorModel cModel = src.getColorModel();</span>
+<span class="nc bnc" id="L393" title="All 4 branches missed.">        final boolean hasAlpha = cModel.hasAlpha() &amp;&amp; checkForActualAlpha(src);</span>
+
+        // 10/2020: In the case of an image with pre-multiplied alpha
+        // (what the TIFF specification calls &quot;associated alpha&quot;), the
+        // Java getRGB method adjusts the value to a non-premultiplied
+        // alpha state. However, this class could access the pre-multiplied
+        // alpha data by obtaining the underlying raster. At this time,
+        // the value of such a little-used feature does not seem
+        // commensurate with the complexity of the extra code it would require.
+
+<span class="nc" id="L403">        int compression = TIFF_COMPRESSION_LZW;</span>
+<span class="nc" id="L404">        short predictor = TiffTagConstants.PREDICTOR_VALUE_NONE;</span>
+
+<span class="nc" id="L406">        int stripSizeInBits = 64000; // the default from legacy implementation</span>
+<span class="nc" id="L407">        final Integer compressionParameter = params.getCompression();</span>
+<span class="nc bnc" id="L408" title="All 2 branches missed.">        if (compressionParameter != null) {</span>
+<span class="nc" id="L409">            compression = compressionParameter;</span>
+<span class="nc" id="L410">            final Integer stripSizeInBytes = params.getLzwCompressionBlockSize();</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">            if (stripSizeInBytes != null) {</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">                if (stripSizeInBytes &lt; 8000) {</span>
+<span class="nc" id="L413">                    throw new ImagingException(&quot;Block size parameter &quot; + stripSizeInBytes + &quot; is less than 8000 minimum&quot;);</span>
+                }
+<span class="nc" id="L415">                stripSizeInBits = stripSizeInBytes * 8;</span>
+            }
+        }
+
+        int samplesPerPixel;
+        int bitsPerSample;
+        int photometricInterpretation;
+<span class="nc bnc" id="L422" title="All 6 branches missed.">        if (compression == TIFF_COMPRESSION_CCITT_1D || compression == TIFF_COMPRESSION_CCITT_GROUP_3 || compression == TIFF_COMPRESSION_CCITT_GROUP_4) {</span>
+<span class="nc" id="L423">            samplesPerPixel = 1;</span>
+<span class="nc" id="L424">            bitsPerSample = 1;</span>
+<span class="nc" id="L425">            photometricInterpretation = 0;</span>
+        } else {
+<span class="nc bnc" id="L427" title="All 2 branches missed.">            samplesPerPixel = hasAlpha ? 4 : 3;</span>
+<span class="nc" id="L428">            bitsPerSample = 8;</span>
+<span class="nc" id="L429">            photometricInterpretation = 2;</span>
+        }
+
+<span class="nc" id="L432">        int rowsPerStrip = stripSizeInBits / (width * bitsPerSample * samplesPerPixel);</span>
+<span class="nc" id="L433">        rowsPerStrip = Math.max(1, rowsPerStrip); // must have at least one.</span>
+
+<span class="nc" id="L435">        final byte[][] strips = getStrips(src, samplesPerPixel, bitsPerSample, rowsPerStrip);</span>
+
+        // System.out.println(&quot;width: &quot; + width);
+        // System.out.println(&quot;height: &quot; + height);
+        // System.out.println(&quot;fRowsPerStrip: &quot; + fRowsPerStrip);
+        // System.out.println(&quot;fSamplesPerPixel: &quot; + fSamplesPerPixel);
+        // System.out.println(&quot;stripCount: &quot; + stripCount);
+
+<span class="nc" id="L443">        int t4Options = 0;</span>
+<span class="nc" id="L444">        int t6Options = 0;</span>
+<span class="nc bnc" id="L445" title="All 8 branches missed.">        switch (compression) {</span>
+        case TIFF_COMPRESSION_CCITT_1D:
+<span class="nc bnc" id="L447" title="All 2 branches missed.">            for (int i = 0; i &lt; strips.length; i++) {</span>
+<span class="nc" id="L448">                strips[i] = T4AndT6Compression.compressModifiedHuffman(strips[i], width, strips[i].length / ((width + 7) / 8));</span>
+            }
+<span class="nc" id="L450">            break;</span>
+        case TIFF_COMPRESSION_CCITT_GROUP_3: {
+<span class="nc" id="L452">            final Integer t4Parameter = params.getT4Options();</span>
+<span class="nc bnc" id="L453" title="All 2 branches missed.">            if (t4Parameter != null) {</span>
+<span class="nc" id="L454">                t4Options = t4Parameter.intValue();</span>
+            }
+<span class="nc" id="L456">            t4Options &amp;= 0x7;</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">            final boolean is2D = (t4Options &amp; 1) != 0;</span>
+<span class="nc bnc" id="L458" title="All 2 branches missed.">            final boolean usesUncompressedMode = (t4Options &amp; 2) != 0;</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">            if (usesUncompressedMode) {</span>
+<span class="nc" id="L460">                throw new ImagingException(&quot;T.4 compression with the uncompressed mode extension is not yet supported&quot;);</span>
+            }
+<span class="nc bnc" id="L462" title="All 2 branches missed.">            final boolean hasFillBitsBeforeEOL = (t4Options &amp; 4) != 0;</span>
+<span class="nc bnc" id="L463" title="All 2 branches missed.">            for (int i = 0; i &lt; strips.length; i++) {</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">                if (is2D) {</span>
+<span class="nc" id="L465">                    strips[i] = T4AndT6Compression.compressT4_2D(strips[i], width, strips[i].length / ((width + 7) / 8), hasFillBitsBeforeEOL, rowsPerStrip);</span>
+                } else {
+<span class="nc" id="L467">                    strips[i] = T4AndT6Compression.compressT4_1D(strips[i], width, strips[i].length / ((width + 7) / 8), hasFillBitsBeforeEOL);</span>
+                }
+            }
+<span class="nc" id="L470">            break;</span>
+        }
+        case TIFF_COMPRESSION_CCITT_GROUP_4: {
+<span class="nc" id="L473">            final Integer t6Parameter = params.getT6Options();</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">            if (t6Parameter != null) {</span>
+<span class="nc" id="L475">                t6Options = t6Parameter.intValue();</span>
+            }
+<span class="nc" id="L477">            t6Options &amp;= 0x4;</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">            final boolean usesUncompressedMode = (t6Options &amp; TIFF_FLAG_T6_OPTIONS_UNCOMPRESSED_MODE) != 0;</span>
+<span class="nc bnc" id="L479" title="All 2 branches missed.">            if (usesUncompressedMode) {</span>
+<span class="nc" id="L480">                throw new ImagingException(&quot;T.6 compression with the uncompressed mode extension is not yet supported&quot;);</span>
+            }
+<span class="nc bnc" id="L482" title="All 2 branches missed.">            for (int i = 0; i &lt; strips.length; i++) {</span>
+<span class="nc" id="L483">                strips[i] = T4AndT6Compression.compressT6(strips[i], width, strips[i].length / ((width + 7) / 8));</span>
+            }
+<span class="nc" id="L485">            break;</span>
+        }
+        case TIFF_COMPRESSION_PACKBITS:
+<span class="nc bnc" id="L488" title="All 2 branches missed.">            for (int i = 0; i &lt; strips.length; i++) {</span>
+<span class="nc" id="L489">                strips[i] = PackBits.compress(strips[i]);</span>
+            }
+<span class="nc" id="L491">            break;</span>
+        case TIFF_COMPRESSION_LZW:
+<span class="nc" id="L493">            predictor = TiffTagConstants.PREDICTOR_VALUE_HORIZONTAL_DIFFERENCING;</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">            for (int i = 0; i &lt; strips.length; i++) {</span>
+<span class="nc" id="L495">                final byte[] uncompressed = strips[i];</span>
+<span class="nc" id="L496">                this.applyPredictor(width, samplesPerPixel, strips[i]);</span>
+
+<span class="nc" id="L498">                final int LZW_MINIMUM_CODE_SIZE = 8;</span>
+<span class="nc" id="L499">                final MyLzwCompressor compressor = new MyLzwCompressor(LZW_MINIMUM_CODE_SIZE, ByteOrder.BIG_ENDIAN, true);</span>
+<span class="nc" id="L500">                final byte[] compressed = compressor.compress(uncompressed);</span>
+<span class="nc" id="L501">                strips[i] = compressed;</span>
+            }
+<span class="nc" id="L503">            break;</span>
+        case TIFF_COMPRESSION_DEFLATE_ADOBE:
+<span class="nc" id="L505">            predictor = TiffTagConstants.PREDICTOR_VALUE_HORIZONTAL_DIFFERENCING;</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">            for (int i = 0; i &lt; strips.length; i++) {</span>
+<span class="nc" id="L507">                this.applyPredictor(width, samplesPerPixel, strips[i]);</span>
+<span class="nc" id="L508">                strips[i] = ZlibDeflate.compress(strips[i]);</span>
+            }
+<span class="nc" id="L510">            break;</span>
+        case TIFF_COMPRESSION_UNCOMPRESSED:
+<span class="nc" id="L512">            break;</span>
+        default:
+<span class="nc" id="L514">            throw new ImagingException(</span>
+                    &quot;Invalid compression parameter (Only CCITT 1D/Group 3/Group 4, LZW, Packbits, Zlib Deflate and uncompressed supported).&quot;);
+        }
+
+<span class="nc" id="L518">        final AbstractTiffElement.DataElement[] imageData = new AbstractTiffElement.DataElement[strips.length];</span>
+<span class="nc" id="L519">        Arrays.setAll(imageData, i -&gt; new AbstractTiffImageData.Data(0, strips[i].length, strips[i]));</span>
+
+<span class="nc" id="L521">        final TiffOutputSet outputSet = new TiffOutputSet(byteOrder);</span>
+<span class="nc" id="L522">        final TiffOutputDirectory directory = outputSet.addRootDirectory();</span>
+
+        // WriteField stripOffsetsField;
+
+<span class="nc" id="L526">        directory.add(TiffTagConstants.TIFF_TAG_IMAGE_WIDTH, width);</span>
+<span class="nc" id="L527">        directory.add(TiffTagConstants.TIFF_TAG_IMAGE_LENGTH, height);</span>
+<span class="nc" id="L528">        directory.add(TiffTagConstants.TIFF_TAG_PHOTOMETRIC_INTERPRETATION, (short) photometricInterpretation);</span>
+<span class="nc" id="L529">        directory.add(TiffTagConstants.TIFF_TAG_COMPRESSION, (short) compression);</span>
+<span class="nc" id="L530">        directory.add(TiffTagConstants.TIFF_TAG_SAMPLES_PER_PIXEL, (short) samplesPerPixel);</span>
+
+<span class="nc bnc" id="L532" title="All 4 branches missed.">        switch (samplesPerPixel) {</span>
+        case 3:
+<span class="nc" id="L534">            directory.add(TiffTagConstants.TIFF_TAG_BITS_PER_SAMPLE, (short) bitsPerSample, (short) bitsPerSample, (short) bitsPerSample);</span>
+<span class="nc" id="L535">            break;</span>
+        case 4:
+<span class="nc" id="L537">            directory.add(TiffTagConstants.TIFF_TAG_BITS_PER_SAMPLE, (short) bitsPerSample, (short) bitsPerSample, (short) bitsPerSample,</span>
+                    (short) bitsPerSample);
+<span class="nc" id="L539">            directory.add(TiffTagConstants.TIFF_TAG_EXTRA_SAMPLES, (short) TiffTagConstants.EXTRA_SAMPLE_UNASSOCIATED_ALPHA);</span>
+<span class="nc" id="L540">            break;</span>
+        case 1:
+<span class="nc" id="L542">            directory.add(TiffTagConstants.TIFF_TAG_BITS_PER_SAMPLE, (short) bitsPerSample);</span>
+<span class="nc" id="L543">            break;</span>
+        default:
+            break;
+        }
+        // {
+        // stripOffsetsField = new WriteField(TIFF_TAG_STRIP_OFFSETS,
+        // FIELD_TYPE_LONG, stripOffsets.length, FIELD_TYPE_LONG
+        // .writeData(stripOffsets, byteOrder));
+        // directory.add(stripOffsetsField);
+        // }
+        // {
+        // WriteField field = new WriteField(TIFF_TAG_STRIP_BYTE_COUNTS,
+        // FIELD_TYPE_LONG, stripByteCounts.length,
+        // FIELD_TYPE_LONG.writeData(stripByteCounts,
+        // WRITE_BYTE_ORDER));
+        // directory.add(field);
+        // }
+<span class="nc" id="L560">        directory.add(TiffTagConstants.TIFF_TAG_ROWS_PER_STRIP, rowsPerStrip);</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">        if (pixelDensity.isUnitless()) {</span>
+<span class="nc" id="L562">            directory.add(TiffTagConstants.TIFF_TAG_RESOLUTION_UNIT, (short) 0);</span>
+<span class="nc" id="L563">            directory.add(TiffTagConstants.TIFF_TAG_XRESOLUTION, RationalNumber.valueOf(pixelDensity.getRawHorizontalDensity()));</span>
+<span class="nc" id="L564">            directory.add(TiffTagConstants.TIFF_TAG_YRESOLUTION, RationalNumber.valueOf(pixelDensity.getRawVerticalDensity()));</span>
+<span class="nc bnc" id="L565" title="All 2 branches missed.">        } else if (pixelDensity.isInInches()) {</span>
+<span class="nc" id="L566">            directory.add(TiffTagConstants.TIFF_TAG_RESOLUTION_UNIT, (short) 2);</span>
+<span class="nc" id="L567">            directory.add(TiffTagConstants.TIFF_TAG_XRESOLUTION, RationalNumber.valueOf(pixelDensity.horizontalDensityInches()));</span>
+<span class="nc" id="L568">            directory.add(TiffTagConstants.TIFF_TAG_YRESOLUTION, RationalNumber.valueOf(pixelDensity.verticalDensityInches()));</span>
+        } else {
+<span class="nc" id="L570">            directory.add(TiffTagConstants.TIFF_TAG_RESOLUTION_UNIT, (short) 1);</span>
+<span class="nc" id="L571">            directory.add(TiffTagConstants.TIFF_TAG_XRESOLUTION, RationalNumber.valueOf(pixelDensity.horizontalDensityCentimetres()));</span>
+<span class="nc" id="L572">            directory.add(TiffTagConstants.TIFF_TAG_YRESOLUTION, RationalNumber.valueOf(pixelDensity.verticalDensityCentimetres()));</span>
+        }
+<span class="nc bnc" id="L574" title="All 2 branches missed.">        if (t4Options != 0) {</span>
+<span class="nc" id="L575">            directory.add(TiffTagConstants.TIFF_TAG_T4_OPTIONS, t4Options);</span>
+        }
+<span class="nc bnc" id="L577" title="All 2 branches missed.">        if (t6Options != 0) {</span>
+<span class="nc" id="L578">            directory.add(TiffTagConstants.TIFF_TAG_T6_OPTIONS, t6Options);</span>
+        }
+
+<span class="nc bnc" id="L581" title="All 2 branches missed.">        if (null != xmpXml) {</span>
+<span class="nc" id="L582">            final byte[] xmpXmlBytes = xmpXml.getBytes(StandardCharsets.UTF_8);</span>
+<span class="nc" id="L583">            directory.add(TiffTagConstants.TIFF_TAG_XMP, xmpXmlBytes);</span>
+        }
+
+<span class="nc bnc" id="L586" title="All 2 branches missed.">        if (predictor == TiffTagConstants.PREDICTOR_VALUE_HORIZONTAL_DIFFERENCING) {</span>
+<span class="nc" id="L587">            directory.add(TiffTagConstants.TIFF_TAG_PREDICTOR, predictor);</span>
+        }
+
+<span class="nc" id="L590">        final AbstractTiffImageData abstractTiffImageData = new AbstractTiffImageData.Strips(imageData, rowsPerStrip);</span>
+<span class="nc" id="L591">        directory.setTiffImageData(abstractTiffImageData);</span>
+
+<span class="nc bnc" id="L593" title="All 2 branches missed.">        if (userExif != null) {</span>
+<span class="nc" id="L594">            combineUserExifIntoFinalExif(userExif, outputSet);</span>
+        }
+
+<span class="nc" id="L597">        write(os, outputSet);</span>
+<span class="nc" id="L598">    }</span>
+
+    protected void writeImageFileHeader(final BinaryOutputStream bos) throws IOException {
+<span class="nc" id="L601">        writeImageFileHeader(bos, TIFF_HEADER_SIZE);</span>
+<span class="nc" id="L602">    }</span>
+
+    protected void writeImageFileHeader(final BinaryOutputStream bos, final long offsetToFirstIFD) throws IOException {
+<span class="nc bnc" id="L605" title="All 2 branches missed.">        if (byteOrder == ByteOrder.LITTLE_ENDIAN) {</span>
+<span class="nc" id="L606">            bos.write('I');</span>
+<span class="nc" id="L607">            bos.write('I');</span>
+        } else {
+<span class="nc" id="L609">            bos.write('M');</span>
+<span class="nc" id="L610">            bos.write('M');</span>
+        }
+
+<span class="nc" id="L613">        bos.write2Bytes(42); // tiffVersion</span>
+
+<span class="nc" id="L615">        bos.write4Bytes((int) offsetToFirstIFD);</span>
+<span class="nc" id="L616">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BmpWriterPalette.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.bmp</a> &gt; <span class="el_source">BmpWriterPalette.java</span></div><h1>BmpWriterPalette.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.bmp;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.apache.commons.imaging.common.BinaryOutputStream;
+import org.apache.commons.imaging.palette.SimplePalette;
+
+final class BmpWriterPalette implements BmpWriter {
+
+    private final SimplePalette palette;
+    private final int bitsPerSample;
+
+<span class="nc" id="L31">    BmpWriterPalette(final SimplePalette palette) {</span>
+<span class="nc" id="L32">        this.palette = palette;</span>
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (palette.length() &lt;= 2) {</span>
+<span class="nc" id="L35">            bitsPerSample = 1;</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        } else if (palette.length() &lt;= 16) {</span>
+<span class="nc" id="L37">            bitsPerSample = 4;</span>
+        } else {
+<span class="nc" id="L39">            bitsPerSample = 8;</span>
+        }
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public int getBitsPerPixel() {
+<span class="nc" id="L45">        return bitsPerSample;</span>
+    }
+
+    @Override
+    public byte[] getImageData(final BufferedImage src) {
+<span class="nc" id="L50">        final int width = src.getWidth();</span>
+<span class="nc" id="L51">        final int height = src.getHeight();</span>
+
+<span class="nc" id="L53">        final ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+<span class="nc" id="L55">        int bitCache = 0;</span>
+<span class="nc" id="L56">        int bitsInCache = 0;</span>
+
+<span class="nc" id="L58">        int byteCount = 0;</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        for (int y = height - 1; y &gt;= 0; y--) {</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            for (int x = 0; x &lt; width; x++) {</span>
+<span class="nc" id="L61">                final int argb = src.getRGB(x, y);</span>
+<span class="nc" id="L62">                final int rgb = 0xffffff &amp; argb;</span>
+
+<span class="nc" id="L64">                final int index = palette.getPaletteIndex(rgb);</span>
+
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                if (bitsPerSample == 8) {</span>
+<span class="nc" id="L67">                    baos.write(0xff &amp; index);</span>
+<span class="nc" id="L68">                    byteCount++;</span>
+                } else {
+                    // 4 or 1
+<span class="nc" id="L71">                    bitCache = bitCache &lt;&lt; bitsPerSample | index;</span>
+<span class="nc" id="L72">                    bitsInCache += bitsPerSample;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">                    if (bitsInCache &gt;= 8) {</span>
+<span class="nc" id="L74">                        baos.write(0xff &amp; bitCache);</span>
+<span class="nc" id="L75">                        byteCount++;</span>
+<span class="nc" id="L76">                        bitCache = 0;</span>
+<span class="nc" id="L77">                        bitsInCache = 0;</span>
+                    }
+                }
+            }
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">            if (bitsInCache &gt; 0) {</span>
+<span class="nc" id="L83">                bitCache = bitCache &lt;&lt; 8 - bitsInCache;</span>
+
+<span class="nc" id="L85">                baos.write(0xff &amp; bitCache);</span>
+<span class="nc" id="L86">                byteCount++;</span>
+<span class="nc" id="L87">                bitCache = 0;</span>
+<span class="nc" id="L88">                bitsInCache = 0;</span>
+            }
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            while (byteCount % 4 != 0) {</span>
+<span class="nc" id="L92">                baos.write(0);</span>
+<span class="nc" id="L93">                byteCount++;</span>
+            }
+        }
+
+<span class="nc" id="L97">        return baos.toByteArray();</span>
+    }
+
+    @Override
+    public int getPaletteSize() {
+<span class="nc" id="L102">        return palette.length();</span>
+    }
+
+    @Override
+    public void writePalette(final BinaryOutputStream bos) throws IOException {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        for (int i = 0; i &lt; palette.length(); i++) {</span>
+<span class="nc" id="L108">            final int rgb = palette.getEntry(i);</span>
+
+<span class="nc" id="L110">            final int red = 0xff &amp; rgb &gt;&gt; 16;</span>
+<span class="nc" id="L111">            final int green = 0xff &amp; rgb &gt;&gt; 8;</span>
+<span class="nc" id="L112">            final int blue = 0xff &amp; rgb &gt;&gt; 0;</span>
+
+<span class="nc" id="L114">            bos.write(blue);</span>
+<span class="nc" id="L115">            bos.write(green);</span>
+<span class="nc" id="L116">            bos.write(red);</span>
+<span class="nc" id="L117">            bos.write(0);</span>
+        }
+<span class="nc" id="L119">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

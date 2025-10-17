@@ -1,0 +1,5 @@
+match_arm_leading_pipes = "Always"
+match_block_trailing_comma = true
+newline_style = "Unix"
+use_field_init_shorthand = true
+use_try_shorthand = true

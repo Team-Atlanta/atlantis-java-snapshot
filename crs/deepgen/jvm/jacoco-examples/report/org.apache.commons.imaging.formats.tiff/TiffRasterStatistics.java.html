@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffRasterStatistics.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffRasterStatistics.java</span></div><h1>TiffRasterStatistics.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+/**
+ * Collects and stores a set of simple statistics from the input raster.
+ */
+public class TiffRasterStatistics {
+
+    private final int nSample;
+    private final int nNull;
+    private final float minValue;
+    private final float maxValue;
+    private final float meanValue;
+    private final float excludedValue;
+
+    /**
+     * Constructs an instance of this class, tabulating results from the input raster data.
+     *
+     * @param raster        the input data
+     * @param excludedValue an optional value to ignore; use Float&amp;#46;NaN if no value is to be ignored.
+     */
+<span class="nc" id="L37">    TiffRasterStatistics(final TiffRasterData raster, final float excludedValue) {</span>
+<span class="nc" id="L38">        this.excludedValue = excludedValue;</span>
+<span class="nc" id="L39">        float vMin = Float.POSITIVE_INFINITY;</span>
+<span class="nc" id="L40">        float vMax = Float.NEGATIVE_INFINITY;</span>
+<span class="nc" id="L41">        double vSum = 0;</span>
+<span class="nc" id="L42">        int nS = 0;</span>
+<span class="nc" id="L43">        int nN = 0;</span>
+<span class="nc" id="L44">        final float[] data = raster.getData();</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (final float test : data) {</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            if (Float.isNaN(test)) {</span>
+<span class="nc" id="L47">                nN++;</span>
+<span class="nc" id="L48">                continue;</span>
+            }
+<span class="nc bnc" id="L50" title="All 2 branches missed.">            if (test == excludedValue) {</span>
+<span class="nc" id="L51">                continue;</span>
+            }
+
+<span class="nc" id="L54">            nS++;</span>
+<span class="nc" id="L55">            vSum += test;</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (test &lt; vMin) {</span>
+<span class="nc" id="L57">                vMin = test;</span>
+            }
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            if (test &gt; vMax) {</span>
+<span class="nc" id="L60">                vMax = test;</span>
+            }
+        }
+
+<span class="nc" id="L64">        minValue = vMin;</span>
+<span class="nc" id="L65">        maxValue = vMax;</span>
+<span class="nc" id="L66">        nSample = nS;</span>
+<span class="nc" id="L67">        nNull = nN;</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (nSample == 0) {</span>
+<span class="nc" id="L69">            meanValue = 0;</span>
+        } else {
+<span class="nc" id="L71">            meanValue = (float) (vSum / nSample);</span>
+        }
+<span class="nc" id="L73">    }</span>
+
+    /**
+     * Gets the count of the number of null samples in the collection.
+     *
+     * @return the a positive number, potentially zero
+     */
+    public int getCountOfNulls() {
+<span class="nc" id="L81">        return nNull;</span>
+    }
+
+    /**
+     * Gets the count of the number of non-null and non-excluded samples in the collection.
+     *
+     * @return the a positive number, potentially zero
+     */
+    public int getCountOfSamples() {
+<span class="nc" id="L90">        return nSample;</span>
+    }
+
+    /**
+     * Gets the value that was set for exclusion, or a Float&amp;#46;NaN if not was set.
+     *
+     * @return the excluded value (if any).
+     */
+    public float getExcludedValue() {
+<span class="nc" id="L99">        return excludedValue;</span>
+    }
+
+    /**
+     * Gets the maximum value found in the source data
+     *
+     * @return the maximum value found in the source data
+     */
+    public float getMaxValue() {
+<span class="nc" id="L108">        return maxValue;</span>
+    }
+
+    /**
+     * Gets the mean value for all sample values in the raster. Null-data values and excluded values are not considered.
+     *
+     * @return the mean value of the samples
+     */
+    public float getMeanValue() {
+<span class="nc" id="L117">        return meanValue;</span>
+    }
+
+    /**
+     * Gets the minimum value found in the source data
+     *
+     * @return the minimum value found in the source data
+     */
+    public float getMinValue() {
+<span class="nc" id="L126">        return minValue;</span>
+    }
+
+    /**
+     * Indicates if a sample value was set to be deliberately excluded from the statistics.
+     *
+     * @return true if a value was set for exclusion; otherwise, false
+     */
+    public boolean isAnExcludedValueSet() {
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        return !Float.isNaN(excludedValue);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

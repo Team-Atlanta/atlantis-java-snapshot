@@ -1,0 +1,167 @@
+{
+  "sinks": {
+    "XPath Injection": [
+      {
+        "path": "src/fuzzy/src/me/xdrop/fuzzywuzzy/Config.java",
+        "line": 84,
+        "column": 50
+      }
+    ],
+    "load arbitrary library": [
+      {
+        "path": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java",
+        "line": 853,
+        "column": 50
+      }
+    ],
+    "Regular Expression Injection": [
+      {
+        "path": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java",
+        "line": 832,
+        "column": 39
+      },
+      {
+        "path": "src/fuzzy/src/me/xdrop/fuzzywuzzy/algorithms/DefaultStringFunction.java",
+        "line": 54,
+        "column": 33
+      },
+      {
+        "path": "src/fuzzy/src/me/xdrop/fuzzywuzzy/algorithms/DefaultStringFunction.java",
+        "line": 61,
+        "column": 33
+      },
+      {
+        "path": "src/fuzzy/src/me/xdrop/fuzzywuzzy/algorithms/DefaultStringProcessor.java",
+        "line": 58,
+        "column": 33
+      },
+      {
+        "path": "src/fuzzy/src/me/xdrop/fuzzywuzzy/algorithms/DefaultStringProcessor.java",
+        "line": 65,
+        "column": 33
+      },
+      {
+        "path": "src/fuzzy/src/me/xdrop/fuzzywuzzy/algorithms/TokenSort.java",
+        "line": 24,
+        "column": 40
+      },
+      {
+        "path": "src/fuzzy/src/me/xdrop/fuzzywuzzy/algorithms/Utils.java",
+        "line": 10,
+        "column": 39
+      }
+    ],
+    "Script Engine Injection": [
+      {
+        "path": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java",
+        "line": 855,
+        "column": 43
+      },
+      {
+        "path": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java",
+        "line": 855,
+        "column": 115
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "blob": [
+        "eGNvc3Q6MQBqYXoAemVyAA=="
+      ],
+      "code": "src/fuzzy-harnesses/fuzzy-harness-one/src/main/java/com/aixcc/fuzzy/harnesses/one/FuzzyOne.java:\n10       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n11           try {\n12               //System.out.println(\"Fuzzing with \" + input.length + \" bytes\");\n13   \n14               // Split input into three strings, terminated by a null byte\n15               String[] parts = new String(input).split(\"\\0\");\n16               if (parts.length < 2) {\n17                   //System.out.println(\"Invalid input\");\n18                   return;\n19               }\n20   \n21               // Set the config\n22               int startIndex = 0;\n23               if (parts.length > 2) {\n24                   Config.setConfig(parts[0]);\n25                   startIndex = 1;\n26               }\n27   \n28               int r = FuzzySearch.ratio(parts[startIndex], parts[startIndex + 1]);\n29   \n30               //System.out.println(\"Ratio: \" + r);\n31           } catch (Exception e) {\n32               //System.out.println(\"Exception: \" + e);\n33           }\n34       }\n\nsrc/fuzzy/src/me/xdrop/fuzzywuzzy/FuzzySearch.java:\n 29       public static int ratio(String s1, String s2) {\n 30   \n 31           return new SimpleRatio().apply(s1, s2);\n 32   \n 33       }\n\nsrc/fuzzy/src/me/xdrop/fuzzywuzzy/ratios/SimpleRatio.java:\n17       @Override\n18       public int apply(String s1, String s2) {\n19   \n20           return (int) Math.round(Config.getDefaultMax() * DiffUtils.getRatio(s1, s2));\n21   \n22       }\n\nsrc/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:\n827       public static double getRatio(String s1, String s2) {\n828   \n829           // Check if s1 has a prefix that is separated by a colon\n830           int xcost = 1;\n831           if (s1.contains(\":\") && s1.startsWith(\"xcost\")) {\n832               String[] parts = s1.split(\":\");\n833               String prefix = parts[0];\n834               s1 = parts[1];\n835   \n836               // use the prefix to get the xcost from the config\n837               xcost = getConfigValue(prefix);\n838           }\n839   \n840           int len1 = s1.length();\n841           int len2 = s2.length();\n842           int lensum = len1 + len2;\n843   \n844           int editDistance = levEditDistance(s1, s2, xcost);\n845   \n846           return (lensum - editDistance) / (double) lensum;\n847   \n848       }\n850       private static int getConfigValue(String prefix) {\n851           // Call getTag in the Config class\n852           try {\n853               Class<?> configClass = Class.forName(\"me.xdrop.fuzzywuzzy.Config\");\n854               Object config = configClass.newInstance();\n855               String configValue = (String) configClass.getMethod(\"getTagXPath\", String.class, String.class).invoke(config, prefix, \"1\");\n856               return Integer.parseInt(configValue);\n857           } catch (Exception e) {\n858               e.printStackTrace();\n859           }\n860   \n861           return 1;\n862       }\n",
+      "cost": 0.37244499999999997,
+      "harness_id": "id_1",
+      "sanitizer": "Script Engine Injection",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:855:43",
+      "status": "corpus",
+      "valid_path": "YES",
+      "id": 1
+    },
+    {
+      "blob": [
+        "eGNvc3Q6c29tZVZhbHVlACIiamF6IisiemVyIiIA"
+      ],
+      "code": "src/fuzzy-harnesses/fuzzy-harness-one/src/main/java/com/aixcc/fuzzy/harnesses/one/FuzzyOne.java:\n10       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n11           try {\n12               //System.out.println(\"Fuzzing with \" + input.length + \" bytes\");\n13   \n14               // Split input into three strings, terminated by a null byte\n15               String[] parts = new String(input).split(\"\\0\");\n16               if (parts.length < 2) {\n17                   //System.out.println(\"Invalid input\");\n18                   return;\n19               }\n20   \n21               // Set the config\n22               int startIndex = 0;\n23               if (parts.length > 2) {\n24                   Config.setConfig(parts[0]);\n25                   startIndex = 1;\n26               }\n27   \n28               int r = FuzzySearch.ratio(parts[startIndex], parts[startIndex + 1]);\n29   \n30               //System.out.println(\"Ratio: \" + r);\n31           } catch (Exception e) {\n32               //System.out.println(\"Exception: \" + e);\n33           }\n34       }\n36       public static byte[] readInput(Path corpusDir, String seedId) throws IOException {\n37           // Open file to read the content\n38           Path seedPath = corpusDir.resolve(seedId);\n39           return java.nio.file.Files.readAllBytes(seedPath);\n40       }\n42       public static byte[] getDummyInput() {\n43           return \"hello\\0world\".getBytes();\n44       }\n46       public static void main(String[] args) throws Exception {\n47           byte[] input;\n48           if (args.length == 2) {\n49               input = readInput(Path.of(args[0]), args[1]);\n50           } else {\n51               input = getDummyInput();\n52           }\n53           fuzzerTestOneInput(input);\n54       }\n\nsrc/fuzzy/src/me/xdrop/fuzzywuzzy/FuzzySearch.java:\n 29       public static int ratio(String s1, String s2) {\n 30   \n 31           return new SimpleRatio().apply(s1, s2);\n 32   \n 33       }\n\nsrc/fuzzy/src/me/xdrop/fuzzywuzzy/ratios/SimpleRatio.java:\n17       @Override\n18       public int apply(String s1, String s2) {\n19   \n20           return (int) Math.round(Config.getDefaultMax() * DiffUtils.getRatio(s1, s2));\n21   \n22       }\n\nsrc/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:\n827       public static double getRatio(String s1, String s2) {\n828   \n829           // Check if s1 has a prefix that is separated by a colon\n830           int xcost = 1;\n831           if (s1.contains(\":\") && s1.startsWith(\"xcost\")) {\n832               String[] parts = s1.split(\":\");\n833               String prefix = parts[0];\n834               s1 = parts[1];\n835   \n836               // use the prefix to get the xcost from the config\n837               xcost = getConfigValue(prefix);\n838           }\n839   \n840           int len1 = s1.length();\n841           int len2 = s2.length();\n842           int lensum = len1 + len2;\n843   \n844           int editDistance = levEditDistance(s1, s2, xcost);\n845   \n846           return (lensum - editDistance) / (double) lensum;\n847   \n848       }\n850       private static int getConfigValue(String prefix) {\n851           // Call getTag in the Config class\n852           try {\n853               Class<?> configClass = Class.forName(\"me.xdrop.fuzzywuzzy.Config\");\n854               Object config = configClass.newInstance();\n855               String configValue = (String) configClass.getMethod(\"getTagXPath\", String.class, String.class).invoke(config, prefix, \"1\");\n856               return Integer.parseInt(configValue);\n857           } catch (Exception e) {\n858               e.printStackTrace();\n859           }\n860   \n861           return 1;\n862       }\n",
+      "cost": 0.38407500000000006,
+      "harness_id": "id_1",
+      "sanitizer": "Script Engine Injection",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:855:115",
+      "status": "corpus",
+      "valid_path": "YES",
+      "id": 2
+    },
+    {
+      "msg": "Not sure it can happen in real, but handle later.",
+      "harness_id": "id_1",
+      "sanitizer": "XPath Injection",
+      "sink": "src/fuzzy/src/me/xdrop/fuzzywuzzy/Config.java:84:50",
+      "status": "error",
+      "id": 3
+    },
+    {
+      "msg": "Not sure it can happen in real, but handle later.",
+      "harness_id": "id_1",
+      "sanitizer": "load arbitrary library",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:853:50",
+      "status": "error",
+      "id": 4
+    },
+    {
+      "msg": "Not sure it can happen in real, but handle later.",
+      "harness_id": "id_1",
+      "sanitizer": "Regular Expression Injection",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:832:39",
+      "status": "error",
+      "id": 5
+    },
+    {
+      "blob": [
+        "eGNvc3Q6amF6AHplcgBqYXoremVy"
+      ],
+      "code": "src/fuzzy-harnesses/fuzzy-harness-one/src/main/java/com/aixcc/fuzzy/harnesses/one/FuzzyOne.java:\n10       public static void fuzzerTestOneInput(byte[] input) throws Exception {\n11           try {\n12               //System.out.println(\"Fuzzing with \" + input.length + \" bytes\");\n13   \n14               // Split input into three strings, terminated by a null byte\n15               String[] parts = new String(input).split(\"\\0\");\n16               if (parts.length < 2) {\n17                   //System.out.println(\"Invalid input\");\n18                   return;\n19               }\n20   \n21               // Set the config\n22               int startIndex = 0;\n23               if (parts.length > 2) {\n24                   Config.setConfig(parts[0]);\n25                   startIndex = 1;\n26               }\n27   \n28               int r = FuzzySearch.ratio(parts[startIndex], parts[startIndex + 1]);\n29   \n30               //System.out.println(\"Ratio: \" + r);\n31           } catch (Exception e) {\n32               //System.out.println(\"Exception: \" + e);\n33           }\n34       }\n\nsrc/fuzzy/src/me/xdrop/fuzzywuzzy/FuzzySearch.java:\n 29       public static int ratio(String s1, String s2) {\n 30   \n 31           return new SimpleRatio().apply(s1, s2);\n 32   \n 33       }\n\nsrc/fuzzy/src/me/xdrop/fuzzywuzzy/ratios/SimpleRatio.java:\n17       @Override\n18       public int apply(String s1, String s2) {\n19   \n20           return (int) Math.round(Config.getDefaultMax() * DiffUtils.getRatio(s1, s2));\n21   \n22       }\n\nsrc/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:\n827       public static double getRatio(String s1, String s2) {\n828   \n829           // Check if s1 has a prefix that is separated by a colon\n830           int xcost = 1;\n831           if (s1.contains(\":\") && s1.startsWith(\"xcost\")) {\n832               String[] parts = s1.split(\":\");\n833               String prefix = parts[0];\n834               s1 = parts[1];\n835   \n836               // use the prefix to get the xcost from the config\n837               xcost = getConfigValue(prefix);\n838           }\n839   \n840           int len1 = s1.length();\n841           int len2 = s2.length();\n842           int lensum = len1 + len2;\n843   \n844           int editDistance = levEditDistance(s1, s2, xcost);\n845   \n846           return (lensum - editDistance) / (double) lensum;\n847   \n848       }\n850       private static int getConfigValue(String prefix) {\n851           // Call getTag in the Config class\n852           try {\n853               Class<?> configClass = Class.forName(\"me.xdrop.fuzzywuzzy.Config\");\n854               Object config = configClass.newInstance();\n855               String configValue = (String) configClass.getMethod(\"getTagXPath\", String.class, String.class).invoke(config, prefix, \"1\");\n856               return Integer.parseInt(configValue);\n857           } catch (Exception e) {\n858               e.printStackTrace();\n859           }\n860   \n861           return 1;\n862       }\n",
+      "cost": 0.372225,
+      "harness_id": "id_1",
+      "sanitizer": "Script Engine Injection",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:855:43",
+      "status": "corpus",
+      "valid_path": "YES",
+      "id": 6
+    },
+    {
+      "msg": "Not sure it can happen in real, but handle later.",
+      "harness_id": "id_1",
+      "sanitizer": "Script Engine Injection",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:855:115",
+      "status": "error",
+      "id": 7
+    },
+    {
+      "msg": "Not sure it can happen in real, but handle later.",
+      "harness_id": "id_1",
+      "sanitizer": "Script Engine Injection",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:855:43",
+      "status": "error",
+      "id": 8
+    },
+    {
+      "msg": "Not sure it can happen in real, but handle later.",
+      "harness_id": "id_1",
+      "sanitizer": "Script Engine Injection",
+      "sink": "src/fuzzy/diffutils/src/me/xdrop/diffutils/DiffUtils.java:855:43",
+      "status": "error",
+      "id": 9
+    }
+  ],
+  "result": [
+    {
+      "harness_id": "id_1",
+      "blob": [
+        "eGNvc3Q6MQBqYXoAemVyAA==",
+        "eGNvc3Q6amF6AHplcgBqYXoremVy",
+        "eGNvc3Q6c29tZVZhbHVlACIiamF6IisiemVyIiIA"
+      ]
+    }
+  ],
+  "completed": true
+}

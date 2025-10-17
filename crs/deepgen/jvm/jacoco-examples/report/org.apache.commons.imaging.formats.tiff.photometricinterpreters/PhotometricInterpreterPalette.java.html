@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhotometricInterpreterPalette.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.photometricinterpreters</a> &gt; <span class="el_source">PhotometricInterpreterPalette.java</span></div><h1>PhotometricInterpreterPalette.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.photometricinterpreters;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.ImagingFormatException;
+import org.apache.commons.imaging.common.AllocationRequestException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.ImageBuilder;
+
+public class PhotometricInterpreterPalette extends PhotometricInterpreter {
+
+    /**
+     * The color map of integer ARGB values tied to the pixel index of the palette.
+     */
+    private final int[] indexColorMap;
+    private final int bitsPerPixelMask;
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param samplesPerPixel Samples per pixel.
+     * @param bitsPerSample   Bits per sample.
+     * @param predictor       TODO
+     * @param width           TODO
+     * @param height          TODO
+     * @param colorMap        TODO
+     *
+     * @throws ImagingFormatException     if an index into the {@code colorMap} is out of bounds.
+     * @throws AllocationRequestException Thrown when an allocation request exceeds the {@link Allocator} limit.
+     */
+    public PhotometricInterpreterPalette(final int samplesPerPixel, final int[] bitsPerSample, final int predictor, final int width, final int height,
+            final int[] colorMap) {
+<span class="nc" id="L51">        super(samplesPerPixel, bitsPerSample, predictor, width, height);</span>
+
+<span class="nc" id="L53">        final int bitsPerPixel = getBitsPerSample(0);</span>
+<span class="nc" id="L54">        final int colorMapScale = 1 &lt;&lt; bitsPerPixel;</span>
+        int colorMapScaleX2;
+        try {
+<span class="nc" id="L57">            colorMapScaleX2 = Math.multiplyExact(2, colorMapScale);</span>
+<span class="nc" id="L58">        } catch (final ArithmeticException e) {</span>
+<span class="nc" id="L59">            throw new ImagingFormatException(&quot;bitsPerPixel is too large or colorMap is too small&quot;, e);</span>
+<span class="nc" id="L60">        }</span>
+        // Validate colorMap[i], colorMap[i + colorMapScale], and colorMap[i + colorMapScaleX2] where max(i) is
+        // colorMapScale - 1.
+        int maxI;
+        try {
+<span class="nc" id="L65">            maxI = Math.addExact(colorMapScaleX2, colorMapScale - 1);</span>
+<span class="nc" id="L66">        } catch (final ArithmeticException e) {</span>
+<span class="nc" id="L67">            throw new ImagingFormatException(&quot;bitsPerPixel is too large or colorMap is too small&quot;, e);</span>
+<span class="nc" id="L68">        }</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (maxI &gt;= colorMap.length) {</span>
+<span class="nc" id="L70">            throw new ImagingFormatException(&quot;bitsPerPixel %,d (maxI = %,d) is too large or colorMap is too small %,d&quot;, bitsPerPixel, maxI, colorMap.length);</span>
+        }
+<span class="nc" id="L72">        indexColorMap = Allocator.intArray(colorMapScale);</span>
+<span class="nc" id="L73">        Arrays.setAll(indexColorMap, i -&gt; {</span>
+<span class="nc" id="L74">            final int red = colorMap[i] &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L75">            final int green = colorMap[i + colorMapScale] &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L76">            final int blue = colorMap[i + colorMapScaleX2] &gt;&gt; 8 &amp; 0xff;</span>
+<span class="nc" id="L77">            return 0xff000000 | red &lt;&lt; 16 | green &lt;&lt; 8 | blue;</span>
+        });
+
+        // Fix for IMAGING-247 5/17/2020
+        // This interpreter is used with TIFF_COMPRESSION_PACKBITS (32773).
+        // which unpacks to 8 bits per sample. But if the bits-per-pixel
+        // is less than 8 bits, some authoring tools do not zero-out the
+        // unused bits. This results in cases where the decoded by index
+        // exceeds the size of the palette. So we set up a mask to protect
+        // the code from an array bounds exception.
+<span class="nc" id="L87">        int temp = 0;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        for (int i = 0; i &lt; bitsPerPixel; i++) {</span>
+<span class="nc" id="L89">            temp = temp &lt;&lt; 1 | 1;</span>
+        }
+<span class="nc" id="L91">        bitsPerPixelMask = temp;</span>
+
+<span class="nc" id="L93">    }</span>
+
+    @Override
+    public void interpretPixel(final ImageBuilder imageBuilder, final int[] samples, final int x, final int y) throws ImagingException, IOException {
+<span class="nc" id="L97">        imageBuilder.setRgb(x, y, indexColorMap[samples[0] &amp; bitsPerPixelMask]);</span>
+<span class="nc" id="L98">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

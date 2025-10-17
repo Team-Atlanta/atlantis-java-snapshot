@@ -1,0 +1,48 @@
+name: "[aixcc-jazzer] AIxCC Official Jazzer Testing"
+
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  aixcc-jazzer-build-n-test:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        ssh-key: ${{ secrets.SSHKEY_GT_NOSGX_RSA }}
+        submodules: 'recursive'
+        lfs: false
+        fetch-depth: 0
+
+    - name: Check if submodule aixcc-jazzer has been modified
+      run: |
+        if git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep "crs/fuzzers/aixcc-jazzer"; then
+          echo "Submodule crs/fuzzers/aixcc-jazzer has been modified."
+          echo "SUBMODULE_CHANGED=true" >> $GITHUB_ENV
+        else
+          echo "Submodule crs/fuzzers/aixcc-jazzer has not been modified."
+          echo "SUBMODULE_CHANGED=false" >> $GITHUB_ENV
+        fi
+
+    - name: Build aixcc-jazzer testing docker image
+      if: env.SUBMODULE_CHANGED == 'true'
+      run: |
+        echo "Building and testing aixcc-jazzer..."
+
+        docker system prune -f
+
+        docker build \
+          -t aixcc-jazzer-test:latest \
+          -f misc/Dockerfile.aixcc-jazzer \
+          .
+
+        docker run \
+          --rm \
+          -w /app/crs-cp-java/fuzzers/aixcc-jazzer \
+          -u builder:builder \
+          aixcc-jazzer-test:latest \
+          bash -c "bazel test --test_output=all //..."

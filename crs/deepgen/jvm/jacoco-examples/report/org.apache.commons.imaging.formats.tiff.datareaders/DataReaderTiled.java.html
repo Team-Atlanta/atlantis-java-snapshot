@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataReaderTiled.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.datareaders</a> &gt; <span class="el_source">DataReaderTiled.java</span></div><h1>DataReaderTiled.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+* Implementation notes:
+*    See ImageDataReader and DataReaderStrips for notes on development
+* with particular emphasis on run-time performance.
+*/
+package org.apache.commons.imaging.formats.tiff.datareaders;
+
+import static org.apache.commons.imaging.formats.tiff.constants.TiffConstants.TIFF_COMPRESSION_JPEG;
+
+import java.awt.Rectangle;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.ByteOrder;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.ImageBuilder;
+import org.apache.commons.imaging.formats.tiff.AbstractTiffImageData;
+import org.apache.commons.imaging.formats.tiff.TiffDirectory;
+import org.apache.commons.imaging.formats.tiff.TiffRasterData;
+import org.apache.commons.imaging.formats.tiff.TiffRasterDataFloat;
+import org.apache.commons.imaging.formats.tiff.TiffRasterDataInt;
+import org.apache.commons.imaging.formats.tiff.constants.TiffPlanarConfiguration;
+import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.photometricinterpreters.PhotometricInterpreter;
+import org.apache.commons.imaging.formats.tiff.photometricinterpreters.PhotometricInterpreterRgb;
+
+/**
+ * Provides a data reader for TIFF file images organized by tiles.
+ */
+public final class DataReaderTiled extends ImageDataReader {
+
+    private final int tileWidth;
+    private final int tileLength;
+
+    private final int bitsPerPixel;
+
+    private final int compression;
+    private final ByteOrder byteOrder;
+
+    private final AbstractTiffImageData.Tiles imageData;
+
+    public DataReaderTiled(final TiffDirectory directory, final PhotometricInterpreter photometricInterpreter, final int tileWidth, final int tileLength,
+            final int bitsPerPixel, final int[] bitsPerSample, final int predictor, final int samplesPerPixel, final int sampleFormat, final int width,
+            final int height, final int compression, final TiffPlanarConfiguration planarConfiguration, final ByteOrder byteOrder,
+            final AbstractTiffImageData.Tiles imageData) {
+<span class="nc" id="L64">        super(directory, photometricInterpreter, bitsPerSample, predictor, samplesPerPixel, sampleFormat, width, height, planarConfiguration);</span>
+
+<span class="nc" id="L66">        this.tileWidth = tileWidth;</span>
+<span class="nc" id="L67">        this.tileLength = tileLength;</span>
+
+<span class="nc" id="L69">        this.bitsPerPixel = bitsPerPixel;</span>
+<span class="nc" id="L70">        this.compression = compression;</span>
+
+<span class="nc" id="L72">        this.imageData = imageData;</span>
+<span class="nc" id="L73">        this.byteOrder = byteOrder;</span>
+<span class="nc" id="L74">    }</span>
+
+    private void interpretTile(final ImageBuilder imageBuilder, final byte[] bytes, final int startX, final int startY, final int xLimit, final int yLimit)
+            throws ImagingException, IOException {
+
+        // March 2020 change to handle floating-point with compression
+        // for the compressed floating-point, there is a standard that allows
+        // 16 bit floats (which is an IEEE 754 standard) and 24 bits (which is
+        // a non-standard format implemented for TIFF). At this time, this
+        // code only supports the 32-bit and 64-bit formats.
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (sampleFormat == TiffTagConstants.SAMPLE_FORMAT_VALUE_IEEE_FLOATING_POINT) {</span>
+            // tileLength: number of rows in tile
+            // tileWidth: number of columns in tile
+<span class="nc" id="L87">            final int i0 = startY;</span>
+<span class="nc" id="L88">            int i1 = startY + tileLength;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (i1 &gt; yLimit) {</span>
+                // the tile is padded past bottom of image
+<span class="nc" id="L91">                i1 = yLimit;</span>
+            }
+<span class="nc" id="L93">            final int j0 = startX;</span>
+<span class="nc" id="L94">            int j1 = startX + tileWidth;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (j1 &gt; xLimit) {</span>
+                // the tile is padded to beyond the tile width
+<span class="nc" id="L97">                j1 = xLimit;</span>
+            }
+<span class="nc" id="L99">            final int[] samples = new int[4];</span>
+<span class="nc" id="L100">            final int[] b = unpackFloatingPointSamples(j1 - j0, i1 - i0, tileWidth, bytes, bitsPerPixel, byteOrder);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            for (int i = i0; i &lt; i1; i++) {</span>
+<span class="nc" id="L102">                final int row = i - startY;</span>
+<span class="nc" id="L103">                final int rowOffset = row * tileWidth;</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                for (int j = j0; j &lt; j1; j++) {</span>
+<span class="nc" id="L105">                    final int column = j - startX;</span>
+<span class="nc" id="L106">                    final int k = (rowOffset + column) * samplesPerPixel;</span>
+<span class="nc" id="L107">                    samples[0] = b[k];</span>
+<span class="nc" id="L108">                    photometricInterpreter.interpretPixel(imageBuilder, samples, j, i);</span>
+                }
+            }
+<span class="nc" id="L111">            return;</span>
+        }
+
+        // End of March 2020 changes to support floating-point format
+        // changes introduced May 2012
+        // The following block of code implements changes that
+        // reduce image loading time by using special-case processing
+        // instead of the general-purpose logic from the original
+        // implementation. For a detailed discussion, see the comments for
+        // a similar treatment in the DataReaderStrip class
+        //
+        // verify that all samples are one byte in size
+<span class="nc" id="L123">        final boolean allSamplesAreOneByte = isHomogenous(8);</span>
+
+<span class="nc bnc" id="L125" title="All 8 branches missed.">        if ((bitsPerPixel == 24 || bitsPerPixel == 32) &amp;&amp; allSamplesAreOneByte &amp;&amp; photometricInterpreter instanceof PhotometricInterpreterRgb) {</span>
+<span class="nc" id="L126">            int i1 = startY + tileLength;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">            if (i1 &gt; yLimit) {</span>
+                // the tile is padded past bottom of image
+<span class="nc" id="L129">                i1 = yLimit;</span>
+            }
+<span class="nc" id="L131">            int j1 = startX + tileWidth;</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">            if (j1 &gt; xLimit) {</span>
+                // the tile is padded to beyond the tile width
+<span class="nc" id="L134">                j1 = xLimit;</span>
+            }
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            if (predictor == TiffTagConstants.PREDICTOR_VALUE_HORIZONTAL_DIFFERENCING) {</span>
+<span class="nc" id="L138">                applyPredictorToBlock(tileWidth, i1 - startY, samplesPerPixel, bytes);</span>
+            }
+
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            if (bitsPerPixel == 24) {</span>
+                // 24 bit case, we don't mask the red byte because any
+                // sign-extended bits get covered by opacity mask
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                for (int i = startY; i &lt; i1; i++) {</span>
+<span class="nc" id="L145">                    int k = (i - startY) * tileWidth * 3;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                    for (int j = startX; j &lt; j1; j++, k += 3) {</span>
+<span class="nc" id="L147">                        final int rgb = 0xff000000 | bytes[k] &lt;&lt; 16 | (bytes[k + 1] &amp; 0xff) &lt;&lt; 8 | bytes[k + 2] &amp; 0xff;</span>
+<span class="nc" id="L148">                        imageBuilder.setRgb(j, i, rgb);</span>
+                    }
+                }
+<span class="nc bnc" id="L151" title="All 2 branches missed.">            } else if (bitsPerPixel == 32) {</span>
+                // 32 bit case, we don't mask the high byte because any
+                // sign-extended bits get shifted up and out of result.
+<span class="nc bnc" id="L154" title="All 2 branches missed.">                for (int i = startY; i &lt; i1; i++) {</span>
+<span class="nc" id="L155">                    int k = (i - startY) * tileWidth * 4;</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                    for (int j = startX; j &lt; j1; j++, k += 4) {</span>
+<span class="nc" id="L157">                        final int rgb = (bytes[k] &amp; 0xff) &lt;&lt; 16 | (bytes[k + 1] &amp; 0xff) &lt;&lt; 8 | bytes[k + 2] &amp; 0xff | bytes[k + 3] &lt;&lt; 24;</span>
+<span class="nc" id="L158">                        imageBuilder.setRgb(j, i, rgb);</span>
+                    }
+                }
+            }
+
+<span class="nc" id="L163">            return;</span>
+        }
+
+        // End of May 2012 changes
+<span class="nc" id="L167">        try (BitInputStream bis = new BitInputStream(new ByteArrayInputStream(bytes), byteOrder)) {</span>
+
+<span class="nc" id="L169">            final int pixelsPerTile = tileWidth * tileLength;</span>
+
+<span class="nc" id="L171">            int tileX = 0;</span>
+<span class="nc" id="L172">            int tileY = 0;</span>
+
+<span class="nc" id="L174">            int[] samples = Allocator.intArray(bitsPerSampleLength);</span>
+<span class="nc" id="L175">            resetPredictor();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">            for (int i = 0; i &lt; pixelsPerTile; i++) {</span>
+
+<span class="nc" id="L178">                final int x = tileX + startX;</span>
+<span class="nc" id="L179">                final int y = tileY + startY;</span>
+
+<span class="nc" id="L181">                getSamplesAsBytes(bis, samples);</span>
+
+<span class="nc bnc" id="L183" title="All 4 branches missed.">                if (x &lt; xLimit &amp;&amp; y &lt; yLimit) {</span>
+<span class="nc" id="L184">                    samples = applyPredictor(samples);</span>
+<span class="nc" id="L185">                    photometricInterpreter.interpretPixel(imageBuilder, samples, x, y);</span>
+                }
+
+<span class="nc" id="L188">                tileX++;</span>
+
+<span class="nc bnc" id="L190" title="All 2 branches missed.">                if (tileX &gt;= tileWidth) {</span>
+<span class="nc" id="L191">                    tileX = 0;</span>
+<span class="nc" id="L192">                    resetPredictor();</span>
+<span class="nc" id="L193">                    tileY++;</span>
+<span class="nc" id="L194">                    bis.flushCache();</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                    if (tileY &gt;= tileLength) {</span>
+<span class="nc" id="L196">                        break;</span>
+                    }
+                }
+
+            }
+        }
+<span class="nc" id="L202">    }</span>
+
+    @Override
+    public ImageBuilder readImageData(final Rectangle subImageSpecification, final boolean hasAlpha, final boolean isAlphaPreMultiplied)
+            throws IOException, ImagingException {
+
+        final Rectangle subImage;
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (subImageSpecification == null) {</span>
+            // configure subImage to read entire image
+<span class="nc" id="L211">            subImage = new Rectangle(0, 0, width, height);</span>
+        } else {
+<span class="nc" id="L213">            subImage = subImageSpecification;</span>
+        }
+
+<span class="nc" id="L216">        final int bitsPerRow = tileWidth * bitsPerPixel;</span>
+<span class="nc" id="L217">        final int bytesPerRow = (bitsPerRow + 7) / 8;</span>
+<span class="nc" id="L218">        final int bytesPerTile = bytesPerRow * tileLength;</span>
+
+        // tileWidth is the width of the tile
+        // tileLength is the height of the tile
+<span class="nc" id="L222">        final int col0 = subImage.x / tileWidth;</span>
+<span class="nc" id="L223">        final int col1 = (subImage.x + subImage.width - 1) / tileWidth;</span>
+<span class="nc" id="L224">        final int row0 = subImage.y / tileLength;</span>
+<span class="nc" id="L225">        final int row1 = (subImage.y + subImage.height - 1) / tileLength;</span>
+
+<span class="nc" id="L227">        final int nCol = col1 - col0 + 1;</span>
+<span class="nc" id="L228">        final int nRow = row1 - row0 + 1;</span>
+<span class="nc" id="L229">        final int workingWidth = nCol * tileWidth;</span>
+<span class="nc" id="L230">        final int workingHeight = nRow * tileLength;</span>
+
+<span class="nc" id="L232">        final int nColumnsOfTiles = (width + tileWidth - 1) / tileWidth;</span>
+
+<span class="nc" id="L234">        final int x0 = col0 * tileWidth;</span>
+<span class="nc" id="L235">        final int y0 = row0 * tileLength;</span>
+
+        // When processing a subimage, the workingBuilder width and height
+        // are set to be integral multiples of the tile width and height.
+        // So the working image may be larger than the specified size of the subimage.
+        // If necessary, the subimage is extracted from the workingBuilder
+        // at the end of this method. This approach avoids the need for the
+        // interpretTile method to implement bounds checking for a subimage.
+<span class="nc" id="L243">        final ImageBuilder workingBuilder = new ImageBuilder(workingWidth, workingHeight, hasAlpha, isAlphaPreMultiplied);</span>
+
+<span class="nc bnc" id="L245" title="All 2 branches missed.">        for (int iRow = row0; iRow &lt;= row1; iRow++) {</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            for (int iCol = col0; iCol &lt;= col1; iCol++) {</span>
+<span class="nc" id="L247">                final int tile = iRow * nColumnsOfTiles + iCol;</span>
+<span class="nc" id="L248">                final byte[] compressed = imageData.tiles[tile].getData();</span>
+<span class="nc" id="L249">                final int x = iCol * tileWidth - x0;</span>
+<span class="nc" id="L250">                final int y = iRow * tileLength - y0;</span>
+                // Handle JPEG based compression
+<span class="nc bnc" id="L252" title="All 2 branches missed.">                if (compression == TIFF_COMPRESSION_JPEG) {</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                    if (planarConfiguration == TiffPlanarConfiguration.PLANAR) {</span>
+<span class="nc" id="L254">                        throw new ImagingException(&quot;TIFF file in non-supported configuration: JPEG compression used in planar configuration.&quot;);</span>
+                    }
+<span class="nc" id="L256">                    DataInterpreterJpeg.intepretBlock(directory, workingBuilder, x, y, tileWidth, tileLength, compressed);</span>
+<span class="nc" id="L257">                    continue;</span>
+                }
+
+<span class="nc" id="L260">                final byte[] decompressed = decompress(compressed, compression, bytesPerTile, tileWidth, tileLength);</span>
+
+<span class="nc" id="L262">                interpretTile(workingBuilder, decompressed, x, y, width, height);</span>
+            }
+        }
+
+<span class="nc bnc" id="L266" title="All 8 branches missed.">        if (subImage.x == x0 &amp;&amp; subImage.y == y0 &amp;&amp; subImage.width == workingWidth &amp;&amp; subImage.height == workingHeight) {</span>
+<span class="nc" id="L267">            return workingBuilder;</span>
+        }
+
+<span class="nc" id="L270">        return workingBuilder.getSubset(subImage.x - x0, subImage.y - y0, subImage.width, subImage.height);</span>
+    }
+
+    @Override
+    public TiffRasterData readRasterData(final Rectangle subImage) throws ImagingException, IOException {
+<span class="nc bnc" id="L275" title="All 3 branches missed.">        switch (sampleFormat) {</span>
+        case TiffTagConstants.SAMPLE_FORMAT_VALUE_IEEE_FLOATING_POINT:
+<span class="nc" id="L277">            return readRasterDataFloat(subImage);</span>
+        case TiffTagConstants.SAMPLE_FORMAT_VALUE_TWOS_COMPLEMENT_SIGNED_INTEGER:
+<span class="nc" id="L279">            return readRasterDataInt(subImage);</span>
+        default:
+<span class="nc" id="L281">            throw new ImagingException(&quot;Unsupported sample format, value=&quot; + sampleFormat);</span>
+        }
+    }
+
+    private TiffRasterData readRasterDataFloat(final Rectangle subImage) throws ImagingException, IOException {
+<span class="nc" id="L286">        final int bitsPerRow = tileWidth * bitsPerPixel;</span>
+<span class="nc" id="L287">        final int bytesPerRow = (bitsPerRow + 7) / 8;</span>
+<span class="nc" id="L288">        final int bytesPerTile = bytesPerRow * tileLength;</span>
+        int xRaster;
+        int yRaster;
+        int rasterWidth;
+        int rasterHeight;
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (subImage != null) {</span>
+<span class="nc" id="L294">            xRaster = subImage.x;</span>
+<span class="nc" id="L295">            yRaster = subImage.y;</span>
+<span class="nc" id="L296">            rasterWidth = subImage.width;</span>
+<span class="nc" id="L297">            rasterHeight = subImage.height;</span>
+        } else {
+<span class="nc" id="L299">            xRaster = 0;</span>
+<span class="nc" id="L300">            yRaster = 0;</span>
+<span class="nc" id="L301">            rasterWidth = width;</span>
+<span class="nc" id="L302">            rasterHeight = height;</span>
+        }
+<span class="nc" id="L304">        final float[] rasterDataFloat = Allocator.floatArray(rasterWidth * rasterHeight * samplesPerPixel);</span>
+
+        // tileWidth is the width of the tile
+        // tileLength is the height of the tile
+<span class="nc" id="L308">        final int col0 = xRaster / tileWidth;</span>
+<span class="nc" id="L309">        final int col1 = (xRaster + rasterWidth - 1) / tileWidth;</span>
+<span class="nc" id="L310">        final int row0 = yRaster / tileLength;</span>
+<span class="nc" id="L311">        final int row1 = (yRaster + rasterHeight - 1) / tileLength;</span>
+
+<span class="nc" id="L313">        final int nColumnsOfTiles = (width + tileWidth - 1) / tileWidth;</span>
+
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        for (int iRow = row0; iRow &lt;= row1; iRow++) {</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">            for (int iCol = col0; iCol &lt;= col1; iCol++) {</span>
+<span class="nc" id="L317">                final int tile = iRow * nColumnsOfTiles + iCol;</span>
+<span class="nc" id="L318">                final byte[] compressed = imageData.tiles[tile].getData();</span>
+<span class="nc" id="L319">                final byte[] decompressed = decompress(compressed, compression, bytesPerTile, tileWidth, tileLength);</span>
+<span class="nc" id="L320">                final int x = iCol * tileWidth;</span>
+<span class="nc" id="L321">                final int y = iRow * tileLength;</span>
+
+<span class="nc" id="L323">                final int[] blockData = unpackFloatingPointSamples(tileWidth, tileLength, tileWidth, decompressed, bitsPerPixel, byteOrder);</span>
+<span class="nc" id="L324">                transferBlockToRaster(x, y, tileWidth, tileLength, blockData, xRaster, yRaster, rasterWidth, rasterHeight, samplesPerPixel, rasterDataFloat);</span>
+            }
+        }
+
+<span class="nc" id="L328">        return new TiffRasterDataFloat(rasterWidth, rasterHeight, samplesPerPixel, rasterDataFloat);</span>
+    }
+
+    private TiffRasterData readRasterDataInt(final Rectangle subImage) throws ImagingException, IOException {
+<span class="nc" id="L332">        final int bitsPerRow = tileWidth * bitsPerPixel;</span>
+<span class="nc" id="L333">        final int bytesPerRow = (bitsPerRow + 7) / 8;</span>
+<span class="nc" id="L334">        final int bytesPerTile = bytesPerRow * tileLength;</span>
+        int xRaster;
+        int yRaster;
+        int rasterWidth;
+        int rasterHeight;
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (subImage != null) {</span>
+<span class="nc" id="L340">            xRaster = subImage.x;</span>
+<span class="nc" id="L341">            yRaster = subImage.y;</span>
+<span class="nc" id="L342">            rasterWidth = subImage.width;</span>
+<span class="nc" id="L343">            rasterHeight = subImage.height;</span>
+        } else {
+<span class="nc" id="L345">            xRaster = 0;</span>
+<span class="nc" id="L346">            yRaster = 0;</span>
+<span class="nc" id="L347">            rasterWidth = width;</span>
+<span class="nc" id="L348">            rasterHeight = height;</span>
+        }
+<span class="nc" id="L350">        final int[] rasterDataInt = Allocator.intArray(rasterWidth * rasterHeight);</span>
+
+        // tileWidth is the width of the tile
+        // tileLength is the height of the tile
+<span class="nc" id="L354">        final int col0 = xRaster / tileWidth;</span>
+<span class="nc" id="L355">        final int col1 = (xRaster + rasterWidth - 1) / tileWidth;</span>
+<span class="nc" id="L356">        final int row0 = yRaster / tileLength;</span>
+<span class="nc" id="L357">        final int row1 = (yRaster + rasterHeight - 1) / tileLength;</span>
+
+<span class="nc" id="L359">        final int nColumnsOfTiles = (width + tileWidth - 1) / tileWidth;</span>
+
+<span class="nc bnc" id="L361" title="All 2 branches missed.">        for (int iRow = row0; iRow &lt;= row1; iRow++) {</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            for (int iCol = col0; iCol &lt;= col1; iCol++) {</span>
+<span class="nc" id="L363">                final int tile = iRow * nColumnsOfTiles + iCol;</span>
+<span class="nc" id="L364">                final byte[] compressed = imageData.tiles[tile].getData();</span>
+<span class="nc" id="L365">                final byte[] decompressed = decompress(compressed, compression, bytesPerTile, tileWidth, tileLength);</span>
+<span class="nc" id="L366">                final int x = iCol * tileWidth;</span>
+<span class="nc" id="L367">                final int y = iRow * tileLength;</span>
+<span class="nc" id="L368">                final int[] blockData = unpackIntSamples(tileWidth, tileLength, tileWidth, decompressed, predictor, bitsPerPixel, byteOrder);</span>
+<span class="nc" id="L369">                transferBlockToRaster(x, y, tileWidth, tileLength, blockData, xRaster, yRaster, rasterWidth, rasterHeight, rasterDataInt);</span>
+            }
+        }
+<span class="nc" id="L372">        return new TiffRasterDataInt(rasterWidth, rasterHeight, rasterDataInt);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

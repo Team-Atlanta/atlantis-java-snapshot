@@ -1,0 +1,33 @@
+package io.joern.kotlin2cpg
+
+object Constants {
+  val Alloc                        = "alloc"
+  val CaseNodeParserTypeName       = "CaseNode"
+  val CaseNodePrefix               = "case"
+  val CodeForLoweredForBlock       = "FOR-BLOCK" // TODO: improve this
+  val CollectionsIteratorName      = "kotlin.collections.Iterator"
+  val CompanionObjectMemberName    = "object"
+  val ComponentNPrefix             = "component"
+  val DefaultCaseNode              = "default"
+  val Empty                        = "<empty>"
+  val GetIteratorMethodName        = "iterator"
+  val HasNextIteratorMethodName    = "hasNext"
+  val ImportKeyword                = "import"
+  val IteratorPrefix               = "iterator_"
+  val JavaUtilIterator             = "java.util.Iterator"
+  val UnknownLambdaBindingName     = "<unknownBindingName>"
+  val UnknownLambdaBaseClass       = "<unknownLambdaBaseClass>"
+  val LambdaTypeDeclName           = "LAMBDA_TYPE_DECL"
+  val NextIteratorMethodName       = "next"
+  val CodePropUndefinedValue       = ""
+  val OperatorSuffix               = "<operator>"
+  val DestructedParamNamePrefix    = "<destructed_param>"
+  val RetCode                      = "RET"
+  val Root                         = "<root>"
+  val ThisName                     = "this"
+  val TmpLocalPrefix               = "tmp_"
+  val UnusedDestructuringEntryText = "_"
+  val UnknownOperator              = "<operator>.unknown"
+  val WhenKeyword                  = "when"
+  val WildcardImportName           = "*"
+}

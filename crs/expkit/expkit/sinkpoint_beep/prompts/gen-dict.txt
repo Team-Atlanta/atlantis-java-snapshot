@@ -1,0 +1,6 @@
+Task:
+
+You've already generated a POC for the reached but not exploited sinkpoint. I'll launch a fuzzing phase targets on exploiting that sinkpoint, whose coverage feedback will be removed and use only the POC and the sinkpoint reaching input as our corpus. In this context, please generate a fuzzing dictionary for that fuzzing phase.
+
+- The dictionary should specifically help guiding our corpus to exploit the sinkpoint.
+- Directly return the generated dictionary in hexstring. Each line will be parsed as one dictionary entry.

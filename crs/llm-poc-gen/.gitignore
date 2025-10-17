@@ -1,0 +1,6 @@
+cache
+libjazzer_fuzzed_data_provider.so
+run_all_out
+__pycache__
+workspace
+temp_dir

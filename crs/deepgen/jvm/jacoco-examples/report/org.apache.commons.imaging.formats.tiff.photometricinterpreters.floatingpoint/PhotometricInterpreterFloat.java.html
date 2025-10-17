@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhotometricInterpreterFloat.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.photometricinterpreters.floatingpoint</a> &gt; <span class="el_source">PhotometricInterpreterFloat.java</span></div><h1>PhotometricInterpreterFloat.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.photometricinterpreters.floatingpoint;
+
+import java.awt.Color;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.ImageBuilder;
+import org.apache.commons.imaging.formats.tiff.photometricinterpreters.PhotometricInterpreter;
+
+/**
+ * Implements a custom photometric interpreter that can be supplied by applications in order to render Java images from real-valued TIFF data products. Most
+ * TIFF files include a specification for a &quot;photometric interpreter&quot; that implements logic for transforming the raw data in a TIFF file to a rendered image.
+ * But the TIFF standard does not include a specification for a photometric interpreter that can be used for rendering floating-point data. TIFF files are
+ * sometimes used to specify non-image data as a floating-point raster. This approach is particularly common in GeoTIFF files (TIFF files that contain tags for
+ * supporting geospatial reference metadata for Geographic Information Systems). Because of the limits of the stock photometric interpreters, most
+ * floating-point TIFF files to not produce useful images.
+ * &lt;p&gt;
+ * This class allows an Apache Commons implementation to construct and specify a custom photometric interpreter when reading from a TIFF file. Applications may
+ * supply their own palette that maps real-valued data to specified colors.
+ * &lt;p&gt;
+ * This class provides two constructors:
+ * &lt;ol&gt;
+ * &lt;li&gt;A simple constructor to support gray scales&lt;/li&gt;
+ * &lt;li&gt;A constructor to support a color palette (with potential interpolation)&lt;/li&gt;
+ * &lt;/ol&gt;
+ * &lt;p&gt;
+ * To use this class, an application must access the TIFF file using the low-level, TIFF-specific API provided by the Apache Commons Imaging library.
+ */
+public class PhotometricInterpreterFloat extends PhotometricInterpreter {
+
+<span class="nc" id="L50">    ArrayList&lt;PaletteEntry&gt; rangePaletteEntries = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L51">    ArrayList&lt;PaletteEntry&gt; singleValuePaletteEntries = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L53">    float minFound = Float.POSITIVE_INFINITY;</span>
+<span class="nc" id="L54">    float maxFound = Float.NEGATIVE_INFINITY;</span>
+    int xMin;
+    int yMin;
+    int xMax;
+    int yMax;
+
+    double sumFound;
+    int nFound;
+
+    /**
+     * Constructs a photometric interpreter that will produce a gray scale linearly distributed across the RGB color space for values in the range valueBlack to
+     * valueWhite. Note that the two values may be given in either ascending order or descending order, but they must not be equal. Infinite values will not
+     * result in proper numerical computations.
+     *
+     * @param valueBlack the value associated with the dark side of the gray scale
+     * @param valueWhite the value associated with the light side of the gray scale
+     */
+    public PhotometricInterpreterFloat(final float valueBlack, final float valueWhite) {
+        // The abstract base class requires that the following fields
+        // be set in the constructor:
+        // samplesPerPixel (int)
+        // bits per sample (array of type int[samplesPerPixel])
+        // predictor (int, not used by this class)
+        // width (int)
+        // height (int)
+<span class="nc" id="L79">        super(1, new int[] { 32 }, // bits per sample</span>
+                0, // not used by this class
+                32, // pro forma width value
+                32 // pro format height value
+        );
+
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (valueWhite &gt; valueBlack) {</span>
+<span class="nc" id="L86">            final PaletteEntryForRange entry = new PaletteEntryForRange(valueBlack, valueWhite, Color.black, Color.white);</span>
+<span class="nc" id="L87">            rangePaletteEntries.add(entry);</span>
+<span class="nc" id="L88">        } else {</span>
+<span class="nc" id="L89">            final PaletteEntryForRange entry = new PaletteEntryForRange(valueWhite, valueBlack, Color.white, Color.black);</span>
+<span class="nc" id="L90">            rangePaletteEntries.add(entry);</span>
+        }
+<span class="nc" id="L92">    }</span>
+
+    /**
+     * Constructs a photometric interpreter that will use the specified palette to assign colors to floating-point values.
+     * &lt;p&gt;
+     * Although there is no prohibition against using palette entries with overlapping ranges, the behavior of such specifications is undefined and subject to
+     * change in the future. Therefore, it is not recommended. The exception in the use of single-value palette entries which may be used to override the
+     * specifications for ranges.
+     *
+     * @param paletteEntries a valid, non-empty list of palette entries
+     */
+    public PhotometricInterpreterFloat(final List&lt;PaletteEntry&gt; paletteEntries) {
+        // The abstract base class requires that the following fields
+        // be set in the constructor:
+        // samplesPerPixel (int)
+        // bits per sample (array of type int[samplesPerPixel])
+        // predictor (int, not used by this class)
+        // width (int)
+        // height (int)
+<span class="nc" id="L111">        super(1, new int[] { 32 }, // bits per sample</span>
+                0, // not used by this class
+                32, // pro forma width value
+                32 // pro format height value
+        );
+
+<span class="nc bnc" id="L117" title="All 4 branches missed.">        if (paletteEntries == null || paletteEntries.isEmpty()) {</span>
+<span class="nc" id="L118">            throw new IllegalArgumentException(&quot;Palette entries list must be non-null and non-empty&quot;);</span>
+        }
+
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        for (final PaletteEntry entry : paletteEntries) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">            if (entry.coversSingleEntry()) {</span>
+<span class="nc" id="L123">                singleValuePaletteEntries.add(entry);</span>
+            } else {
+<span class="nc" id="L125">                rangePaletteEntries.add(entry);</span>
+            }
+<span class="nc" id="L127">        }</span>
+
+<span class="nc" id="L129">        final Comparator&lt;PaletteEntry&gt; comparator = (o1, o2) -&gt; {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            if (o1.getLowerBound() == o2.getLowerBound()) {</span>
+<span class="nc" id="L131">                return Double.compare(o1.getUpperBound(), o2.getUpperBound());</span>
+            }
+<span class="nc" id="L133">            return Double.compare(o1.getLowerBound(), o2.getLowerBound());</span>
+        };
+
+<span class="nc" id="L136">        rangePaletteEntries.sort(comparator);</span>
+<span class="nc" id="L137">        singleValuePaletteEntries.sort(comparator);</span>
+<span class="nc" id="L138">    }</span>
+
+    /**
+     * Gets the maximum value found while rendering the image
+     *
+     * @return if data was processed, a valid value; otherwise, Negative Infinity
+     */
+    public float getMaxFound() {
+<span class="nc" id="L146">        return maxFound;</span>
+    }
+
+    /**
+     * Gets the coordinates (x,y) at which the maximum value was identified during processing
+     *
+     * @return a valid array of length 2.
+     */
+    public int[] getMaxXY() {
+<span class="nc" id="L155">        return new int[] { xMax, yMax };</span>
+    }
+
+    /**
+     * Gets the mean of the values found while processing
+     *
+     * @return if data was processed, a valid mean value; otherwise, a zero.
+     */
+    public float getMeanFound() {
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (nFound == 0) {</span>
+<span class="nc" id="L165">            return 0;</span>
+        }
+<span class="nc" id="L167">        return (float) (sumFound / nFound);</span>
+    }
+
+    /**
+     * Gets the minimum value found while rendering the image
+     *
+     * @return if data was processed, a valid value; otherwise, Positive Infinity
+     */
+    public float getMinFound() {
+<span class="nc" id="L176">        return minFound;</span>
+    }
+
+    /**
+     * Gets the coordinates (x,y) at which the minimum value was identified during processing
+     *
+     * @return a valid array of length 2.
+     */
+    public int[] getMinXY() {
+<span class="nc" id="L185">        return new int[] { xMin, yMin };</span>
+    }
+
+    @Override
+    public void interpretPixel(final ImageBuilder imageBuilder, final int[] samples, final int x, final int y) throws ImagingException, IOException {
+
+<span class="nc" id="L191">        final float f = Float.intBitsToFloat(samples[0]);</span>
+        // in the event of NaN, do not store entry in the image builder.
+
+        // only the single bound palette entries support NaN
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        for (final PaletteEntry entry : singleValuePaletteEntries) {</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            if (entry.isCovered(f)) {</span>
+<span class="nc" id="L197">                final int p = entry.getArgb(f);</span>
+<span class="nc" id="L198">                imageBuilder.setRgb(x, y, p);</span>
+<span class="nc" id="L199">                return;</span>
+            }
+<span class="nc" id="L201">        }</span>
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        if (Float.isNaN(f)) {</span>
+            // if logic reaches here, there is no definition
+            // for a NaN.
+<span class="nc" id="L206">            return;</span>
+        }
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (f &lt; minFound) {</span>
+<span class="nc" id="L209">            minFound = f;</span>
+<span class="nc" id="L210">            xMin = x;</span>
+<span class="nc" id="L211">            yMin = y;</span>
+        }
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        if (f &gt; maxFound) {</span>
+<span class="nc" id="L214">            maxFound = f;</span>
+<span class="nc" id="L215">            xMax = x;</span>
+<span class="nc" id="L216">            yMax = y;</span>
+        }
+<span class="nc" id="L218">        nFound++;</span>
+<span class="nc" id="L219">        sumFound += f;</span>
+
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        for (final PaletteEntry entry : singleValuePaletteEntries) {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">            if (entry.isCovered(f)) {</span>
+<span class="nc" id="L223">                final int p = entry.getArgb(f);</span>
+<span class="nc" id="L224">                imageBuilder.setRgb(x, y, p);</span>
+<span class="nc" id="L225">                return;</span>
+            }
+<span class="nc" id="L227">        }</span>
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        for (final PaletteEntry entry : rangePaletteEntries) {</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">            if (entry.isCovered(f)) {</span>
+<span class="nc" id="L231">                final int p = entry.getArgb(f);</span>
+<span class="nc" id="L232">                imageBuilder.setRgb(x, y, p);</span>
+<span class="nc" id="L233">                break;</span>
+            }
+<span class="nc" id="L235">        }</span>
+<span class="nc" id="L236">    }</span>
+
+    /**
+     * Provides a method for mapping a pixel value to an integer (ARGB) value. This method is not defined for the standard photometric interpreters and is
+     * provided as a convenience to applications that are processing data outside the standard TIFF image-reading modules.
+     *
+     * @param f the floating point value to be mapped to an ARGB value
+     * @return a valid ARGB value, or zero if no palette specification covers the input value.
+     */
+    public int mapValueToArgb(final float f) {
+
+        // The single-value palette entries can accept a Float.NaN as
+        // a target while the range-of-values entries cannot. So
+        // check the single-values before testing for Float.isNaN()
+        // because NaN may have special treatment.
+<span class="nc bnc" id="L251" title="All 2 branches missed.">        for (final PaletteEntry entry : singleValuePaletteEntries) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">            if (entry.isCovered(f)) {</span>
+<span class="nc" id="L253">                return entry.getArgb(f);</span>
+            }
+<span class="nc" id="L255">        }</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (Float.isNaN(f)) {</span>
+            // if logic reaches here, there is no definition
+            // for a NaN.
+<span class="nc" id="L260">            return 0;</span>
+        }
+
+<span class="nc bnc" id="L263" title="All 2 branches missed.">        for (final PaletteEntry entry : rangePaletteEntries) {</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            if (entry.isCovered(f)) {</span>
+<span class="nc" id="L265">                return entry.getArgb(f);</span>
+            }
+<span class="nc" id="L267">        }</span>
+<span class="nc" id="L268">        return 0;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

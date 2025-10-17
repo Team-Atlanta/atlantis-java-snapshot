@@ -1,0 +1,692 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PngImageParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.png</a> &gt; <span class="el_source">PngImageParser.java</span></div><h1>PngImageParser.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.png;
+
+import java.awt.Dimension;
+import java.awt.color.ColorSpace;
+import java.awt.color.ICC_ColorSpace;
+import java.awt.color.ICC_Profile;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.InflaterInputStream;
+
+import org.apache.commons.imaging.AbstractImageParser;
+import org.apache.commons.imaging.ColorTools;
+import org.apache.commons.imaging.ImageFormat;
+import org.apache.commons.imaging.ImageFormats;
+import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.bytesource.ByteSource;
+import org.apache.commons.imaging.common.Allocator;
+import org.apache.commons.imaging.common.BinaryFunctions;
+import org.apache.commons.imaging.common.GenericImageMetadata;
+import org.apache.commons.imaging.common.ImageMetadata;
+import org.apache.commons.imaging.common.XmpEmbeddable;
+import org.apache.commons.imaging.common.XmpImagingParameters;
+import org.apache.commons.imaging.formats.png.chunks.AbstractPngTextChunk;
+import org.apache.commons.imaging.formats.png.chunks.PngChunk;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkGama;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkIccp;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkIdat;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkIhdr;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkItxt;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkPhys;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkPlte;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkScal;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkText;
+import org.apache.commons.imaging.formats.png.chunks.PngChunkZtxt;
+import org.apache.commons.imaging.formats.png.transparencyfilters.AbstractTransparencyFilter;
+import org.apache.commons.imaging.formats.png.transparencyfilters.TransparencyFilterGrayscale;
+import org.apache.commons.imaging.formats.png.transparencyfilters.TransparencyFilterIndexedColor;
+import org.apache.commons.imaging.formats.png.transparencyfilters.TransparencyFilterTrueColor;
+import org.apache.commons.imaging.icc.IccProfileParser;
+
+<span class="fc" id="L68">public class PngImageParser extends AbstractImageParser&lt;PngImagingParameters&gt; implements XmpEmbeddable&lt;PngImagingParameters&gt; {</span>
+
+<span class="fc" id="L70">    private static final Logger LOGGER = Logger.getLogger(PngImageParser.class.getName());</span>
+
+<span class="fc" id="L72">    private static final String DEFAULT_EXTENSION = ImageFormats.PNG.getDefaultExtension();</span>
+<span class="fc" id="L73">    private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.PNG.getExtensions();</span>
+
+    public static String getChunkTypeName(final int chunkType) {
+<span class="nc" id="L76">        final StringBuilder result = new StringBuilder();</span>
+<span class="nc" id="L77">        result.append((char) (0xff &amp; chunkType &gt;&gt; 24));</span>
+<span class="nc" id="L78">        result.append((char) (0xff &amp; chunkType &gt;&gt; 16));</span>
+<span class="nc" id="L79">        result.append((char) (0xff &amp; chunkType &gt;&gt; 8));</span>
+<span class="nc" id="L80">        result.append((char) (0xff &amp; chunkType &gt;&gt; 0));</span>
+<span class="nc" id="L81">        return result.toString();</span>
+    }
+
+    @Override
+    public boolean dumpImageFile(final PrintWriter pw, final ByteSource byteSource) throws ImagingException, IOException {
+<span class="nc" id="L86">        final ImageInfo imageInfo = getImageInfo(byteSource);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (imageInfo == null) {</span>
+<span class="nc" id="L88">            return false;</span>
+        }
+
+<span class="nc" id="L91">        imageInfo.toString(pw, &quot;&quot;);</span>
+
+<span class="nc" id="L93">        final List&lt;PngChunk&gt; chunks = readChunks(byteSource, null, false);</span>
+<span class="nc" id="L94">        final List&lt;PngChunk&gt; IHDRs = filterChunks(chunks, ChunkType.IHDR);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (IHDRs.size() != 1) {</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L97">                LOGGER.finest(&quot;PNG contains more than one Header&quot;);</span>
+            }
+<span class="nc" id="L99">            return false;</span>
+        }
+<span class="nc" id="L101">        final PngChunkIhdr pngChunkIHDR = (PngChunkIhdr) IHDRs.get(0);</span>
+<span class="nc" id="L102">        pw.println(&quot;Color: &quot; + pngChunkIHDR.getPngColorType().name());</span>
+
+<span class="nc" id="L104">        pw.println(&quot;chunks: &quot; + chunks.size());</span>
+
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (chunks.isEmpty()) {</span>
+<span class="nc" id="L107">            return false;</span>
+        }
+
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        for (int i = 0; i &lt; chunks.size(); i++) {</span>
+<span class="nc" id="L111">            final PngChunk chunk = chunks.get(i);</span>
+<span class="nc" id="L112">            BinaryFunctions.printCharQuad(pw, &quot;\t&quot; + i + &quot;: &quot;, chunk.getChunkType());</span>
+        }
+
+<span class="nc" id="L115">        pw.println(&quot;&quot;);</span>
+
+<span class="nc" id="L117">        pw.flush();</span>
+
+<span class="nc" id="L119">        return true;</span>
+    }
+
+    private List&lt;PngChunk&gt; filterChunks(final List&lt;PngChunk&gt; chunks, final ChunkType type) {
+<span class="nc" id="L123">        final List&lt;PngChunk&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        for (final PngChunk chunk : chunks) {</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">            if (chunk.getChunkType() == type.value) {</span>
+<span class="nc" id="L127">                result.add(chunk);</span>
+            }
+<span class="nc" id="L129">        }</span>
+
+<span class="nc" id="L131">        return result;</span>
+    }
+
+    @Override
+    protected String[] getAcceptedExtensions() {
+<span class="nc" id="L136">        return ACCEPTED_EXTENSIONS.clone();</span>
+    }
+
+    @Override
+    protected ImageFormat[] getAcceptedTypes() {
+<span class="fc" id="L141">        return new ImageFormat[] { ImageFormats.PNG, //</span>
+        };
+    }
+
+    // private final static int tRNS = CharsToQuad('t', 'R', 'N', 's');
+
+    @Override
+    public BufferedImage getBufferedImage(final ByteSource byteSource, final PngImagingParameters params) throws ImagingException, IOException {
+
+<span class="nc" id="L150">        final List&lt;PngChunk&gt; chunks = readChunks(byteSource,</span>
+                new ChunkType[] { ChunkType.IHDR, ChunkType.PLTE, ChunkType.IDAT, ChunkType.tRNS, ChunkType.iCCP,
+                                  ChunkType.gAMA, ChunkType.sRGB, ChunkType.zTXt}, false);
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (chunks.isEmpty()) {</span>
+<span class="nc" id="L155">            throw new ImagingException(&quot;PNG: no chunks&quot;);</span>
+        }
+
+<span class="nc" id="L158">        final List&lt;PngChunk&gt; IHDRs = filterChunks(chunks, ChunkType.IHDR);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (IHDRs.size() != 1) {</span>
+<span class="nc" id="L160">            throw new ImagingException(&quot;PNG contains more than one Header&quot;);</span>
+        }
+
+<span class="nc" id="L163">        final PngChunkIhdr pngChunkIHDR = (PngChunkIhdr) IHDRs.get(0);</span>
+
+<span class="nc" id="L165">        final List&lt;PngChunk&gt; PLTEs = filterChunks(chunks, ChunkType.PLTE);</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (PLTEs.size() &gt; 1) {</span>
+<span class="nc" id="L167">            throw new ImagingException(&quot;PNG contains more than one Palette&quot;);</span>
+        }
+
+<span class="nc" id="L170">        PngChunkPlte pngChunkPLTE = null;</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        if (PLTEs.size() == 1) {</span>
+<span class="nc" id="L172">            pngChunkPLTE = (PngChunkPlte) PLTEs.get(0);</span>
+        }
+
+<span class="nc" id="L175">        final List&lt;PngChunk&gt; IDATs = filterChunks(chunks, ChunkType.IDAT);</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (IDATs.isEmpty()) {</span>
+<span class="nc" id="L177">            throw new ImagingException(&quot;PNG missing image data&quot;);</span>
+        }
+
+<span class="nc" id="L180">        ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">        for (final PngChunk IDAT : IDATs) {</span>
+<span class="nc" id="L182">            final PngChunkIdat pngChunkIDAT = (PngChunkIdat) IDAT;</span>
+<span class="nc" id="L183">            final byte[] bytes = pngChunkIDAT.getBytes();</span>
+            // System.out.println(i + &quot;: bytes: &quot; + bytes.length);
+<span class="nc" id="L185">            baos.write(bytes);</span>
+<span class="nc" id="L186">        }</span>
+
+<span class="nc" id="L188">        final byte[] compressed = baos.toByteArray();</span>
+
+<span class="nc" id="L190">        baos = null;</span>
+
+<span class="nc" id="L192">        AbstractTransparencyFilter abstractTransparencyFilter = null;</span>
+
+<span class="nc" id="L194">        final List&lt;PngChunk&gt; tRNSs = filterChunks(chunks, ChunkType.tRNS);</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        if (!tRNSs.isEmpty()) {</span>
+<span class="nc" id="L196">            final PngChunk pngChunktRNS = tRNSs.get(0);</span>
+<span class="nc" id="L197">            abstractTransparencyFilter = getTransparencyFilter(pngChunkIHDR.getPngColorType(), pngChunktRNS);</span>
+        }
+
+<span class="nc" id="L200">        ICC_Profile iccProfile = null;</span>
+<span class="nc" id="L201">        GammaCorrection gammaCorrection = null;</span>
+        {
+<span class="nc" id="L203">            final List&lt;PngChunk&gt; sRGBs = filterChunks(chunks, ChunkType.sRGB);</span>
+<span class="nc" id="L204">            final List&lt;PngChunk&gt; gAMAs = filterChunks(chunks, ChunkType.gAMA);</span>
+<span class="nc" id="L205">            final List&lt;PngChunk&gt; iCCPs = filterChunks(chunks, ChunkType.iCCP);</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (sRGBs.size() &gt; 1) {</span>
+<span class="nc" id="L207">                throw new ImagingException(&quot;PNG: unexpected sRGB chunk&quot;);</span>
+            }
+<span class="nc bnc" id="L209" title="All 2 branches missed.">            if (gAMAs.size() &gt; 1) {</span>
+<span class="nc" id="L210">                throw new ImagingException(&quot;PNG: unexpected gAMA chunk&quot;);</span>
+            }
+<span class="nc bnc" id="L212" title="All 2 branches missed.">            if (iCCPs.size() &gt; 1) {</span>
+<span class="nc" id="L213">                throw new ImagingException(&quot;PNG: unexpected iCCP chunk&quot;);</span>
+            }
+
+<span class="nc bnc" id="L216" title="All 2 branches missed.">            if (sRGBs.size() == 1) {</span>
+                // no color management necessary.
+<span class="nc bnc" id="L218" title="All 2 branches missed.">                if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L219">                    LOGGER.finest(&quot;sRGB, no color management necessary.&quot;);</span>
+                }
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            } else if (iCCPs.size() == 1) {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">                if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L223">                    LOGGER.finest(&quot;iCCP.&quot;);</span>
+                }
+
+<span class="nc" id="L226">                final PngChunkIccp pngChunkiCCP = (PngChunkIccp) iCCPs.get(0);</span>
+<span class="nc" id="L227">                final byte[] bytes = pngChunkiCCP.getUncompressedProfile();</span>
+
+                try {
+<span class="nc" id="L230">                    iccProfile = ICC_Profile.getInstance(bytes);</span>
+<span class="nc" id="L231">                } catch (final IllegalArgumentException iae) {</span>
+<span class="nc" id="L232">                    throw new ImagingException(&quot;The image data does not correspond to a valid ICC Profile&quot;, iae);</span>
+<span class="nc" id="L233">                }</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">            } else if (gAMAs.size() == 1) {</span>
+<span class="nc" id="L235">                final PngChunkGama pngChunkgAMA = (PngChunkGama) gAMAs.get(0);</span>
+<span class="nc" id="L236">                final double gamma = pngChunkgAMA.getGamma();</span>
+
+                // charles: what is the correct target value here?
+                // double targetGamma = 2.2;
+<span class="nc" id="L240">                final double targetGamma = 1.0;</span>
+<span class="nc" id="L241">                final double diff = Math.abs(targetGamma - gamma);</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                if (diff &gt;= 0.5) {</span>
+<span class="nc" id="L243">                    gammaCorrection = new GammaCorrection(gamma, targetGamma);</span>
+                }
+
+<span class="nc bnc" id="L246" title="All 4 branches missed.">                if (gammaCorrection != null &amp;&amp; pngChunkPLTE != null) {</span>
+<span class="nc" id="L247">                    pngChunkPLTE.correct(gammaCorrection);</span>
+                }
+
+            }
+        }
+
+        {
+<span class="nc" id="L254">            final int width = pngChunkIHDR.getWidth();</span>
+<span class="nc" id="L255">            final int height = pngChunkIHDR.getHeight();</span>
+<span class="nc" id="L256">            final PngColorType pngColorType = pngChunkIHDR.getPngColorType();</span>
+<span class="nc" id="L257">            final int bitDepth = pngChunkIHDR.getBitDepth();</span>
+
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            if (pngChunkIHDR.getFilterMethod() != 0) {</span>
+<span class="nc" id="L260">                throw new ImagingException(&quot;PNG: unknown FilterMethod: &quot; + pngChunkIHDR.getFilterMethod());</span>
+            }
+
+<span class="nc" id="L263">            final int bitsPerPixel = bitDepth * pngColorType.getSamplesPerPixel();</span>
+
+<span class="nc bnc" id="L265" title="All 4 branches missed.">            final boolean hasAlpha = pngColorType.hasAlpha() || abstractTransparencyFilter != null;</span>
+
+            BufferedImage result;
+<span class="nc bnc" id="L268" title="All 2 branches missed.">            if (pngColorType.isGreyscale()) {</span>
+<span class="nc" id="L269">                result = getBufferedImageFactory(params).getGrayscaleBufferedImage(width, height, hasAlpha);</span>
+            } else {
+<span class="nc" id="L271">                result = getBufferedImageFactory(params).getColorBufferedImage(width, height, hasAlpha);</span>
+            }
+
+<span class="nc" id="L274">            final ByteArrayInputStream bais = new ByteArrayInputStream(compressed);</span>
+<span class="nc" id="L275">            final InflaterInputStream iis = new InflaterInputStream(bais);</span>
+
+            AbstractScanExpediter abstractScanExpediter;
+
+<span class="nc bnc" id="L279" title="All 3 branches missed.">            switch (pngChunkIHDR.getInterlaceMethod()) {</span>
+            case NONE:
+<span class="nc" id="L281">                abstractScanExpediter = new ScanExpediterSimple(width, height, iis, result, pngColorType, bitDepth, bitsPerPixel, pngChunkPLTE, gammaCorrection,</span>
+                        abstractTransparencyFilter);
+<span class="nc" id="L283">                break;</span>
+            case ADAM7:
+<span class="nc" id="L285">                abstractScanExpediter = new ScanExpediterInterlaced(width, height, iis, result, pngColorType, bitDepth, bitsPerPixel, pngChunkPLTE,</span>
+                        gammaCorrection, abstractTransparencyFilter);
+<span class="nc" id="L287">                break;</span>
+            default:
+<span class="nc" id="L289">                throw new ImagingException(&quot;Unknown InterlaceMethod: &quot; + pngChunkIHDR.getInterlaceMethod());</span>
+            }
+
+<span class="nc" id="L292">            abstractScanExpediter.drive();</span>
+
+<span class="nc bnc" id="L294" title="All 2 branches missed.">            if (iccProfile != null) {</span>
+<span class="nc" id="L295">                final boolean isSrgb = new IccProfileParser().isSrgb(iccProfile);</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">                if (!isSrgb) {</span>
+<span class="nc" id="L297">                    final ICC_ColorSpace cs = new ICC_ColorSpace(iccProfile);</span>
+
+<span class="nc" id="L299">                    final ColorModel srgbCM = ColorModel.getRGBdefault();</span>
+<span class="nc" id="L300">                    final ColorSpace csSrgb = srgbCM.getColorSpace();</span>
+
+<span class="nc" id="L302">                    result = new ColorTools().convertBetweenColorSpaces(result, cs, csSrgb);</span>
+                }
+            }
+
+<span class="nc" id="L306">            return result;</span>
+
+        }
+
+    }
+
+    /**
+     * @param is PNG image input stream
+     * @return List of String-formatted chunk types, ie. &quot;tRNs&quot;.
+     * @throws ImagingException if it fail to read the PNG chunks
+     * @throws IOException      if it fails to read the input stream data
+     */
+    public List&lt;String&gt; getChunkTypes(final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L319">        final List&lt;PngChunk&gt; chunks = readChunks(is, null, false);</span>
+<span class="nc" id="L320">        final List&lt;String&gt; chunkTypes = Allocator.arrayList(chunks.size());</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">        for (final PngChunk chunk : chunks) {</span>
+<span class="nc" id="L322">            chunkTypes.add(getChunkTypeName(chunk.getChunkType()));</span>
+<span class="nc" id="L323">        }</span>
+<span class="nc" id="L324">        return chunkTypes;</span>
+    }
+
+    @Override
+    public String getDefaultExtension() {
+<span class="nc" id="L329">        return DEFAULT_EXTENSION;</span>
+    }
+
+    @Override
+    public PngImagingParameters getDefaultParameters() {
+<span class="nc" id="L334">        return new PngImagingParameters();</span>
+    }
+
+    @Override
+    public byte[] getIccProfileBytes(final ByteSource byteSource, final PngImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L339">        final List&lt;PngChunk&gt; chunks = readChunks(byteSource, new ChunkType[] { ChunkType.iCCP }, true);</span>
+
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (chunks.isEmpty()) {</span>
+<span class="nc" id="L342">            return null;</span>
+        }
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (chunks.size() &gt; 1) {</span>
+<span class="nc" id="L346">            throw new ImagingException(&quot;PNG contains more than one ICC Profile &quot;);</span>
+        }
+
+<span class="nc" id="L349">        final PngChunkIccp pngChunkiCCP = (PngChunkIccp) chunks.get(0);</span>
+
+<span class="nc" id="L351">        return pngChunkiCCP.getUncompressedProfile(); // TODO should this be a clone?</span>
+    }
+
+    @Override
+    public ImageInfo getImageInfo(final ByteSource byteSource, final PngImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L356">        final List&lt;PngChunk&gt; chunks = readChunks(byteSource, new ChunkType[] { ChunkType.IHDR, ChunkType.pHYs, ChunkType.sCAL, ChunkType.tEXt, ChunkType.zTXt,</span>
+                ChunkType.tRNS, ChunkType.PLTE, ChunkType.iTXt, }, false);
+
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        if (chunks.isEmpty()) {</span>
+<span class="nc" id="L360">            throw new ImagingException(&quot;PNG: no chunks&quot;);</span>
+        }
+
+<span class="nc" id="L363">        final List&lt;PngChunk&gt; IHDRs = filterChunks(chunks, ChunkType.IHDR);</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        if (IHDRs.size() != 1) {</span>
+<span class="nc" id="L365">            throw new ImagingException(&quot;PNG contains more than one Header&quot;);</span>
+        }
+
+<span class="nc" id="L368">        final PngChunkIhdr pngChunkIHDR = (PngChunkIhdr) IHDRs.get(0);</span>
+
+<span class="nc" id="L370">        boolean transparent = false;</span>
+
+<span class="nc" id="L372">        final List&lt;PngChunk&gt; tRNSs = filterChunks(chunks, ChunkType.tRNS);</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">        if (!tRNSs.isEmpty()) {</span>
+<span class="nc" id="L374">            transparent = true;</span>
+        } else {
+            // CE - Fix Alpha.
+<span class="nc" id="L377">            transparent = pngChunkIHDR.getPngColorType().hasAlpha();</span>
+            // END FIX
+        }
+
+<span class="nc" id="L381">        PngChunkPhys pngChunkpHYs = null;</span>
+
+<span class="nc" id="L383">        final List&lt;PngChunk&gt; pHYss = filterChunks(chunks, ChunkType.pHYs);</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        if (pHYss.size() &gt; 1) {</span>
+<span class="nc" id="L385">            throw new ImagingException(&quot;PNG contains more than one pHYs: &quot; + pHYss.size());</span>
+        }
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        if (pHYss.size() == 1) {</span>
+<span class="nc" id="L388">            pngChunkpHYs = (PngChunkPhys) pHYss.get(0);</span>
+        }
+
+<span class="nc" id="L391">        PhysicalScale physicalScale = PhysicalScale.UNDEFINED;</span>
+
+<span class="nc" id="L393">        final List&lt;PngChunk&gt; sCALs = filterChunks(chunks, ChunkType.sCAL);</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">        if (sCALs.size() &gt; 1) {</span>
+<span class="nc" id="L395">            throw new ImagingException(&quot;PNG contains more than one sCAL:&quot; + sCALs.size());</span>
+        }
+<span class="nc bnc" id="L397" title="All 2 branches missed.">        if (sCALs.size() == 1) {</span>
+<span class="nc" id="L398">            final PngChunkScal pngChunkScal = (PngChunkScal) sCALs.get(0);</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">            if (pngChunkScal.getUnitSpecifier() == 1) {</span>
+<span class="nc" id="L400">                physicalScale = PhysicalScale.createFromMeters(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());</span>
+            } else {
+<span class="nc" id="L402">                physicalScale = PhysicalScale.createFromRadians(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());</span>
+            }
+        }
+
+<span class="nc" id="L406">        final List&lt;PngChunk&gt; tEXts = filterChunks(chunks, ChunkType.tEXt);</span>
+<span class="nc" id="L407">        final List&lt;PngChunk&gt; zTXts = filterChunks(chunks, ChunkType.zTXt);</span>
+<span class="nc" id="L408">        final List&lt;PngChunk&gt; iTXts = filterChunks(chunks, ChunkType.iTXt);</span>
+
+<span class="nc" id="L410">        final int chunkCount = tEXts.size() + zTXts.size() + iTXts.size();</span>
+<span class="nc" id="L411">        final List&lt;String&gt; comments = Allocator.arrayList(chunkCount);</span>
+<span class="nc" id="L412">        final List&lt;AbstractPngText&gt; textChunks = Allocator.arrayList(chunkCount);</span>
+
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        for (final PngChunk tEXt : tEXts) {</span>
+<span class="nc" id="L415">            final PngChunkText pngChunktEXt = (PngChunkText) tEXt;</span>
+<span class="nc" id="L416">            comments.add(pngChunktEXt.getKeyword() + &quot;: &quot; + pngChunktEXt.getText());</span>
+<span class="nc" id="L417">            textChunks.add(pngChunktEXt.getContents());</span>
+<span class="nc" id="L418">        }</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">        for (final PngChunk zTXt : zTXts) {</span>
+<span class="nc" id="L420">            final PngChunkZtxt pngChunkzTXt = (PngChunkZtxt) zTXt;</span>
+<span class="nc" id="L421">            comments.add(pngChunkzTXt.getKeyword() + &quot;: &quot; + pngChunkzTXt.getText());</span>
+<span class="nc" id="L422">            textChunks.add(pngChunkzTXt.getContents());</span>
+<span class="nc" id="L423">        }</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">        for (final PngChunk iTXt : iTXts) {</span>
+<span class="nc" id="L425">            final PngChunkItxt pngChunkiTXt = (PngChunkItxt) iTXt;</span>
+<span class="nc" id="L426">            comments.add(pngChunkiTXt.getKeyword() + &quot;: &quot; + pngChunkiTXt.getText());</span>
+<span class="nc" id="L427">            textChunks.add(pngChunkiTXt.getContents());</span>
+<span class="nc" id="L428">        }</span>
+
+<span class="nc" id="L430">        final int bitsPerPixel = pngChunkIHDR.getBitDepth() * pngChunkIHDR.getPngColorType().getSamplesPerPixel();</span>
+<span class="nc" id="L431">        final ImageFormat format = ImageFormats.PNG;</span>
+<span class="nc" id="L432">        final String formatName = &quot;PNG Portable Network Graphics&quot;;</span>
+<span class="nc" id="L433">        final int height = pngChunkIHDR.getHeight();</span>
+<span class="nc" id="L434">        final String mimeType = &quot;image/png&quot;;</span>
+<span class="nc" id="L435">        final int numberOfImages = 1;</span>
+<span class="nc" id="L436">        final int width = pngChunkIHDR.getWidth();</span>
+<span class="nc" id="L437">        final boolean progressive = pngChunkIHDR.getInterlaceMethod().isProgressive();</span>
+
+<span class="nc" id="L439">        int physicalHeightDpi = -1;</span>
+<span class="nc" id="L440">        float physicalHeightInch = -1;</span>
+<span class="nc" id="L441">        int physicalWidthDpi = -1;</span>
+<span class="nc" id="L442">        float physicalWidthInch = -1;</span>
+
+        // if (pngChunkpHYs != null)
+        // {
+        // System.out.println(&quot;\t&quot; + &quot;pngChunkpHYs.UnitSpecifier: &quot; +
+        // pngChunkpHYs.UnitSpecifier );
+        // System.out.println(&quot;\t&quot; + &quot;pngChunkpHYs.PixelsPerUnitYAxis: &quot; +
+        // pngChunkpHYs.PixelsPerUnitYAxis );
+        // System.out.println(&quot;\t&quot; + &quot;pngChunkpHYs.PixelsPerUnitXAxis: &quot; +
+        // pngChunkpHYs.PixelsPerUnitXAxis );
+        // }
+<span class="nc bnc" id="L453" title="All 4 branches missed.">        if (pngChunkpHYs != null &amp;&amp; pngChunkpHYs.getUnitSpecifier() == 1) { // meters</span>
+<span class="nc" id="L454">            final double metersPerInch = 0.0254;</span>
+
+<span class="nc" id="L456">            physicalWidthDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch);</span>
+<span class="nc" id="L457">            physicalWidthInch = (float) (width / (pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch));</span>
+<span class="nc" id="L458">            physicalHeightDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitYAxis() * metersPerInch);</span>
+<span class="nc" id="L459">            physicalHeightInch = (float) (height / (pngChunkpHYs.getPixelsPerUnitYAxis() * metersPerInch));</span>
+        }
+
+<span class="nc" id="L462">        boolean usesPalette = false;</span>
+
+<span class="nc" id="L464">        final List&lt;PngChunk&gt; PLTEs = filterChunks(chunks, ChunkType.PLTE);</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">        if (!PLTEs.isEmpty()) {</span>
+<span class="nc" id="L466">            usesPalette = true;</span>
+        }
+
+        ImageInfo.ColorType colorType;
+<span class="nc bnc" id="L470" title="All 3 branches missed.">        switch (pngChunkIHDR.getPngColorType()) {</span>
+        case GREYSCALE:
+        case GREYSCALE_WITH_ALPHA:
+<span class="nc" id="L473">            colorType = ImageInfo.ColorType.GRAYSCALE;</span>
+<span class="nc" id="L474">            break;</span>
+        case TRUE_COLOR:
+        case INDEXED_COLOR:
+        case TRUE_COLOR_WITH_ALPHA:
+<span class="nc" id="L478">            colorType = ImageInfo.ColorType.RGB;</span>
+<span class="nc" id="L479">            break;</span>
+        default:
+<span class="nc" id="L481">            throw new ImagingException(&quot;Png: Unknown ColorType: &quot; + pngChunkIHDR.getPngColorType());</span>
+        }
+
+<span class="nc" id="L484">        final String formatDetails = &quot;Png&quot;;</span>
+<span class="nc" id="L485">        final ImageInfo.CompressionAlgorithm compressionAlgorithm = ImageInfo.CompressionAlgorithm.PNG_FILTER;</span>
+
+<span class="nc" id="L487">        return new PngImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType, numberOfImages, physicalHeightDpi,</span>
+                physicalHeightInch, physicalWidthDpi, physicalWidthInch, width, progressive, transparent, usesPalette, colorType, compressionAlgorithm,
+                textChunks, physicalScale);
+    }
+
+    @Override
+    public Dimension getImageSize(final ByteSource byteSource, final PngImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L494">        final List&lt;PngChunk&gt; chunks = readChunks(byteSource, new ChunkType[] { ChunkType.IHDR, }, true);</span>
+
+<span class="nc bnc" id="L496" title="All 2 branches missed.">        if (chunks.isEmpty()) {</span>
+<span class="nc" id="L497">            throw new ImagingException(&quot;Png: No chunks&quot;);</span>
+        }
+
+<span class="nc bnc" id="L500" title="All 2 branches missed.">        if (chunks.size() &gt; 1) {</span>
+<span class="nc" id="L501">            throw new ImagingException(&quot;PNG contains more than one Header&quot;);</span>
+        }
+
+<span class="nc" id="L504">        final PngChunkIhdr pngChunkIHDR = (PngChunkIhdr) chunks.get(0);</span>
+
+<span class="nc" id="L506">        return new Dimension(pngChunkIHDR.getWidth(), pngChunkIHDR.getHeight());</span>
+    }
+
+    @Override
+    public ImageMetadata getMetadata(final ByteSource byteSource, final PngImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L511">        final List&lt;PngChunk&gt; chunks = readChunks(byteSource, new ChunkType[] { ChunkType.tEXt, ChunkType.zTXt, ChunkType.iTXt }, false);</span>
+
+<span class="nc bnc" id="L513" title="All 2 branches missed.">        if (chunks.isEmpty()) {</span>
+<span class="nc" id="L514">            return null;</span>
+        }
+
+<span class="nc" id="L517">        final GenericImageMetadata result = new GenericImageMetadata();</span>
+
+<span class="nc bnc" id="L519" title="All 2 branches missed.">        for (final PngChunk chunk : chunks) {</span>
+<span class="nc" id="L520">            final AbstractPngTextChunk textChunk = (AbstractPngTextChunk) chunk;</span>
+
+<span class="nc" id="L522">            result.add(textChunk.getKeyword(), textChunk.getText());</span>
+<span class="nc" id="L523">        }</span>
+
+<span class="nc" id="L525">        return result;</span>
+    }
+
+    @Override
+    public String getName() {
+<span class="nc" id="L530">        return &quot;Png-Custom&quot;;</span>
+    }
+
+    private AbstractTransparencyFilter getTransparencyFilter(final PngColorType pngColorType, final PngChunk pngChunktRNS)
+            throws ImagingException, IOException {
+<span class="nc bnc" id="L535" title="All 4 branches missed.">        switch (pngColorType) {</span>
+        case GREYSCALE: // 1,2,4,8,16 Each pixel is a grayscale sample.
+<span class="nc" id="L537">            return new TransparencyFilterGrayscale(pngChunktRNS.getBytes());</span>
+        case TRUE_COLOR: // 8,16 Each pixel is an R,G,B triple.
+<span class="nc" id="L539">            return new TransparencyFilterTrueColor(pngChunktRNS.getBytes());</span>
+        case INDEXED_COLOR: // 1,2,4,8 Each pixel is a palette index;
+<span class="nc" id="L541">            return new TransparencyFilterIndexedColor(pngChunktRNS.getBytes());</span>
+        case GREYSCALE_WITH_ALPHA: // 8,16 Each pixel is a grayscale sample,
+        case TRUE_COLOR_WITH_ALPHA: // 8,16 Each pixel is an R,G,B triple,
+        default:
+<span class="nc" id="L545">            throw new ImagingException(&quot;Simple Transparency not compatible with ColorType: &quot; + pngColorType);</span>
+        }
+    }
+
+    @Override
+    public String getXmpXml(final ByteSource byteSource, final XmpImagingParameters&lt;PngImagingParameters&gt; params) throws ImagingException, IOException {
+
+<span class="nc" id="L552">        final List&lt;PngChunk&gt; chunks = readChunks(byteSource, new ChunkType[] { ChunkType.iTXt }, false);</span>
+
+<span class="nc bnc" id="L554" title="All 2 branches missed.">        if (chunks.isEmpty()) {</span>
+<span class="nc" id="L555">            return null;</span>
+        }
+
+<span class="nc" id="L558">        final List&lt;PngChunkItxt&gt; xmpChunks = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L559" title="All 2 branches missed.">        for (final PngChunk chunk : chunks) {</span>
+<span class="nc" id="L560">            final PngChunkItxt itxtChunk = (PngChunkItxt) chunk;</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">            if (!itxtChunk.getKeyword().equals(PngConstants.XMP_KEYWORD)) {</span>
+<span class="nc" id="L562">                continue;</span>
+            }
+<span class="nc" id="L564">            xmpChunks.add(itxtChunk);</span>
+<span class="nc" id="L565">        }</span>
+
+<span class="nc bnc" id="L567" title="All 2 branches missed.">        if (xmpChunks.isEmpty()) {</span>
+<span class="nc" id="L568">            return null;</span>
+        }
+<span class="nc bnc" id="L570" title="All 2 branches missed.">        if (xmpChunks.size() &gt; 1) {</span>
+<span class="nc" id="L571">            throw new ImagingException(&quot;PNG contains more than one XMP chunk.&quot;);</span>
+        }
+
+<span class="nc" id="L574">        final PngChunkItxt chunk = xmpChunks.get(0);</span>
+<span class="nc" id="L575">        return chunk.getText();</span>
+    }
+
+    // TODO: I have been too casual about making inner classes subclass of
+    // BinaryFileParser
+    // I may not have always preserved byte order correctly.
+
+    public boolean hasChunkType(final ByteSource byteSource, final ChunkType chunkType) throws ImagingException, IOException {
+<span class="nc" id="L583">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L584">            readSignature(is);</span>
+<span class="nc" id="L585">            final List&lt;PngChunk&gt; chunks = readChunks(is, new ChunkType[] { chunkType }, true);</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">            return !chunks.isEmpty();</span>
+        }
+    }
+
+    private boolean keepChunk(final int chunkType, final ChunkType[] chunkTypes) {
+        // System.out.println(&quot;keepChunk: &quot;);
+<span class="nc bnc" id="L592" title="All 2 branches missed.">        if (chunkTypes == null) {</span>
+<span class="nc" id="L593">            return true;</span>
+        }
+
+<span class="nc bnc" id="L596" title="All 2 branches missed.">        for (final ChunkType chunkType2 : chunkTypes) {</span>
+<span class="nc bnc" id="L597" title="All 2 branches missed.">            if (chunkType2.value == chunkType) {</span>
+<span class="nc" id="L598">                return true;</span>
+            }
+        }
+<span class="nc" id="L601">        return false;</span>
+    }
+
+    private List&lt;PngChunk&gt; readChunks(final ByteSource byteSource, final ChunkType[] chunkTypes, final boolean returnAfterFirst)
+            throws ImagingException, IOException {
+<span class="fc" id="L606">        try (InputStream is = byteSource.getInputStream()) {</span>
+<span class="nc" id="L607">            readSignature(is);</span>
+<span class="nc" id="L608">            return readChunks(is, chunkTypes, returnAfterFirst);</span>
+        }
+    }
+
+    private List&lt;PngChunk&gt; readChunks(final InputStream is, final ChunkType[] chunkTypes, final boolean returnAfterFirst) throws ImagingException, IOException {
+<span class="nc" id="L613">        final List&lt;PngChunk&gt; result = new ArrayList&lt;&gt;();</span>
+
+        while (true) {
+<span class="nc" id="L616">            final int length = BinaryFunctions.read4Bytes(&quot;Length&quot;, is, &quot;Not a Valid PNG File&quot;, getByteOrder());</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">            if (length &lt; 0) {</span>
+<span class="nc" id="L618">                throw new ImagingException(&quot;Invalid PNG chunk length: &quot; + length);</span>
+            }
+<span class="nc" id="L620">            final int chunkType = BinaryFunctions.read4Bytes(&quot;ChunkType&quot;, is, &quot;Not a Valid PNG File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L622" title="All 2 branches missed.">            if (LOGGER.isLoggable(Level.FINEST)) {</span>
+<span class="nc" id="L623">                BinaryFunctions.logCharQuad(&quot;ChunkType&quot;, chunkType);</span>
+<span class="nc" id="L624">                debugNumber(&quot;Length&quot;, length, 4);</span>
+            }
+<span class="nc" id="L626">            final boolean keep = keepChunk(chunkType, chunkTypes);</span>
+
+<span class="nc" id="L628">            byte[] bytes = null;</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">            if (keep) {</span>
+<span class="nc" id="L630">                bytes = BinaryFunctions.readBytes(&quot;Chunk Data&quot;, is, length, &quot;Not a Valid PNG File: Couldn't read Chunk Data.&quot;);</span>
+            } else {
+<span class="nc" id="L632">                BinaryFunctions.skipBytes(is, length, &quot;Not a Valid PNG File&quot;);</span>
+            }
+
+<span class="nc bnc" id="L635" title="All 4 branches missed.">            if (LOGGER.isLoggable(Level.FINEST) &amp;&amp; bytes != null) {</span>
+<span class="nc" id="L636">                debugNumber(&quot;bytes&quot;, bytes.length, 4);</span>
+            }
+
+<span class="nc" id="L639">            final int crc = BinaryFunctions.read4Bytes(&quot;CRC&quot;, is, &quot;Not a Valid PNG File&quot;, getByteOrder());</span>
+
+<span class="nc bnc" id="L641" title="All 2 branches missed.">            if (keep) {</span>
+<span class="nc bnc" id="L642" title="All 2 branches missed.">                if (chunkType == ChunkType.iCCP.value) {</span>
+<span class="nc" id="L643">                    result.add(new PngChunkIccp(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">                } else if (chunkType == ChunkType.tEXt.value) {</span>
+<span class="nc" id="L645">                    result.add(new PngChunkText(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">                } else if (chunkType == ChunkType.zTXt.value) {</span>
+<span class="nc" id="L647">                    result.add(new PngChunkZtxt(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L648" title="All 2 branches missed.">                } else if (chunkType == ChunkType.IHDR.value) {</span>
+<span class="nc" id="L649">                    result.add(new PngChunkIhdr(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">                } else if (chunkType == ChunkType.PLTE.value) {</span>
+<span class="nc" id="L651">                    result.add(new PngChunkPlte(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">                } else if (chunkType == ChunkType.pHYs.value) {</span>
+<span class="nc" id="L653">                    result.add(new PngChunkPhys(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L654" title="All 2 branches missed.">                } else if (chunkType == ChunkType.sCAL.value) {</span>
+<span class="nc" id="L655">                    result.add(new PngChunkScal(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L656" title="All 2 branches missed.">                } else if (chunkType == ChunkType.IDAT.value) {</span>
+<span class="nc" id="L657">                    result.add(new PngChunkIdat(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L658" title="All 2 branches missed.">                } else if (chunkType == ChunkType.gAMA.value) {</span>
+<span class="nc" id="L659">                    result.add(new PngChunkGama(length, chunkType, crc, bytes));</span>
+<span class="nc bnc" id="L660" title="All 2 branches missed.">                } else if (chunkType == ChunkType.iTXt.value) {</span>
+<span class="nc" id="L661">                    result.add(new PngChunkItxt(length, chunkType, crc, bytes));</span>
+                } else {
+<span class="nc" id="L663">                    result.add(new PngChunk(length, chunkType, crc, bytes));</span>
+                }
+
+<span class="nc bnc" id="L666" title="All 2 branches missed.">                if (returnAfterFirst) {</span>
+<span class="nc" id="L667">                    return result;</span>
+                }
+            }
+
+<span class="nc bnc" id="L671" title="All 2 branches missed.">            if (chunkType == ChunkType.IEND.value) {</span>
+<span class="nc" id="L672">                break;</span>
+            }
+
+<span class="nc" id="L675">        }</span>
+
+<span class="nc" id="L677">        return result;</span>
+
+    }
+
+    public void readSignature(final InputStream is) throws ImagingException, IOException {
+<span class="nc" id="L682">        BinaryFunctions.readAndVerifyBytes(is, PngConstants.PNG_SIGNATURE, &quot;Not a Valid PNG Segment: Incorrect Signature&quot;);</span>
+
+<span class="nc" id="L684">    }</span>
+
+    @Override
+    public void writeImage(final BufferedImage src, final OutputStream os, final PngImagingParameters params) throws ImagingException, IOException {
+<span class="nc" id="L688">        new PngWriter().writeImage(src, os, params, null);</span>
+<span class="nc" id="L689">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

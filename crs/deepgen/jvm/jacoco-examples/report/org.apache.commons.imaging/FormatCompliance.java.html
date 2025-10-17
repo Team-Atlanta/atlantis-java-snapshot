@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FormatCompliance.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging</a> &gt; <span class="el_source">FormatCompliance.java</span></div><h1>FormatCompliance.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Provides information about the compliance of a specified data source (byte array, file, etc&amp;#46;) to an image format.
+ */
+public class FormatCompliance {
+
+<span class="fc" id="L32">    private static final Logger LOGGER = Logger.getLogger(FormatCompliance.class.getName());</span>
+
+    public static FormatCompliance getDefault() {
+<span class="fc" id="L35">        return new FormatCompliance(&quot;ignore&quot;, false);</span>
+    }
+
+    private final boolean failOnError;
+    private final String description;
+
+<span class="pc" id="L41">    private final List&lt;String&gt; comments = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L43">    public FormatCompliance(final String description) {</span>
+<span class="nc" id="L44">        this.description = description;</span>
+<span class="nc" id="L45">        this.failOnError = false;</span>
+<span class="nc" id="L46">    }</span>
+
+<span class="fc" id="L48">    public FormatCompliance(final String description, final boolean failOnError) {</span>
+<span class="fc" id="L49">        this.description = description;</span>
+<span class="fc" id="L50">        this.failOnError = failOnError;</span>
+<span class="fc" id="L51">    }</span>
+
+    public void addComment(final String comment) throws ImagingException {
+<span class="fc" id="L54">        comments.add(comment);</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if (failOnError) {</span>
+<span class="nc" id="L56">            throw new ImagingException(comment);</span>
+        }
+<span class="fc" id="L58">    }</span>
+
+    public void addComment(final String comment, final int value) throws ImagingException {
+<span class="fc" id="L61">        addComment(comment + &quot;: &quot; + getValueDescription(value));</span>
+<span class="fc" id="L62">    }</span>
+
+    public boolean checkBounds(final String name, final int min, final int max, final int actual) throws ImagingException {
+<span class="fc bfc" id="L65" title="All 4 branches covered.">        if (actual &lt; min || actual &gt; max) {</span>
+<span class="fc" id="L66">            addComment(name + &quot;: &quot; + &quot;bounds check: &quot; + min + &quot; &lt;= &quot; + actual + &quot; &lt;= &quot; + max + &quot;: false&quot;);</span>
+<span class="fc" id="L67">            return false;</span>
+        }
+
+<span class="fc" id="L70">        return true;</span>
+    }
+
+    public boolean compare(final String name, final int valid, final int actual) throws ImagingException {
+<span class="fc" id="L74">        return compare(name, new int[] { valid, }, actual);</span>
+    }
+
+    public boolean compare(final String name, final int[] valid, final int actual) throws ImagingException {
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (final int element : valid) {</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">            if (actual == element) {</span>
+<span class="fc" id="L80">                return true;</span>
+            }
+        }
+
+<span class="fc" id="L84">        final StringBuilder result = new StringBuilder(43);</span>
+<span class="fc" id="L85">        result.append(name);</span>
+<span class="fc" id="L86">        result.append(&quot;: Unexpected value: (valid: &quot;);</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if (valid.length &gt; 1) {</span>
+<span class="fc" id="L88">            result.append('{');</span>
+        }
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        for (int i = 0; i &lt; valid.length; i++) {</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            if (i &gt; 0) {</span>
+<span class="fc" id="L92">                result.append(&quot;, &quot;);</span>
+            }
+<span class="fc" id="L94">            result.append(getValueDescription(valid[i]));</span>
+        }
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (valid.length &gt; 1) {</span>
+<span class="fc" id="L97">            result.append('}');</span>
+        }
+<span class="fc" id="L99">        result.append(&quot;, actual: &quot;).append(getValueDescription(actual)).append(&quot;)&quot;);</span>
+<span class="fc" id="L100">        addComment(result.toString());</span>
+<span class="fc" id="L101">        return false;</span>
+    }
+
+    public boolean compareBytes(final String name, final byte[] expected, final byte[] actual) throws ImagingException {
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (expected.length != actual.length) {</span>
+<span class="nc" id="L106">            addComment(name + &quot;: &quot; + &quot;Unexpected length: (expected: &quot; + expected.length + &quot;, actual: &quot; + actual.length + &quot;)&quot;);</span>
+<span class="nc" id="L107">            return false;</span>
+        }
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        for (int i = 0; i &lt; expected.length; i++) {</span>
+            // System.out.println(&quot;expected: &quot;
+            // + getValueDescription(expected[i]) + &quot;, actual: &quot;
+            // + getValueDescription(actual[i]) + &quot;)&quot;);
+<span class="fc bfc" id="L113" title="All 2 branches covered.">            if (expected[i] != actual[i]) {</span>
+<span class="fc" id="L114">                addComment(</span>
+<span class="fc" id="L115">                        name + &quot;: &quot; + &quot;Unexpected value: (expected: &quot; + getValueDescription(expected[i]) + &quot;, actual: &quot; + getValueDescription(actual[i]) + &quot;)&quot;);</span>
+<span class="fc" id="L116">                return false;</span>
+            }
+        }
+
+<span class="fc" id="L120">        return true;</span>
+    }
+
+    public void dump() {
+<span class="nc" id="L124">        try (StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L125">                PrintWriter pw = new PrintWriter(sw)) {</span>
+<span class="nc" id="L126">            dump(pw);</span>
+<span class="nc" id="L127">            pw.flush();</span>
+<span class="nc" id="L128">            sw.flush();</span>
+<span class="nc" id="L129">            LOGGER.fine(sw.toString());</span>
+<span class="nc" id="L130">        } catch (final IOException e) {</span>
+<span class="nc" id="L131">            LOGGER.log(Level.SEVERE, e.getMessage(), e);</span>
+<span class="nc" id="L132">        }</span>
+<span class="nc" id="L133">    }</span>
+
+    public void dump(final PrintWriter pw) {
+<span class="nc" id="L136">        pw.println(&quot;Format Compliance: &quot; + description);</span>
+
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (comments.isEmpty()) {</span>
+<span class="nc" id="L139">            pw.println(&quot;\t&quot; + &quot;No comments.&quot;);</span>
+        } else {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            for (int i = 0; i &lt; comments.size(); i++) {</span>
+<span class="nc" id="L142">                pw.println(&quot;\t&quot; + (i + 1) + &quot;: &quot; + comments.get(i));</span>
+            }
+        }
+<span class="nc" id="L145">        pw.println(&quot;&quot;);</span>
+<span class="nc" id="L146">        pw.flush();</span>
+<span class="nc" id="L147">    }</span>
+
+    private String getValueDescription(final int value) {
+<span class="fc" id="L150">        return value + &quot; (&quot; + Integer.toHexString(value) + &quot;)&quot;;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L155">        final StringWriter sw = new StringWriter();</span>
+<span class="nc" id="L156">        final PrintWriter pw = new PrintWriter(sw);</span>
+
+<span class="nc" id="L158">        dump(pw);</span>
+
+<span class="nc" id="L160">        return sw.getBuffer().toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

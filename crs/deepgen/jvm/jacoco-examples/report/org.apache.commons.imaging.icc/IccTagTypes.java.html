@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IccTagTypes.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.icc</a> &gt; <span class="el_source">IccTagTypes.java</span></div><h1>IccTagTypes.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.icc;
+
+<span class="nc" id="L19">public enum IccTagTypes implements IccTagType {</span>
+<span class="nc" id="L20">    A_TO_B0_TAG(&quot;AToB0Tag&quot;, &quot;lut8Type or lut16Type or lutAtoBType&quot;, 0x41324230</span>
+    // &quot;This tag defines a color transform from Device to PCS using lookup table tag element structures. The processing mechanisms are described in lut8Type or
+    // lut16Type or lutAtoBType.&quot;);
+    ),
+
+    // public static final IccTagType AToB0Tag = new IccTagType(
+    // &quot;AToB0Tag&quot;,
+    // &quot;lut8Type or lut16Type or lutAtoBType&quot;,
+    // &quot;�A2B0� (41324230h)&quot;,
+    // &quot;This tag defines a color transform from Device to PCS using lookup table tag element structures. The processing&quot;,
+    // &quot;mechanisms are described in lut8Type or lut16Type or lutAtoBType.&quot;,
+    // );
+
+<span class="nc" id="L33">    A_TO_B1_TAG(&quot;AToB1Tag&quot;, &quot;lut8Type or lut16Type or lutAtoBType&quot;, 0x41324231</span>
+    // &quot;This tag defines a color transform from Device to PCS using lookup table tag element structures. The processing&quot;,
+    // &quot;mechanisms are described in lut8Type or lut16Type or lutAtoBType.&quot;,
+    ),
+
+<span class="nc" id="L38">    A_TO_B2_TAG(&quot;AToB2Tag&quot;, &quot;lut8Type or lut16Type or lutAtoBType&quot;, 0x41324232</span>
+    // &quot;This tag defines a color transform from Device to PCS using lookup table tag element structures. The processing&quot;,
+    // &quot;mechanisms are described in lut8Type or lut16Type or lutAtoBType.&quot;,
+    ),
+
+<span class="nc" id="L43">    BLUE_MATRIX_COLUMN_TAG(&quot;blueMatrixColumnTag&quot;, &quot;XYZType&quot;, 0x6258595A</span>
+    // &quot;The third column in the matrix used in TRC/matrix transforms.&quot;,
+    ),
+
+<span class="nc" id="L47">    BLUE_TRC_TAG(&quot;blueTRCTag&quot;, &quot;curveType or parametricCurveType&quot;, 0x62545243</span>
+    // &quot;Blue channel tone reproduction curve. The first element represents no colorant (white) or phosphors&quot;,
+    // &quot;(black) and the last element represents 100 percent colorant (blue) or 100 percent phosphor (blue).&quot;,
+    ),
+
+<span class="nc" id="L52">    B_TO_A0_TAG(&quot;BToA0Tag&quot;, &quot;lut8Type or lut16Type or lutBtoAType&quot;, 0x42324130</span>
+    // &quot;This tag defines a color transform from PCS to Device using the lookup table tag element structures. The&quot;,
+    // &quot;processing mechanisms are described in lut8Type or lut16Type or lutBtoAType.&quot;,
+    ),
+
+<span class="nc" id="L57">    B_TO_A1_TAG(&quot;BToA1Tag&quot;, &quot;lut8Type or lut16Type or lutBtoAType&quot;, 0x42324131</span>
+    // &quot;This tag defines a color transform from PCS to Device using the lookup table tag element structures. The&quot;,
+    // &quot;processing mechanisms are described in lut8Type or lut16Type or lutBtoAType.&quot;,
+    ),
+
+<span class="nc" id="L62">    B_TO_A2_TAG(&quot;BToA2Tag&quot;, &quot;lut8Type or lut16Type or lutBtoAType&quot;, 0x42324132</span>
+    // &quot;This tag defines a color transform from PCS to Device using the lookup table tag element structures. The&quot;,
+    // &quot;processing mechanisms are described in lut8Type or lut16Type or lutBtoAType.&quot;,
+    ),
+
+<span class="nc" id="L67">    CALIBRATION_DATE_TIME_TAG(&quot;calibrationDateTimeTag&quot;, &quot;dateTimeType&quot;, 0x63616C74</span>
+    // &quot;Profile calibration date and time. Initially, this tag matches the contents of the profile header�s creation&quot;,
+    // &quot;date/time field. This allows applications and utilities to verify if this profile matches a vendor�s profile and&quot;,
+    // &quot;how recently calibration has been performed.&quot;,
+    ),
+
+<span class="nc" id="L73">    CHAR_TARGET_TAG(&quot;charTargetTag&quot;, &quot;textType&quot;, 0x74617267</span>
+    // &quot;This tag contains the name of the registered characterization data set, or it contains the measurement data&quot;,
+    // &quot;for a characterization target. This tag is provided so that distributed utilities can identify the underlying&quot;,
+    // &quot;characterization data, create transforms \&quot;on the fly\&quot; or check the current performance against the original&quot;,
+    // &quot;device performance.&quot;,
+    // &quot;The first seven characters of the text shall identify the nature of the characterization data.&quot;,
+    // &quot;If the first seven characters are \&quot;ICCHDAT\&quot;, then the remainder of the text shall be a single space followed&quot;,
+    // &quot;by the Reference Name of a characterization data set in the ICC Characterization Data Registry and terminated&quot;,
+    // &quot;with a NULL byte (00h). The Reference Name in the text must match exactly (including case) the&quot;,
+    // &quot;Reference Name in the registry.&quot;,
+    // &quot;If the first seven characters match one of the identifiers defined in an ANSI or ISO standard, then the tag&quot;,
+    // &quot;embeds the exact data file format defined in that standard. Each of these file formats contains an identifying&quot;,
+    // &quot;character string as the first seven characters of the format, allowing an external parser to determine&quot;,
+    // &quot;which data file format is being used. This provides the facilities to include a wide range of targets using a&quot;,
+    // &quot;variety of measurement specifications in a standard manner.&quot;,
+    // &quot;NOTE: It is highly recommended that the profileDescriptionTag also include an identification of the characterization&quot;,
+    // &quot;data that was used in the creation of the profile (e.g. \&quot;Based on CGATS TR 001\&quot;).&quot;,
+    ),
+
+<span class="nc" id="L92">    CHROMATIC_ADAPTATION_TAG(&quot;chromaticAdaptationTag&quot;, &quot;s15Fixed16ArrayType&quot;, 0x63686164</span>
+    // &quot;This tag converts an XYZ color, measured at a device's specific illumination conditions, to an XYZ color in&quot;,
+    // &quot;the PCS illumination conditions after complete adaptation.&quot;,
+    // &quot;The tag reflects a survey of the currently used methods of conversion, all of which can be formulated as a&quot;,
+    // &quot;matrix transformation (see Annex E). Such a 3 by 3 chromatic adaptation matrix is organized as a 9-element&quot;,
+    // &quot;array of signed 15.16 numbers (s15Fixed16ArrayType tag). Similarly as in the other occurrences of a&quot;,
+    // &quot;3 by 3 matrix in the ICC tags, the dimension corresponding to the matrix rows varies least rapidly while the&quot;,
+    // &quot;one corresponding to the matrix columns varies most rapidly.&quot;,
+    // &quot;(19)&quot;,
+    // &quot;(20)&quot;,
+    // &quot;array a0 a1 a2 a3 a4 a5 a6 a7 a8 =&quot;,
+    // &quot;Xpcs&quot;,
+    // &quot;Ypcs&quot;,
+    // &quot;Zpcs&quot;,
+    // &quot;a0 a1 a2&quot;,
+    // &quot;a3 a4 a5&quot;,
+    // &quot;a6 a7 a8&quot;,
+    // &quot;Xsrc&quot;,
+    // &quot;Ysrc&quot;,
+    // &quot;Zsrc&quot;,
+    // &quot;=&quot;,
+    // &quot;Where XYZsrc represents the measured value in the actual device viewing condition and XYZpcs represents&quot;,
+    // &quot;the chromatically adapted value in the PCS.&quot;,
+    // &quot;The chromatic adaptation matrix is a combination of three separate conversions:&quot;,
+    // &quot;1) Conversion of source CIE XYZ tristimulus values to cone response tristimulus values.&quot;,
+    // &quot;2) Adjustment of the cone response values for an observer�s chromatic adaptation.&quot;,
+    // &quot;3) Conversion of the adjusted cone response tristimulus back to CIE XYZ values.&quot;,
+    ),
+
+<span class="nc" id="L121">    CHROMATICITY_TAG(&quot;chromaticityTag&quot;, &quot;chromaticityType&quot;, 0x6368726D</span>
+    // &quot;The data and type of phosphor/colorant chromaticity set.&quot;,
+    ),
+
+<span class="nc" id="L125">    COLORANT_ORDER_TAG(&quot;colorantOrderTag&quot;, &quot;colorantOrderType&quot;, 0x636C726F</span>
+    // &quot;This tag specifies the laydown order of colorants.&quot;,
+    ),
+
+<span class="nc" id="L129">    COLORANT_TABLE_TAG(&quot;colorantTableTag&quot;, &quot;colorantTableType&quot;, 0x636C7274</span>
+    // &quot;This tag identifies the colorants used in the profile by a unique name and an XYZ or L*a*b* value.&quot;,
+    // &quot;This is a required tag for profiles where the color space defined in the header is xCLR, where x is one of&quot;,
+    // &quot;the allowed numbers from 2 through Fh, per Table 13. See Section 6.3.3.2, Section 6.3.4.1.&quot;,
+    ),
+
+<span class="nc" id="L135">    COPYRIGHT_TAG(&quot;copyrightTag&quot;, &quot;multiLocalizedUnicodeType&quot;, 0x63707274</span>
+    // &quot;This tag contains the text copyright information for the profile.&quot;,
+    ),
+
+<span class="nc" id="L139">    DEVICE_MFG_DESC_TAG(&quot;deviceMfgDescTag&quot;, &quot;multiLocalizedUnicodeType&quot;, 0x646D6E64</span>
+    // &quot;Structure containing invariant and localizable versions of the device manufacturer for display. The content&quot;,
+    // &quot;of this structure is described in 6.5.12.&quot;,
+    ),
+
+<span class="nc" id="L144">    DEVICE_MODEL_DESC_TAG(&quot;deviceModelDescTag&quot;, &quot;multiLocalizedUnicodeType&quot;, 0x646D6464</span>
+    // &quot;Structure containing invariant and localizable versions of the device model for display. The content of this&quot;,
+    // &quot;structure is described in 6.5.12.&quot;,
+    ),
+
+<span class="nc" id="L149">    GAMUT_TAG(&quot;gamutTag&quot;, &quot;lut8Type or lut16Type or lutBtoAType&quot;, 0x67616D74</span>
+    // &quot;Out of gamut tag. The processing mechanisms are described in lut8Type or lut16Type or lutBtoAType.&quot;,
+    // &quot;This tag takes PCS values as its input and produces a single channel of output. If the output value is 0, the&quot;,
+    // &quot;PCS color is in-gamut. If the output is non-zero, the PCS color is out-of-gamut, with the output value �n+1�&quot;,
+    // &quot;being at least as far out of gamut as the output value �n�.&quot;,
+    ),
+
+<span class="nc" id="L156">    GRAY_TRC_TAG(&quot;grayTRCTag&quot;, &quot;curveType or parametricCurveType&quot;, 0x6B545243</span>
+    // &quot;Gray tone reproduction curve. The tone reproduction curve provides the necessary information to convert&quot;,
+    // &quot;between a single device channel and the CIEXYZ encoding of the profile connection space. The first element&quot;,
+    // &quot;represents black and the last element represents white.&quot;,
+    ),
+
+<span class="nc" id="L162">    GREEN_MATRIX_COLUMN_TAG(&quot;greenMatrixColumnTag&quot;, &quot;XYZType&quot;, 0x6758595A</span>
+    // &quot;The second column in the matrix used in TRC/matrix transforms.&quot;,
+    ),
+
+<span class="nc" id="L166">    GREEN_TRC_TAG(</span>
+            // &quot;6.4.21 &quot;,
+            &quot;greenTRCTag&quot;, &quot;curveType or parametricCurveType&quot;, 0x67545243
+    // &quot;Green channel tone reproduction curve. The first element represents no colorant (white) or phosphors&quot;,
+    // &quot;(black) and the last element represents 100 percent colorant (green) or 100 percent phosphor (green).&quot;,
+    ),
+
+<span class="nc" id="L173">    LUMINANCE_TAG(</span>
+            // &quot;6.4.22 &quot;,
+            &quot;luminanceTag&quot;, &quot;XYZType&quot;, 0x6C756D69
+    // &quot;Absolute luminance of emissive devices in candelas per square meter as described by the Y channel. The&quot;,
+    // &quot;X and Z channels are ignored in all cases.&quot;,
+    ),
+
+<span class="nc" id="L180">    MEASUREMENT_TAG(</span>
+            // &quot;6.4.23 &quot;,
+            &quot;measurementTag&quot;, &quot;measurementType&quot;, 0x6D656173
+    // &quot;Alternative measurement specification such as a D65 illuminant instead of the default D50.&quot;,
+    ),
+
+<span class="nc" id="L186">    MEDIA_BLACK_POINT_TAG(</span>
+            // &quot;6.4.24 &quot;,
+            &quot;mediaBlackPointTag&quot;, &quot;XYZType&quot;, 0x626B7074
+    // &quot;This tag specifies the media black point and contains the CIE 1931 XYZ colorimetry of the black point of&quot;,
+    // &quot;the actual medium.&quot;,
+    // &quot;NOTE Previous revisions of this specification contained an error indicating that this tag is used to calculate&quot;,
+    // &quot;ICC-absolute colorimetry. This is not the case.&quot;,
+    ),
+
+<span class="nc" id="L195">    MEDIA_WHITE_POINT_TAG(</span>
+            // &quot;6.4.25 &quot;,
+            &quot;mediaWhitePointTag&quot;, &quot;XYZType&quot;, 0x77747074
+    // &quot;This tag, which is used for generating ICC-absolute colorimetric intent, specifies the XYZ tristimulus values&quot;,
+    // &quot;of the media white point. If the media is measured under an illumination source which has a chromaticity&quot;,
+    // &quot;other than D50, the measured values must be adjusted to D50 using the chromaticAdaptationTag matrix&quot;,
+    // &quot;before recording in the tag. For reflecting and transmitting media, the tag values are specified relative to&quot;,
+    // &quot;the perfect diffuser (which is normalized to a Y value of 1,0) for illuminant D50. For displays, the values&quot;,
+    // &quot;specified must be those of D50 (i.e. 0,9642, 1,0 0,8249) normalized such that Y = 1,0.&quot;,
+    // &quot;See Annex A for a more complete description of the use of the media white point.&quot;,
+    ),
+
+<span class="nc" id="L207">    NAMED_COLOR_2_TAG(</span>
+            // &quot;6.4.26 &quot;,
+            &quot;namedColor2Tag&quot;, &quot;namedColor2Type&quot;, 0x6E636C32
+    // &quot;Named color information providing a PCS and optional device representation for a list of named colors.&quot;,
+    ),
+
+<span class="nc" id="L213">    OUTPUT_RESPONSE_TAG(</span>
+            // &quot;6.4.27 &quot;,
+            &quot;outputResponseTag&quot;, &quot;responseCurveSet16Type&quot;, 0x72657370
+    // &quot;Structure containing a description of the device response for which the profile is intended. The content of&quot;,
+    // &quot;this structure is described in 6.5.16.&quot;,
+    // &quot;NOTE The user�s attention is called to the possibility that the use of this tag for device calibration may&quot;,
+    // &quot;require use of an invention covered by patent rights. By publication of this specification, no position is&quot;,
+    // &quot;taken with respect to the validity of this claim or of any patent rights in connection therewith. The patent&quot;,
+    // &quot;holder has, however, filed a statement of willingness to grant a license under these rights on reasonable&quot;,
+    // &quot;and nondiscriminatory terms and conditions to applicants desiring to obtain such a license. Details may be&quot;,
+    // &quot;obtained from the publisher.&quot;,
+    ),
+
+<span class="nc" id="L226">    PREVIEW_0_TAG(</span>
+            // &quot;6.4.28 &quot;,
+            &quot;preview0Tag&quot;, &quot;lut8Type or lut16Type or lutBtoAType&quot;, 0x70726530
+    // &quot;Preview transformation from PCS to device space and back to the PCS. The processing mechanisms are&quot;,
+    // &quot;described in lut8Type or lut16Type or lutBtoAType.&quot;,
+    // &quot;This tag contains the combination of tag B2A0 and tag A2B1.&quot;,
+    ),
+
+<span class="nc" id="L234">    PREVIEW_1_TAG(</span>
+            // &quot;6.4.29 &quot;,
+            &quot;preview1Tag&quot;, &quot;lut8Type or lut16Type or lutBtoAType&quot;, 0x70726531
+    // &quot;Preview transformation from the PCS to device space and back to the PCS. The processing mechanisms&quot;,
+    // &quot;are described in lut8Type or lut16Type or lutBtoAType.&quot;,
+    // &quot;This tag contains the combination of tag B2A1 and tag A2B1.&quot;,
+    ),
+
+<span class="nc" id="L242">    PREVIEW_2_TAG(</span>
+            // &quot;6.4.30 &quot;,
+            &quot;preview2Tag&quot;, &quot;lut8Type or lut16Type or lutBtoAType&quot;, 0x70726532
+    // &quot;Preview transformation from PCS to device space and back to the PCS. The processing mechanisms are&quot;,
+    // &quot;described in lut8Type or lut16Type or lutBtoAType.&quot;,
+    // &quot;This tag contains the combination of tag B2A2 and tag A2B1.&quot;,
+    ),
+
+<span class="nc" id="L250">    PROFILE_DESCRIPTION_TAG(</span>
+            // &quot;6.4.31 &quot;,
+            &quot;profileDescriptionTag&quot;, &quot;multiLocalizedUnicodeType&quot;, 0x64657363
+    // &quot;Structure containing invariant and localizable versions of the profile description for display. The content of&quot;,
+    // &quot;this structure is described in 6.5.12. This invariant description has no fixed relationship to the actual profile&quot;,
+    // &quot;disk file name.&quot;,
+    ),
+
+<span class="nc" id="L258">    PROFILE_SEQUENCE_DESC_TAG(</span>
+            // &quot;6.4.32 &quot;,
+            &quot;profileSequenceDescTag&quot;, &quot;profileSequenceDescType&quot;, 0x70736571
+    // &quot;Structure containing a description of the profile sequence from source to destination, typically used with&quot;,
+    // &quot;the DeviceLink profile. The content of this structure is described in 6.5.15.&quot;,
+    ),
+
+<span class="nc" id="L265">    RED_MATRIX_COLUMN_TAG(</span>
+            // &quot;6.4.33 &quot;,
+            &quot;redMatrixColumnTag&quot;, &quot;XYZType&quot;, 0x7258595A
+    // &quot;The first column in the matrix used in TRC/matrix transforms.&quot;,
+    ),
+
+<span class="nc" id="L271">    RED_TRC_TAG(</span>
+            // &quot;6.4.34 &quot;,
+            &quot;redTRCTag&quot;, &quot;curveType or parametricCurveType&quot;, 0x72545243
+    // &quot;Red channel tone reproduction curve. The first element represents no colorant (white) or phosphors&quot;,
+    // &quot;(black) and the last element represents 100 percent colorant (red) or 100 percent phosphor (red).&quot;,
+    ),
+
+<span class="nc" id="L278">    TECHNOLOGY_TAG(</span>
+            // &quot;6.4.35 &quot;,
+            &quot;technologyTag&quot;, &quot;signatureType&quot;, 0x74656368
+    // &quot;Device technology information such as CRT, Dye Sublimation, etc. The encoding is such that:&quot;,
+    ),
+
+<span class="nc" id="L284">    VIEWING_COND_DESC_TAG(</span>
+            // &quot;6.4.36 &quot;,
+            &quot;viewingCondDescTag&quot;, &quot;multiLocalizedUnicodeType&quot;, 0x76756564
+    // &quot;Structure containing invariant and localizable versions of the viewing conditions. The content of this structure&quot;,
+    // &quot;is described in 6.5.12.&quot;,
+
+    ),
+
+<span class="nc" id="L292">    VIEWING_CONDITIONS_TAG(</span>
+            // &quot;6.4.37 &quot;,
+            &quot;viewingConditionsTag&quot;, &quot;viewingConditionsType&quot;, 0x76696577
+    // &quot;Viewing conditions parameters. The content of this structure is described in 6.5.25.&quot;,
+    );
+
+    public final String name;
+    public final String typeDescription;
+    public final int signature;
+
+<span class="nc" id="L302">    IccTagTypes(final String name, final String typeDescription, final int signature) {</span>
+<span class="nc" id="L303">        this.name = name;</span>
+<span class="nc" id="L304">        this.typeDescription = typeDescription;</span>
+<span class="nc" id="L305">        this.signature = signature;</span>
+<span class="nc" id="L306">    }</span>
+
+    @Override
+    public String getName() {
+<span class="nc" id="L310">        return name;</span>
+    }
+
+    @Override
+    public int getSignature() {
+<span class="nc" id="L315">        return signature;</span>
+    }
+
+    @Override
+    public String getTypeDescription() {
+<span class="nc" id="L320">        return typeDescription;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

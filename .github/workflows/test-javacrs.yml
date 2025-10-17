@@ -1,0 +1,55 @@
+name: "[javacrs] CRS Testing"
+
+on:
+  workflow_dispatch:
+  merge_group:
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  crs-build:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        ssh-key: ${{ secrets.SSHKEY_GT_NOSGX_RSA }}
+        submodules: 'recursive'
+        lfs: false
+        fetch-depth: 0
+
+    - name: Check if need build & test
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          if git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E "^crs/|^compose.dev.yaml$|^dev.sh$"; then
+            echo "CRS files have been modified."
+            echo "RUN_BUILD=true" >> $GITHUB_ENV
+          else
+            echo "No CRS files have been modified."
+            echo "RUN_BUILD=false" >> $GITHUB_ENV
+          fi
+        else
+          echo "Not a pull request, running build."
+          echo "RUN_BUILD=true" >> $GITHUB_ENV
+        fi
+
+    - name: Skip notification
+      if: env.RUN_BUILD != 'true'
+      run: echo "No changes to CRS code, skipping further build & test"
+
+    - name: Check Disk Space and Prune Docker if necessary
+      if: env.RUN_BUILD == 'true'
+      run: |
+        DF_USAGE=$(df --output=pcent / | tail -1 | sed 's/%//g' | xargs)
+        echo "Current disk usage: $DF_USAGE%"
+        if [[ $DF_USAGE -gt 85 ]]; then
+          echo "Disk usage is above 85%, pruning docker system..."
+          docker system prune -f
+        else
+          echo "Disk usage is below threshold, no prune needed."
+        fi
+
+    - name: Build CRS docker image
+      if: env.RUN_BUILD == 'true'
+      run: |
+        bash dev.sh build-crs

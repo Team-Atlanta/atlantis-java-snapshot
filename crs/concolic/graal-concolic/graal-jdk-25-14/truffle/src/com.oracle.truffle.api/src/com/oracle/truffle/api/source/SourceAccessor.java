@@ -1,0 +1,183 @@
+/*
+ * Copyright (c) 2013, 2024, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * The Universal Permissive License (UPL), Version 1.0
+ *
+ * Subject to the condition set forth below, permission is hereby granted to any
+ * person obtaining a copy of this software, associated documentation and/or
+ * data (collectively the "Software"), free of charge and under any and all
+ * copyright rights in the Software, and any and all patent rights owned or
+ * freely licensable by each licensor hereunder covering either (i) the
+ * unmodified Software as contributed to or provided by such licensor, or (ii)
+ * the Larger Works (as defined below), to deal in both
+ *
+ * (a) the Software, and
+ *
+ * (b) any piece of software and/or hardware listed in the lrgrwrks.txt file if
+ * one is included with the Software each a "Larger Work" to which the Software
+ * is contributed by such licensors),
+ *
+ * without restriction, including without limitation the rights to copy, create
+ * derivative works of, display, perform, and distribute the Software and make,
+ * use, sell, offer for sale, import, export, have made, and have sold the
+ * Software and the Larger Work(s), and to sublicense the foregoing rights on
+ * either these or other terms.
+ *
+ * This license is subject to the following condition:
+ *
+ * The above copyright notice and either this complete permission notice or at a
+ * minimum a reference to the UPL must be included in all copies or substantial
+ * portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package com.oracle.truffle.api.source;
+
+import java.io.File;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.net.URI;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
+import com.oracle.truffle.api.TruffleFile;
+import com.oracle.truffle.api.impl.Accessor;
+import com.oracle.truffle.api.source.Source.SourceBuilder;
+
+final class SourceAccessor extends Accessor {
+
+    static final SourceAccessor ACCESSOR = new SourceAccessor();
+
+    static final LanguageSupport LANGUAGE = ACCESSOR.languageSupport();
+    static final EngineSupport ENGINE = ACCESSOR.engineSupport();
+
+    private SourceAccessor() {
+    }
+
+    public static void load() {
+    }
+
+    static String detectMimeType(TruffleFile file, Set<String> validMimeTypes) {
+        return ACCESSOR.languageSupport().detectMimeType(file, validMimeTypes);
+    }
+
+    static Charset detectEncoding(TruffleFile file, String mimeType) {
+        return ACCESSOR.languageSupport().detectEncoding(file, mimeType);
+    }
+
+    static TruffleFile getTruffleFile(URI uri, Object fileSystemContext) {
+        return ACCESSOR.languageSupport().getTruffleFile(uri, fileSystemContext);
+    }
+
+    static TruffleFile getTruffleFile(String path, Object fileSystemContext) {
+        return ACCESSOR.languageSupport().getTruffleFile(path, fileSystemContext);
+    }
+
+    static boolean isSocketIOAllowed(Object fileSystemContext) {
+        return ACCESSOR.languageSupport().isSocketIOAllowed(fileSystemContext);
+    }
+
+    static void onSourceCreated(Source source) {
+        ACCESSOR.engineSupport().onSourceCreated(source);
+    }
+
+    static String getReinitializedPath(TruffleFile truffleFile) {
+        return ACCESSOR.engineSupport().getReinitializedPath(truffleFile);
+    }
+
+    static URI getReinitializedURI(TruffleFile truffleFile) {
+        return ACCESSOR.engineSupport().getReinitializedURI(truffleFile);
+    }
+
+    static final class SourceSupportImpl extends Accessor.SourceSupport {
+
+        @Override
+        public Source copySource(Source source) {
+            Source copy = source.copy();
+            copy.cachedPolyglotSource = source.cachedPolyglotSource;
+            return copy;
+        }
+
+        @Override
+        public Map<String, String> getSourceOptions(Source source) {
+            return source.getOptions();
+        }
+
+        @Override
+        public Object getSourceIdentifier(Source source) {
+            return source.getSourceId();
+        }
+
+        @Override
+        public Object getOrCreatePolyglotSource(Source source,
+                        Function<Source, Object> createSource) {
+            WeakReference<Object> ref = source.cachedPolyglotSource;
+            Object polyglotSource;
+            if (ref == null) {
+                polyglotSource = null;
+            } else {
+                polyglotSource = ref.get();
+            }
+            if (polyglotSource == null) {
+                polyglotSource = createSource.apply(source);
+                source.cachedPolyglotSource = new WeakReference<>(polyglotSource);
+            }
+            assert polyglotSource != null;
+            return polyglotSource;
+        }
+
+        @Override
+        public String findMimeType(URL url, Object fileSystemContext) throws IOException {
+            return Source.findMimeType(url, url.openConnection(), null, fileSystemContext);
+        }
+
+        @Override
+        public SourceBuilder newBuilder(String language, File origin) {
+            return Source.newBuilder(language, origin);
+        }
+
+        @Override
+        public void setFileSystemContext(SourceBuilder builder, Object fileSystemContext) {
+            builder.fileSystemContext(fileSystemContext);
+        }
+
+        @Override
+        public void setEmbedderSource(SourceBuilder builder, boolean enabled) {
+            builder.embedderSource(enabled);
+        }
+
+        @Override
+        public void setURL(SourceBuilder builder, URL url) {
+            builder.url(url);
+        }
+
+        @Override
+        public void setPath(SourceBuilder builder, String path) {
+            builder.path(path);
+        }
+
+        @Override
+        public void invalidateAfterPreinitialiation(Source source) {
+            ((SourceImpl) source).key.invalidateAfterPreinitialiation();
+        }
+
+        @Override
+        public void mergeLoadedSources(Source[] sources) {
+            for (Source s : sources) {
+                if (s instanceof SourceImpl) {
+                    Source.SOURCES.add(((SourceImpl) s));
+                }
+            }
+        }
+    }
+}

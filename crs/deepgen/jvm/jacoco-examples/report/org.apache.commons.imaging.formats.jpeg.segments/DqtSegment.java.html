@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DqtSegment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.jpeg.segments</a> &gt; <span class="el_source">DqtSegment.java</span></div><h1>DqtSegment.java</h1><pre class="source lang-java linenums">/*
+ *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  under the License.
+ */
+
+package org.apache.commons.imaging.formats.jpeg.segments;
+
+import static org.apache.commons.imaging.common.BinaryFunctions.read2Bytes;
+import static org.apache.commons.imaging.common.BinaryFunctions.readByte;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+
+public class DqtSegment extends AbstractSegment {
+    public static class QuantizationTable {
+        public final int precision;
+        public final int destinationIdentifier;
+        private final int[] elements;
+
+<span class="fc" id="L35">        public QuantizationTable(final int precision, final int destinationIdentifier, final int[] elements) {</span>
+<span class="fc" id="L36">            this.precision = precision;</span>
+<span class="fc" id="L37">            this.destinationIdentifier = destinationIdentifier;</span>
+<span class="fc" id="L38">            this.elements = elements;</span>
+<span class="fc" id="L39">        }</span>
+
+        /**
+         * @return the elements
+         */
+        public int[] getElements() {
+<span class="nc" id="L45">            return elements;</span>
+        }
+    }
+
+<span class="fc" id="L49">    public final List&lt;QuantizationTable&gt; quantizationTables = new ArrayList&lt;&gt;();</span>
+
+    public DqtSegment(final int marker, final byte[] segmentData) throws ImagingException, IOException {
+<span class="fc" id="L52">        this(marker, segmentData.length, new ByteArrayInputStream(segmentData));</span>
+<span class="fc" id="L53">    }</span>
+
+    public DqtSegment(final int marker, int length, final InputStream is) throws ImagingException, IOException {
+<span class="fc" id="L56">        super(marker, length);</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        while (length &gt; 0) {</span>
+<span class="fc" id="L59">            final int precisionAndDestination = readByte(&quot;QuantizationTablePrecisionAndDestination&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="fc" id="L60">            length--;</span>
+<span class="fc" id="L61">            final int precision = precisionAndDestination &gt;&gt; 4 &amp; 0xf;</span>
+<span class="fc" id="L62">            final int destinationIdentifier = precisionAndDestination &amp; 0xf;</span>
+
+<span class="fc" id="L64">            final int[] elements = new int[64];</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            for (int i = 0; i &lt; 64; i++) {</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                if (precision == 0) {</span>
+<span class="fc" id="L67">                    elements[i] = 0xff &amp; readByte(&quot;QuantizationTableElement&quot;, is, &quot;Not a Valid JPEG File&quot;);</span>
+<span class="fc" id="L68">                    length--;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                } else if (precision == 1) {</span>
+<span class="fc" id="L70">                    elements[i] = read2Bytes(&quot;QuantizationTableElement&quot;, is, &quot;Not a Valid JPEG File&quot;, getByteOrder());</span>
+<span class="fc" id="L71">                    length -= 2;</span>
+                } else {
+<span class="fc" id="L73">                    throw new ImagingException(&quot;Quantization table precision '&quot; + precision + &quot;' is invalid&quot;);</span>
+                }
+            }
+
+<span class="fc" id="L77">            quantizationTables.add(new QuantizationTable(precision, destinationIdentifier, elements));</span>
+<span class="fc" id="L78">        }</span>
+<span class="fc" id="L79">    }</span>
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L83">        return &quot;DQT (&quot; + getSegmentType() + &quot;)&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

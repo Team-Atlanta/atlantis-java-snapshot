@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HuffmanTree.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff.itu_t4</a> &gt; <span class="el_source">HuffmanTree.java</span></div><h1>HuffmanTree.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff.itu_t4;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.imaging.ImagingException;
+
+/**
+ * A Huffman tree implemented as 1 array for high locality of reference.
+ */
+<span class="nc" id="L28">final class HuffmanTree&lt;T&gt; {</span>
+<span class="nc" id="L29">    private static final class Node&lt;T&gt; {</span>
+<span class="nc" id="L30">        boolean empty = true;</span>
+        T value;
+    }
+
+<span class="nc" id="L34">    private final List&lt;Node&lt;T&gt;&gt; nodes = new ArrayList&lt;&gt;();</span>
+
+    public T decode(final BitInputStreamFlexible bitStream) throws ImagingException {
+<span class="nc" id="L37">        int position = 0;</span>
+<span class="nc" id="L38">        Node&lt;T&gt; node = nodes.get(0);</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        while (node.value == null) {</span>
+            int nextBit;
+            try {
+<span class="nc" id="L42">                nextBit = bitStream.readBits(1);</span>
+<span class="nc" id="L43">            } catch (final IOException ioEx) {</span>
+<span class="nc" id="L44">                throw new ImagingException(&quot;Error reading stream for huffman tree&quot;, ioEx);</span>
+<span class="nc" id="L45">            }</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">            if (nextBit == 0) {</span>
+<span class="nc" id="L47">                position = (position &lt;&lt; 1) + 1;</span>
+            } else {
+<span class="nc" id="L49">                position = position + 1 &lt;&lt; 1;</span>
+            }
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (position &gt;= nodes.size()) {</span>
+<span class="nc" id="L52">                throw new ImagingException(&quot;Invalid bit pattern&quot;);</span>
+            }
+<span class="nc" id="L54">            node = nodes.get(position);</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            if (node.empty) {</span>
+<span class="nc" id="L56">                throw new ImagingException(&quot;Invalid bit pattern&quot;);</span>
+            }
+<span class="nc" id="L58">        }</span>
+<span class="nc" id="L59">        return node.value;</span>
+    }
+
+    private Node&lt;T&gt; growAndGetNode(final int position) {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        while (position &gt;= nodes.size()) {</span>
+<span class="nc" id="L64">            nodes.add(new Node&lt;&gt;());</span>
+        }
+<span class="nc" id="L66">        final Node&lt;T&gt; node = nodes.get(position);</span>
+<span class="nc" id="L67">        node.empty = false;</span>
+<span class="nc" id="L68">        return node;</span>
+    }
+
+    public void insert(final String pattern, final T value) throws ImagingException {
+<span class="nc" id="L72">        int position = 0;</span>
+<span class="nc" id="L73">        Node&lt;T&gt; node = growAndGetNode(position);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (node.value != null) {</span>
+<span class="nc" id="L75">            throw new ImagingException(&quot;Can't add child to a leaf&quot;);</span>
+        }
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (int patternPosition = 0; patternPosition &lt; pattern.length(); patternPosition++) {</span>
+<span class="nc" id="L78">            final char nextChar = pattern.charAt(patternPosition);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (nextChar == '0') {</span>
+<span class="nc" id="L80">                position = (position &lt;&lt; 1) + 1;</span>
+            } else {
+<span class="nc" id="L82">                position = position + 1 &lt;&lt; 1;</span>
+            }
+<span class="nc" id="L84">            node = growAndGetNode(position);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            if (node.value != null) {</span>
+<span class="nc" id="L86">                throw new ImagingException(&quot;Can't add child to a leaf&quot;);</span>
+            }
+        }
+<span class="nc" id="L89">        node.value = value;</span>
+<span class="nc" id="L90">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

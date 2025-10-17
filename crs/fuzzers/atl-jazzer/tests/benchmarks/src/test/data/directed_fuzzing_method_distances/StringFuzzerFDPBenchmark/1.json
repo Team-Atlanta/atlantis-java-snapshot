@@ -1,0 +1,25 @@
+{
+  "target_location": {
+    "coord": {
+      "line_num": -1,
+      "method_name": "secondStage",
+      "file_name": "StringFuzzerFDPTarget.java",
+      "bytecode_offset": 0,
+      "method_desc": "(B)V",
+      "method_signature": "com.example.StringFuzzerFDPTarget: void secondStage(byte)",
+      "class_name": "com.example.StringFuzzerFDPTarget"
+    },
+    "ana_reachability": {
+      "StringFuzzerFDP": true
+    },
+    "ana_exploitability": {}
+  },
+  "distance_map": {
+    "com.example.StringFuzzerFDPTarget: void secondStage(byte)": {
+      "method_distance": 0
+    },
+    "com.example.StringFuzzerFDP: void fuzzerTestOneInput(com.code_intelligence.jazzer.api.FuzzedDataProvider)": {
+      "method_distance": 50
+    }
+  }
+}

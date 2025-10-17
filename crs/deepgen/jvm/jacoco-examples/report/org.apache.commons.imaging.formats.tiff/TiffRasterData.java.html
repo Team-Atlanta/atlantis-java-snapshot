@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiffRasterData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCo Coverage Report</a> &gt; <a href="index.source.html" class="el_package">org.apache.commons.imaging.formats.tiff</a> &gt; <span class="el_source">TiffRasterData.java</span></div><h1>TiffRasterData.java</h1><pre class="source lang-java linenums">/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the &quot;License&quot;); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.commons.imaging.formats.tiff;
+
+/**
+ * Provides a simple container for numeric-raster data. Some TIFF files are used to store floating-point or integer data rather than images. This class is
+ * intended to support access to those TIFF files.
+ * &lt;p&gt;
+ * &lt;strong&gt;Note:&lt;/strong&gt; The getData() and getIntData() methods can return direct references to the internal arrays stored in instances of this class. Because
+ * these are not safe copies of the data, an application that modified the arrays returned by these methods will change the content of the associated instance.
+ * This approach is used for purposes of efficiency when dealing with very large TIFF images.
+ * &lt;p&gt;
+ * &lt;strong&gt;Data layout:&lt;/strong&gt; The elements in the returned array are stored in row-major order. In cases where the data contains multiple samples per raster
+ * cell (pixel), the data is organized into blocks of data one sample at a time. The first block contains width*height values for the first sample for each
+ * cell, the second block contains width*height values for the second sample for each cell, etc. Thus, the array index for a particular value is computed as
+ *
+ * &lt;pre&gt;
+ * index = y * width + x + iSample * width * height;
+ * &lt;/pre&gt;
+ */
+public abstract class TiffRasterData {
+
+    protected final int width;
+    protected final int height;
+    protected final int samplesPerPixel;
+    protected final int nCells;
+    protected final int planarOffset;
+
+    /**
+     * Constructs an instance allocating memory for the specified dimensions.
+     *
+     * @param width           a value of 1 or greater
+     * @param height          a value of 1 or greater
+     * @param samplesPerPixel a value of 1 or greater
+     */
+<span class="nc" id="L50">    public TiffRasterData(final int width, final int height, final int samplesPerPixel) {</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">        if (width &lt;= 0 || height &lt;= 0) {</span>
+<span class="nc" id="L52">            throw new IllegalArgumentException(&quot;Raster dimensions less than or equal to zero are not supported&quot;);</span>
+        }
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (samplesPerPixel &lt;= 0) {</span>
+<span class="nc" id="L55">            throw new IllegalArgumentException(&quot;Raster samples-per-pixel specification must be at least 1&quot;);</span>
+        }
+<span class="nc" id="L57">        this.width = width;</span>
+<span class="nc" id="L58">        this.height = height;</span>
+<span class="nc" id="L59">        this.samplesPerPixel = samplesPerPixel;</span>
+<span class="nc" id="L60">        nCells = width * height * samplesPerPixel;</span>
+<span class="nc" id="L61">        planarOffset = width * height;</span>
+<span class="nc" id="L62">    }</span>
+
+    protected final int checkCoordinatesAndComputeIndex(final int x, final int y, final int i) {
+<span class="nc bnc" id="L65" title="All 8 branches missed.">        if (x &lt; 0 || x &gt;= width || y &lt; 0 || y &gt;= height) {</span>
+<span class="nc" id="L66">            throw new IllegalArgumentException(&quot;Coordinates out of range (&quot; + x + &quot;, &quot; + y + &quot;)&quot;);</span>
+        }
+<span class="nc bnc" id="L68" title="All 4 branches missed.">        if (i &lt; 0 || i &gt;= samplesPerPixel) {</span>
+<span class="nc" id="L69">            throw new IllegalArgumentException(&quot;Sample index out of range, value &quot; + i + &quot; where valid range is (0,&quot; + (samplesPerPixel - 1) + &quot;)&quot;);</span>
+        }
+<span class="nc" id="L71">        return y * width + x + i * planarOffset;</span>
+    }
+
+    /**
+     * Returns the content stored as an array in this instance. Note that in many cases, the returned array is &lt;strong&gt;not&lt;/strong&gt; a safe copy of the data but
+     * a direct reference to the member element. In such cases, modifying it would directly affect the content of the instance. While this design approach
+     * carries some risk in terms of data security, it was chosen for reasons of performance and memory conservation. TIFF images that contain floating-point
+     * data are often quite large. Sizes of 100 million raster cells are common. Making a redundant copy of such a large in-memory object might exceed the
+     * resources available to a Java application.
+     * &lt;p&gt;
+     * See the class API documentation above for notes on accessing array elements.
+     *
+     * @return the data content stored in this instance.
+     */
+    public abstract float[] getData();
+
+    /**
+     * Gets the raster data type from the instance.
+     *
+     * @return a valid enumeration value.
+     */
+    public abstract TiffRasterDataType getDataType();
+
+    /**
+     * Gets the height (number of rows) of the raster.
+     *
+     * @return the height of the raster.
+     */
+    public final int getHeight() {
+<span class="nc" id="L100">        return height;</span>
+    }
+
+    /**
+     * Returns the content stored as an array in this instance. Note that in many cases, the returned array is &lt;strong&gt;not&lt;/strong&gt; a safe copy of the data but
+     * a direct reference to the member element. In such cases, modifying it would directly affect the content of the instance. While this design approach
+     * carries some risk in terms of data security, it was chosen for reasons of performance and memory conservation. TIFF images that contain floating-point
+     * data are often quite large. Sizes of 100 million raster cells are common. Making a redundant copy of such a large in-memory object might exceed the
+     * resources available to a Java application.
+     * &lt;p&gt;
+     * See the class API documentation above for notes on accessing array elements.
+     *
+     * @return the data content stored in this instance.
+     */
+    public abstract int[] getIntData();
+
+    /**
+     * Gets the value stored at the specified raster coordinates.
+     *
+     * @param x integer coordinate in the columnar direction
+     * @param y integer coordinate in the row direction
+     * @return the value stored at the specified location
+     */
+    public abstract int getIntValue(int x, int y);
+
+    /**
+     * Gets the value stored at the specified raster coordinates.
+     *
+     * @param x integer coordinate in the columnar direction
+     * @param y integer coordinate in the row direction
+     * @param i integer sample index (for data sets giving multiple samples per raster cell).
+     * @return the value stored at the specified location
+     */
+    public abstract int getIntValue(int x, int y, int i);
+
+    /**
+     * Gets the number of samples per pixel.
+     *
+     * @return a value of 1 or greater.
+     */
+    public final int getSamplesPerPixel() {
+<span class="nc" id="L141">        return samplesPerPixel;</span>
+    }
+
+    /**
+     * Tabulates simple statistics for the raster and returns an instance containing general metadata.
+     *
+     * @return a valid instance containing a safe copy of the current simple statistics for the raster.
+     */
+    public abstract TiffRasterStatistics getSimpleStatistics();
+
+    /**
+     * Tabulates simple statistics for the raster excluding the specified value and returns an instance containing general metadata.
+     *
+     * @param valueToExclude exclude samples with this specified value.
+     * @return a valid instance.
+     */
+    public abstract TiffRasterStatistics getSimpleStatistics(float valueToExclude);
+
+    /**
+     * Gets the value stored at the specified raster coordinates.
+     *
+     * @param x integer coordinate in the columnar direction
+     * @param y integer coordinate in the row direction
+     * @return the value stored at the specified location; potentially a Float&amp;#46;NaN.
+     */
+    public abstract float getValue(int x, int y);
+
+    /**
+     * Gets the value stored at the specified raster coordinates.
+     *
+     * @param x integer coordinate in the columnar direction
+     * @param y integer coordinate in the row direction
+     * @param i integer sample index
+     * @return the value stored at the specified location; potentially a Float&amp;#46;NaN.
+     */
+    public abstract float getValue(int x, int y, int i);
+
+    /**
+     * Gets the width (number of columns) of the raster.
+     *
+     * @return the width of the raster
+     */
+    public final int getWidth() {
+<span class="nc" id="L184">        return width;</span>
+    }
+
+    /**
+     * Sets the value stored at the specified raster coordinates.
+     *
+     * @param x     integer coordinate in the columnar direction
+     * @param y     integer coordinate in the row direction
+     * @param value the value to be stored at the specified location.
+     */
+    public abstract void setIntValue(int x, int y, int value);
+
+    /**
+     * Sets the value stored at the specified raster coordinates.
+     *
+     * @param x     integer coordinate in the columnar direction
+     * @param y     integer coordinate in the row direction
+     * @param i     integer sample index (for data sets giving multiple samples per raster cell).
+     * @param value the value to be stored at the specified location.
+     */
+    public abstract void setIntValue(int x, int y, int i, int value);
+
+    /**
+     * Sets the value stored at the specified raster coordinates.
+     *
+     * @param x     integer coordinate in the columnar direction
+     * @param y     integer coordinate in the row direction
+     * @param value the value to be stored at the specified location; potentially a Float&amp;#46;NaN.
+     */
+    public abstract void setValue(int x, int y, float value);
+
+    /**
+     * Sets the value stored at the specified raster coordinates.
+     *
+     * @param x     integer coordinate in the columnar direction
+     * @param y     integer coordinate in the row direction
+     * @param i     integer sample index (for data sets giving multiple samples per raster cell).
+     * @param value the value to be stored at the specified location; potentially a Float&amp;#46;NaN.
+     */
+    public abstract void setValue(int x, int y, int i, float value);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
