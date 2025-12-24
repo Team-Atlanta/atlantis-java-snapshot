@@ -243,3 +243,27 @@ def get_sarif_shared_codeql_db_done_file() -> Path | None:
         return tarball_fs_dir / "crs-sarif" / "out" / "CODEQL_DONE"
 
     return None
+
+
+def get_oss_crs_artifact_corpus_dir() -> Path | None:
+    """Get the OSS_CRS_ARTIFACT_CORPUS directory."""
+    artifact_corpus_dir = os.getenv("OSS_CRS_ARTIFACT_CORPUS", None)
+    if artifact_corpus_dir:
+        corpus_dir = Path(artifact_corpus_dir)
+        if not corpus_dir.exists():
+            corpus_dir.mkdir(parents=True, exist_ok=True)
+        return corpus_dir
+
+    return None
+
+
+def get_oss_crs_artifact_pov_dir() -> Path | None:
+    """Get the OSS_CRS_ARTIFACT_POV directory."""
+    artifact_pov_dir = os.getenv("OSS_CRS_ARTIFACT_POV", None)
+    if artifact_pov_dir:
+        pov_dir = Path(artifact_pov_dir)
+        if not pov_dir.exists():
+            pov_dir.mkdir(parents=True, exist_ok=True)
+        return pov_dir
+
+    return None

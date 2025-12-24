@@ -142,6 +142,8 @@ setup_rest_env() {
   export CRS_JAVA_SHARE_DIR="/crs-java-shared-`basename $CRS_TARGET`"
   export CRS_JAVA_TEST_ENV_ROLE="leader"
   export TARBALL_FS_DIR="/tarball-fs"
+  export OSS_CRS_ARTIFACT_CORPUS="/artifacts/corpus"
+  export OSS_CRS_ARTIFACT_POV="/artifacts/povs"
   unset JAVA_CRS_IN_COMPETITION
 }
 

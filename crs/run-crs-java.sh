@@ -74,6 +74,8 @@ run_crs() {
     export CRS_JAVA_TEST_ENV_ROLE="leader"
     export TARBALL_FS_DIR="/tarball-fs"
     export CRS_WORKDIR=/out/crs-workdir
+    export OSS_CRS_ARTIFACT_CORPUS="/artifacts/corpus"
+    export OSS_CRS_ARTIFACT_POV="/artifacts/povs"
 
     update_crs_cfg
 

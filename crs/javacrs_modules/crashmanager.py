@@ -12,7 +12,8 @@ from pydantic import BaseModel, Field, field_validator
 
 from .base_objs import Crash, InsnCoordinate, Sinkpoint
 from .jazzer import Jazzer, is_fuzzing_module
-from .utils import CRS_ERR_LOG, CRS_WARN_LOG, stream_load_json
+from .utils import CRS_ERR_LOG, CRS_WARN_LOG, atomic_write_file_frm_path, stream_load_json
+from .utils_nfs import get_oss_crs_artifact_pov_dir
 from .utils_path_traversal import extract_paths_from_binary
 
 CRS_ERR = CRS_ERR_LOG("crashmanager")
@@ -143,6 +144,25 @@ class CrashManager(Module):
             if not self._can_skip_crash(hrunner, result_json_path, crash):
                 yield crash
 
+    async def _save_oss_crs_pov(self, hrunner, artifact_path: Path):
+        """Save POV artifact to OSS_CRS_ARTIFACT_POV directory."""
+        artifact_pov_dir = get_oss_crs_artifact_pov_dir()
+        if not artifact_pov_dir:
+            return
+
+        pov_artifact_path = artifact_pov_dir / artifact_path.name
+        try:
+            await atomic_write_file_frm_path(pov_artifact_path, artifact_path)
+            self.logH(
+                None,
+                f"Copied POV artifact to {pov_artifact_path}",
+            )
+        except Exception as e:
+            self.logH(
+                None,
+                f"{CRS_ERR} Failed to copy POV artifact {artifact_path} to {pov_artifact_path}: {str(e)} {traceback.format_exc()}",
+            )
+
     async def _report_crash(
         self,
         hrunner,
@@ -153,6 +173,8 @@ class CrashManager(Module):
     ):
         sanitizer_output_hash = f"{hrunner.harness.name}, {artifact_path.name}, {exp_id}, {frame_id}, {sink_coord}"
         finder = "javacrs"
+
+        await self._save_oss_crs_pov(hrunner, artifact_path)
         await self.crs.async_submit_pov(
             hrunner.harness, artifact_path, sanitizer_output_hash, finder
         )
