@@ -23,6 +23,7 @@ from .utils import (
     is_jazzer_gen_seed,
     run_process_and_capture_output,
 )
+from .utils_nfs import get_oss_crs_artifact_corpus_dir
 
 CRS_ERR = CRS_ERR_LOG("seedsharer-mod")
 CRS_WARN = CRS_WARN_LOG("seedsharer-mod")
@@ -305,23 +306,21 @@ class SeedSharer(Module):
         command_sh.chmod(0o755)
         return command_sh
 
-    async def _send_new_seeds_to_seedmerger(self, harness_name, seed_path_pairs):
-        seedmerger = self.crs.seedmerger
-        if not seedmerger.enabled:
-            self.logH(
-                None,
-                f"Seed merger is not enabled, skipping sending {len(seed_path_pairs)} new seeds for {harness_name}",
-            )
-            return
+    async def _copy_seeds_to_dir(
+        self, harness_name, seed_path_pairs, tgt_dir, purpose_name
+    ):
+        """
+        Copy seeds to a target directory.
 
-        tgt_dir = seedmerger.try_get_expected_merge_from_dir(harness_name)
-        if not tgt_dir:
-            self.logH(
-                None,
-                f"{CRS_WARN} Could not get target directory for harness {harness_name}",
-            )
-            return
+        Args:
+            harness_name: Name of the harness
+            seed_path_pairs: List of (seed_path, del_after_cp) tuples
+            tgt_dir: Target directory to copy seeds to
+            purpose_name: Name of the purpose (for logging, e.g., "seedmerger", "artifact corpus")
 
+        Returns:
+            Number of seeds successfully copied
+        """
         if not tgt_dir.exists():
             tgt_dir.mkdir(parents=True, exist_ok=True)
 
@@ -341,17 +340,17 @@ class SeedSharer(Module):
                 except FileNotFoundError:
                     self.logH(
                         None,
-                        f"Eat the FileNotFoundError in seedmerger seed transfer: {seed_path}",
+                        f"Eat the FileNotFoundError in {purpose_name} seed transfer: {seed_path}",
                     )
             self.logH(
                 None,
-                f"Sent {ttl_num} seeds to seedmerger for {harness_name}, deleted {ttl_del} after copy",
+                f"Sent {ttl_num} seeds to {purpose_name} for {harness_name}, deleted {ttl_del} after copy",
             )
-            return
+            return ttl_num
 
         # For larger numbers, use rsync with files-from
         timestamp = int(time.time())
-        list_file_path = self.workdir / f"{harness_name}_{timestamp}_rsync_list.txt"
+        list_file_path = self.workdir / f"{harness_name}_{timestamp}_{purpose_name.replace(' ', '_')}_rsync_list.txt"
 
         async with aiofiles.open(list_file_path, "w") as list_file:
             contents = "\n".join(
@@ -371,8 +370,8 @@ class SeedSharer(Module):
             f"{str(tgt_dir)}/",
         ]
 
-        script_name = f"{harness_name}_{timestamp}_rsync.sh"
-        log_file = self.workdir / f"{harness_name}_{timestamp}_rsync.log"
+        script_name = f"{harness_name}_{timestamp}_{purpose_name.replace(' ', '_')}_rsync.sh"
+        log_file = self.workdir / f"{harness_name}_{timestamp}_{purpose_name.replace(' ', '_')}_rsync.log"
 
         try:
             command_sh = await self._create_command_sh(cmd, script_name)
@@ -381,13 +380,13 @@ class SeedSharer(Module):
             if ret not in [0, 23, 24]:
                 self.logH(
                     None,
-                    f"{CRS_ERR} Failed to send new seeds to seedmerger for {harness_name} {list_file_path}: ret {ret}",
+                    f"{CRS_ERR} Failed to send new seeds to {purpose_name} for {harness_name} {list_file_path}: ret {ret}",
                 )
             else:
                 if self.crs.verbose:
                     self.logH(
                         None,
-                        f"Successfully sent {len(seed_path_pairs)} seeds to seedmerger for {harness_name} {list_file_path}: ret {ret}",
+                        f"Successfully sent {len(seed_path_pairs)} seeds to {purpose_name} for {harness_name} {list_file_path}: ret {ret}",
                     )
 
             # Clean up the seed_path whose del_after_cp is True
@@ -404,14 +403,66 @@ class SeedSharer(Module):
                         )
             self.logH(
                 None,
-                f"Deleted {ttl_del} seeds after sending to seedmerger for {harness_name}",
+                f"Deleted {ttl_del} seeds after sending to {purpose_name} for {harness_name}",
             )
+
+            return len(seed_path_pairs)
 
         except Exception as e:
             self.logH(
                 None,
-                f"{CRS_ERR} Error sending new seeds to seedmerger for {harness_name} {list_file_path}: {str(e)} {traceback.format_exc()}",
+                f"{CRS_ERR} Error sending new seeds to {purpose_name} for {harness_name} {list_file_path}: {str(e)} {traceback.format_exc()}",
             )
+            return 0
+
+    async def _copy_seeds_to_artifact_corpus(self, harness_name, seed_path_pairs):
+        """Copy seeds to OSS_CRS_ARTIFACT_CORPUS directory."""
+        seedmerger = self.crs.seedmerger
+        if not seedmerger.enabled:
+            self.logH(
+                None,
+                f"Seed merger is not enabled, skipping sending {len(seed_path_pairs)} new seeds for {harness_name}",
+            )
+            return
+
+        artifact_corpus_dir = get_oss_crs_artifact_corpus_dir()
+        if not artifact_corpus_dir:
+            return
+
+        # NOTE: Use del_after_cp=False for artifact copy to preserve original files
+        artifact_seed_pairs = [(path, False) for path, _ in seed_path_pairs]
+
+        try:
+            await self._copy_seeds_to_dir(
+                harness_name, artifact_seed_pairs, artifact_corpus_dir, "osscrs"
+            )
+        except Exception as e:
+            self.logH(
+                None,
+                f"{CRS_ERR} Error copying seeds to artifact corpus for {harness_name}: {str(e)} {traceback.format_exc()}",
+            )
+
+    async def _send_new_seeds_to_seedmerger(self, harness_name, seed_path_pairs):
+        seedmerger = self.crs.seedmerger
+        if not seedmerger.enabled:
+            self.logH(
+                None,
+                f"Seed merger is not enabled, skipping sending {len(seed_path_pairs)} new seeds for {harness_name}",
+            )
+            return
+
+        tgt_dir = seedmerger.try_get_expected_merge_from_dir(harness_name)
+        if not tgt_dir:
+            self.logH(
+                None,
+                f"{CRS_WARN} Could not get target directory for harness {harness_name}",
+            )
+            return
+
+        # Copy seeds to seedmerger
+        await self._copy_seeds_to_dir(
+            harness_name, seed_path_pairs, tgt_dir, "seedmerger"
+        )
 
     async def _process_seed_queue(self):
         """Process seeds from the async queue."""
@@ -464,6 +515,11 @@ class SeedSharer(Module):
                     tasks.append(self._record_seedmerger_new_seeds(frm_seedmerger))
                 if len(to_seedmerger) > 0:
                     for harness_name, seed_path_pairs in to_seedmerger.items():
+                        tasks.append(
+                            self._copy_seeds_to_artifact_corpus(
+                                harness_name, seed_path_pairs
+                            )
+                        )
                         tasks.append(
                             self._send_new_seeds_to_seedmerger(
                                 harness_name, seed_path_pairs
