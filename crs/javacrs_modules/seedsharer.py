@@ -417,14 +417,6 @@ class SeedSharer(Module):
 
     async def _copy_seeds_to_artifact_corpus(self, harness_name, seed_path_pairs):
         """Copy seeds to OSS_CRS_ARTIFACT_CORPUS directory."""
-        seedmerger = self.crs.seedmerger
-        if not seedmerger.enabled:
-            self.logH(
-                None,
-                f"Seed merger is not enabled, skipping sending {len(seed_path_pairs)} new seeds for {harness_name}",
-            )
-            return
-
         artifact_corpus_dir = get_oss_crs_artifact_corpus_dir()
         if not artifact_corpus_dir:
             return
