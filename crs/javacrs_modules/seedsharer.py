@@ -170,8 +170,11 @@ class DirectoryScannerManager:
 
         for hrunner in self.seedsharer.crs.hrunners:
             seedmerger = self.seedsharer.crs.seedmerger
-            if seedmerger.enabled:
-                # Monitor all harness corpus dirs for seedmerger
+            artifact_corpus_dir = get_oss_crs_artifact_corpus_dir()
+
+            # Monitor if either seedmerger is enabled OR artifact corpus is configured
+            if seedmerger.enabled or artifact_corpus_dir:
+                # Monitor all harness corpus dirs
                 for jazzer_mod in self.seedsharer._get_enabled_fuzzing_modules():
                     corpus_dirs = await jazzer_mod.get_expected_corpus_dirs(hrunner)
                     for corpus_dir in corpus_dirs:
@@ -179,7 +182,8 @@ class DirectoryScannerManager:
                             hrunner.harness.name, jazzer_mod.name, corpus_dir
                         )
 
-                # Monitor seedmerger output dir for all harnesses
+            # Monitor seedmerger output dir for all harnesses (only if seedmerger is enabled)
+            if seedmerger.enabled:
                 corpus_dir = seedmerger.get_expected_full_cov_dir(hrunner)
                 self.add_directory(hrunner.harness.name, seedmerger.name, corpus_dir)
 
