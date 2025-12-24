@@ -77,46 +77,48 @@ RUN mkdir /classpath && mkdir /classpath/atl-jazzer && \
 #################################################################################
 ## Staged Images - Prebuilt atl-libafl-jazzer
 #################################################################################
-FROM aixcc_afc_builder_base AS atl_jazzer_libafl_builder
-
-# libAFL requires bindgen which requires libclang.
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y libclang-dev
-
-COPY crs/fuzzers/atl-libafl-jazzer /app/crs-cp-java/fuzzers/atl-libafl-jazzer
-COPY crs/fuzzers/jazzer-libafl /app/crs-cp-java/fuzzers/jazzer-libafl
-WORKDIR /app/crs-cp-java/fuzzers/atl-libafl-jazzer
-RUN yes | adduser --disabled-password builder && \
-    chown -R builder . && chown -R builder ../jazzer-libafl/
-
-USER builder:builder
-# Install Rust.
-RUN curl https://sh.rustup.rs -sSf | sh -s -- --component llvm-tools --default-toolchain nightly-2025-06-04 -y
-ENV PATH="/home/builder/.cargo/bin:${PATH}"
-RUN ln -sf /home/builder/.rustup/toolchains/nightly-2025-06-04-x86_64-unknown-linux-gnu /home/builder/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
-RUN echo "build --java_runtime_version=local_jdk_17" >> .bazelrc \
-    && echo "build --cxxopt=-stdlib=libc++" >> .bazelrc \
-    && echo "build --linkopt=-lc++" >> .bazelrc
-RUN echo "build --experimental_repository_downloader_retries=5" >> .bazelrc \
-    && echo "build --http_timeout_scaling=2" >> .bazelrc \
-    && echo "build --repository_cache=/home/builder/.cache/bazel-repo" >> .bazelrc
-RUN bazel build \
-    //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar \
-    //deploy:jazzer-api \
-    //deploy:jazzer-junit \
-    //launcher:jazzer
-RUN mkdir out && \
-    cp $(bazel cquery --output=files //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar) out/jazzer_agent_deploy.jar && \
-    cp $(bazel cquery --output=files //launcher:jazzer) out/jazzer_driver && \
-    cp $(bazel cquery --output=files //deploy:jazzer-api) out/jazzer_api_deploy.jar && \
-    cp $(bazel cquery --output=files //deploy:jazzer-junit) out/jazzer_junit.jar
-
-USER root
-RUN mkdir /classpath && mkdir /classpath/atl-libafl-jazzer && \
-    cp out/jazzer_agent_deploy.jar /classpath/atl-libafl-jazzer/jazzer_standalone_deploy.jar && \
-    cp out/jazzer_driver /classpath/atl-libafl-jazzer/jazzer && \
-    cp out/jazzer_junit.jar /classpath/atl-libafl-jazzer/ && \
-    cp out/jazzer_api_deploy.jar /classpath/atl-libafl-jazzer/
+#FROM aixcc_afc_builder_base AS atl_jazzer_libafl_builder
+#
+## libAFL requires bindgen which requires libclang.
+#ENV DEBIAN_FRONTEND=noninteractive
+#RUN apt-get update && apt-get install -y libclang-dev
+#
+#COPY crs/fuzzers/atl-libafl-jazzer /app/crs-cp-java/fuzzers/atl-libafl-jazzer
+#COPY crs/fuzzers/jazzer-libafl /app/crs-cp-java/fuzzers/jazzer-libafl
+#WORKDIR /app/crs-cp-java/fuzzers/atl-libafl-jazzer
+#RUN yes | adduser --disabled-password builder && \
+#    chown -R builder . && chown -R builder ../jazzer-libafl/
+#
+#USER builder:builder
+## Install Rust.
+#RUN curl https://sh.rustup.rs -sSf | sh -s -- --component llvm-tools --default-toolchain nightly-2025-06-04 -y
+#ENV PATH="/home/builder/.cargo/bin:${PATH}"
+#RUN ln -sf /home/builder/.rustup/toolchains/nightly-2025-06-04-x86_64-unknown-linux-gnu /home/builder/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu
+#RUN echo "build --java_runtime_version=local_jdk_17" >> .bazelrc \
+#    && echo "build --cxxopt=-stdlib=libc++" >> .bazelrc \
+#    && echo "build --linkopt=-lc++" >> .bazelrc
+#RUN echo "build --experimental_repository_downloader_retries=5" >> .bazelrc \
+#    && echo "build --http_timeout_scaling=2" >> .bazelrc \
+#    && echo "build --repository_cache=/home/builder/.cache/bazel-repo" >> .bazelrc
+#ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+#ENV RUSTFLAGS="-Z minimal-versions"
+#RUN bazel build \
+#    //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar \
+#    //deploy:jazzer-api \
+#    //deploy:jazzer-junit \
+#    //launcher:jazzer
+#RUN mkdir out && \
+#    cp $(bazel cquery --output=files //src/main/java/com/code_intelligence/jazzer:jazzer_standalone_deploy.jar) out/jazzer_agent_deploy.jar && \
+#    cp $(bazel cquery --output=files //launcher:jazzer) out/jazzer_driver && \
+#    cp $(bazel cquery --output=files //deploy:jazzer-api) out/jazzer_api_deploy.jar && \
+#    cp $(bazel cquery --output=files //deploy:jazzer-junit) out/jazzer_junit.jar
+#
+#USER root
+#RUN mkdir /classpath && mkdir /classpath/atl-libafl-jazzer && \
+#    cp out/jazzer_agent_deploy.jar /classpath/atl-libafl-jazzer/jazzer_standalone_deploy.jar && \
+#    cp out/jazzer_driver /classpath/atl-libafl-jazzer/jazzer && \
+#    cp out/jazzer_junit.jar /classpath/atl-libafl-jazzer/ && \
+#    cp out/jazzer_api_deploy.jar /classpath/atl-libafl-jazzer/
 
 #################################################################################
 ## Staged Images - Concolic Engine Build (/graal-jdk)
@@ -200,7 +202,7 @@ RUN mkdir -p $JAVA_CRS_SRC && chmod -R 0755 $JAVA_CRS_SRC
 ## CRS-java fuzzer binaries
 COPY --from=aixcc_jazzer_builder /classpath/aixcc-jazzer /classpath/aixcc-jazzer
 COPY --from=atl_jazzer_builder /classpath/atl-jazzer /classpath/atl-jazzer
-COPY --from=atl_jazzer_libafl_builder /classpath/atl-libafl-jazzer /classpath/atl-libafl-jazzer
+COPY --from=atl_jazzer_builder /classpath/atl-jazzer /classpath/atl-libafl-jazzer
 COPY ./crs/fuzzers/mock-jazzer /classpath/mock-jazzer
 ENV AIXCC_JAZZER_DIR=/classpath/aixcc-jazzer
 ENV ATL_JAZZER_DIR=/classpath/atl-jazzer
