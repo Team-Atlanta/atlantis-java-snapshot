@@ -226,12 +226,8 @@ def update_cfg_from_env(conf: dict) -> dict:
             print("CPUSET_CPUS must be in comma-separated integer format (e.g., '0,1,2,3')")
             sys.exit(1)
     else:
-        # Use all host CPUs if CPUSET_CPUS is not set
-        host_ncpu = os.cpu_count()
-        if host_ncpu is None:
-            print("ERROR: Unable to determine host CPU count")
-            sys.exit(1)
-        ttl_core_ids = list(range(host_ncpu))
+        # Use available CPUs (respects cgroup/cpuset constraints)
+        ttl_core_ids = sorted(os.sched_getaffinity(0))
         conf["modules"]["cpuallocator"]["ttl_core_ids"] = ttl_core_ids
         print(f"[Using all host CPUs] Set ttl_core_ids: {ttl_core_ids}")
 

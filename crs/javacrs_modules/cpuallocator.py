@@ -94,22 +94,22 @@ class CPUAllocator(Module):
         self.skipped_mods = self.params.skipped_mods
 
     def _init_usable_core_ids(self):
-        host_ncpu = os.cpu_count()
+        available_cpus = sorted(os.sched_getaffinity(0))
+        host_ncpu = len(available_cpus)
 
         if len(self.params.ttl_core_ids) == 0:
-            if host_ncpu is None or host_ncpu < 2:
+            if host_ncpu < 2:
                 raise ValueError(
-                    "Cannot retrieve host cpu info or has less than 2 cores"
+                    "Available CPU cores less than 2"
                 )
 
-            ttl_core_ids = []
             cpubaseno: int = self.params.cpubaseno
             maxncpu: int = self.params.maxncpu if self.params.maxncpu > 0 else host_ncpu
             if cpubaseno + maxncpu > host_ncpu:
                 raise ValueError(
-                    f"cpubaseno({cpubaseno}) + maxncpu({maxncpu}) > host_ncpu({host_ncpu})"
+                    f"cpubaseno({cpubaseno}) + maxncpu({maxncpu}) > available cpus({host_ncpu})"
                 )
-            ttl_core_ids = list(range(cpubaseno, cpubaseno + maxncpu))
+            ttl_core_ids = available_cpus[cpubaseno : cpubaseno + maxncpu]
 
             return ttl_core_ids, maxncpu
         else:
@@ -117,12 +117,11 @@ class CPUAllocator(Module):
                 raise ValueError("The total number of CPU cores must be greater than 1")
 
             self.params.ttl_core_ids.sort()
-            if (
-                self.params.ttl_core_ids[0] < 0
-                or self.params.ttl_core_ids[-1] >= host_ncpu
-            ):
+            available_set = set(available_cpus)
+            invalid = [c for c in self.params.ttl_core_ids if c not in available_set]
+            if invalid:
                 raise ValueError(
-                    "The total number of CPU cores must be in [0, host_ncpu)"
+                    f"Requested CPU cores {invalid} not in available set {available_cpus}"
                 )
 
             return self.params.ttl_core_ids, len(self.params.ttl_core_ids)
