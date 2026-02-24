@@ -1,0 +1,37 @@
+name: atlantis-java-main
+type:
+  - bug-finding
+version: 1.0.0
+docker_registry: ghcr.io/team-atlanta/atlantis-java-main
+
+target_build_phase:
+  - name: build
+    dockerfile: oss-crs/dockerfiles/builder.Dockerfile
+    outputs:
+      - build
+      - crs/proj
+      - crs/src
+
+crs_run_phase:
+  runner:
+    dockerfile: oss-crs/dockerfiles/runner.Dockerfile
+
+supported_target:
+  mode:
+    - full
+    - delta
+  language:
+    - jvm
+  sanitizer:
+    - address
+  architecture:
+    - x86_64
+
+required_llms:
+  - claude-sonnet-4-20250514
+  - claude-opus-4-20250514
+  - gpt-4.1
+  - gpt-4o
+  - gpt-5
+  - o3
+  - o4-mini
