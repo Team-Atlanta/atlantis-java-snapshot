@@ -22,9 +22,14 @@ libCRS register-submit-dir seed /artifacts/corpus
 #    Framework injects OSS_CRS_* vars,
 #    run-crs-java.sh expects different names
 #############################################
+# 2.5. Start local Redis for expkit caching
+redis-server --daemonize yes --loglevel warning
+export CPMETA_REDIS_URL="redis://localhost:6379"
+
 export CRS_TARGET="${OSS_CRS_TARGET}"
 export LITELLM_URL="${OSS_CRS_LLM_API_URL}"
 export LITELLM_KEY="${OSS_CRS_LLM_API_KEY}"
+export AIXCC_LITELLM_HOSTNAME="${OSS_CRS_LLM_API_URL}"
 
 #############################################
 # 4. Run the original CRS entry point

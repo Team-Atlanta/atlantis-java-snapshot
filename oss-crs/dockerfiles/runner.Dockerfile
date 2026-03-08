@@ -247,6 +247,9 @@ RUN mkdir -p ${JAVA_CRS_SRC}/llm-poc-gen/eval/sheet && \
 ## oss-crs integration layer
 #################################################################################
 
+# Redis for expkit caching
+RUN apt-get update && apt-get install -y --no-install-recommends redis-server && rm -rf /var/lib/apt/lists/*
+
 # Install framework libCRS (provided as additional_context by oss-crs)
 COPY --from=libcrs . /libCRS
 RUN /libCRS/install.sh

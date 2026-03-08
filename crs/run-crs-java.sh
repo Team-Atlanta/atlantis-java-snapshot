@@ -95,15 +95,15 @@ setup_llm() {
         echo "Using default LITELLM_URL: http://litellm:4000"
     fi
 
-    # Setup LiteLLM API key
-    if LITELLM_KEY=$(cat /keys/api_key 2>&1); then
-        export LITELLM_KEY
+    # Setup LiteLLM API key (priority: /keys/api_key > env LITELLM_KEY > fake-key)
+    if _key=$(cat /keys/api_key 2>/dev/null); then
+        export LITELLM_KEY="$_key"
         echo "LITELLM_KEY retrieved successfully from /keys/api_key"
+    elif [ -n "$LITELLM_KEY" ]; then
+        echo "Using provided LITELLM_KEY from environment"
     else
-        error_msg="$LITELLM_KEY"
         export LITELLM_KEY="fake-key"
-        echo "ERROR: Failed to read /keys/api_key: $error_msg"
-        echo "Using fake-key as fallback"
+        echo "WARNING: No LiteLLM key found, using fake-key as fallback"
     fi
 }
 

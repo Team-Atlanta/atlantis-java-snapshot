@@ -26,8 +26,8 @@ class LLMClient:
     def __init__(
         self, timeout: int = 240, max_retries: int = 10, verbose: bool = False
     ):
-        self.api_key = os.environ.get("LITELLM_KEY")
-        self.base_url = os.environ.get("AIXCC_LITELLM_HOSTNAME")
+        self.api_key = os.environ.get("LITELLM_KEY") or os.environ.get("OSS_CRS_LLM_API_KEY")
+        self.base_url = os.environ.get("AIXCC_LITELLM_HOSTNAME") or os.environ.get("OSS_CRS_LLM_API_URL")
 
         if not self.api_key:
             logger.error(f"{CRS_WARN} LITELLM_KEY environment variable not set")
