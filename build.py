@@ -5,7 +5,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-OSS_FUZZ_PROJ_DIR = Path("/oss-fuzz-proj")
+OSS_FUZZ_PROJ_DIR = Path(os.getenv("OSS_CRS_PROJ_PATH", "/OSS_CRS_PROJ_PATH"))
 CRS_PROJ_DIR = Path("/out/crs/proj")
 OSS_SRC_DIR = Path(os.getenv("SRC", "/src"))
 CRS_SRC_DIR = Path("/out/crs/src")
